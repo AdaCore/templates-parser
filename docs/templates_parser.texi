@@ -822,6 +822,7 @@ by @code{@@@@}. The tag statements are:
 * IF tag statement::
 * TABLE tag statement::
 * SET tag statement::
+* INLINE tag statement::
 @end menu
 
 @node Comments tag statement
@@ -1164,7 +1165,7 @@ The following output will be generated:
 @include table_section.adb.res
 
 @noindent
-It is important to note that is is possible to avoid code
+It is important to note that it is possible to avoid code
 duplication by using the @code{@@@@BEGIN@@@@} and @code{@@@@END@@@@}
 block statements. In this case only the code inside the block is part
 of the section, code outside is common text to all sections. Here is
@@ -1338,6 +1339,64 @@ It is important to note that a variable is set global to a template
 file. It means that constants set into an include file are visible
 into the parent template. This is an important feature to be able to
 have a "theme" like include template file for example.
+
+@node INLINE tag statement
+@section INLINE tag statement
+@cindex Command, INLINE
+
+@noindent
+The @code{INLINE} tag statement can be used to better control the
+result's layout. For example it is not possible to have the results of
+a vector tag on the same line as it is not possible to have a
+conditional output in the middle of a line. The @code{INLINE} block
+tag statement can be used to achieve that.
+
+@noindent
+Elements in an inlined block are separated by a single space by
+default. It is possible to specify any string as the separator.
+
+@noindent
+Syntax:
+
+@cartouche
+@smallexample
+@group
+@@@@INLINE[(<separator>)]@@@@
+      ...
+@@@@END_INLINE@@@@
+@end group
+@end smallexample
+@end cartouche
+
+@noindent
+Let's look at an example, with the following template:
+
+@include table_inline.tmplt.texi
+
+@noindent
+Using the program:
+
+@include table_inline.adb.texi
+
+@noindent
+We get the following result:
+
+@include table_inline.adb.res
+
+@noindent
+Another example with an @code{IF} tag statement:
+
+@include if_inline.tmplt.texi
+
+@noindent
+Using the program:
+
+@include if_inline.adb.texi
+
+@noindent
+We get the following result:
+
+@include if_inline.adb.res
 
 @c ----------------------------------------------------------------------
 

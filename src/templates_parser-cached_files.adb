@@ -163,7 +163,6 @@ package body Cached_Files is
             C_Info.Used := C_Info.Used - 1;
 
             if C_Info.Obsolete and then C_Info.Used = 0 then
-               Text_IO.Put_Line ("Release 0/obsolete");
                Templates_Parser.Release (C_Info);
             end if;
          end if;

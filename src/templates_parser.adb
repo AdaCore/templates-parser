@@ -28,6 +28,8 @@
 
 --  $Id$
 
+--  2001-05-25 Sune Falck Added TRIM, ESCAPE, SPACE filters
+
 with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;
@@ -64,12 +66,18 @@ package body Templates_Parser is
    Filter_Lower_Token       : aliased constant String := "LOWER";
    Filter_Upper_Token       : aliased constant String := "UPPER";
    Filter_Clean_Text_Token  : aliased constant String := "CLEAN_TEXT";
+   Filter_Contract_Token    : aliased constant String := "CONTRACT";
    Filter_No_Space_Token    : aliased constant String := "NO_SPACE";
+   Filter_No_Digit_Token    : aliased constant String := "NO_DIGIT";
+   Filter_No_Letter_Token   : aliased constant String := "NO_LETTER";
    Filter_Capitalize_Token  : aliased constant String := "CAPITALIZE";
    Filter_Yes_No_Token      : aliased constant String := "YES_NO";
    Filter_Oui_Non_Token     : aliased constant String := "OUI_NON";
    Filter_Exist_Token       : aliased constant String := "EXIST";
    Filter_Is_Empty_Token    : aliased constant String := "IS_EMPTY";
+   Filter_Trim_Token        : aliased constant String := "TRIM";
+   Filter_Web_Escape_Token  : aliased constant String := "WEB_ESCAPE";
+   Filter_Web_NBSP_Token    : aliased constant String := "WEB_NBSP";
 
    subtype Table_Range     is Positive range Table_Token'Range;
    subtype Section_Range   is Positive range Section_Token'Range;
@@ -90,16 +98,53 @@ package body Templates_Parser is
    --  replacing it in the template file.
 
    type Filters_Mode is
-     (Invert,     -- reverse string
-      Lower,      -- lower case
-      Upper,      -- upper case
-      Capitalize, -- lower case except char before spaces and underscores
-      Clean_Text, -- only letter/digits all other chars are changed to spaces.
-      No_Space,   -- removes all spaces found in the value.
-      Yes_No,     -- if True return Yes, If False returns No, else do nothing.
-      Oui_Non,    -- if True return Oui, If False returns Non, else do nothing.
-      Exist,      -- return "TRUE" if var is not empty and "FALSE" otherwise.
-      Is_Empty    -- return "TRUE" if var is empty and "FALSE" otherwise.
+     (Invert,
+      --  Reverse string
+
+      Lower,
+      --  Lower case
+
+      Upper,
+      --  Upper case
+
+      Capitalize,
+      --  Lower case except char before spaces and underscores
+
+      Clean_Text,
+      --  Only letter/digits all other chars are changed to spaces.
+
+      Contract,
+      --  Replaces a suite of spaces by a single space character.
+
+      No_Space,
+      --  Removes all spaces found in the value.
+
+      No_Digit,
+      --  Replace all digits by spaces.
+
+      No_Letter,
+      --  Removes all letters by spaces.
+
+      Yes_No,
+      --  If True return Yes, If False returns No, else do nothing.
+
+      Oui_Non,
+      --  If True return Oui, If False returns Non, else do nothing.
+
+      Exist,
+      --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
+
+      Is_Empty,
+      --  Returns "TRUE" if var is empty and "FALSE" otherwise.
+
+      Trim,
+      --  Trim leading and trailing space
+
+      Web_Escape,
+      --  Convert characters "<>&" to HTML equivalents: &lt;, &gt; and &amp;
+
+      Web_NBSP
+      --  Convert spaces to HTML &nbsp; - non breaking spaces
       );
 
    type Filter_Function is access function (S : in String) return String;
@@ -121,11 +166,17 @@ package body Templates_Parser is
    function Upper_Filter      (S : in String) return String;
    function Capitalize_Filter (S : in String) return String;
    function Clean_Text_Filter (S : in String) return String;
+   function Contract_Filter   (S : in String) return String;
    function No_Space_Filter   (S : in String) return String;
+   function No_Digit_Filter   (S : in String) return String;
+   function No_Letter_Filter  (S : in String) return String;
    function Yes_No_Filter     (S : in String) return String;
    function Oui_Non_Filter    (S : in String) return String;
    function Exist_Filter      (S : in String) return String;
    function Is_Empty_Filter   (S : in String) return String;
+   function Trim_Filter       (S : in String) return String;
+   function Web_Escape_Filter (S : in String) return String;
+   function Web_NBSP_Filter   (S : in String) return String;
 
    function Filter_Handle (Name : in String) return Filter_Function;
    --  Returns the filter function for the given filter name.
@@ -1381,6 +1432,48 @@ package body Templates_Parser is
       return Result;
    end Clean_Text_Filter;
 
+   ---------------------
+   -- Contract_Filter --
+   ---------------------
+
+   function Contract_Filter (S : in String) return String is
+
+      use type Strings.Maps.Character_Set;
+
+      Result : String (S'Range);
+      R      : Natural := 0;
+      Space  : Boolean := False;
+
+      K      : Positive := Result'First;
+
+   begin
+      for K in S'Range loop
+
+         if S (K) = ' ' then
+
+            if Space = False then
+               Space := True;
+
+               R := R + 1;
+               Result (R) := ' ';
+            end if;
+
+         else
+            Space := False;
+
+            R := R + 1;
+            Result (R) := S (K);
+         end if;
+
+      end loop;
+
+      if R = 0 then
+         return "";
+      else
+         return Result (Result'First .. R);
+      end if;
+   end Contract_Filter;
+
    ------------------
    -- Exist_Filter --
    ------------------
@@ -1417,6 +1510,40 @@ package body Templates_Parser is
    end Lower_Filter;
 
    ---------------------
+   -- No_Digit_Filter --
+   ---------------------
+
+   function No_Digit_Filter (S : in String) return String is
+      Result : String := S;
+   begin
+      for K in S'Range loop
+         if Strings.Maps.Is_In (S (K),
+                                Strings.Maps.Constants.Decimal_Digit_Set)
+         then
+            Result (K) := ' ';
+         end if;
+      end loop;
+
+      return Result;
+   end No_Digit_Filter;
+
+   ---------------------
+   -- No_Letter_Filter --
+   ----------------------
+
+   function No_Letter_Filter (S : in String) return String is
+      Result : String := S;
+   begin
+      for K in S'Range loop
+         if Strings.Maps.Is_In (S (K), Strings.Maps.Constants.Letter_Set) then
+            Result (K) := ' ';
+         end if;
+      end loop;
+
+      return Result;
+   end No_Letter_Filter;
+
+   ---------------------
    -- No_Space_Filter --
    ---------------------
 
@@ -1430,6 +1557,7 @@ package body Templates_Parser is
             Result (L) := S (K);
          end if;
       end loop;
+
       return Result (Result'First .. L);
    end No_Space_Filter;
 
@@ -1475,6 +1603,15 @@ package body Templates_Parser is
       return Result;
    end Reverse_Filter;
 
+   -----------------
+   -- Trim_Filter --
+   -----------------
+
+   function Trim_Filter (S : in String) return String is
+   begin
+      return Ada.Strings.Fixed.Trim (S, Ada.Strings.Both);
+   end Trim_Filter;
+
    ------------------
    -- Upper_Filter --
    ------------------
@@ -1483,6 +1620,65 @@ package body Templates_Parser is
    begin
       return Characters.Handling.To_Upper (S);
    end Upper_Filter;
+
+   -------------------
+   -- Escape_Filter --
+   -------------------
+
+   function Web_Escape_Filter (S : in String) return String is
+      Max_Escape_Sequence : constant Positive := 5;
+      Result              : String (1 .. S'Length * Max_Escape_Sequence);
+      Last                : Natural := 0;
+   begin
+      for I in S'Range loop
+         Last := Last + 1;
+
+         case S (I) is
+            when '&' =>
+               Result (Last .. Last + 4) := "&amp;";
+               Last := Last + 4;
+
+            when '>' =>
+               Result (Last .. Last + 3) := "&gt;";
+               Last := Last + 3;
+
+            when '<' =>
+               Result (Last .. Last + 3) := "&lt;";
+               Last := Last + 3;
+
+            when others =>
+               Result (Last) := S (I);
+         end case;
+
+      end loop;
+
+      return Result (1 .. Last);
+   end Web_Escape_Filter;
+
+   ---------------------
+   -- Web_NBSP_Filter --
+   ---------------------
+
+   function Web_NBSP_Filter (S : in String) return String is
+      Nbsp_Token          : constant String := "&nbsp;";
+      Max_Escape_Sequence : constant Positive := Nbsp_Token'Length;
+      Result              : String (1 .. S'Length * Max_Escape_Sequence);
+      Last                : Natural := 0;
+   begin
+      for I in S'Range loop
+         Last := Last + 1;
+
+         if S (I) = ' ' then
+            Result (Last .. Last + Nbsp_Token'Length - 1) := Nbsp_Token;
+            Last := Last + Nbsp_Token'Length - 1;
+         else
+            Result (Last) := S (I);
+         end if;
+
+      end loop;
+
+      return Result (1 .. Last);
+   end Web_NBSP_Filter;
 
    -------------------
    -- Yes_No_Filter --
@@ -1516,26 +1712,54 @@ package body Templates_Parser is
    --  Filter Table
 
    Filter_Table : constant array (Filters_Mode) of Filter_Record
-     := (Lower      =>
-           (Filter_Lower_Token'Access,      Lower_Filter'Access),
-         Upper      =>
-           (Filter_Upper_Token'Access,      Upper_Filter'Access),
-         Capitalize =>
-           (Filter_Capitalize_Token'Access, Capitalize_Filter'Access),
-         Clean_Text =>
-           (Filter_Clean_Text_Token'Access, Clean_Text_Filter'Access),
-         No_Space   =>
-           (Filter_No_Space_Token'Access,   No_Space_Filter'Access),
-         Invert     =>
-           (Filter_Reverse_Token'Access,    Reverse_Filter'Access),
-         Yes_No     =>
-           (Filter_Yes_No_Token'Access,     Yes_No_Filter'Access),
-         Oui_Non    =>
-           (Filter_Oui_Non_Token'Access,    Oui_Non_Filter'Access),
-         Exist      =>
-           (Filter_Exist_Token'Access,      Exist_Filter'Access),
-         Is_Empty   =>
-           (Filter_Is_Empty_Token'Access,   Is_Empty_Filter'Access));
+     := (Lower          =>
+           (Filter_Lower_Token'Access,          Lower_Filter'Access),
+
+         Upper          =>
+           (Filter_Upper_Token'Access,          Upper_Filter'Access),
+
+         Capitalize     =>
+           (Filter_Capitalize_Token'Access,     Capitalize_Filter'Access),
+
+         Clean_Text     =>
+           (Filter_Clean_Text_Token'Access,     Clean_Text_Filter'Access),
+
+         Contract       =>
+           (Filter_Contract_Token'Access,       Contract_Filter'Access),
+
+         No_Digit       =>
+           (Filter_No_Digit_Token'Access,       No_Digit_Filter'Access),
+
+         No_Letter      =>
+           (Filter_No_Letter_Token'Access,      No_Letter_Filter'Access),
+
+         No_Space       =>
+           (Filter_No_Space_Token'Access,       No_Space_Filter'Access),
+
+         Invert         =>
+           (Filter_Reverse_Token'Access,        Reverse_Filter'Access),
+
+         Yes_No         =>
+           (Filter_Yes_No_Token'Access,         Yes_No_Filter'Access),
+
+         Oui_Non        =>
+           (Filter_Oui_Non_Token'Access,        Oui_Non_Filter'Access),
+
+         Exist          =>
+           (Filter_Exist_Token'Access,          Exist_Filter'Access),
+
+         Is_Empty       =>
+           (Filter_Is_Empty_Token'Access,       Is_Empty_Filter'Access),
+
+         Trim           =>
+           (Filter_Trim_Token'Access,           Trim_Filter'Access),
+
+         Web_Escape     =>
+           (Filter_Web_Escape_Token'Access,     Web_Escape_Filter'Access),
+
+         Web_NBSP =>
+           (Filter_Web_NBSP_Token'Access,       Web_NBSP_Filter'Access)
+         );
 
    -------------------
    -- Filter_Handle --

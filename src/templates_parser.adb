@@ -559,7 +559,8 @@ package body Templates_Parser is
 
    package Expr is
 
-      type Ops is (O_And, O_Or, O_Xor, O_Sup, O_Inf, O_Esup, O_Einf, O_Equal);
+      type Ops is (O_And, O_Or, O_Xor,
+                   O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
 
       function Image (O : in Ops) return String;
       --  Returns Ops string representation.
@@ -2736,6 +2737,19 @@ package body Templates_Parser is
             end F_And;
 
             ------------
+            -- F_Diff --
+            ------------
+
+            function F_Diff (L, R : in String) return String is
+            begin
+               if L /= R then
+                  return "TRUE";
+               else
+                  return "FALSE";
+               end if;
+            end F_Diff;
+
+            ------------
             -- F_Einf --
             ------------
 
@@ -2862,7 +2876,8 @@ package body Templates_Parser is
                   Expr.O_Inf   => F_Inf'Access,
                   Expr.O_Esup  => F_Esup'Access,
                   Expr.O_Einf  => F_Einf'Access,
-                  Expr.O_Equal => F_Equ'Access);
+                  Expr.O_Equal => F_Equ'Access,
+                  Expr.O_Diff  => F_Diff'Access);
 
          begin
             case E.Kind is

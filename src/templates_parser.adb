@@ -229,6 +229,10 @@ package body Templates_Parser is
          Exist,
          --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
 
+         File_Exists,
+         --  Returns "TRUE" if var is the name of an existing file and "FALSE"
+         --  otherwise.
+
          Format_Date,
          --  Returns the date formatted using the format parameter. This
          --  format is following the GNU/date as implemented in
@@ -471,6 +475,13 @@ package body Templates_Parser is
          return String;
 
       function Exist
+        (S : in String;
+         P : in Parameter_Data     := No_Parameter;
+         T : in Translate_Set      := Null_Set;
+         I : in Include_Parameters := No_Include_Parameters)
+         return String;
+
+      function File_Exists
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;

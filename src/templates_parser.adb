@@ -2103,7 +2103,11 @@ package body Templates_Parser is
                --  There is only spaces on this line, this is an empty line
                --  we just have to skip it.
                Last := 0;
+               return False;
             end if;
+
+            Last := Strings.Fixed.Index_Non_Blank
+              (Buffer (1 .. Last), Strings.backward);
 
             return False;
          end if;

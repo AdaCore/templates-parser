@@ -143,12 +143,17 @@ begin
                   Print_Indent (Level + 2);
                   Text_IO.Put ("$" & Image (K) & " = ");
                   Data.Print_Tree (T.I_Params (K));
-                  Text_IO.New_Line;
                end if;
             end loop;
          end;
 
          Print_Tree (T.File.Info, Level + 1);
+         Print_Tree (T.Next, Level);
+
+      when Inline_Stmt =>
+         Text_IO.Put_Line ("[INLINE_STMT] (" & To_String (T.Sep) & ')');
+         Print_Tree (T.I_Block, Level + 1);
+         Text_IO.Put_Line ("[END_INLINE]");
          Print_Tree (T.Next, Level);
    end case;
 

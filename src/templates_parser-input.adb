@@ -187,6 +187,11 @@ package body Templates_Parser.Input is
       File.Last    := 0;
 
       Stream_IO.Open (File.File, Stream_IO.In_File, Name, Form);
+
+   exception
+      when Stream_IO.Name_Error =>
+         Free (File);
+         raise;
    end Open;
 
 end Templates_Parser.Input;

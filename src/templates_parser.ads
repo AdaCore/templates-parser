@@ -28,6 +28,7 @@
 
 --  $Id$
 
+with Ada.Finalization;
 with Ada.Strings.Unbounded;
 
 package Templates_Parser is
@@ -85,10 +86,6 @@ package Templates_Parser is
    --  open a template file on disk and create an in-memory template to be
    --  parsed later.
 
-   procedure Close (Template : in out Template_File);
-   --  when a template is not to be used anymore it must be close to release
-   --  the memory it used.
-
 private
 
    use Ada.Strings.Unbounded;
@@ -112,10 +109,17 @@ private
    type Template_Content is array (Positive range <>) of Unbounded_String;
    type Template_Lines is access Template_Content;
 
-   type Template_File is
+   type Counter is access Natural;
+
+   type Template_File is new Ada.Finalization.Controlled with
       record
+         Count    : Counter;
          Filename : Unbounded_String;
          Lines    : Template_Lines;
       end record;
+
+   procedure Initialize (Template : in out Template_File);
+   procedure Finalize (Template : in out Template_File);
+   procedure Adjust (Template : in out Template_File);
 
 end Templates_Parser;

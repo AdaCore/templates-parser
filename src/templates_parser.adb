@@ -724,18 +724,9 @@ package body Templates_Parser is
 
    function Parse (Template_Filename : in String;
                    Translations      : in Translate_Table := No_Translation)
-                   return String
-   is
-      Template : Template_File;
+                   return String is
    begin
-      Template := Open (Template_Filename);
-
-      declare
-         Result : constant String := Parse (Template, Translations);
-      begin
-         Close (Template);
-         return Result;
-      end;
+      return Parse (Open (Template_Filename), Translations);
    end Parse;
 
    ----------
@@ -745,11 +736,12 @@ package body Templates_Parser is
    function Open (Template_Filename : in String)
                  return Template_File
    is
-      File   : Text_IO.File_Type;
-      Lines  : Template_Content (1 .. Max_Template_Lines);
-      Buffer : Buffer_Type;
-      Last   : Natural;
-      K      : Natural := 0;
+      File     : Text_IO.File_Type;
+      Lines    : Template_Content (1 .. Max_Template_Lines);
+      Buffer   : Buffer_Type;
+      Last     : Natural;
+      K        : Natural := 0;
+      Template : Template_File;
    begin
       begin
          Text_IO.Open (File => File,
@@ -772,8 +764,11 @@ package body Templates_Parser is
 
       Text_IO.Close (File);
 
-      return Template_File'(To_Unbounded_String (Template_Filename),
-                            new Template_Content'(Lines (1 .. K)));
+      Template.Filename := To_Unbounded_String (Template_Filename);
+      Template.Lines    := new Template_Content'(Lines (1 .. K));
+
+      return Template;
+
    exception
       when Template_Error =>
          raise;
@@ -782,17 +777,43 @@ package body Templates_Parser is
          raise Template_Error;
    end Open;
 
-   -----------
-   -- Close --
-   -----------
+   ----------------
+   -- Initialize --
+   ----------------
 
-   procedure Close (Template : in out Template_File) is
+   procedure Initialize (Template : in out Template_File) is
+   begin
+      Template.Count := new Natural'(1);
+   end Initialize;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   procedure Finalize (Template : in out Template_File) is
 
       procedure Free is
          new Unchecked_Deallocation (Template_Content, Template_Lines);
 
+      procedure Free is
+         new Unchecked_Deallocation (Natural, Counter);
+
    begin
-      Free (Template.Lines);
-   end Close;
+      Template.Count.all := Template.Count.all - 1;
+
+      if Template.Count.all = 0 then
+         Free (Template.Lines);
+         Free (Template.Count);
+      end if;
+   end Finalize;
+
+   ------------
+   -- Assign --
+   ------------
+
+   procedure Adjust (Template : in out Template_File) is
+   begin
+      Template.Count.all := Template.Count.all + 1;
+   end Adjust;
 
 end Templates_Parser;

@@ -352,8 +352,13 @@ package body Templates_Parser is
          Upper,
          --  Upper case
 
+         Web_Encode,
+         --  Idem as Web_Escape and also encode non 7-bit ASCII characters as
+         --  &#xxx;.
+
          Web_Escape,
-         --  Convert characters "<>&" to HTML equivalents: &lt;, &gt; and &amp;
+         --  Convert characters <>&" to HTML equivalents: &lt;, &gt; and &amp;
+         --  and &quot;
 
          Web_NBSP,
          --  Convert spaces to HTML &nbsp; - non breaking spaces
@@ -674,6 +679,13 @@ package body Templates_Parser is
          return String;
 
       function Upper
+        (S : in String;
+         P : in Parameter_Data     := No_Parameter;
+         T : in Translate_Set      := Null_Set;
+         I : in Include_Parameters := No_Include_Parameters)
+         return String;
+
+      function Web_Encode
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;

@@ -340,11 +340,13 @@ package body Templates_Parser is
 
          function Name_Parameter (Filter : in String) return Filter_Routine is
             P1 : constant Natural := Strings.Fixed.Index (Filter, "(");
-            P2 : constant Natural := Strings.Fixed.Index (Filter, ")");
+            P2 : constant Natural := Strings.Fixed.Index (Filter, ")",
+                                                          Strings.Backward);
          begin
             if (P1 = 0 and then P2 /= 0) or else (P1 /= 0 and then P2 = 0) then
                Exceptions.Raise_Exception
-                 (Template_Error'Identity, "unbalanced parenthesis " & Filter);
+                 (Template_Error'Identity,
+                  "unbalanced parenthesis """ & Filter & '"');
             end if;
 
             if P1 = 0 then
@@ -544,6 +546,7 @@ package body Templates_Parser is
 
    type Node (Kind : Nkind) is record
       Next : Tree;
+      Line : Natural;
 
       case Kind is
          when Info =>
@@ -1691,6 +1694,11 @@ package body Templates_Parser is
    is
       Regexp : GNAT.Regexp.Regexp;
    begin
+      if P = No_Parameter then
+         Exceptions.Raise_Exception
+           (Template_Error'Identity, "missing parameter for MATCH filter");
+      end if;
+
       Regexp := GNAT.Regexp.Compile (P);
 
       if GNAT.Regexp.Match (S, Regexp) then
@@ -1835,14 +1843,24 @@ package body Templates_Parser is
       P : in String := No_Parameter)
      return String
    is
-      N : constant Natural := Natural'Value (P);
-      R : String (1 .. N * S'Length);
+      N : Natural;
    begin
-      for K in 1 .. N loop
-         R (1 + (K - 1) * S'Length .. S'Length * K) := S;
-      end loop;
+      N := Natural'Value (P);
 
-      return R;
+      declare
+         R : String (1 .. N * S'Length);
+      begin
+         for K in 1 .. N loop
+            R (1 + (K - 1) * S'Length .. S'Length * K) := S;
+         end loop;
+
+         return R;
+      end;
+
+   exception
+      when Constraint_Error =>
+         Exceptions.Raise_Exception
+           (Template_Error'Identity, "repeat filter parameter error");
    end Repeat_Filter;
 
    --------------------
@@ -2434,6 +2452,9 @@ package body Templates_Parser is
                end if;
 
                T := new Node (Section_Stmt);
+
+               T.Line := Line;
+
                T.Next := Parse (Parse_Section_Content);
 
                if Is_Stmt (End_Table_Token) then
@@ -2469,6 +2490,8 @@ package body Templates_Parser is
          if Is_Stmt (If_Token) then
             T := new Node (If_Stmt);
 
+            T.Line := Line;
+
             T.Cond    := Expr.Parse (Get_All_Parameters);
             T.N_True  := Parse (Parse_If);
 
@@ -2485,6 +2508,8 @@ package body Templates_Parser is
          elsif Is_Stmt (Table_Token) then
             T := new Node (Table_Stmt);
 
+            T.Line := Line;
+
             T.Terminate_Sections :=
               Get_First_Parameter = Terminate_Sections_Token;
 
@@ -2496,10 +2521,12 @@ package body Templates_Parser is
          elsif Is_Stmt (Include_Token) then
             T := new Node (Include_Stmt);
 
+            T.Line := Line;
+
             T.File     :=
               Load (Build_Include_Pathname (Get_First_Parameter), Cached);
 
-            I_File     := new Node'(Include_Stmt, I_File, T.File);
+            I_File     := new Node'(Include_Stmt, I_File, Line, T.File);
 
             T.Next     := Parse (Mode);
 
@@ -2507,6 +2534,8 @@ package body Templates_Parser is
 
          else
             T := new Node (Text);
+
+            T.Line := Line;
 
             T.Text := Data.Parse (Buffer (1 .. Last));
 
@@ -2533,6 +2562,7 @@ package body Templates_Parser is
       --  Add first node (info about tree)
       T := new Node'(Info,
                      T,
+                     0,
                      To_Unbounded_String (Filename),
                      GNAT.OS_Lib.File_Time_Stamp (Filename),
                      1,
@@ -2547,7 +2577,7 @@ package body Templates_Parser is
       return T;
 
    exception
-      when E : Internal_Error =>
+      when E : others =>
          Fatal_Error (Exceptions.Exception_Message (E));
    end Load;
 
@@ -3332,7 +3362,16 @@ package body Templates_Parser is
                Analyze (T.Next, State);
 
             when Text =>
-               Analyze (T.Text);
+               begin
+                  Analyze (T.Text);
+               exception
+                  when E : others =>
+                     Exceptions.Raise_Exception
+                       (Template_Error'Identity,
+                        "In " & Filename
+                        & " at line" & Natural'Image (T.Line) & ' '
+                        & Exceptions.Exception_Message (E) & '.');
+               end;
 
                Append (Results, ASCII.LF);
 

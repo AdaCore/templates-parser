@@ -1,0 +1,1479 @@
+\input texinfo   @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename templates_parser.info
+@settitle Templates Parser User's Guide
+@setchapternewpage off
+@syncodeindex fn cp
+
+@iftex
+@afourpaper
+@end iftex
+
+@titlepage
+
+@title Templates Parser User's Guide
+@subtitle $Revision$
+@subtitle Date: @today{}
+@author Pascal Obry (pascal@@obry.org)
+
+@sp 1
+@url{http://www.obry.org}
+
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@ifhtml
+@c title page for the HTML documentation
+@html
+<font size="+2">
+<p>$Revision$
+<p>Date: @today{}
+<p>Pascal Obry (pascal@@obry.org)
+</font>
+
+<font size="+1">
+<p>@url{http://www.obry.org}
+</font>
+
+@page
+@end html
+@end ifhtml
+@finalout
+
+@contents
+
+@ifinfo
+@node Top
+@top Templates Parser
+
+@menu
+* Introduction::
+* What is a tag ?::
+* Variable tags::
+* Translations::
+* Tag statements::
+* Other services::
+* Last notes::
+* Templates_Parser API Reference::
+* Index::
+@end menu
+@end ifinfo
+
+@c ----------------------------------------------------------------------
+
+@node Introduction
+@chapter Introduction
+
+@noindent
+First of all this package is distributed under the GNAT modified GNU GPL.
+
+@noindent
+The templates parser package has been designed to parse files and to
+replace some specific tags into these files by some specified values.
+
+@noindent
+The main goal was to ease the development of Web servers. In CGI 
+(@i{Common Gateway Interface}) mode you have to write the HTML page in
+the program (in Ada or whatever other languages) by using some specific
+libraries or by using only basic output functions like Ada @code{Put_Line} for
+example. This is of course not mandatory but by lack of a good library
+every Web development end up doing just that.
+
+@noindent
+The main problems with this approach are:
+
+@itemize @bullet
+
+@item It is painful to have to recompile the program each time you have
+a slight change to do in the design (center an image, change the border
+width of a table...)
+
+@item You have the design and the program merged together. It means that
+to change the design you must know the Ada language. And to change the
+Ada program you need to understand what is going on with all these
+inline HTML command.
+
+@item You can't use the nice tools to generate your HTML.
+
+@end itemize
+
+@noindent
+With the templates parser package these problems are gone. The code and
+the design is @b{completely} separated. This is a very important
+point. PHP or JSP have tried this but most of the time you have the
+script embedded into the Web template. And worst you need to use another
+language just for your Web development.
+
+@itemize @bullet
+
+@item The HTML page is separated from the program code. Then you can
+change the design without changing the code. Moreover when you fix the
+code you don't have to handle all the specific HTML output. And you do
+not risk to break the design.
+
+@item It is easier to work on the design and the program at the same time
+using the right peoples for the job.
+
+@item It reduce the number of @i{edit/build/test} cycles. Writing HTML
+code from a program is error prone.
+
+@item It is possible to use standard tools to produce the HTML.
+
+@item You don't have to learn a new language.
+
+@item The script is Ada, so here you have the benefit of all the Ada power.
+
+@end itemize
+
+@noindent
+In fact, now the Ada program just compute some values, get some data
+from a database or whatever and then call the templates parser to output
+a page with the data displayed. To the templates parser you just pass
+the template filename and an associative table. 
+
+@noindent
+It is even more convenient to have different display with the same set
+of data. You just have to provides as many templates as you like.
+
+@c ----------------------------------------------------------------------
+
+@node What is a tag ?
+@chapter What is a tag ?
+
+@noindent
+A tag is a string found in the template page and surrounded by a specific set
+of characters. The default is @b{@@_} at the start and @b{_@@} at the
+end of the tag. This default can be changed using @code{Set_Tag_Separators}
+routine, @pxref{Templates_Parser API Reference}. Note that it must be changed
+as the first API call and should not be changed after that.
+
+@noindent
+The tag will be replaced by a value specified in a translation table.
+
+@noindent
+For example with the template file @file{demo.tmplt}:
+
+@include demo.tmplt.texi
+
+@noindent
+Using the following code @file{demo.adb}:
+
+@include demo.adb.texi
+
+@noindent
+The program will print out :
+
+@include demo.adb.res
+
+@noindent
+This is a very simple example, but you'll see that there is a lot of
+powerful construct that you can use into a template file.
+
+@c ----------------------------------------------------------------------
+
+@node Variable tags
+@chapter Variable tags
+
+@menu
+* Discrete Boolean Composite::
+* Filters and Attributes::
+* Other variable tags::
+@end menu
+
+@node Discrete Boolean Composite
+@section Discrete Boolean Composite
+
+@noindent
+A variable tag is a specific string to be replaced by the template
+parser. There is three kinds of variable tags: @b{discrete}, @b{boolean},
+@b{composite}. All variables tags are built using the @code{Assoc}
+constructors, @pxref{Templates_Parser API Reference}.
+
+@table @b
+
+@item discrete
+@cindex Tag, discrete
+We have already seen the discrete variable tag. This is a variable which
+has only one value. This value will replace the tag in the template
+file. Discrete variable constructors are provided for String,
+Unbounded_String and Integer (see Assoc routines).
+@sp 1
+
+@item boolean
+@cindex Tag, boolean
+A boolean tag as a value of TRUE or FALSE. This value will replace the
+tag in the template file. These tags can also be used with the @code{IF} tag
+statement.
+@sp 1
+
+@item composite (Tag)
+@cindex Tag, composite
+A composite tag is a variable which contains a set of values. These kind of
+variables will be used with the @code{TABLE} tag statement 
+@pxref{TABLE tag statement}. Outside a table statement it will be
+replaced by all values concatenated with a specified separator. See
+@code{Set_Separator} routine. Such tag are variables declared on the
+Ada program a @code{Templates_Parser.Tag} type.
+
+@sp 1
+@noindent
+There is many overloaded constructors to build a composite tags (see "+"
+operators).  The "+" operators are used to build a Tag item from
+standard types like String, Unbounded_String, Character, Integer and
+Boolean.
+
+@sp 1
+@noindent
+To add items to a Tag many overloaded operators are provided (see
+"&" operators). The "&" operators add one item at the start or the end
+of the tag, it is possible to add directly String, Unbounded_String,
+Character, Integer and Boolean items using one of the overloaded operator.
+
+@sp 1
+@noindent
+A tag composed of only boolean values TRUE or FALSE is called a
+Boolean composite tag. This tag is to be used with a @code{IF} tag statement
+inside a @code{TABLE} tag statement.
+
+@sp 1
+@noindent
+It is possible to build a composite tag having any number of nested
+level. A vector is a composite tag with only one level, a matrix is a
+composite tag with two level (a Tag with a set of vector tag).
+
+@sp 1
+@noindent
+Two aliases exists for composite tags with one or two nested level,
+they are named @code{Vector_Tag} and @code{Matrix_Tag}. In the suite
+of the document, we call @i{vector tag} a tag with a single nested
+level and @i{matrix tag} a tag with two nested level.
+
+@end table
+
+@node Filters and Attributes
+@section Filters and Attributes
+@cindex Filters
+
+@noindent
+All kinds of variable tag can have one or more function-prefix or
+filter. The function prefix is applied to the variable value. The
+syntax is
+@code{@@_[[FILTER_NAME[(parameter)]:]FILTER_NAME[(parameter)]:]SOME_VAR_@@}.
+Filters are evaluated from right to left.
+
+@noindent
+Composite tags can also have attributes. Attributes are placed
+after the tag name and preceded with a simple quote.
+@code{@@_SOME_VAR['ATTRIBUTE_NAME]_@@}. It is possible to use filters
+and attributes together. In that case the attribute is first evaluated and
+the result is passed-through the filters.
+
+@menu
+* Filters::
+* Attributes::
+@end menu
+
+@node Filters
+@subsection Filters
+
+@noindent
+The current supported filters are:
+
+@table @code
+
+@item "+"(@i{N}) or ADD(@i{N})
+@cindex Filter, "+"
+
+Add N to variable and return the result. If the current variable value
+is not a number it returns the empty string. N must be a number or a
+discrete tag variable whose value is a number.
+
+@item "-"(@i{N}) or SUB(@i{N})
+@cindex Filter, "-"
+
+Subtract N to variable and return the result. If the current variable value
+is not a number it returns the empty string. N must be a number or a
+discrete tag variable whose value is a number.
+
+@item "*"(@i{N}) or MULT(@i{N})
+@cindex Filter, "*"
+
+Multiply N with variable and return the result. If the current variable value
+is not a number it returns the empty string. N must be a number or a
+discrete tag variable whose value is a number.
+
+@item "/"(@i{N}) or DIV(@i{N})
+@cindex Filter, "/"
+
+Divide variable by N and return the result. If the current variable value
+is not a number it returns the empty string. N must be a number or a
+discrete tag variable whose value is a number.
+
+@item ABS
+@cindex Filter, ABS
+
+Returns the absoute value.
+
+@item ADD_PARAM(@i{NAME[=VALUE]})
+@cindex Filter, ADD_PARAM
+
+Add a parameter into an URL. This routine adds the '?' and '&'
+character if needed. @i{VALUE} can be a tag variable name.
+
+@item BR_2_LF
+@cindex Filter, BR_2_LF
+
+Replaces all occurrences of the @code{<br>} HTML tag by a LF
+(Line-Feed) character.
+
+@item CAPITALIZE
+@cindex Filter, CAPITALIZE
+
+Put all characters in the variable in lower case except characters after
+a space or an underscore which are set in upper-case.
+
+@item CLEAN_TEXT
+@cindex Filter, CLEAN_TEXT
+
+Keep only letters and digits all others characters are changed to
+spaces.
+
+@item COMA_2_POINT
+@cindex Filter, COMA_2_POINT
+
+Replaces all comas by points.
+
+@item CONTRACT
+@cindex Filter, CONTRACT
+
+Converts any suite of spaces by a single space character.
+
+@item DEL_PARAM(@i{NAME})
+@cindex Filter, DEL_PARAM
+
+Delete parameter NAME from the URL. This routine removes the '?' and '&'
+character if needed. Returns the input string as-is if the parameter
+is not found.
+
+@item EXIST
+@cindex Filter, EXIST
+
+Returns @b{True} if variable is set and has a value different that the null
+string and @b{False} otherwise.
+
+@item FILE_EXISTS
+@cindex Filter, FILE_EXISTS
+
+Returns @b{True} if variable is set and has a value that corresponds
+to a filename present on the file system and @b{False} otherwise.
+
+@item FORMAT_DATE(@b{FORMAT})
+@cindex Filter, FORMAT_DATE
+
+Returns the date with the given format. The date must be in the ISO
+format (YYYY-MM-DD) eventually followed by a space and the time with
+the format HH:MM:SS. If the date is not given in the right format it
+returns the date as-is. The format is using the GNU/date description
+patterns as also implemented in @code{GNAT.Calendar.Time_IO}.
+
+@sp 2
+
+@table @i
+
+@item Characters:
+
+@table @b
+@item % 
+a literal %
+@item n 
+a newline
+@item t 
+a horizontal tab
+@end table
+
+@item Time fields:
+
+@table @b
+@item %H
+hour (00..23)
+@item %I
+hour (01..12)
+@item %k
+hour ( 0..23)
+@item %l
+hour ( 1..12)
+@item %M
+minute (00..59)
+@item %p
+locale's AM or PM
+@item %r
+time, 12-hour (hh:mm:ss [AP]M)
+@item %s
+seconds  since 1970-01-01  00:00:00 UTC (a nonstandard extension)
+@item %S
+second (00..59)
+@item %T
+time, 24-hour (hh:mm:ss)
+@end table
+
+@item Date fields:
+
+@table @b
+@item %a
+locale's abbreviated weekday name (Sun..Sat)
+@item %A
+locale's full weekday name, variable length (Sunday..Saturday)
+@item %b
+locale's abbreviated month name (Jan..Dec)
+@item %B
+locale's full month name, variable length (January..December)
+@item %c
+locale's date and time (Sat Nov 04 12:02:33 EST 1989)
+@item %d
+day of month (01..31)
+@item %D
+date (mm/dd/yy)
+@item %h
+same as %b
+@item %j
+day of year (001..366)
+@item %m
+month (01..12)
+@item %U
+week number of year with  Sunday as first day of week (00..53)
+@item %w
+day of week (0..6) with 0 corresponding to Sunday
+@item %W
+week number of year with  Monday as first day of week (00..53)
+@item %x
+locale's date representation (mm/dd/yy)
+@item %y
+last two digits of year (00..99)
+@item %Y
+year (1970...)
+@end table
+
+@item By default,  date pads numeric fields with zeroes. GNU date recognizes the following nonstandard numeric modifiers:
+
+@table @b
+@item -    (hyphen)
+do not pad the field
+@item _    (underscore) 
+pad the field with spaces
+@end table
+@end table
+
+@item FORMAT_NUMBER
+@cindex Filter, FORMAT_NUMBER
+
+Returns the number with a space added between each 3 digits
+blocks. The decimal part is not transformed. If the data is not a
+number nothing is done.
+
+@item IS_EMPTY
+@cindex Filter, IS_EMPTY
+
+Returns @b{True} if variable is the empty string and @b{False} otherwise.
+
+@item LF_2_BR
+@cindex Filter, LF_2_BR
+
+Replaces all occurrences of the character LF (Line-Feed) by a
+@code{<br>} HTML tag.
+
+@item LOWER
+@cindex Filter, LOWER
+
+Put all characters in the variable in lower-case.
+
+@item MATCH(@i{REGEXP})
+@cindex Filter, MATCH
+
+Returns @b{True} if variable match the regular expression passed as
+filter's parameter. The regular expression is using a format as
+found in @file{gawk}, @file{sed} or @file{grep} tools.
+
+@item MAX(@i{N})
+@cindex Filter, MAX
+
+Returns the maximum value between the variable and the parameter.
+
+@item MIN(@i{N})
+@cindex Filter, MIN
+
+Returns the minimum value between the variable and the parameter.
+
+@item MOD(@i{N})
+@cindex Filter, MOD
+
+Returns variable modulo N. If the current variable value is not a
+number it returns the empty string. N must be a number or a
+discrete tag variable whose value is a number.
+
+@item NEG
+@cindex Filter, NEG
+
+Change the sign of the value.
+
+@item NO_CONTEXT
+@cindex Filter, NO_CONTEXT
+
+This is a special command filter which indicates that the tag must not
+be searched in the context. See @pxref{Context}. @code{NO_CONTEXT} must be
+the first filter. This filter returns the value as-is.
+
+@item NO_DIGIT
+@cindex Filter, NO_DIGIT
+
+Replaces all digits by spaces.
+
+@item NO_LETTER
+@cindex Filter, NO_LETTER
+
+Replaces all letters by spaces.
+
+@item NO_SPACE
+@cindex Filter, NO_SPACE
+
+Removes all spaces in the variable.
+
+@item OUI_NON
+@cindex Filter, OUI_NON
+
+If variable value is @b{True} it returns @b{Oui}, if @b{False} it
+returns @b{Non}, otherwise does nothing. It keeps the way @b{True/False} is
+capitalized (all upper, all lower or first letter capital).
+
+@item POINT_2_COMA
+@cindex Filter, POINT_2_COMA
+
+Replaces all comas by points.
+
+@item REPEAT(@i{N})
+@cindex Filter, REPEAT
+
+Returns N times the variable, N being passed as filter's parameter. N
+must be a number  or a discrete tag variable whose value is a number.
+
+@item REPLACE(@i{REGEXP}[/@i{STR}])
+@cindex Filter, REPLACE
+
+This filter replaces @b{\n} (where @i{n} is a number) @i{STR}'s
+occurences by the corresponding match from @i{REGEXP}. The first match
+in @i{REGEXP} will replace @b{\1}, the second match @b{\2} and so
+on. Each match in @i{REGEXP} must be parenthesized. It replaces only
+the first match. @i{STR} is an optional parameter, its default value
+is @b{\1}. It is possible to espace characters in @i{STR} to avoid
+parsing confusions. This is required if you need to have @b{@@_} or
+@b{_@@} or a parenthesis in @i{STR} for example. @i{STR} can be a tag
+variable name.
+
+@item REPLACE_ALL(@i{REGEXP}[/@i{STR}])
+@cindex Filter, REPLACE_ALL
+
+Idem as above but replaces all occurences.
+
+@item REPLACE_PARAM(@i{NAME[=VALUE]})
+@cindex Filter, REPLACE_PARAM
+
+This is filter is equivalent to 
+ADD_PARAM(@i{NAME[=VALUE]}):DEL_PARAM(@i{NAME}). @i{VALUE} can be a
+tag variable name.
+
+@item REVERSE
+@cindex Filter, REVERSE
+
+Reverse the string.
+
+@item SIZE
+@cindex Filter, SIZE
+
+Returns the size (number of characters) of the string value.
+
+@item SLICE(@i{x .. y})
+@cindex Filter, SLICE
+
+Returns the sub-string starting from position x and ending to position
+y. Note that the string to slice always start from position 1.
+
+@item TRIM
+@cindex Filter, TRIM
+
+Removes leading and trailing spaces.
+
+@item UPPER
+@cindex Filter, UPPER
+
+Put all characters in the variable in upper-case.
+
+@item WEB_ESCAPE
+@cindex Filter, WEB_ESCAPE
+
+Replaces characters '<', '>', '"' and '&' by corresponding HTML
+sequences: &lt; &gt; &quot; and &amp; 
+
+@item WEB_NBSP
+@cindex Filter, WEB_NBSP
+
+Replaces all spaces by an HTML non breaking space.
+
+@item YES_NO
+@cindex Filter, YES_NO
+
+If variable value is @b{True} it returns @b{Yes}, if @b{False} it
+returns @b{No}, otherwise does nothing. It keeps the way @b{True/False} is
+capitalized (all upper, all lower or first letter capital).
+
+@end table
+
+@noindent
+For example:
+
+@smallexample
+@cartouche
+@group
+If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
+
+
+@@_VAR_@@                                   ->  vector_tag
+@@_UPPER:VAR_@@                             ->  VECTOR_TAG
+@@_CAPITALIZE:VAR_@@                        ->  Vector_Tag
+@@_EXIST:VAR_@@                             ->  TRUE
+@@_UPPER:REVERSE:VAR_@@                     ->  GAT_ROTCEV
+@@_MATCH(VEC.*):UPPER:VAR_@@                ->  TRUE
+@@_SLICE(1..6):VAR_@@                       ->  vector
+@@_REPLACE(([^_]+)):VAR_@@                  ->  vector
+@@_REPLACE(([a-z]+)_([a-z]+)/\2_\1):VAR_@@  ->  tag_vector
+@@_"+"(TWO):ONE_@@                          ->  3
+@@_"-"(TWO):ONE_@@                          ->  -1
+@end group
+@end cartouche
+@end smallexample
+
+@node Attributes
+@subsection Attributes
+
+@noindent
+Current supported attributes are:
+
+@table @code
+
+@item V'length
+@cindex Attribute, 'Length
+
+Returns the number of item in the composite tag (can be applied only
+to a composite tag having a single nested level - a vector).
+
+@item V'Up_Level(n)
+@cindex Attribute, 'Up_Level
+
+Use index from the table command @b{n} level(s) upper so this attribute must
+be used in a nested table command tag. @code{'Up_Level} is equivalent
+to @code{'Up_Level(1)} (can be applied only to a composite tag having
+a single nested level - a vector).
+
+@item M'Line
+@cindex Attribute, 'Line
+
+Returns the number of line in the composite tag. This is identical to
+'Length but can be applied only to a composite tag having two nested
+level - a matrix).
+
+@item M'Min_Column
+@cindex Attribute, 'Min_Column
+
+Returns the size of smallest composite tag in M composite tag. This attribute
+can be applied only to a composite tag having two nested level - a matrix.
+
+@item M'Max_Column
+@cindex Attribute, 'Max_Column
+
+Returns the size of largest composite tag in M composite tag. This attribute
+can be applied only to a composite tag having two nested level - a matrix.
+
+@end table
+
+@noindent
+For example:
+
+@smallexample
+@cartouche
+@group
+If VEC is set to "@i{<1 , 2>}" and MAT to "@i{<a, b, c> ; <2, 3, 5, 7>}" then:
+
+
+@@_VEC'Length_@@              ->  2
+@@_ADD(3):VEC'Length_@@       ->  5
+@@_MAT'Line_@@                ->  2
+@@_MAT'Min_Column_@@          ->  3
+@@_MAT'Max_Column_@@          ->  4
+
+@end group
+@end cartouche
+@end smallexample
+
+@node Other variable tags
+@section Other variable tags
+
+@noindent
+There is some specific variables tags that can be used in any
+templates. Here is a description of them:
+
+@table @code
+
+@item NOW
+@cindex @@_NOW_@@
+
+Current date and time with format "YYYY-MM-DD HH:MM:SS".
+
+@item YEAR
+@cindex @@_YEAR_@@
+
+Current year number using 4 digits.
+
+@item MONTH
+@cindex @@_MONTH_@@
+
+Current month number using 2 digits.
+
+@item DAY
+@cindex @@_DAY_@@
+
+Current day number using 2 digits.
+
+@item HOUR
+@cindex @@_HOUR_@@
+
+Current hour using range 0 to 23 using 2 digits.
+
+@item MINUTE
+@cindex @@_MINUTE_@@
+
+Current minute using 2 digits.
+
+@item SECOND
+@cindex @@_SECOND_@@
+
+Current seconds using 2 digits.
+
+@item MONTH_NAME
+@cindex @@_MONTH_NAME_@@
+
+Current full month name (January .. December).
+
+@item DAY_NAME
+@cindex @@_DAY_NAME_@@
+
+Current full day name (Monday .. Sunday).
+
+@end table
+
+@c ----------------------------------------------------------------------
+
+@node Translations
+@chapter Translations
+
+@noindent
+Associations between variable tags and the template tag names are
+created with one of the @code{Assoc} routines. This set of
+associations are used by the parser (@code{Parse} routine). There is
+two kinds of associations set:
+
+@itemize
+
+@item Translate_Table
+@cindex Translate_Table
+
+an array of associations, this is easy to use when the number of
+associations is known at the creation time.
+
+@item Translate_Set
+@cindex Translate_Set
+
+a set of associations, it is possible to insert as many associations
+as needed into this object.
+@end itemize
+
+@noindent
+Note that this difference is only for users, the Templates_Parser
+engine uses only @code{Translate_Set} objects internally as it is much more
+efficient.
+
+@c ----------------------------------------------------------------------
+
+@node Tag statements
+@chapter Tag statements
+
+@noindent
+There is three different tag statements. A tag statement is surrounded
+by @code{@@@@}. The tag statements are:
+
+@menu
+* Comments tag statement::
+* INCLUDE tag statement::
+* IF tag statement::
+* TABLE tag statement::
+* SET tag statement::
+@end menu
+
+@node Comments tag statement
+@section Comments tag statement
+@cindex Command, comments
+@cindex Command, @@@@--
+
+@noindent
+Every line starting with @b{@@@@--} are comments and are completly
+ignored by the parser. The resulting page will have the exact same
+format and number of lines with or without the comments.
+
+@smallexample
+@cartouche
+@group
+@@@@-- This template is used to display the client's data
+@@@@-- It uses the following tags:
+@@@@--
+@@@@--    @@_CID_@@       Client ID
+@@@@--    @@_ITEMS_V_@@   List of items (vector tag)
+
+<P>Client @@_CID_@@
+
+...
+@end group
+@end cartouche
+@end smallexample
+
+@node INCLUDE tag statement
+@section INCLUDE tag statement
+@cindex Command, INCLUDE
+
+@noindent
+This tag is used to include another template file. This is useful if you
+have the same header and/or footer in all your HTML pages. For example:
+
+@smallexample
+@cartouche
+@group
+@@@@INCLUDE@@@@ header.tmplt
+
+<P>This is by Web page
+
+@@@@INCLUDE@@@@ footer.tmplt
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+It is also possible to pass arguments to the include file. These parameters
+are put after the include filename. It is possible to reference these
+parameters into the included file with the special variable names
+@code{@@_$<n>_@@}, where @i{n} is the include's parameter indice (0 is
+the include filename, 1 the first parameter and so on).
+
+@smallexample
+@cartouche
+@group
+@@@@INCLUDE@@@@ another.tmplt @@_VAR_@@ azerty
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+In file @file{another.tmplt}
+
+@table @code
+@item @@_$0_@@
+is another.tmplt
+@item @@_$1_@@
+is the variable @@_VAR_@@
+@item @@_$2_@@
+is the string "azerty"
+@end table
+
+@noindent
+If an include variable references a non existing include parameter the
+tag is kept as-is.
+
+@noindent
+Note that it is possible to pass the include parameters using names,
+a set of positional parameters can be pass first, so all following
+include command are identical:
+
+@smallexample
+@cartouche
+@group
+@@@@INCLUDE@@@@ another.tmplt one two three four "a text"
+@@@@INCLUDE@@@@ another.tmplt (one, two, 3 => three, 4 => four, 5 => "a text")
+@@@@INCLUDE@@@@ another.tmplt (one, 5 => "a text", 3 => three, 2 => two, 4 => four)
+@end group
+@end cartouche
+@end smallexample
+
+@node IF tag statement
+@section IF tag statement
+@cindex Command, IF
+
+@noindent
+This is the conditional tag statement. The complete form is:
+
+@smallexample
+@cartouche
+@group
+@@@@IF@@@@ <expression1>
+   part1
+@@@@ELSIF@@@@ <expression2>
+   part2
+@@@@ELSE@@@@
+   part3
+@@@@END_IF@@@@
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+The part1 one will be parsed if expression1 evaluate to "TRUE", part2
+will be parsed if expression2 evaluate to "TRUE" and the part3 will
+be parse in any other case. The @code{ELSIF} and @code{ELSE} part are
+optional.
+
+@noindent
+The expression here is composed of boolean variable (or conditional
+variable) and/or boolean expression. Recognized operators are:
+
+@cindex Command, IF expression
+@table @code
+@item A = B
+Returns TRUE if A equal B
+
+@item A /= B
+Returns TRUE if A is not equal B
+
+@item A > B
+Returns TRUE if A greater than B. If A and B are numbers it returns the
+the number comparison (5 > 003 = TRUE) otherwise it returns the string
+comparison (``5'' > ``003'' = FALSE).
+
+@item A >= B
+Returns TRUE if A greater than or equal to B. See above for rule about numbers.
+
+@item A < B
+Returns TRUE if A lesser than B. See above for rule about numbers.
+
+@item A <= B
+Returns TRUE if A lesser than or equal to B. See above for rule about numbers.
+
+@item A and B
+Returns TRUE if A and B is TRUE and FALSE otherwise.
+
+@item A or B
+Returns TRUE if A or B is TRUE and FALSE otherwise.
+
+@item A xor B
+Returns TRUE if either A or B (but not both) is TRUE and FALSE otherwise.
+
+@item not A
+Returns TRUE if either A is FALSE and FALSE otherwise.
+@end table
+
+@noindent
+The default evaluation order is done from left to right, all operators
+having the same precedence. To build an expression it is possible to
+use the parentheses to change the evaluation order. A value with
+spaces must be quoted as a string. So valid expressions could be:
+
+@smallexample
+@cartouche
+@group
+@@@@IF@@@@ (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
+
+@@@@IF@@@@ not (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
+
+@@@@IF@@@@ (@@_VAR1_@@ > 3) and not @@_COND1_@@
+
+@@@@IF@@@@ @@_VAR1_@@ = "a value"
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+Note also that variables and values can be surrounded by quotes if needed.
+Quotes are needed if a value contain spaces.
+
+@noindent
+To generate a conditional variable tag it is possible to use the
+following @b{Templates_Parser} function:
+
+@smallexample
+@cartouche
+@group
+@b{function} Assoc (Variable  : @b{in} String;
+                Value     : @b{in} Boolean;
+                @b{return} Association;
+@i{--  build an Association (Variable = Value) to be added to a}
+@i{--  Translate_Table. It set the variable to TRUE or FALSE depending on}
+@i{--  Value.}
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+Let's see an example using an @code{IF} tag statement. With the following
+template:
+
+@include user.tmplt.texi
+
+@noindent
+The following program:
+
+@include user1.adb.texi
+
+@noindent
+Will display:
+
+@include user1.adb.res
+
+@noindent
+But the following program:
+
+@include user2.adb.texi
+
+@noindent
+Will display:
+
+@include user2.adb.res
+
+@node TABLE tag statement
+@section TABLE tag statement
+@cindex Command, TABLE
+
+@noindent
+A table tag is useful to generate @code{HTML} table for example. Basically the
+code between the @code{@@@@TABLE@@@@} and @code{@@@@END_TABLE@@@@} will
+be repeated as many time as the vector tag will have of values. If many
+vector tags are specified in a table statement, the code between the
+table will be repeated a number of time equal to the maximum length of
+all vector tags in the @code{TABLE} tag statement.
+
+@noindent
+A @code{TABLE} tag statement is a kind of implicit iterator. This is a very
+important concept to build HTML tables. Using a composite tag variable in
+a @code{@@@@TABLE@@@@} tag statement it is possible to build very
+complex Web pages.
+
+@noindent
+Syntax:
+
+@cindex Command, TERMINATE_SECTIONS
+@smallexample
+@cartouche
+@group
+@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@ 
+      ...
+   [@@@@BEGIN@@@@]
+      ...
+   [@@@@SECTION@@@@]
+      ...
+   [@@@@END@@@@]
+      ...
+@@@@END_TABLE@@@@
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+Let's have an example. With the following template:
+
+@include table.tmplt.texi
+
+@noindent
+And the following program:
+
+@include table.adb.texi
+
+@noindent
+The following output will be generated:
+
+@include table.adb.res
+
+@noindent
+Note that we use vector tag variables here. A discrete variable tag in a table
+will be replaced by the same (the only one) value for each row. A vector
+tag outside a table will be displayed as a list of values, each value
+being separated by a specified separator. The default is a comma and a
+space ", ".
+
+@noindent
+The complete prototype for the @code{Tag} Assoc function is:
+
+@smallexample
+@cartouche
+@group
+@b{function} Assoc (Variable  : @b{in} String;
+                Value     : @b{in} Tag;
+                Separator : @b{in} String    := Default_Separator;
+                @b{return} Association;
+@i{--  Build an Association (Variable = Value) to be added to Translate_Table.}
+@i{--  This is a tag association. Separator will be used when outputting the}
+@i{--  a flat representation of the Tag (outside a table statement).}
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+A table can contain many sections. The section to use will be selected
+depending on the current line. For example, a table with two sections
+will use different data on even and odd lines. This is useful when you
+want to alternate the line background color for a better readability
+when working on HTML pages.
+
+@noindent
+A table with sections can have attribute:
+
+@table @code
+
+@item TERMINATE_SECTIONS
+
+This ensure that the table output will end
+with the last section. If the number of data in the vector variable tag
+is not a multiple of the number of sections then the remaining section
+will be complete with empty tag value.
+
+@item REVERSE
+
+The items will be displayed in the reverse order.
+
+@end table
+
+@include table_section.tmplt.texi
+
+@noindent
+And the following program:
+
+@include table_section.adb.texi
+
+@noindent
+The following output will be generated:
+
+@include table_section.adb.res
+
+@noindent
+It is important to note that is is possible to avoid code
+duplication by using the @code{@@@@BEGIN@@@@} and @code{@@@@END@@@@}
+block statements. In this case only the code inside the block is part
+of the section, code outside is common text to all sections. Here is
+an example to generate an HTML table with different colors for each line:
+
+@noindent
+The template file above can be written this way:
+@include table_block.tmplt.texi
+
+@noindent
+Into a table construct there are some additional variable tags available:
+
+@table @code
+@item @@_UP_TABLE_LINE_@@
+@cindex @@_UP_TABLE_LINE_@@
+
+This tag will be replaced by the table line number of the upper table
+statement. It will be set to 0 outside a table statement or inside a
+single table statement.
+
+@item @@_TABLE_LINE_@@
+@cindex @@_TABLE_LINE_@@
+
+This tag will be replaced by the current table line number. It will be
+replaced by 0 outside a table statement.
+
+@item @@_NUMBER_LINE_@@
+@cindex @@_NUMBER_LINE_@@
+
+This is the number of line displayed in the table. It will be replaced
+by 0 outside a table statement.
+
+@item @@_TABLE_LEVEL_@@
+@cindex @@_TABLE_LEVEL_@@
+
+This is the table level number. A table construct declared in a table
+has a level value of 2.  It will be replaced by 0 outside a table statement.
+
+@end table
+
+@noindent
+Let's have a look at a more complex example with mixed IF and TABLE tag
+statement.
+
+@noindent
+Here is the template:
+
+@include table_if.tmplt.texi
+
+@noindent
+And the following program:
+
+@include table_if.adb.texi
+
+@noindent
+The following output will be generated:
+
+@include table_if.adb.res
+
+@noindent
+Table tag statements can also be used with matrix tag or more nested
+tag variables. In this case, for a tag variable with N nested level,
+the Nth closest enclosing @code{TABLE} tag statement will be used for
+the corresponding indices. If there is not enough indices, the last
+axis are just streamed as a single text value.
+
+@noindent
+Let's see what happen for a matrix tag:
+
+@enumerate
+
+@item Inside a table of level 2 (a TABLE tag statement inside a TABLE tag
+statement).
+
+@noindent
+In this case the first @code{TABLE} iterates through the matrix lines.
+First iteration will use the first matrix's vector, second
+iteration will use second matrix's vector and so on. And the second
+@code{TABLE} will be use to iterate through the vector's values.
+
+@item Inside a table of level 1.
+
+@noindent
+In this case the @code{TABLE} iterates through the matrix lines. First
+iteration will use the first matrix's vector, second iteration will
+use second matrix's vector and so on. Each vector is then converted to
+a string by concatenating all values using the specified separator
+(see Assoc constructor for Tag or @code{Set_Separator} routine).
+
+@item Outside a table statement.
+
+@noindent
+In this case the matrix is converted to a string. Each line represents
+a vector converted as a string using the supplied separator (see point
+2 above), and each vector is separated by an ASCII.LF character. The
+separators to use for each level can be specified using @code{Set_Separator}.
+
+@end enumerate
+
+@noindent
+Let's look at an example, with the following template:
+
+@include matrix.tmplt.texi
+
+@noindent
+Using the program:
+
+@include matrix.adb.texi
+
+@noindent
+We get the following result:
+
+@include matrix.adb.res
+
+@node SET tag statement
+@section SET tag statement
+@cindex Command, SET
+
+@noindent
+The @code{SET} command tag can be used to define a constant or an
+alias for an include file parameter. This is especially important in
+the context of reusable template files. For example, instead of having
+many references to the @b{red} color in an HTML document, it is better to
+define a constant @var{COLOR} with the value @b{red} and use @var{COLOR}
+everywhere. It is then easier to change the color afterward.
+
+@noindent
+The first form, to define a simple constant that can be used as any
+other variable in a template file, is:
+
+@smallexample
+@cartouche
+@group
+@@@@SET@@@@ <name> = <value>
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+The second form, to define an alias for a template file parameter, is:
+
+@smallexample
+@cartouche
+@group
+@@@@SET@@@@ <name> = $n [| <default_value>]
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+In this case <name> is an alias for the Nth include parameter. In this
+form it is also possible to define a default value that would be used
+if the Nth include parameter is not specified.
+
+Some examples:
+
+@smallexample
+@cartouche
+@group
+@@@@SET@@@@ COLOR = red
+
+@@@@SET@@@@ SIZE = $1
+
+@@@@SET@@@@ COLOR = $4 | green
+@end group
+@end cartouche
+@end smallexample
+
+@noindent
+It is important to note that a variable is set global to a template
+file. It means that constants set into an include file are visible
+into the parent template. This is an important feature to be able to
+have a "theme" like include template file for example.
+
+@c ----------------------------------------------------------------------
+
+@node Other services
+@chapter Other services
+
+@menu
+* Context::
+* Tag utils::
+* XML representation::
+* Debug::
+@end menu
+
+@node Context
+@section Context
+@cindex Context
+
+@noindent
+The context object can be used to dynamically handle tags. Such
+context can be passed to the @code{Parse} routines. If a template's tag
+is not found in the @code{Translate_Table} the context callback method
+is called by the parser. The default callback method does nothing, it
+is up to the user to define it. The callback procedure is defined as
+follow:
+
+@smallexample
+@cartouche
+@group
+@b{procedure} Callback
+  (Context  : @b{access} Templates_Parser.Context;
+   Variable : @b{in}     String;
+   Result   :    @b{out} Unbounded_String;
+   Found    :    @b{out} Boolean);
+@end group
+@end cartouche
+@end smallexample
+
+@code{Result} must be set with the value for the tag @code{Variable}
+and @code{Found} set to @code{True}, otherwise @code{Found} can be set
+to @code{False}.
+
+@node Tag utils
+@section Tag utils
+@cindex Tag utils
+
+@noindent
+The child package @code{Utils}, @pxref{Templates_Parser.Utils}
+contains a routine to encode a Tag variable into a string and the
+inverse routine that build a Tag given it's string
+representation. This is usefuln for example, in the context of AWS to
+store a Tag into a session variable. See AWS project.
+
+@node XML representation
+@section XML representation
+@cindex XML
+
+@noindent
+The child package @code{XML}, @pxref{Templates_Parser.XML} contains
+routines to save a @code{Translation_Set} into an XML document or to
+create a @code{Translation_Set} by loading an XML document. The XML
+document must conforms to a specific @code{DTD} (see Ada spec file).
+
+@node Debug
+@section Debug
+@cindex Debug
+
+@noindent
+A set of routine to help debug the @code{Templates_Parser} engine,
+@pxref{Templates_Parser.Debug}. For example, @code{Debug.Print_Tree}
+will display, to the standard output, a representation of the internal
+semantic tree for a template file.
+
+@c ----------------------------------------------------------------------
+
+@node Last notes
+@chapter Last notes
+
+@noindent
+The templates parser has be written to parse @code{HTML} page but it is usable
+with any king of files. There is nothing hard coded for @code{HTML}, it is then
+possible to use it with plain text files, @code{XML} files, @code{SGML} files
+or whatever as long as it is not a binary file.
+
+@sp 2
+
+@noindent
+All tag statements can be mixed together. A @code{TABLE} tag statement can be
+put in an @code{IF} tag statement. An @code{IF} tag statement can be put
+in a @code{TABLE} tag statement. Idem for the @code{INCLUDE} tag statement.
+
+@noindent
+Download page is @url{http://www.obry.org/}.
+
+@sp 3
+
+@c ----------------------------------------------------------------------
+
+@node Templates_Parser API Reference
+@appendix Templates_Parser API Reference
+
+@menu
+Templates_Parser User's API
+
+* Templates_Parser::
+* Templates_Parser.Debug::
+* Templates_Parser.Utils::
+* Templates_Parser.XML::
+@end menu
+
+@page
+@node Templates_Parser
+@appendixsec Templates_Parser
+@cindex Templates_Parser
+
+@include templates_parser.ads.texi
+
+@page
+@node Templates_Parser.Debug
+@appendixsec Templates_Parser.Debug
+@cindex Templates_Parser.Debug
+
+@include templates_parser-debug.ads.texi
+
+@page
+@node Templates_Parser.Utils
+@appendixsec Templates_Parser.Utils
+@cindex Templates_Parser.Utils
+
+@include templates_parser-utils.ads.texi
+
+@page
+@node Templates_Parser.XML
+@appendixsec Templates_Parser.XML
+@cindex Templates_Parser.XML
+
+@include templates_parser-xml.ads.texi
+
+@c ----------------------------------------------------------------------
+
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@bye

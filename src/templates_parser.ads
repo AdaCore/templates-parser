@@ -94,6 +94,9 @@ package Templates_Parser is
      return Vector_Tag;
    --  Add Value (converted to a String) at the end of the vector tag set.
 
+   procedure Clear (Vect : in out Vector_Tag);
+   --  Removes all values in the vector tag.
+
    function Size (Vect : in Vector_Tag) return Natural;
    --  Returns the number of value into Vect.
 
@@ -266,9 +269,9 @@ private
       M : Matrix_Tag_Int;
    end record;
 
---     procedure Initialize (V : in out Matrix_Tag_Int);
---     procedure Finalize   (V : in out Matrix_Tag_Int);
---     procedure Adjust     (V : in out Matrix_Tag_Int);
+   procedure Initialize (M : in out Matrix_Tag_Int);
+   procedure Finalize   (M : in out Matrix_Tag_Int);
+   procedure Adjust     (M : in out Matrix_Tag_Int);
 
    ------------------
    --  Association --

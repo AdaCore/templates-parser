@@ -306,75 +306,20 @@ package body Templates_Parser is
       end if;
    end "&";
 
-   ----------------
-   -- Matrix_Tag --
-   ----------------
+   -----------
+   -- Clear --
+   -----------
 
-   ---------
-   -- "+" --
-   ---------
-
-   function "+" (Vect : in Vector_Tag) return Matrix_Tag is
-      Item : constant Matrix_Tag_Node_Access
-        := new Matrix_Tag_Node'(Vect, null);
+   procedure Clear (Vect : in out Vector_Tag) is
    begin
-      return Matrix_Tag'(M => (Ada.Finalization.Controlled with
-                               new Integer'(1), 1, Item, Item));
-   end "+";
-
-   ---------
-   -- "&" --
-   ---------
-
-   function "&"
-     (Matrix : in Matrix_Tag;
-      Vect   : in Vector_Tag)
-     return Matrix_Tag
-   is
-      Item : constant Matrix_Tag_Node_Access
-        := new Matrix_Tag_Node'(Vect, null);
-   begin
-      if Matrix.M.Head = null then
-         return Matrix_Tag'(M => (Ada.Finalization.Controlled with
-                                  Matrix.M.Ref_Count,
-                                  Matrix.M.Count + 1,
-                                  Head => Item,
-                                  Last => Item));
-      else
-         Matrix.M.Last.Next := Item;
-         return Matrix_Tag'(M => (Ada.Finalization.Controlled with
-                                  Matrix.M.Ref_Count,
-                                  Matrix.M.Count + 1,
-                                  Head => Matrix.M.Head,
-                                  Last => Item));
-      end if;
-   end "&";
-
-   ----------
-   -- Size --
-   ----------
-
-   function Size (Matrix : in Matrix_Tag) return Natural is
-   begin
-      return Matrix.M.Count;
-   end Size;
-
-   function Vector
-     (Matrix : in Matrix_Tag;
-      N      : in Positive)
-     return Vector_Tag
-   is
-      P : Matrix_Tag_Node_Access := Matrix.M.Head;
-   begin
-      for K in 1 .. N - 1 loop
-         P := P . Next;
-      end loop;
-      return P.Vect;
-   exception
-      when others =>
-         Exceptions.Raise_Exception (Template_Error'Identity,
-                                     "Index out of range");
-   end Vector;
+      --  Here we just separated current vector from the new one. The memory
+      --  used by the current one will be collected by the Finalize
+      --  routine. We just want a new independant Vector_Tag here.
+      Vect.Ref_Count := new Integer'(1);
+      Vect.Count     := 0;
+      Vect.Head      := null;
+      Vect.Last      := null;
+   end Clear;
 
    ------------
    -- Adjust --
@@ -422,6 +367,7 @@ package body Templates_Parser is
             end loop;
 
             V.Head := null;
+            V.Last := null;
             Free (V.Ref_Count);
          end;
       end if;
@@ -435,6 +381,134 @@ package body Templates_Parser is
    begin
       return Vect.Count;
    end Size;
+
+   ----------------
+   -- Matrix_Tag --
+   ----------------
+
+   ---------
+   -- "+" --
+   ---------
+
+   function "+" (Vect : in Vector_Tag) return Matrix_Tag is
+      Item : constant Matrix_Tag_Node_Access
+        := new Matrix_Tag_Node'(Vect, null);
+   begin
+      return Matrix_Tag'(M => (Ada.Finalization.Controlled with
+                               new Integer'(1), 1, Item, Item));
+   end "+";
+
+   ---------
+   -- "&" --
+   ---------
+
+   function "&"
+     (Matrix : in Matrix_Tag;
+      Vect   : in Vector_Tag)
+     return Matrix_Tag
+   is
+      Item : constant Matrix_Tag_Node_Access
+        := new Matrix_Tag_Node'(Vect, null);
+   begin
+      Matrix.M.Ref_Count.all := Matrix.M.Ref_Count.all + 1;
+
+      if Matrix.M.Head = null then
+         return Matrix_Tag'(M => (Ada.Finalization.Controlled with
+                                  Matrix.M.Ref_Count,
+                                  Matrix.M.Count + 1,
+                                  Head => Item,
+                                  Last => Item));
+      else
+         Matrix.M.Last.Next := Item;
+         return Matrix_Tag'(M => (Ada.Finalization.Controlled with
+                                  Matrix.M.Ref_Count,
+                                  Matrix.M.Count + 1,
+                                  Head => Matrix.M.Head,
+                                  Last => Item));
+      end if;
+   end "&";
+
+   ----------
+   -- Size --
+   ----------
+
+   function Size (Matrix : in Matrix_Tag) return Natural is
+   begin
+      return Matrix.M.Count;
+   end Size;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (M : in out Matrix_Tag_Int) is
+   begin
+      M.Ref_Count := new Integer'(1);
+      M.Count     := 0;
+   end Initialize;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   procedure Finalize (M : in out Matrix_Tag_Int) is
+   begin
+      M.Ref_Count.all := M.Ref_Count.all - 1;
+
+      if M.Ref_Count.all = 0 then
+         declare
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Matrix_Tag_Node, Matrix_Tag_Node_Access);
+
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Integer, Integer_Access);
+
+            P, N : Matrix_Tag_Node_Access;
+         begin
+            P := M.Head;
+
+            while P /= null loop
+               N := P.Next;
+               Free (P);
+               P := N;
+            end loop;
+
+            M.Head := null;
+            M.Last := null;
+            Free (M.Ref_Count);
+         end;
+      end if;
+   end Finalize;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   procedure Adjust (M : in out Matrix_Tag_Int) is
+   begin
+      M.Ref_Count.all := M.Ref_Count.all + 1;
+   end Adjust;
+
+   ------------
+   -- Vector --
+   ------------
+
+   function Vector
+     (Matrix : in Matrix_Tag;
+      N      : in Positive)
+     return Vector_Tag
+   is
+      P : Matrix_Tag_Node_Access := Matrix.M.Head;
+   begin
+      for K in 1 .. N - 1 loop
+         P := P . Next;
+      end loop;
+      return P.Vect;
+   exception
+      when others =>
+         Exceptions.Raise_Exception (Template_Error'Identity,
+                                     "Index out of range");
+   end Vector;
 
    ------------------
    -- Cached_Files --

@@ -1354,13 +1354,16 @@ have a "theme" like include template file for example.
 @noindent
 The @code{INLINE} tag statement can be used to better control the
 result's layout. For example it is not possible to have the results of
-a vector tag on the same line as it is not possible to have a
+a vector tag on the same line, also it is not possible to have a
 conditional output in the middle of a line. The @code{INLINE} block
 tag statement can be used to achieve that.
 
 @noindent
 Elements in an inlined block are separated by a single space by
-default. It is possible to specify any string as the separator.
+default. It is possible to specify any string as the separator. The
+text layout on an @code{INLINE} block has no meaning (the lines are
+trimmed on both side). As part of the inline command it is possible to
+specify texts to output before and after the block.
 
 @noindent
 Syntax:
@@ -1368,12 +1371,31 @@ Syntax:
 @cartouche
 @smallexample
 @group
-@@@@INLINE[(<separator>)]@@@@
+@@@@INLINE[(<before>)(<separator>)(<after>)]@@@@
       ...
 @@@@END_INLINE@@@@
 @end group
 @end smallexample
 @end cartouche
+
+@noindent
+There is three supported usages:
+
+@table @code
+@item @@@@INLINE@@@@
+
+In this case there is no text before and after the block and the
+separator is a single space.
+
+@item @@@@INLINE(<separator>)@@@@
+
+In this case there is no text before and after the block and the
+separator is the string given as parameter @i{<separator>}.
+
+@item @@@@INLINE(<before>)(<separator>)(<after>)@@@@
+
+In this case all three values are explicitly given.
+@end table
 
 @noindent
 Let's look at an example, with the following template:

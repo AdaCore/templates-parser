@@ -746,14 +746,14 @@ package body Templates_Parser is
       P : Matrix_Tag_Node_Access := Matrix.M.Head;
    begin
       for K in 1 .. N - 1 loop
-         P := P . Next;
+         P := P.Next;
       end loop;
-      return P.Vect;
 
+      return P.Vect;
    exception
       when others =>
-         Exceptions.Raise_Exception (Internal_Error'Identity,
-                                     "Index out of range");
+         Exceptions.Raise_Exception
+           (Internal_Error'Identity, "Index out of range");
    end Vector;
 
    ------------------
@@ -1983,89 +1983,90 @@ package body Templates_Parser is
          --  Return True if Str is one of "TRUE", "OUI", the case beeing not
          --  case sensitive.
 
-         function Vect_List (A : in Association) return String;
-         --  Returns the Vector_Tag for the Association as a String, each
-         --  value is separated by the given separator.
-
-         function Mat_List (A : in Association) return String;
-         --  Returns the Matrix_Tag as a string. If Matrix_Tag is not into
-         --  a table, each Vector_Tag is convected using Vect_List and a LF
-         --  is inserted between each rows. If the Matrix_Tag is into a
-         --  table of level 1, it returns only the Vector_Tag (converted
-         --  using Vect_List) for the current table line.
-
          function Translate (Var : in Tag) return String;
          --  Translate Tag variable using Translation table and apply all
          --  Filters recorded for this variable.
-
-         ---------------
-         -- Vect_List --
-         ---------------
-
-         function Vect_List (A : in Association) return String is
-            Result : Unbounded_String;
-            P      : Vector_Tag_Node_Access := A.Vect_Value.Head;
-         begin
-            if P = null then
-               return "";
-            else
-               Result := P.Value;
-               for K in 2 .. A.Vect_Value.Count loop
-                  P := P.Next;
-                  Append (Result, A.Separator & P.Value);
-               end loop;
-
-               return To_String (Result);
-            end if;
-         end Vect_List;
-
-         --------------
-         -- Mat_List --
-         --------------
-
-         function Mat_List (A : in Association) return String is
-            Result : Unbounded_String;
-            P      : Matrix_Tag_Node_Access := A.Mat_Value.M.Head;
-
-            procedure Add_Vector (V : in Vector_Tag);
-            --  Add V Vector_Tag representation into Result variable.
-
-            ----------------
-            -- Add_Vector --
-            ----------------
-
-            procedure Add_Vector (V : in Vector_Tag) is
-               P : Vector_Tag_Node_Access := V.Head;
-            begin
-               Result := Result & P.Value;
-               for K in 2 .. V.Count loop
-                  P := P.Next;
-                  Append (Result, A.Column_Separator & P.Value);
-               end loop;
-            end Add_Vector;
-
-         begin
-            if State.Table_Level = 0 then
-               --  A Matrix outside a table statement.
-
-               while P /= null loop
-                  Add_Vector (P.Vect);
-                  Append (Result, ASCII.LF);
-                  P := P.Next;
-               end loop;
-
-            else
-               Add_Vector (Vector (A.Mat_Value, State.J));
-            end if;
-
-            return To_String (Result);
-         end Mat_List;
 
          ---------------
          -- Translate --
          ---------------
 
          function Translate (Var : in Tag) return String is
+
+            function Vect_List (A : in Association) return String;
+            --  Returns the Vector_Tag for the Association as a String, each
+            --  value is separated by the given separator.
+
+            function Mat_List (A : in Association) return String;
+            --  Returns the Matrix_Tag as a string. If Matrix_Tag is not into
+            --  a table, each Vector_Tag is convected using Vect_List and a LF
+            --  is inserted between each rows. If the Matrix_Tag is into a
+            --  table of level 1, it returns only the Vector_Tag (converted
+            --  using Vect_List) for the current table line.
+
+            ---------------
+            -- Vect_List --
+            ---------------
+
+            function Vect_List (A : in Association) return String is
+               Result : Unbounded_String;
+               P      : Vector_Tag_Node_Access := A.Vect_Value.Head;
+            begin
+               if P = null then
+                  return "";
+               else
+                  Result := P.Value;
+                  for K in 2 .. A.Vect_Value.Count loop
+                     P := P.Next;
+                     Append (Result, A.Separator & P.Value);
+                  end loop;
+
+                  return To_String (Result);
+               end if;
+            end Vect_List;
+
+            --------------
+            -- Mat_List --
+            --------------
+
+            function Mat_List (A : in Association) return String is
+               Result : Unbounded_String;
+               P      : Matrix_Tag_Node_Access := A.Mat_Value.M.Head;
+
+               procedure Add_Vector (V : in Vector_Tag);
+               --  Add V Vector_Tag representation into Result variable.
+
+               ----------------
+               -- Add_Vector --
+               ----------------
+
+               procedure Add_Vector (V : in Vector_Tag) is
+                  P : Vector_Tag_Node_Access := V.Head;
+               begin
+                  Result := Result & P.Value;
+                  for K in 2 .. V.Count loop
+                     P := P.Next;
+                     Append (Result, A.Column_Separator & P.Value);
+                  end loop;
+               end Add_Vector;
+
+            begin
+               if State.Table_Level = 0 then
+                  --  A Matrix outside a table statement.
+
+                  while P /= null loop
+                     Add_Vector (P.Vect);
+                     Append (Result, ASCII.LF);
+                     P := P.Next;
+                  end loop;
+
+               else
+                  Add_Vector (Vector (A.Mat_Value, State.J));
+               end if;
+
+               return To_String (Result);
+            end Mat_List;
+
          begin
             for K in Translations'Range loop
                if Var.Name = Translations (K).Variable then

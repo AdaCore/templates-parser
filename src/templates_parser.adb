@@ -1471,6 +1471,10 @@ package body Templates_Parser is
                Result (Last .. Last + 3) := "&lt;";
                Last := Last + 3;
 
+            when '"' =>
+               Result (Last .. Last + 5) := "&quot;";
+               Last := Last + 5;
+
             when others =>
                Result (Last) := S (I);
          end case;

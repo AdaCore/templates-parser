@@ -32,12 +32,14 @@
 --  This is the standard version to be used with the standalone version of
 --  Templates_Parser.
 
+with Ada.Exceptions;
 with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Deallocation;
 
 package body Templates_Parser.Input is
 
    use Ada;
+   use Ada.Exceptions;
    use Ada.Streams;
 
    Buffer_Size : constant := 8_192;
@@ -192,7 +194,9 @@ package body Templates_Parser.Input is
    exception
       when Stream_IO.Name_Error =>
          Free (File);
-         raise;
+         Raise_Exception
+           (IO_Exceptions.Name_Error'Identity,
+            "File '" & Name & "' not found.");
    end Open;
 
 end Templates_Parser.Input;

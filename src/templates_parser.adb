@@ -2107,7 +2107,7 @@ package body Templates_Parser is
             end if;
 
             Last := Strings.Fixed.Index_Non_Blank
-              (Buffer (1 .. Last), Strings.backward);
+              (Buffer (1 .. Last), Strings.Backward);
 
             return False;
          end if;

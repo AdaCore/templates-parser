@@ -1,12 +1,48 @@
 
 --  $Id$
 
+-- To build with XML/Ada you need to comment out the following line
+-- with "xmlada";
+
 project Templates_Parser is
+
+   type Tasking_Type is ("No_Tasking", "Standard_Tasking");
+   Tasking : Tasking_Type := external ("TP_TASKING", "Standard_Tasking");
+
+   type XMLAda_Type is ("Installed", "Disabled");
+   XMLAda : XMLAda_Type := external ("TP_XMLADA", "Disabled");
 
    for Source_Dirs use ("src", "include");
    for Object_Dir use "obj";
 
-   --  GPS must compile using GNAT 3.15p, do not use a library project
+   case XMLAda is
+      when "Installed" =>
+         for Source_Dirs use project'Source_Dirs & ("xsrc");
+      when "Disabled" =>
+         --  Should be replaced by null as supported by GNAT 5.03
+         for Source_Dirs use project'Source_Dirs;
+   end case;
+
+   package Naming is
+
+      for Specification ("Templates_Parser.Configuration")
+        use "templates_parser-configuration__standalone.ads";
+      for Implementation ("Templates_Parser.Input")
+        use "templates_parser-input__standalone.adb";
+
+      case Tasking is
+         when "No_Tasking" =>
+            for Implementation ("Templates_Parser.Tasking")
+              use "templates_parser-tasking__no_tasking.adb";
+         when "Standard_Tasking" =>
+            for Implementation ("Templates_Parser.Tasking")
+              use "templates_parser-tasking__standard_tasking.adb";
+      end case;
+
+   end Naming;
+
+   --  For now we try to have Templates_Parser compatible with GNAT 3.15p, so
+   --  we do not use a library project.
 
    --  for Library_Dir use "lib";
    --  for Library_Name use "templates_parser";

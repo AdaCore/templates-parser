@@ -188,8 +188,6 @@ package body Cached_Files is
 
    function Get (Filename : in String) return Natural is
 
-      use type GNAT.OS_Lib.OS_Time;
-
       L_Filename : constant Unbounded_String
         := To_Unbounded_String (Filename);
 

@@ -114,14 +114,14 @@ package body Templates_Parser is
    Filter_Coma_2_Point_Token  : aliased constant String := "COMA_2_POINT";
    Filter_Point_2_Coma_Token  : aliased constant String := "POINT_2_COMA";
    Filter_Plus_Token          : aliased constant String := """+""";
-   Filter_Add_Token           : aliased constant String := "add";
+   Filter_Add_Token           : aliased constant String := "ADD";
    Filter_Minus_Token         : aliased constant String := """-""";
-   Filter_Sub_Token           : aliased constant String := "sub";
+   Filter_Sub_Token           : aliased constant String := "SUB";
    Filter_Multiply_Token      : aliased constant String := """*""";
-   Filter_Mult_Token          : aliased constant String := "mult";
+   Filter_Mult_Token          : aliased constant String := "MULT";
    Filter_Divide_Token        : aliased constant String := """/""";
-   Filter_Div_Token           : aliased constant String := "div";
-   Filter_Modulo_Token        : aliased constant String := "mod";
+   Filter_Div_Token           : aliased constant String := "DIV";
+   Filter_Modulo_Token        : aliased constant String := "MOD";
 
    --  A filter appear just before a tag variable (e.g. @_LOWER:SOME_VAR_@
    --  and means that the filter LOWER should be applied to SOME_VAR before

@@ -1545,23 +1545,20 @@ package body Templates_Parser is
    -- Field --
    -----------
 
-   --  ??? It is certainly possible to share code between both Field routine
-
    procedure Field
      (T      : in     Tag;
       N      : in     Positive;
-      Result :    out Tag;
-      Found  :    out Boolean)
-   is
-      R : Tag_Node_Access;
+      Result :    out Tag_Node_Access;
+      Found  :    out Boolean) is
    begin
       Found := True;
 
       if N = T.Count then
-         R := T.Last;
+         Result := T.Last;
 
       elsif N > T.Count then
          --  No such item for this position
+         Result := null;
          Found  := False;
 
       elsif N > T.Position.Pos.all then
@@ -1572,7 +1569,7 @@ package body Templates_Parser is
             T.Position.Current.all := T.Position.Current.all.Next;
          end loop;
 
-         R := T.Position.Current.all;
+         Result := T.Position.Current.all;
       else
 
          declare
@@ -1585,11 +1582,23 @@ package body Templates_Parser is
             T.Position.Pos.all     := N;
             T.Position.Current.all := P;
 
-            R := P;
+            Result := P;
          end;
       end if;
+   end Field;
 
-      if R.Kind = Value_Set then
+   procedure Field
+     (T      : in     Tag;
+      N      : in     Positive;
+      Result :    out Tag;
+      Found  :    out Boolean)
+   is
+      R : Tag_Node_Access;
+   begin
+      Field (T, N, R, Found);
+
+      if Found and then R.Kind = Value_Set then
+         --  There is a Tag at this position, return it
          Result := R.VS.all;
       else
          Found := False;
@@ -1660,38 +1669,8 @@ package body Templates_Parser is
          --  No cursor, we just want the streamed T image
          Result := Image (T);
 
-      elsif P = T.Count then
-         R := T.Last;
-
-      elsif P > T.Count then
-         --  No such item for this position
-         R      := null;
-         Result := Null_Unbounded_String;
-         Found  := False;
-
-      elsif P > T.Position.Pos.all then
-         --  Use cursor to move to the right position
-
-         for K in 1 .. P - T.Position.Pos.all loop
-            T.Position.Pos.all     := T.Position.Pos.all + 1;
-            T.Position.Current.all := T.Position.Current.all.Next;
-         end loop;
-
-         R := T.Position.Current.all;
       else
-
-         declare
-            N : Tag_Node_Access := T.Head;
-         begin
-            for K in 1 .. P - 1 loop
-               N := N.Next;
-            end loop;
-
-            T.Position.Pos.all     := P;
-            T.Position.Current.all := N;
-
-            R := N;
-         end;
+         Field (T, P, R, Found);
       end if;
 
       if R /= null then

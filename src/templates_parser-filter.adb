@@ -29,7 +29,7 @@
 --  $Id$
 
 with Ada.Strings.Fixed;
-with GNAT.OS_Lib;
+with Templates_Parser.Configuration;
 
 separate (Templates_Parser)
 package body Filter is
@@ -701,7 +701,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      if GNAT.OS_Lib.Is_Regular_File (S) then
+      if Configuration.Is_Regular_File (S) then
          return "TRUE";
       else
          return "FALSE";

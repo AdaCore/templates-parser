@@ -91,6 +91,7 @@ procedure Testme is
                    +"one" & "two" & "three"),
          TP.Assoc ("VAR4", ""),
          TP.Assoc ("VAR5", "T R uE"),
+         TP.Assoc ("VAR6", "A"),
          TP.Assoc ("CLASS", C),
          TP.Assoc ("MEMBER", MF),
          TP.Assoc ("COND1", False),

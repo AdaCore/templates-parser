@@ -1468,8 +1468,6 @@ package body Templates_Parser is
       R      : Natural := 0;
       Space  : Boolean := False;
 
-      K      : Positive := Result'First;
-
    begin
       for K in S'Range loop
 
@@ -2658,7 +2656,7 @@ package body Templates_Parser is
             if Keep_Unknown_Tags then
                return To_String (Begin_Tag & Var.Name & End_Tag);
             else
-               return "";
+               return Translate (Var, "");
             end if;
          end Translate;
 

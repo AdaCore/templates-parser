@@ -1,7 +1,7 @@
 
 --  $Id$
 
--- To build with XML/Ada you need to comment out the following line
+-- To build with XML/Ada you need to uncomment the following line
 -- with "xmlada";
 
 project Templates_Parser is

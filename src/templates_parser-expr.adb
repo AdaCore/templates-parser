@@ -64,6 +64,11 @@ package body Expr is
       --  Returns next token. Set Index to the last analysed position in
       --  Expression.
 
+      function No_Quote (Str : in String) return String;
+      --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
+      --  are quotes return Str (Str'First + 1 ..  Str'Last - 1) otherwise
+      --  return Str as-is.
+
       ---------------
       -- Get_Token --
       ---------------
@@ -135,6 +140,19 @@ package body Expr is
          end if;
       end Get_Token;
 
+      --------------
+      -- No_Quote --
+      --------------
+
+      function No_Quote (Str : in String) return String is
+      begin
+         if Str (Str'First) = '"' and then Str (Str'Last) = '"' then
+            return Str (Str'First + 1 .. Str'Last - 1);
+         else
+            return Str;
+         end if;
+      end No_Quote;
+
       L_Tok : constant String := Get_Token;  -- left operand
       O_Tok : constant String := Get_Token;  -- operator
       R_Tok : constant String := Get_Token;  -- right operand
@@ -150,11 +168,11 @@ package body Expr is
 
          elsif Strings.Fixed.Index (L_Tok, To_String (Begin_Tag)) = 0 then
             --  a value
-            return new Node'(Value, To_Unbounded_String (L_Tok));
+            return new Node'(Value, To_Unbounded_String (No_Quote (L_Tok)));
 
          else
             --  a variable
-            return new Node'(Var, Build (L_Tok));
+            return new Node'(Var, Build (No_Quote (L_Tok)));
          end if;
 
 

@@ -1197,18 +1197,35 @@ package body Filter is
       I : in Include_Parameters := No_Include_Parameters)
       return String
    is
-      N : Natural;
+      N       : Natural;
+      Pattern : Unbounded_String;
    begin
       declare
          V_Str : constant String := To_String (P.S);
       begin
          if Is_Number (V_Str) then
-            N := Natural'Value (V_Str);
+            --  REPEAT(N):STR
+            N       := Natural'Value (V_Str);
+            Pattern := To_Unbounded_String (S);
+
          else
-            N := Natural'Value (Value (V_Str, T, I));
+            declare
+               N_Str : constant String := Value (V_Str, T, I);
+            begin
+               if Is_Number (N_Str) then
+                  --  REPEAT(N_VAR):STR
+                  N       := Natural'Value (N_Str);
+                  Pattern := To_Unbounded_String (S);
+               else
+                  --  REPEAT(STR):N
+                  N       := Natural'Value (S);
+                  Pattern := P.S;
+               end if;
+            end;
          end if;
 
          declare
+            S : constant String := To_String (Pattern);
             R : String (1 .. N * S'Length);
          begin
             for K in 1 .. N loop
@@ -1842,7 +1859,8 @@ package body Filter is
    is
       Pos : Containers.Cursor;
    begin
-      if Str (Str'First) = '$'
+      if Str'Length > 0
+        and then Str (Str'First) = '$'
         and then Is_Number (Str (Str'First + 1 .. Str'Last))
       then
          --  This is an include parameter

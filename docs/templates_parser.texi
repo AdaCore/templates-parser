@@ -554,8 +554,14 @@ Replaces all comas by points.
 @item REPEAT(@i{N})
 @cindex Filter, REPEAT
 
-Returns N times the variable, N being passed as filter's parameter. N
-must be a number  or a discrete tag variable whose value is a number.
+Returns @i{N} times the variable, @i{N} being passed as filter's parameter.
+@i{N} must be a number or a discrete tag variable whose value is a number.
+
+@item REPEAT(@i{STR})
+@cindex Filter, REPEAT
+
+This is the second @code{REPEAT} form. In this case @i{STR} is repeated
+a number of time corresponding to the variable value which must be a number.
 
 @item REPLACE(@i{REGEXP}[/@i{STR}])
 @cindex Filter, REPLACE

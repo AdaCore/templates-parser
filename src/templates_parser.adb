@@ -467,8 +467,6 @@ package body Templates_Parser is
             Stop := Stop - 1;
          end loop;
 
-         pragma Assert (K = 1);
-
          return new Filter_Set'(FS);
       end Get_Filter_Set;
 

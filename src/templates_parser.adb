@@ -2404,9 +2404,9 @@ package body Templates_Parser is
       function Get_Tag_Attribute (K : in Positive) return String;
       --  Returns the Nth tag attribute
 
-      function Get_Tag_Parameter return String;
-      --  Returns the tag parameter found between parenthesis or the empty
-      --  string if not found.
+      function Get_Tag_Parameter (Default : in String) return String;
+      --  Returns the tag parameter found between parenthesis or Default
+      --  if not found.
 
       function Is_Stmt
         (Stmt : in String; Extended : in Boolean := False) return Boolean;
@@ -2650,13 +2650,13 @@ package body Templates_Parser is
       -- Get_Tag_Parameter --
       -----------------------
 
-      function Get_Tag_Parameter return String is
+      function Get_Tag_Parameter (Default : in String) return String is
          L : constant Natural :=
                Strings.Fixed.Index (Buffer (First .. Last), ")@@");
          I : Natural;
       begin
          if L = 0 then
-            return "";
+            return Default;
 
          else
             I := Strings.Fixed.Index (Buffer (First .. L), "(");
@@ -3384,17 +3384,7 @@ package body Templates_Parser is
          elsif Is_Stmt (Inline_Token, Extended => True) then
             T := new Node (Inline_Stmt);
 
-            declare
-               Parameter : constant String := Get_Tag_Parameter;
-            begin
-               if Parameter = "" then
-                  --  No parameter, the default is a single space
-                  T.Sep := To_Unbounded_String (" ");
-               else
-                  T.Sep := To_Unbounded_String (Parameter);
-               end if;
-            end;
-
+            T.Sep     := To_Unbounded_String (Get_Tag_Parameter (" "));
             T.I_Block := Parse (Parse_Inline);
 
             --  Now we have parsed the full tree to inline. Rewrite this tree

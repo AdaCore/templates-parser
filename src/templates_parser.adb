@@ -29,9 +29,10 @@
 --  $Id$
 
 with Ada.Exceptions;
+with Ada.Characters.Handling;
 with Ada.Text_IO;
 with Ada.Strings.Fixed;
-with Ada.Strings.Maps;
+with Ada.Strings.Maps.Constants;
 with Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with Strings_Cutter;
@@ -54,6 +55,13 @@ package body Templates_Parser is
    End_If_Token             : constant String := "@@END_IF@@";
    Include_Token            : constant String := "@@INCLUDE@@";
 
+   Filter_Identity_Token    : aliased constant String := "@@IDENTITY";
+   Filter_Reverse_Token     : aliased constant String := "@@REVERSE";
+   Filter_Lower_Token       : aliased constant String := "@@LOWER";
+   Filter_Upper_Token       : aliased constant String := "@@UPPER";
+   Filter_Clean_Text_Token  : aliased constant String := "@@CLEAN_TEXT";
+   Filter_Capitalize_Token  : aliased constant String := "@@CAPITALIZE";
+
    subtype Table_Range     is Positive range Table_Token'Range;
    subtype Section_Range   is Positive range Section_Token'Range;
    subtype End_Table_Range is Positive range End_Table_Token'Range;
@@ -61,6 +69,197 @@ package body Templates_Parser is
    subtype Else_Range      is Positive range Else_Token'Range;
    subtype End_If_Range    is Positive range End_If_Token'Range;
    subtype Include_Range   is Positive range Include_Token'Range;
+
+   --  Filters setting
+   --
+   --  a filter appear just before a tag variable (e.g. @@LOWER@@_SOME_VAT_@@
+   --  and means that the filter LOWER should be applied to SOME_VAR before
+   --  replacing it in the template file.
+
+   type Filters_Mode is
+     (Identity,   -- same string as the input
+      Invert,     -- reverse string
+      Lower,      -- lower case
+      Upper,      -- upper case
+      Capitalize, -- lower case except char before spaces and underscores
+      Clean_Text  -- only letter/digits all other chars are changed to spaces.
+      );
+
+   type Filter_Function is access function (S : in String) return String;
+
+   type String_Access is access constant String;
+
+   type Filter_Record is record
+      Name   : String_Access;
+      Handle : Filter_Function;
+   end record;
+
+   --  filter functions, see above.
+
+   function Lower_Filter (S : in String) return String;
+   function Identity_Filter (S : in String) return String;
+   function Reverse_Filter (S : in String) return String;
+   function Upper_Filter (S : in String) return String;
+   function Capitalize_Filter (S : in String) return String;
+   function Clean_Text_Filter (S : in String) return String;
+
+   function Check_Filter (Str : in Unbounded_String;
+                          P   : in Positive)
+                         return Filters_Mode;
+   --  returns the prefix filter for the tag variable starting a position P in
+   --  Str or Identity if no filter has been found.
+
+   function Through_Filter (S      : in String;
+                            Filter : in Filters_Mode) return String;
+   --  apply Filter to string S and return the result string.
+
+   function Filter_Length (Filter : in Filters_Mode) return Natural;
+   --  returns the number of characters for the filter token Filter.
+
+   ---------------------
+   -- Identity_Filter --
+   ---------------------
+
+   function Identity_Filter (S : in String) return String is
+   begin
+      return S;
+   end Identity_Filter;
+
+   ------------------
+   -- Lower_Filter --
+   ------------------
+
+   function Lower_Filter (S : in String) return String is
+   begin
+      return Characters.Handling.To_Lower (S);
+   end Lower_Filter;
+
+   --------------------
+   -- Reverse_Filter --
+   --------------------
+
+   function Reverse_Filter (S : in String) return String is
+      Result : String (S'Range);
+   begin
+      for K in S'Range loop
+         Result (Result'Last - K + Result'First) := S (K);
+      end loop;
+      return Result;
+   end Reverse_Filter;
+
+   ------------------
+   -- Upper_Filter --
+   ------------------
+
+   function Upper_Filter (S : in String) return String is
+   begin
+      return Characters.Handling.To_Upper (S);
+   end Upper_Filter;
+
+   -----------------------
+   -- Capitalize_Filter --
+   -----------------------
+
+   function Capitalize_Filter (S : in String) return String is
+      Result : String (S'Range);
+      Upper  : Boolean := True;
+   begin
+      for K in Result'Range loop
+         if Upper then
+            Result (K) := Characters.Handling.To_Upper (S (K));
+            Upper := False;
+         else
+            Result (K) := Characters.Handling.To_Lower (S (K));
+            if Result (K) = ' ' or else Result (K) = '_' then
+               Upper := True;
+            end if;
+         end if;
+      end loop;
+      return Result;
+   end Capitalize_Filter;
+
+   -----------------------
+   -- Clean_Text_Filter --
+   -----------------------
+
+   function Clean_Text_Filter (S : in String) return String is
+
+      use type Strings.Maps.Character_Set;
+
+      Result : String (S'Range);
+
+      Clean_Set : Strings.Maps.Character_Set
+        := Strings.Maps.Constants.Letter_Set
+        or Strings.Maps.Constants.Decimal_Digit_Set
+        or Strings.Maps.To_Set (" йикопафз");
+
+   begin
+      for K in S'Range loop
+         if Strings.Maps.Is_In (S (K), Clean_Set) then
+            Result (K) := S (K);
+         else
+            Result (K) := ' ';
+         end if;
+      end loop;
+      return Result;
+   end Clean_Text_Filter;
+
+   Filter_Table : array (Filters_Mode) of Filter_Record
+     := (Identity   =>
+           (Filter_Identity_Token'Access,   Identity_Filter'Access),
+         Lower      =>
+           (Filter_Lower_Token'Access,      Lower_Filter'Access),
+         Upper      =>
+           (Filter_Upper_Token'Access,      Upper_Filter'Access),
+         Capitalize =>
+           (Filter_Capitalize_Token'Access, Capitalize_Filter'Access),
+         Clean_Text =>
+           (Filter_Clean_Text_Token'Access, Clean_Text_Filter'Access),
+         Invert     =>
+           (Filter_Reverse_Token'Access,    Reverse_Filter'Access));
+
+   ------------------
+   -- Check_Filter --
+   ------------------
+
+   function Check_Filter (Str : in Unbounded_String;
+                          P : in Positive)
+                         return Filters_Mode is
+   begin
+      for F in Filter_Table'Range loop
+         if P - Filter_Table (F).Name'Length >= 1
+           and then Slice (Str,
+                           P - Filter_Table (F).Name'Length,
+                           P - 1) = Filter_Table (F).Name.all
+         then
+            return F;
+         end if;
+      end loop;
+      return Identity;
+   end Check_Filter;
+
+   --------------------
+   -- Through_Filter --
+   --------------------
+
+   function Through_Filter (S      : in String;
+                            Filter : in Filters_Mode) return String is
+   begin
+      return Filter_Table (Filter).Handle (S);
+   end Through_Filter;
+
+   -------------------
+   -- Filter_Length --
+   -------------------
+
+   function Filter_Length (Filter : in Filters_Mode) return Natural is
+   begin
+      if Filter = Identity then
+         return 0;
+      else
+         return Filter_Table (Filter).Name'Length;
+      end if;
+   end Filter_Length;
 
    -----------
    -- Assoc --
@@ -110,15 +309,23 @@ package body Templates_Parser is
    procedure Translate (Str : in out Unbounded_String;
                         Tag : in     String;
                         To  : in     String) is
-      Pos : Natural;
+      Pos    : Natural;
+      Filter : Filters_Mode;
    begin
       loop
          Pos := Index (Str, Tag);
 
          exit when Pos = 0;
 
+         --  check if there is a prefix filter to apply
+
+         Filter := Check_Filter (Str, Pos);
+
          if Pos /= 0 then
-            Replace_Slice (Str, Pos, Pos + Tag'Length - 1, To);
+            Replace_Slice (Str,
+                           Pos - Filter_Length (Filter),
+                           Pos + Tag'Length - 1,
+                           Through_Filter (To, Filter));
          end if;
       end loop;
    end Translate;
@@ -194,6 +401,10 @@ package body Templates_Parser is
          return False;
       end Exist;
 
+      ---------------
+      -- Translate --
+      ---------------
+
       procedure Translate (Str : in out Unbounded_String) is
       begin
          for K in Translations'Range loop
@@ -219,9 +430,12 @@ package body Templates_Parser is
                            Stop :    out Boolean)
       is
          use Strings_Cutter;
+
          Pos     : Natural;
          CS      : Cutted_String;
          Nb_Item : Natural;
+
+         Filter  : Filters_Mode;
 
       begin
          Stop := False;
@@ -236,6 +450,10 @@ package body Templates_Parser is
                   To_String (Translations (K).Variable));
 
                exit when Pos = 0;
+
+               --  check if there is a prefix filter to apply
+
+               Filter := Check_Filter (Str, Pos);
 
                Create (CS,
                        To_String (Translations (K).Value),
@@ -266,15 +484,15 @@ package body Templates_Parser is
                   if Translations (K).Vector then
                      Replace_Slice
                        (Str,
-                        Pos,
+                        Pos - Filter_Length (Filter),
                         Pos + Length (Translations (K).Variable) - 1,
-                        Field (CS, N));
+                        Through_Filter (Field (CS, N), Filter));
                   else
                      Replace_Slice
                        (Str,
-                        Pos,
+                        Pos - Filter_Length (Filter),
                         Pos + Length (Translations (K).Variable) - 1,
-                        Field (CS, 1));
+                        Through_Filter (Field (CS, 1), Filter));
                   end if;
                end if;
 
@@ -342,7 +560,6 @@ package body Templates_Parser is
          Str : Unbounded_String;
 
 
-
          function Parse_If (Condition       : in String  := "";
                             Check_Condition : in Boolean := True)
            return String;
@@ -362,6 +579,10 @@ package body Templates_Parser is
          --  Parse an include statement (Include_Token).  At the time of this
          --  call Include_Token as been read. When returning the file index is
          --  positioned on the line just after the Include_Token line.
+
+         -----------------
+         -- Parse_Table --
+         -----------------
 
          function Parse_Table (Terminate_Sections : Boolean) return String is
 
@@ -482,6 +703,10 @@ package body Templates_Parser is
                Fatal_Error ("found end of file, expected " & End_Table_Token);
                return "";
          end Parse_Table;
+
+         --------------
+         -- Parse_If --
+         --------------
 
          function Parse_If (Condition       : in String  := "";
                             Check_Condition : in Boolean := True)
@@ -626,6 +851,10 @@ package body Templates_Parser is
                return "";
          end Parse_If;
 
+         -------------------
+         -- Parse_Include --
+         -------------------
+
          function Parse_Include (Filename : in String) return String is
 
             --  returns last directory separator in Filename.
@@ -767,8 +996,9 @@ package body Templates_Parser is
                        Mode => Text_IO.In_File);
       exception
          when Text_IO.Name_Error =>
-            Exceptions.Raise_Exception (Template_Error'Identity,
-                                        "template file not found");
+            Exceptions.Raise_Exception
+              (Template_Error'Identity,
+               "template file " & Template_Filename & " not found");
       end;
 
       while not Text_IO.End_Of_File (File) loop

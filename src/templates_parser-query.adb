@@ -68,7 +68,7 @@ package body Templates_Parser.Query is
 
    function Nested_Level (T : in Tag) return Positive is
    begin
-      return T.Nested_Level;
+      return T.Data.Nested_Level;
    end Nested_Level;
 
    --------------

@@ -1,3 +1,11 @@
+2005-02-17  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-input.adb:
+	Removed. Was checked-in by error.
+
+	* templates_parser-input__standalone.adb:
+	(Open): Add exception message to help tracing missing files.
+
 2005-02-16  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser-tasking__standard_tasking.adb:

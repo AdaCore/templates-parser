@@ -1,0 +1,26 @@
+
+@@TABLE@@
+   first
+   @@INLINE@@
+      (
+      @@IF@@ @_COND1_@
+         1. @_LABELS_@
+      @@ELSE@@
+         2. @_LABELS_@
+      @@END_IF@@
+      )
+   @@END_INLINE@@
+@@END_TABLE@@
+
+@@TABLE@@
+   first
+   @@INLINE()@@
+      (
+      @@IF@@ @_COND1_@
+         1. @_LABELS_@
+      @@ELSE@@
+         2. @_LABELS_@
+      @@END_IF@@
+      )
+   @@END_INLINE@@
+@@END_TABLE@@

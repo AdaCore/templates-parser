@@ -23,6 +23,10 @@ project Templates_Parser is
          for Source_Dirs use project'Source_Dirs;
    end case;
 
+   ------------
+   -- Naming --
+   ------------
+
    package Naming is
 
       for Specification ("Templates_Parser.Configuration")
@@ -40,6 +44,14 @@ project Templates_Parser is
       end case;
 
    end Naming;
+
+   ---------
+   -- Ide --
+   ---------
+
+   package Ide is
+      for Vcs_Kind use "CVS";
+   end Ide;
 
    --  For now we try to have Templates_Parser compatible with GNAT 3.15p, so
    --  we do not use a library project.

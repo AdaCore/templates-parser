@@ -52,14 +52,12 @@ package body Templates_Parser is
 
    Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
 
-   function Image (N : in Integer) return String;
-   pragma Inline (Image);
-   --  Returns N image without leading blank
-
    function No_Quote (Str : in String) return String;
    --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
    --  are quotes return Str (Str'First + 1 ..  Str'Last - 1) otherwise
    --  return Str as-is.
+
+   procedure Free is new Ada.Unchecked_Deallocation (Integer, Integer_Access);
 
    -----------
    -- Image --
@@ -104,6 +102,48 @@ package body Templates_Parser is
    Else_Token               : constant String := "@@ELSE@@";
    End_If_Token             : constant String := "@@END_IF@@";
    Include_Token            : constant String := "@@INCLUDE@@";
+
+   -------------------
+   -- Translate_Set --
+   -------------------
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Set : in out Translate_Set) is
+   begin
+      Set.Ref_Count := new Integer'(1);
+      Set.Set       := new Containers.Map_Type;
+   end Initialize;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   procedure Finalize (Set : in out Translate_Set) is
+      procedure Free is
+        new Unchecked_Deallocation (Containers.Map_Type, Map_Type_Access);
+   begin
+      Set.Ref_Count.all := Set.Ref_Count.all - 1;
+
+      if Set.Ref_Count.all = 0 then
+         Free (Set.Ref_Count);
+         Free (Set.Set);
+      end if;
+   end Finalize;
+
+   ------------
+   -- Adjust --
+   ------------
+
+   procedure Adjust (Set : in out Translate_Set) is
+   begin
+      Set.Ref_Count.all := Set.Ref_Count.all + 1;
+   end Adjust;
+
+   Null_Set : Translate_Set;
+   --  This is used as default parameter in some local calls
 
    ------------
    -- Filter --
@@ -295,9 +335,9 @@ package body Templates_Parser is
 
       type Callback is access function
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
-        return String;
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
+         return String;
       --  P is the filter parameter, no parameter by default. Parameter are
       --  untyped and will be parsed by the filter function if needed.
 
@@ -326,218 +366,218 @@ package body Templates_Parser is
 
       function Add_Param
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function BR_2_LF
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Capitalize
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Clean_Text
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Coma_2_Point
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Contract
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Del_Param
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Exist
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Format_Date
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Format_Number
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Is_Empty
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function LF_2_BR
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Lower
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Match
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function No_Digit
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function No_Letter
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function No_Space
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Oui_Non
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Point_2_Coma
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Repeat
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Replace
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Replace_All
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Replace_Param
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Reverse_Data
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Size
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Slice
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Trim
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Upper
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Web_Escape
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Web_NBSP
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Yes_No
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Plus
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Minus
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Divide
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Multiply
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Modulo
         (S : in String;
-         P : in Parameter_Data  := No_Parameter;
-         T : in Translate_Table := No_Translation)
+         P : in Parameter_Data := No_Parameter;
+         T : in Translate_Set  := Null_Set)
          return String;
 
       function Handle (Name : in String) return Callback;
@@ -577,7 +617,7 @@ package body Templates_Parser is
    function Translate
      (T            : in Tag_Var;
       Value        : in String;
-      Translations : in Translate_Table := No_Translation)
+      Translations : in Translate_Set := Null_Set)
       return String;
    --  Returns the result of Value after applying all filters for tag T.
 
@@ -943,7 +983,7 @@ package body Templates_Parser is
    function Translate
      (T            : in Tag_Var;
       Value        : in String;
-      Translations : in Translate_Table := No_Translation)
+      Translations : in Translate_Set := Null_Set)
       return String
    is
       use type Filter.Set_Access;
@@ -1180,7 +1220,12 @@ package body Templates_Parser is
    -- Tag --
    ---------
 
-   type Indices is array (Positive range <>) of Natural;
+   procedure Field
+     (T      : in     Tag;
+      N      : in     Positive;
+      Result :    out Tag_Node_Access;
+      Found  :    out Boolean);
+   --  Returns the Nth item in Tag
 
    procedure Field
      (T      : in     Tag;
@@ -1289,9 +1334,6 @@ package body Templates_Parser is
             procedure Free is new Ada.Unchecked_Deallocation
               (Tag_Node_Access, Access_Tag_Node_Access);
 
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Integer, Integer_Access);
-
             P, N : Tag_Node_Access;
          begin
             P := T.Head;
@@ -1350,22 +1392,22 @@ package body Templates_Parser is
 
    function "+" (Value : in Character) return Tag is
    begin
-      return + String'(1 => Value);
+      return +String'(1 => Value);
    end "+";
 
    function "+" (Value : in Boolean) return Tag is
    begin
-      return + Boolean'Image (Value);
+      return +Boolean'Image (Value);
    end "+";
 
    function "+" (Value : in Unbounded_String) return Tag is
    begin
-      return + To_String (Value);
+      return +To_String (Value);
    end "+";
 
    function "+" (Value : in Integer) return Tag is
    begin
-      return + Image (Value);
+      return +Image (Value);
    end "+";
 
    function "+" (Value : in Tag) return Tag is
@@ -1713,6 +1755,45 @@ package body Templates_Parser is
    ------------
 
    package body Filter is separate;
+
+   -------------------
+   -- Translate_Set --
+   -------------------
+
+   ------------
+   -- Insert --
+   ------------
+
+   procedure Insert (Set : in out Translate_Set; Item : in Association) is
+   begin
+      Association_Set.Containers.Replace
+        (Set.Set.all, To_String (Item.Variable), Item);
+   end Insert;
+
+   ------------
+   -- Exists --
+   ------------
+
+   function Exists
+     (Set      : in Translate_Set;
+      Variable : in String)
+      return Boolean is
+   begin
+      return Association_Set.Containers.Is_In (Variable, Set.Set.all);
+   end Exists;
+
+   ------------
+   -- To_Set --
+   ------------
+
+   function To_Set (Table : in Translate_Table) return Translate_Set is
+      Set : Translate_Set;
+   begin
+      for K in Table'Range loop
+         Insert (Set, Table (K));
+      end loop;
+      return Set;
+   end To_Set;
 
    -----------
    -- Assoc --
@@ -2621,15 +2702,33 @@ package body Templates_Parser is
         (Parse (Filename, Translations, Cached, Keep_Unknown_Tags));
    end Parse;
 
-   -----------
-   -- Parse --
-   -----------
-
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Table := No_Translation;
       Cached            : in Boolean         := False;
       Keep_Unknown_Tags : in Boolean         := False)
+      return Unbounded_String is
+   begin
+      return Parse
+        (Filename, To_Set (Translations), Cached, Keep_Unknown_Tags);
+   end Parse;
+
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Set;
+      Cached            : in Boolean       := False;
+      Keep_Unknown_Tags : in Boolean       := False)
+      return String is
+   begin
+      return To_String
+        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags));
+   end Parse;
+
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Set;
+      Cached            : in Boolean       := False;
+      Keep_Unknown_Tags : in Boolean       := False)
       return Unbounded_String
    is
 
@@ -2665,6 +2764,7 @@ package body Templates_Parser is
         (T     : in Tree;
          State : in Table_State)
       is
+         use type Containers.Cursor_Type;
 
          function Analyze (E : in Expr.Tree) return String;
          --  Analyse the expression tree and returns the result as a boolean
@@ -2702,91 +2802,89 @@ package body Templates_Parser is
          ---------------
 
          function Translate (Var : in Tag_Var) return String is
+            Pos : Containers.Cursor_Type;
          begin
-            for K in Translations'Range loop
-               --  ??? This loop should be removed when the translation table
-               --  will be in a map.
+            Pos := Containers.Find
+              (Translations.Set.all, To_String (Var.Name));
 
-               if Var.Name = Translations (K).Variable then
+            if Pos /= Containers.Null_Cursor then
+               declare
+                  Tk : constant Association := Containers.Element (Pos);
+               begin
+                  case Tk.Kind is
 
-                  declare
-                     Tk : constant Association := Translations (K);
-                  begin
-                     case Tk.Kind is
+                     when Std =>
+                        if Var.Attr = Nil then
+                           return Translate
+                             (Var, To_String (Tk.Value), Translations);
+                        else
+                           Exceptions.Raise_Exception
+                             (Template_Error'Identity,
+                              "Attribute not valid on a discrete tag");
+                        end if;
 
-                        when Std =>
-                           if Var.Attr = Nil then
+                     when Composite =>
+                        if Tk.Comp_Value.Nested_Level = 1 then
+                           --  This is a vector
+
+                           if Var.Attr = Length then
                               return Translate
-                                (Var, To_String (Tk.Value), Translations);
-                           else
+                                (Var,
+                                 Image (Tk.Comp_Value.Count),
+                                 Translations);
+
+                           elsif Var.Attr /= Nil then
                               Exceptions.Raise_Exception
                                 (Template_Error'Identity,
-                                 "Attribute not valid on a discrete tag");
+                                 "This attribute is not valid for a "
+                                 & "vector tag");
                            end if;
 
-                        when Composite =>
-                           if Tk.Comp_Value.Nested_Level = 1 then
-                              --  This is a vector
-
-                              if Var.Attr = Length then
-                                 return Translate
-                                   (Var,
-                                    Image (Tk.Comp_Value.Count),
-                                    Translations);
-
-                              elsif Var.Attr /= Nil then
-                                 Exceptions.Raise_Exception
-                                   (Template_Error'Identity,
-                                    "This attribute is not valid for a "
-                                    & "vector tag");
-                              end if;
-
-                           elsif Tk.Comp_Value.Nested_Level = 2 then
-                              if Var.Attr = Line then
-                                 --  'Line on a matrix
-                                 return Translate
-                                   (Var,
-                                    Image (Tk.Comp_Value.Count),
-                                    Translations);
-
-                              elsif Var.Attr = Min_Column then
-                                 --  'Min_Column on a matrix
-                                 return Translate
-                                   (Var,
-                                    Image (Tk.Comp_Value.Min),
-                                    Translations);
-
-                              elsif Var.Attr = Max_Column then
-                                 --  'Max_Column on a matrix
-                                 return Translate
-                                   (Var,
-                                    Image (Tk.Comp_Value.Max),
-                                    Translations);
-
-                              elsif Var.Attr /= Nil then
-                                 Exceptions.Raise_Exception
-                                   (Template_Error'Identity,
-                                    "This attribute is not valid for a "
-                                    & "matrix tag");
-                              end if;
-                           end if;
-
-                           declare
-                              Result : Unbounded_String;
-                              Found  : Boolean;
-                           begin
-                              Field
-                                (Tk.Comp_Value,
-                                 State.Cursor (1 .. State.Table_Level),
-                                 Result, Found);
-
+                        elsif Tk.Comp_Value.Nested_Level = 2 then
+                           if Var.Attr = Line then
+                              --  'Line on a matrix
                               return Translate
-                                (Var, To_String (Result), Translations);
-                           end;
-                     end case;
-                  end;
-               end if;
-            end loop;
+                                (Var,
+                                 Image (Tk.Comp_Value.Count),
+                                 Translations);
+
+                           elsif Var.Attr = Min_Column then
+                              --  'Min_Column on a matrix
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Min),
+                                 Translations);
+
+                           elsif Var.Attr = Max_Column then
+                              --  'Max_Column on a matrix
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Max),
+                                 Translations);
+
+                           elsif Var.Attr /= Nil then
+                              Exceptions.Raise_Exception
+                                (Template_Error'Identity,
+                                 "This attribute is not valid for a "
+                                 & "matrix tag");
+                           end if;
+                        end if;
+
+                        declare
+                           Result : Unbounded_String;
+                           Found  : Boolean;
+                        begin
+                           Field
+                             (Tk.Comp_Value,
+                              State.Cursor (1 .. State.Table_Level),
+                              Result, Found);
+
+                           return Translate
+                             (Var, To_String (Result), Translations);
+                        end;
+                  end case;
+               end;
+            end if;
 
             --  Check now for an internal tag
 
@@ -3223,7 +3321,7 @@ package body Templates_Parser is
                      declare
                         P : Tag_Node_Access := T.Head;
                      begin
-                        while p /= null loop
+                        while P /= null loop
                            if P.Kind = Value_Set then
                               if N = 1 then
                                  Result :=
@@ -3239,64 +3337,62 @@ package body Templates_Parser is
                      return Result;
                   end Max;
 
-                  Rr          : Natural;
+                  Pos : Containers.Cursor_Type;
 
                begin
-                  for K in Translations'Range loop
-                     --  ??? Remove this loop when the translation table
-                     --  will be handled by a map.
+                  Pos := Containers.Find
+                    (Translations.Set.all, To_String (T.Name));
+
+                  if Pos /= Containers.Null_Cursor then
                      declare
-                        Tk : constant Association := Translations (K);
+                        Tk : constant Association := Containers.Element (Pos);
                      begin
-                        if T.Name = Tk.Variable then
+                        if Tk.Kind = Composite then
+                           if N > Tk.Comp_Value.Nested_Level then
+                              --  Ignore this variable as it is deeper than
+                              --  its nested level.
+                              return 0;
+                           end if;
 
-                           if Tk.Kind = Composite then
-                              if N > Tk.Comp_Value.Nested_Level then
-                                 --  Ignore this variable as it is deeper than
-                                 --  its nested level.
-                                 return 0;
-                              end if;
+                           --  We look first at two common cases to handle
+                           --  more efficiently tag into a single or two
+                           --  table statement.
 
-                              --  We look first at two common cases to handle
-                              --  more efficiently tag into a single or two
-                              --  table statement.
+                           if Table_Level = 1
+                             or else Tk.Comp_Value.Nested_Level = 1
+                           then
+                              --  First table level, or flat composite, the
+                              --  number of iterations corresponds to the
+                              --  number of item into this tag.
+                              return Size (Tk.Comp_Value);
 
-                              if Table_Level = 1
-                                or else Tk.Comp_Value.Nested_Level = 1
-                              then
-                                 --  First table level, or flat composite, the
-                                 --  number of iterations corresponds to the
-                                 --  number of item into this tag.
-                                 return Size (Tk.Comp_Value);
+                           elsif Table_Level = 2
+                             and then N = 1
+                           then
+                              --  Table level 2 while looking to nested
+                              --  variable.
+                              return Tk.Comp_Value.Max;
 
-                              elsif Table_Level = 2
-                                and then N = 1
-                              then
-                                 --  Table level 2 while looking to nested
-                                 --  variable.
-                                 return Tk.Comp_Value.Max;
-
-                              else
-                                 --  All other cases here
-                                 declare
-                                    K : constant Positive
-                                      := Tk.Comp_Value.Nested_Level - N + 1;
-                                    --  K is the variable indice for which
-                                    --  the number of items is looked for.
-                                 begin
-                                    if K = 1 then
-                                       return Size (Tk.Comp_Value);
-                                    elsif K = 2 then
-                                       return Tk.Comp_Value.Max;
-                                    else
-                                       return Max (Tk.Comp_Value, K - 1);
-                                    end if;
-                                 end;
-                              end if;
+                           else
+                              --  All other cases here
+                              declare
+                                 K : constant Positive
+                                   := Tk.Comp_Value.Nested_Level - N + 1;
+                                 --  K is the variable indice for which
+                                 --  the number of items is looked for.
+                              begin
+                                 if K = 1 then
+                                    return Size (Tk.Comp_Value);
+                                 elsif K = 2 then
+                                    return Tk.Comp_Value.Max;
+                                 else
+                                    return Max (Tk.Comp_Value, K - 1);
+                                 end if;
+                              end;
                            end if;
                         end if;
                      end;
-                  end loop;
+                  end if;
 
                   --  Tag not found
 

@@ -79,6 +79,7 @@ package body Filter is
    Sub_Token           : aliased constant String := "SUB";
    Trim_Token          : aliased constant String := "TRIM";
    Upper_Token         : aliased constant String := "UPPER";
+   Web_Encode_Token    : aliased constant String := "WEB_ENCODE";
    Web_Escape_Token    : aliased constant String := "WEB_ESCAPE";
    Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
    Yes_No_Token        : aliased constant String := "YES_NO";
@@ -214,6 +215,9 @@ package body Filter is
 
          Upper          =>
            (Upper_Token'Access,          Upper'Access),
+
+         Web_Encode     =>
+           (Web_Encode_Token'Access,     Web_Encode'Access),
 
          Web_Escape     =>
            (Web_Escape_Token'Access,     Web_Escape'Access),
@@ -1456,9 +1460,58 @@ package body Filter is
       return Characters.Handling.To_Upper (S);
    end Upper;
 
-   ------------
-   -- Escape --
-   ------------
+   ----------------
+   -- Web_Encode --
+   ----------------
+
+   function Web_Encode
+     (S : in String;
+      P : in Parameter_Data     := No_Parameter;
+      T : in Translate_Set      := Null_Set;
+      I : in Include_Parameters := No_Include_Parameters)
+      return String
+   is
+      pragma Unreferenced (T, I);
+      C_Inf  : constant Natural := Character'Pos ('<');
+      C_Sup  : constant Natural := Character'Pos ('>');
+      C_And  : constant Natural := Character'Pos ('&');
+      C_Quo  : constant Natural := Character'Pos ('"');
+
+      Result : String (1 .. S'Length * 6);
+      N      : Natural := 0;
+      Code   : Natural;
+   begin
+      Check_Null_Parameter (P);
+
+      for K in S'Range loop
+         Code := Character'Pos (S (K));
+
+         if Code in 32 .. 127
+           and then Code /= C_Inf and then Code /= C_Sup
+           and then Code /= C_And and then Code /= C_Quo
+         then
+            N := N + 1;
+            Result (N) := S (K);
+
+         else
+            declare
+               I_Code : constant String := Image (Code);
+            begin
+               N := N + 1;
+               Result (N .. N + 1) := "&#";
+               Result (N + 2 .. N + I_Code'Length + 1) := I_Code;
+               Result (N + I_Code'Length + 2) := ';';
+               N := N + I_Code'Length + 2;
+            end;
+         end if;
+      end loop;
+
+      return Result (1 .. N);
+   end Web_Encode;
+
+   ----------------
+   -- Web_Escape --
+   ----------------
 
    function Web_Escape
      (S : in String;

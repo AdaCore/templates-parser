@@ -1,0 +1,40 @@
+
+@@INLINE@@
+start:
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE(.)(,)()@@
+ start:
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE(..)(,)()@@
+  start:
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE(...)(,)()@@
+   start:
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE(class=")(,)(")@@
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE(..class=")(,)(")@@
+   @@TABLE@@
+      @_LABELS_@
+   @@END_TABLE@@
+@@END_INLINE@@

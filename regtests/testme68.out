@@ -1,0 +1,7 @@
+
+start: lab1 lab2 lab3 lab4
+.start:,lab1,lab2,lab3,lab4
+..start:,lab1,lab2,lab3,lab4
+...start:,lab1,lab2,lab3,lab4
+class="lab1,lab2,lab3,lab4"
+..class="lab1,lab2,lab3,lab4"

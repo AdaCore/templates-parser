@@ -34,6 +34,10 @@ separate (Templates_Parser)
 
 procedure Print_Tree (T : in Tree; Level : in Natural := 0) is
 
+   ------------------
+   -- Print_Indent --
+   ------------------
+
    procedure Print_Indent (L : in Natural) is
       use Ada.Strings.Fixed;
    begin
@@ -75,13 +79,13 @@ begin
          Print_Tree (T.Next, Level);
 
       when Set_Stmt =>
-         Text_IO.Put ("[SET_STMT] ");
+         Text_IO.Put ("[SET] ");
          Definitions.Print_Tree (T.Def);
          Text_IO.New_Line;
          Print_Tree (T.Next, Level);
 
       when If_Stmt  =>
-         Text_IO.Put ("[IF_STMT] ");
+         Text_IO.Put ("[IF] ");
          Expr.Print_Tree (T.Cond);
          Text_IO.New_Line;
          Print_Tree (T.N_True, Level + 1);
@@ -89,11 +93,11 @@ begin
          Text_IO.Put_Line ("[ELSE]");
          Print_Tree (T.N_False, Level + 1);
          Print_Indent (Level);
-         Text_IO.Put_Line ("[END_IF_STMT]");
+         Text_IO.Put_Line ("[END_IF]");
          Print_Tree (T.Next, Level);
 
       when Table_Stmt =>
-         Text_IO.Put ("[TABLE_STMT]");
+         Text_IO.Put ("[TABLE]");
 
          if T.Terminate_Sections then
             Text_IO.Put (" TERMINATE_SECTIONS");
@@ -106,7 +110,7 @@ begin
          Text_IO.New_Line;
          Print_Tree (T.Blocks, Level + 1);
          Print_Indent (Level);
-         Text_IO.Put_Line ("[END_TABLE_STMT]");
+         Text_IO.Put_Line ("[END_TABLE]");
          Print_Tree (T.Next, Level);
 
       when Section_Block =>
@@ -127,13 +131,13 @@ begin
          Print_Tree (T.Next, Level);
 
       when Section_Stmt =>
-         Text_IO.Put_Line ("[SECTION_STMT]");
+         Text_IO.Put_Line ("[SECTION]");
          Print_Tree (T.Next, Level + 1);
          Print_Tree (T.N_Section, Level);
 
       when Include_Stmt =>
          Text_IO.Put_Line
-           ("[INCLUDE_STMT] " & To_String (T.File.Info.Filename));
+           ("[INCLUDE] " & To_String (T.File.Info.Filename));
 
          declare
             use type Data.Tree;
@@ -151,7 +155,7 @@ begin
          Print_Tree (T.Next, Level);
 
       when Inline_Stmt =>
-         Text_IO.Put_Line ("[INLINE_STMT] (" & To_String (T.Sep) & ')');
+         Text_IO.Put_Line ("[INLINE] (" & To_String (T.Sep) & ')');
          Print_Tree (T.I_Block, Level + 1);
          Text_IO.Put_Line ("[END_INLINE]");
          Print_Tree (T.Next, Level);

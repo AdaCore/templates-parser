@@ -64,6 +64,7 @@ package body Templates_Parser is
    Filter_Lower_Token       : aliased constant String := "@_LOWER";
    Filter_Upper_Token       : aliased constant String := "@_UPPER";
    Filter_Clean_Text_Token  : aliased constant String := "@_CLEAN_TEXT";
+   Filter_No_Space_Token    : aliased constant String := "@_NO_SPACE";
    Filter_Capitalize_Token  : aliased constant String := "@_CAPITALIZE";
    Filter_Yes_No_Token      : aliased constant String := "@_YES_NO";
    Filter_Oui_Non_Token     : aliased constant String := "@_OUI_NON";
@@ -189,6 +190,7 @@ package body Templates_Parser is
       Upper,      -- upper case
       Capitalize, -- lower case except char before spaces and underscores
       Clean_Text, -- only letter/digits all other chars are changed to spaces.
+      No_Space,   -- removes all spaces found in the value.
       Yes_No,     -- if True return Yes, If False returns No, else do nothing.
       Oui_Non,    -- if True return Oui, If False returns Non, else do nothing.
       Exist,      -- return "TRUE" if var is not empty and "FALSE" otherwise.
@@ -211,6 +213,7 @@ package body Templates_Parser is
    function Upper_Filter      (S : in String) return String;
    function Capitalize_Filter (S : in String) return String;
    function Clean_Text_Filter (S : in String) return String;
+   function No_Space_Filter   (S : in String) return String;
    function Yes_No_Filter     (S : in String) return String;
    function Oui_Non_Filter    (S : in String) return String;
    function Exist_Filter      (S : in String) return String;
@@ -872,46 +875,6 @@ package body Templates_Parser is
 
    end Expr;
 
-   ---------------------
-   -- Identity_Filter --
-   ---------------------
-
-   function Identity_Filter (S : in String) return String is
-   begin
-      return S;
-   end Identity_Filter;
-
-   ------------------
-   -- Lower_Filter --
-   ------------------
-
-   function Lower_Filter (S : in String) return String is
-   begin
-      return Characters.Handling.To_Lower (S);
-   end Lower_Filter;
-
-   --------------------
-   -- Reverse_Filter --
-   --------------------
-
-   function Reverse_Filter (S : in String) return String is
-      Result : String (S'Range);
-   begin
-      for K in S'Range loop
-         Result (Result'Last - K + Result'First) := S (K);
-      end loop;
-      return Result;
-   end Reverse_Filter;
-
-   ------------------
-   -- Upper_Filter --
-   ------------------
-
-   function Upper_Filter (S : in String) return String is
-   begin
-      return Characters.Handling.To_Upper (S);
-   end Upper_Filter;
-
    -----------------------
    -- Capitalize_Filter --
    -----------------------
@@ -960,34 +923,66 @@ package body Templates_Parser is
       return Result;
    end Clean_Text_Filter;
 
-   -------------------
-   -- Yes_No_Filter --
-   -------------------
+   ------------------
+   -- Exist_Filter --
+   ------------------
 
-   function Yes_No_Filter (S : in String) return String is
+   function Exist_Filter (S : in String) return String is
    begin
-      if S = "TRUE" then
-         return "YES";
-
-      elsif S = "true" then
-         return "yes";
-
-      elsif S = "True" then
-         return "Yes";
-
-      elsif S = "FALSE" then
-         return "NO";
-
-      elsif S = "false" then
-         return "no";
-
-      elsif S = "False" then
-         return "No";
-
+      if S /= "" then
+         return "TRUE";
       else
-         return S;
+         return "FALSE";
       end if;
-   end Yes_No_Filter;
+   end Exist_Filter;
+
+   ---------------------
+   -- Identity_Filter --
+   ---------------------
+
+   function Identity_Filter (S : in String) return String is
+   begin
+      return S;
+   end Identity_Filter;
+
+   ---------------------
+   -- Is_Empty_Filter --
+   ---------------------
+
+   function Is_Empty_Filter (S : in String) return String is
+   begin
+      if S = "" then
+         return "TRUE";
+      else
+         return "FALSE";
+      end if;
+   end Is_Empty_Filter;
+
+   ------------------
+   -- Lower_Filter --
+   ------------------
+
+   function Lower_Filter (S : in String) return String is
+   begin
+      return Characters.Handling.To_Lower (S);
+   end Lower_Filter;
+
+   ---------------------
+   -- No_Space_Filter --
+   ---------------------
+
+   function No_Space_Filter (S : in String) return String is
+      Result : String (S'Range);
+      L      : Natural := Result'First - 1;
+   begin
+      for K in S'Range loop
+         if not (S (K) = ' ') then
+            L := L + 1;
+            Result (L) := S (K);
+         end if;
+      end loop;
+      return Result (Result'First .. L);
+   end No_Space_Filter;
 
    --------------------
    -- Oui_Non_Filter --
@@ -1018,31 +1013,56 @@ package body Templates_Parser is
       end if;
    end Oui_Non_Filter;
 
-   ------------------
-   -- Exist_Filter --
-   ------------------
+   --------------------
+   -- Reverse_Filter --
+   --------------------
 
-   function Exist_Filter (S : in String) return String is
+   function Reverse_Filter (S : in String) return String is
+      Result : String (S'Range);
    begin
-      if S /= "" then
-         return "TRUE";
-      else
-         return "FALSE";
-      end if;
-   end Exist_Filter;
+      for K in S'Range loop
+         Result (Result'Last - K + Result'First) := S (K);
+      end loop;
+      return Result;
+   end Reverse_Filter;
 
-   ---------------------
-   -- Is_Empty_Filter --
-   ---------------------
+   ------------------
+   -- Upper_Filter --
+   ------------------
 
-   function Is_Empty_Filter (S : in String) return String is
+   function Upper_Filter (S : in String) return String is
    begin
-      if S = "" then
-         return "TRUE";
+      return Characters.Handling.To_Upper (S);
+   end Upper_Filter;
+
+   -------------------
+   -- Yes_No_Filter --
+   -------------------
+
+   function Yes_No_Filter (S : in String) return String is
+   begin
+      if S = "TRUE" then
+         return "YES";
+
+      elsif S = "true" then
+         return "yes";
+
+      elsif S = "True" then
+         return "Yes";
+
+      elsif S = "FALSE" then
+         return "NO";
+
+      elsif S = "false" then
+         return "no";
+
+      elsif S = "False" then
+         return "No";
+
       else
-         return "FALSE";
+         return S;
       end if;
-   end Is_Empty_Filter;
+   end Yes_No_Filter;
 
    --  Filter Table
 
@@ -1057,6 +1077,8 @@ package body Templates_Parser is
            (Filter_Capitalize_Token'Access, Capitalize_Filter'Access),
          Clean_Text =>
            (Filter_Clean_Text_Token'Access, Clean_Text_Filter'Access),
+         No_Space   =>
+           (Filter_No_Space_Token'Access,   No_Space_Filter'Access),
          Invert     =>
            (Filter_Reverse_Token'Access,    Reverse_Filter'Access),
          Yes_No     =>
@@ -1079,9 +1101,10 @@ package body Templates_Parser is
    begin
       for F in Filter_Table'Range loop
          if P - Filter_Table (F).Name'Length >= 1
-           and then Slice (Str,
-                           P - Filter_Table (F).Name'Length,
-                           P - 1) = Filter_Table (F).Name.all
+           and then
+            Slice (Str,
+                   P - Filter_Table (F).Name'Length,
+                   P - 1) = Filter_Table (F).Name.all
          then
             return F;
          end if;

@@ -86,7 +86,7 @@ package body Templates_Parser is
 
    package Expr is
 
-      type Ops is (O_And, O_Or, O_Sup, O_Inf, O_Esup, O_Einf, O_Equal);
+      type Ops is (O_And, O_Or, O_Xor, O_Sup, O_Inf, O_Esup, O_Einf, O_Equal);
 
       function Image (O : in Ops) return String;
       --  Returns Ops string representation.
@@ -692,6 +692,7 @@ package body Templates_Parser is
          case O is
             when O_And   => return "and";
             when O_Or    => return "or";
+            when O_Xor   => return "xor";
             when O_Sup   => return ">";
             when O_Inf   => return "<";
             when O_Esup  => return ">=";
@@ -844,6 +845,9 @@ package body Templates_Parser is
 
          elsif O = "or" then
             return O_Or;
+
+         elsif O = "xor" then
+            return O_Xor;
 
          elsif O = ">" then
             return O_Sup;
@@ -1673,6 +1677,7 @@ package body Templates_Parser is
 
             function F_And  (L, R : in String) return String;
             function F_Or   (L, R : in String) return String;
+            function F_Xor  (L, R : in String) return String;
             function F_Sup  (L, R : in String) return String;
             function F_Esup (L, R : in String) return String;
             function F_Einf (L, R : in String) return String;
@@ -1798,9 +1803,23 @@ package body Templates_Parser is
                   end if;
             end F_Sup;
 
+            -----------
+            -- F_Xor --
+            -----------
+
+            function F_Xor (L, R : in String) return String is
+            begin
+               if Is_True (L) xor Is_True (R) then
+                  return "TRUE";
+               else
+                  return "FALSE";
+               end if;
+            end F_Xor;
+
             Op_Table : constant array (Expr.Ops) of Ops_Fct
               := (Expr.O_And   => F_And'Access,
                   Expr.O_Or    => F_Or'Access,
+                  Expr.O_Xor   => F_Xor'Access,
                   Expr.O_Sup   => F_Sup'Access,
                   Expr.O_Inf   => F_Inf'Access,
                   Expr.O_Esup  => F_Esup'Access,

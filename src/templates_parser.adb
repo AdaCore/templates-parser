@@ -3451,9 +3451,7 @@ package body Templates_Parser is
                            elsif Var.Attribute.Attr = Up_Level then
                               Up_Value := Var.Attribute.Value;
 
-                           elsif Var.Attribute.Attr /= Up_Level
-                             and then Var.Attribute.Attr /= Nil
-                           then
+                           elsif Var.Attribute.Attr /= Nil then
                               Exceptions.Raise_Exception
                                 (Template_Error'Identity,
                                  "This attribute is not valid for a "

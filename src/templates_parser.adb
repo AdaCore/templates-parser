@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2001                         --
+--                        Copyright (C) 1999 - 2002                         --
 --                               Pascal Obry                                --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -739,7 +739,8 @@ package body Templates_Parser is
 
    function Field
      (Vect_Value : in Vector_Tag;
-      N          : in Positive) return String;
+      N          : in Positive)
+      return String;
    --  returns the Nth value in the vector tag.
 
    ---------
@@ -975,7 +976,7 @@ package body Templates_Parser is
    function "&"
      (Matrix : in Matrix_Tag;
       Vect   : in Vector_Tag)
-     return Matrix_Tag
+      return Matrix_Tag
    is
       Item : constant Matrix_Tag_Node_Access
         := new Matrix_Tag_Node'(Vect, null);
@@ -1066,7 +1067,7 @@ package body Templates_Parser is
    function Vector
      (Matrix : in Matrix_Tag;
       N      : in Positive)
-     return Vector_Tag
+      return Vector_Tag
    is
       P : Matrix_Tag_Node_Access := Matrix.M.Head;
    begin
@@ -1131,7 +1132,7 @@ package body Templates_Parser is
    function Capitalize_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String (S'Range);
       Upper  : Boolean := True;
@@ -1159,7 +1160,7 @@ package body Templates_Parser is
    function Clean_Text_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
 
       use type Strings.Maps.Character_Set;
@@ -1191,7 +1192,7 @@ package body Templates_Parser is
    function Coma_2_Point_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String := S;
    begin
@@ -1213,7 +1214,7 @@ package body Templates_Parser is
    function Contract_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
 
       use type Strings.Maps.Character_Set;
@@ -1259,7 +1260,7 @@ package body Templates_Parser is
    function Exist_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1277,7 +1278,7 @@ package body Templates_Parser is
    function Format_Number_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       TS : constant String := Strings.Fixed.Trim (S, Both);
 
@@ -1347,7 +1348,7 @@ package body Templates_Parser is
    function Is_Empty_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1365,7 +1366,7 @@ package body Templates_Parser is
    function Lower_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1379,7 +1380,7 @@ package body Templates_Parser is
    function Match_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       if P = No_Parameter then
          Exceptions.Raise_Exception
@@ -1400,7 +1401,7 @@ package body Templates_Parser is
    function No_Digit_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String := S;
    begin
@@ -1424,7 +1425,7 @@ package body Templates_Parser is
    function No_Letter_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String := S;
    begin
@@ -1446,7 +1447,7 @@ package body Templates_Parser is
    function No_Space_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String (S'Range);
       L      : Natural := Result'First - 1;
@@ -1470,7 +1471,7 @@ package body Templates_Parser is
    function Oui_Non_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1504,7 +1505,7 @@ package body Templates_Parser is
    function Point_2_Coma_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String := S;
    begin
@@ -1526,7 +1527,7 @@ package body Templates_Parser is
    function Repeat_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       N : Natural;
    begin
@@ -1555,7 +1556,7 @@ package body Templates_Parser is
    function Reverse_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Result : String (S'Range);
    begin
@@ -1574,7 +1575,7 @@ package body Templates_Parser is
    function Size_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1592,7 +1593,7 @@ package body Templates_Parser is
    function Trim_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1606,7 +1607,7 @@ package body Templates_Parser is
    function Upper_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1620,7 +1621,7 @@ package body Templates_Parser is
    function Web_Escape_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Max_Escape_Sequence : constant Positive := 5;
       Result              : String (1 .. S'Length * Max_Escape_Sequence);
@@ -1664,7 +1665,7 @@ package body Templates_Parser is
    function Web_NBSP_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String
+      return String
    is
       Nbsp_Token          : constant String := "&nbsp;";
       Max_Escape_Sequence : constant Positive := Nbsp_Token'Length;
@@ -1695,7 +1696,7 @@ package body Templates_Parser is
    function Yes_No_Filter
      (S : in String;
       P : in Parameter_Data := No_Parameter)
-     return String is
+      return String is
    begin
       Check_Null_Parameter (P);
 
@@ -1845,7 +1846,8 @@ package body Templates_Parser is
 
    function Field
      (Vect_Value : in Vector_Tag;
-      N          : in Positive) return String
+      N          : in Positive)
+      return String
    is
       P : Vector_Tag_Node_Access := Vect_Value.Head;
    begin
@@ -1865,7 +1867,8 @@ package body Templates_Parser is
 
    function Field
      (Mat_Value : in Matrix_Tag;
-      I, J      : in Natural) return String
+      I, J      : in Natural)
+      return String
    is
       P : Matrix_Tag_Node_Access := Mat_Value.M.Head;
    begin
@@ -1890,7 +1893,7 @@ package body Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in String)
-     return Association is
+      return Association is
    begin
       return Association'
         (Std,
@@ -1901,7 +1904,7 @@ package body Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in Ada.Strings.Unbounded.Unbounded_String)
-     return Association is
+      return Association is
    begin
       return Assoc (Variable, To_String (Value));
    end Assoc;
@@ -1909,7 +1912,7 @@ package body Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in Integer)
-     return Association
+      return Association
    is
       S_Value : constant String := Integer'Image (Value);
    begin
@@ -1924,7 +1927,7 @@ package body Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in Boolean)
-     return Association is
+      return Association is
    begin
       if Value then
          return Assoc (Variable, "TRUE");
@@ -1937,7 +1940,7 @@ package body Templates_Parser is
      (Variable  : in String;
       Value     : in Vector_Tag;
       Separator : in String     := Default_Separator)
-     return Association is
+      return Association is
    begin
       return Association'
         (Vect,
@@ -1950,7 +1953,7 @@ package body Templates_Parser is
      (Variable  : in String;
       Value     : in Matrix_Tag;
       Separator : in String     := Default_Separator)
-     return Association is
+      return Association is
    begin
       return Association'
         (Matrix,
@@ -1966,7 +1969,7 @@ package body Templates_Parser is
    function Load
      (Filename : in String;
       Cached   : in Boolean := False)
-     return Static_Tree
+      return Static_Tree
    is
 
       File   : Input.File_Type;    --  file beeing parsed.
@@ -2032,7 +2035,7 @@ package body Templates_Parser is
 
       function Build_Include_Pathname
         (Include_Filename : in Unbounded_String)
-        return String
+         return String
       is
          K : constant Natural
            := Index (Include_Filename, Maps.To_Set ("/\"),
@@ -2416,7 +2419,7 @@ package body Templates_Parser is
       Translations      : in Translate_Table := No_Translation;
       Cached            : in Boolean         := False;
       Keep_Unknown_Tags : in Boolean         := False)
-     return String is
+      return String is
    begin
       return To_String
         (Parse (Filename, Translations, Cached, Keep_Unknown_Tags));
@@ -2431,7 +2434,7 @@ package body Templates_Parser is
       Translations      : in Translate_Table := No_Translation;
       Cached            : in Boolean         := False;
       Keep_Unknown_Tags : in Boolean         := False)
-     return Unbounded_String
+      return Unbounded_String
    is
       type Table_State is record
          I, J           : Natural;
@@ -2944,7 +2947,7 @@ package body Templates_Parser is
             function Get_Max_Lines
               (T : in Tree;
                N : in Positive)
-              return Natural;
+               return Natural;
             --  Recursivelly descend the tree and compute the max lines that
             --  will be displayed into the table.
 
@@ -2973,7 +2976,7 @@ package body Templates_Parser is
             function Get_Max_Lines
               (T : in Tree;
                N : in Positive)
-              return Natural
+               return Natural
             is
 
                function Check (T : in Data.Tree) return Natural;
@@ -3226,6 +3229,7 @@ package body Templates_Parser is
       T := Load (Filename, Cached);
 
       Now := Ada.Calendar.Clock;
+      --  Used for the time related variable
 
       Analyze (T.C_Info, Empty_State);
 
@@ -3324,7 +3328,7 @@ package body Templates_Parser is
    function Translate
      (Template     : in String;
       Translations : in Translate_Table := No_Translation)
-     return String
+      return String
    is
       T : Data.Tree := Data.Parse (Template);
       P : Data.Tree := T;

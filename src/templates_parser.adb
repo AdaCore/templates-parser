@@ -137,13 +137,17 @@ package body Templates_Parser is
    ---------
 
    function "+" (Value : in String) return Vector_Tag is
+
       Item : constant Vector_Tag_Node_Access
         := new Vector_Tag_Node'(To_Unbounded_String (Value), null);
+
    begin
       return Vector_Tag'
-        (Count => 1,
-         Head  => Item,
-         Last  => Item);
+        (Ada.Finalization.Controlled with
+         Ref_Count => new Integer'(1),
+         Count     => 1,
+         Head      => Item,
+         Last      => Item);
    end "+";
 
    ---------
@@ -158,19 +162,76 @@ package body Templates_Parser is
       Item : constant Vector_Tag_Node_Access
         := new Vector_Tag_Node'(To_Unbounded_String (Value), null);
    begin
+      Vect.Ref_Count.all := Vect.Ref_Count.all + 1;
+
       if Vect.Count = 0 then
          return Vector_Tag'
-           (Count => 1,
-            Head  => Item,
-            Last  => Item);
+           (Ada.Finalization.Controlled with
+            Ref_Count => Vect.Ref_Count,
+            Count     => 1,
+            Head      => Item,
+            Last      => Item);
       else
          Vect.Last.Next := Item;
          return Vector_Tag'
-           (Count => Vect.Count + 1,
-            Head  => Vect.Head,
-            Last  => Item);
+           (Ada.Finalization.Controlled with
+            Ref_Count => Vect.Ref_Count,
+            Count     => Vect.Count + 1,
+            Head      => Vect.Head,
+            Last      => Item);
       end if;
    end "&";
+
+   ------------
+   -- Adjust --
+   ------------
+
+   procedure Adjust (V : in out Vector_Tag) is
+   begin
+      V.Ref_Count.all := V.Ref_Count.all + 1;
+   end Adjust;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (V : in out Vector_Tag) is
+   begin
+      V.Ref_Count := new Integer'(1);
+      V.Count     := 0;
+   end Initialize;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   procedure Finalize (V : in out Vector_Tag) is
+   begin
+      V.Ref_Count.all := V.Ref_Count.all - 1;
+
+      if V.Ref_Count.all = 0 then
+         declare
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Vector_Tag_Node, Vector_Tag_Node_Access);
+
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Integer, Integer_Access);
+
+            P, N : Vector_Tag_Node_Access;
+         begin
+            P := V.Head;
+
+            while P /= null loop
+               N := P.Next;
+               Free (P);
+               P := N;
+            end loop;
+
+            V.Head := null;
+            Free (V.Ref_Count);
+         end;
+      end if;
+   end Finalize;
 
    ---------------------
    -- Identity_Filter --
@@ -680,7 +741,8 @@ package body Templates_Parser is
                         Pos - Filter_Length (Filter),
                         Pos + Length (Translations (K).Variable) - 1,
                         Through_Filter
-                          (Field (Translations (K).Vect_Value, N), Filter));
+                          (Field (Translations (K).Vect_Value, N),
+                           Filter));
                   else
                      Replace_Slice
                        (Str,

@@ -326,11 +326,11 @@ private
    package Association_Set is new Strings_Maps (Association, "=");
    use Association_Set;
 
-   type Map_Type_Access is access Containers.Map_Type;
+   type Map_Access is access Containers.Map;
 
    type Translate_Set is new Ada.Finalization.Controlled with record
       Ref_Count : Integer_Access;
-      Set       : Map_Type_Access;
+      Set       : Map_Access;
    end record;
 
    procedure Initialize (Set : in out Translate_Set);

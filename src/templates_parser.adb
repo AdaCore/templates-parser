@@ -114,7 +114,7 @@ package body Templates_Parser is
    procedure Initialize (Set : in out Translate_Set) is
    begin
       Set.Ref_Count := new Integer'(1);
-      Set.Set       := new Containers.Map_Type;
+      Set.Set       := new Containers.Map;
    end Initialize;
 
    --------------
@@ -123,7 +123,7 @@ package body Templates_Parser is
 
    procedure Finalize (Set : in out Translate_Set) is
       procedure Free is
-        new Unchecked_Deallocation (Containers.Map_Type, Map_Type_Access);
+        new Unchecked_Deallocation (Containers.Map, Map_Access);
    begin
       Set.Ref_Count.all := Set.Ref_Count.all - 1;
 
@@ -2776,7 +2776,7 @@ package body Templates_Parser is
         (T     : in Tree;
          State : in Table_State)
       is
-         use type Containers.Cursor_Type;
+         use type Containers.Cursor;
 
          function Analyze (E : in Expr.Tree) return String;
          --  Analyse the expression tree and returns the result as a boolean
@@ -2814,12 +2814,12 @@ package body Templates_Parser is
          ---------------
 
          function Translate (Var : in Tag_Var) return String is
-            Pos : Containers.Cursor_Type;
+            Pos : Containers.Cursor;
          begin
             Pos := Containers.Find
               (Translations.Set.all, To_String (Var.Name));
 
-            if Pos /= Containers.Null_Cursor then
+            if Containers.Has_Element (Pos) then
                declare
                   Tk : constant Association := Containers.Element (Pos);
                begin
@@ -3349,13 +3349,13 @@ package body Templates_Parser is
                      return Result;
                   end Max;
 
-                  Pos : Containers.Cursor_Type;
+                  Pos : Containers.Cursor;
 
                begin
                   Pos := Containers.Find
                     (Translations.Set.all, To_String (T.Name));
 
-                  if Pos /= Containers.Null_Cursor then
+                  if Containers.Has_Element (Pos) then
                      declare
                         Tk : constant Association := Containers.Element (Pos);
                      begin
@@ -3743,12 +3743,11 @@ package body Templates_Parser is
       ---------------
 
       function Translate (Var : in Tag_Var) return String is
-         use type Containers.Cursor_Type;
-         Pos : Containers.Cursor_Type;
+         Pos : Containers.Cursor;
       begin
          Pos := Containers.Find (Translations.Set.all, To_String (Var.Name));
 
-         if Pos /= Containers.Null_Cursor then
+         if Containers.Has_Element (Pos) then
             declare
                Item : constant Association := Containers.Element (Pos);
             begin

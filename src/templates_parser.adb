@@ -2814,8 +2814,7 @@ package body Templates_Parser is
                      E := E - 1;
                   end if;
 
-                  --  Always return the variable or value unquoted except if
-                  --  the value has some spaces.
+                  --  Always return the variable or value unquoted
 
                   if Variables (S) = '"' then
                      return Variables (S + 1  .. E - 1);

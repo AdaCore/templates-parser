@@ -37,16 +37,17 @@ with Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with GNAT.Calendar.Time_IO;
-with GNAT.OS_Lib;
 with GNAT.Regpat;
 
 with Templates_Parser.Input;
+with Templates_Parser.Configuration;
 
 package body Templates_Parser is
 
    use Ada;
    use Ada.Exceptions;
    use Ada.Strings;
+   use Ada.Strings.Unbounded;
 
    Internal_Error : exception;
 
@@ -1512,9 +1513,9 @@ package body Templates_Parser is
 
       case Kind is
          when Info =>
-            Filename  : Unbounded_String;    -- Name of the file
-            Timestamp : GNAT.OS_Lib.OS_Time; -- Date and Time of last change
-            I_File    : Tree;                -- Included file references
+            Filename  : Unbounded_String;         -- Name of the file
+            Timestamp : Configuration.Time_Stamp; -- Date/Time of last change
+            I_File    : Tree;                     -- Included file references
 
          when C_Info =>
             Obsolete  : Boolean := False;    -- True if newer version in cache
@@ -1561,35 +1562,32 @@ package body Templates_Parser is
    -------------------
 
    --  Cached_Files keep the parsed Tree for a given file in memory. This
-   --  implementation is thread safe so it is possible to use the cache in a
-   --  multitasking program.
+   --  package has two implementations one is thread safe so it is possible to
+   --  use the cache in a multitasking program. The other is meant to be used
+   --  for configuration that do not want to drag the tasking runtime.
 
    package Cached_Files is
 
-      protected Prot is
+      procedure Add
+        (Filename : in     String;
+         T        : in     Tree;
+         Old      :    out Tree);
+      --  Add Filename/T to the list of cached files. If Filename is
+      --  already in the list, replace the current tree with T. Furthemore
+      --  if Filename tree is already in use, Old will be set with the
+      --  previous C_Info node otherwise Old will be T.Next (C_Info node
+      --  for current tree).
 
-         procedure Add
-           (Filename : in     String;
-            T        : in     Tree;
-            Old      :    out Tree);
-         --  Add Filename/T to the list of cached files. If Filename is
-         --  already in the list, replace the current tree with T. Furthemore
-         --  if Filename tree is already in use, Old will be set with the
-         --  previous C_Info node otherwise Old will be T.Next (C_Info node
-         --  for current tree).
+      procedure Get
+        (Filename : in     String;
+         Result   :    out Static_Tree);
+      --  Returns the Tree for Filename or Null_Static_Tree if Filename has
+      --  not been cached or is obsolete.
 
-         procedure Get
-           (Filename : in     String;
-            Result   :    out Static_Tree);
-         --  Returns the Tree for Filename or Null_Static_Tree if Filename has
-         --  not been cached or is obsolete.
-
-         procedure Release (T : in out Static_Tree);
-         --  After loading a tree and using it, it is required that it be
-         --  released. This will ensure that a tree marked as obsolete (a new
-         --  version being now in the cache) will be released from the memory.
-
-      end Prot;
+      procedure Release (T : in out Static_Tree);
+      --  After loading a tree and using it, it is required that it be
+      --  released. This will ensure that a tree marked as obsolete (a new
+      --  version being now in the cache) will be released from the memory.
 
    end Cached_Files;
 
@@ -3287,7 +3285,7 @@ package body Templates_Parser is
 
    begin
       if Cached then
-         Cached_Files.Prot.Get (Filename, Result => T);
+         Cached_Files.Get (Filename, Result => T);
 
          if T /= Null_Static_Tree then
             pragma Assert (T.C_Info /= null);
@@ -3320,7 +3318,7 @@ package body Templates_Parser is
                          Old,
                          0,
                          To_Unbounded_String (Filename),
-                         GNAT.OS_Lib.File_Time_Stamp (Filename),
+                         Configuration.File_Time_Stamp (Filename),
                          I_File);
 
       if Error_Include_Message /= Null_Unbounded_String then
@@ -3333,7 +3331,7 @@ package body Templates_Parser is
       end if;
 
       if Cached then
-         Cached_Files.Prot.Add (Filename, New_T, Old);
+         Cached_Files.Add (Filename, New_T, Old);
          pragma Assert (Old /= null);
       end if;
 
@@ -4609,7 +4607,7 @@ package body Templates_Parser is
       Analyze (T.C_Info, Empty_State);
 
       if Cached then
-         Cached_Files.Prot.Release (T);
+         Cached_Files.Release (T);
       else
          Release (T.Info);
       end if;

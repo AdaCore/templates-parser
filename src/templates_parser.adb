@@ -96,7 +96,7 @@ package body Templates_Parser is
    --  Filters setting --
    ----------------------
 
-   --  a filter appear just before a tag variable (e.g. @@LOWER@@_SOME_VAT_@@
+   --  A filter appear just before a tag variable (e.g. @_LOWER:SOME_VAR_@
    --  and means that the filter LOWER should be applied to SOME_VAR before
    --  replacing it in the template file.
 
@@ -163,17 +163,40 @@ package body Templates_Parser is
       --  If True return Yes, If False returns No, else do nothing.
       );
 
-   No_Parameter : constant String := "";
+   function Expect_Regexp (Mode : in Filters_Mode) return Boolean;
+   --  Returns True is the filter named Filter_Name expect a regular
+   --  expression as parameter.
+
+   type Parameter_Mode is (Void, Str, Regexp);
+
+   type Parameter_Data (Mode : Parameter_Mode := Void) is record
+      case Mode is
+         when Void =>
+            null;
+
+         when Str =>
+            S : Unbounded_String;
+
+         when Regexp =>
+            R_Str  : Unbounded_String;
+            Regexp : GNAT.Regexp.Regexp;
+      end case;
+   end record;
+
+   No_Parameter : constant Parameter_Data := Parameter_Data'(Mode => Void);
+
+   function Image (P : in Parameter_Data) return String;
+   --  Returns parameter string representation.
 
    type Filter_Function is
-     access function (S : in String; P : in String := No_Parameter)
+     access function (S : in String; P : in Parameter_Data := No_Parameter)
      return String;
    --  P is the filter parameter, no parameter by default. Parameter are
    --  untyped and will be parsed by the filter function if needed.
 
    type Filter_Routine is record
       Handle     : Filter_Function;
-      Parameters : Unbounded_String;
+      Parameters : Parameter_Data;
    end record;
 
    type Filter_Set is array (Positive range <>) of Filter_Routine;
@@ -188,72 +211,79 @@ package body Templates_Parser is
 
    --  filter functions, see above.
 
-   procedure Check_Null_Parameter (P : in String);
+   procedure Check_Null_Parameter (P : in Parameter_Data);
    --  Raises Template_Error if P is not equal to Null_Parameter.
 
    function Capitalize_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Clean_Text_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Coma_2_Point_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Contract_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Exist_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Is_Empty_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Lower_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Match_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function No_Digit_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function No_Letter_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function No_Space_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Oui_Non_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Point_2_Coma_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Reverse_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Repeat_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Trim_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Upper_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Web_Escape_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Web_NBSP_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
    function Yes_No_Filter
-     (S : in String; P : in String := No_Parameter) return String;
+     (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
 
    function Filter_Handle (Name : in String) return Filter_Function;
    --  Returns the filter function for the given filter name.
+
+   function Filter_Handle (Mode : in Filters_Mode) return Filter_Function;
+   --  Returns the filter function for the given filter mode.
+
+   function Filter_Mode (Name : in String) return Filters_Mode;
+   --  Returns the Filters_Mode for filter named Name. This is the internal
+   --  representation for this filter name.
 
    function Filter_Name (Handle : in Filter_Function) return String;
    --  Returns the filter name for the given filter function.
@@ -284,6 +314,19 @@ package body Templates_Parser is
    -- Image --
    -----------
 
+   function Image (P : in Parameter_Data) return String is
+   begin
+      case P.Mode is
+         when Void   => return "";
+         when Str    => return '(' & To_String (P.S) & ')';
+         when Regexp => return '(' & To_String (P.R_Str) & ')';
+      end case;
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
    function Image (T : in Tag) return String is
       R : Unbounded_String;
    begin
@@ -292,13 +335,7 @@ package body Templates_Parser is
       if T.Filters /= null then
          for K in reverse T.Filters'Range loop
             Append (R, Filter_Name (T.Filters (K).Handle));
-
-            if T.Filters (K).Parameters /= Null_Unbounded_String then
-               Append (R, '(');
-               Append (R, T.Filters (K).Parameters);
-               Append (R, ')');
-            end if;
-
+            Append (R, Image (T.Filters (K).Parameters));
             Append (R, ":");
          end loop;
       end if;
@@ -358,10 +395,29 @@ package body Templates_Parser is
             end if;
 
             if P1 = 0 then
-               return (Filter_Handle (Filter), Null_Unbounded_String);
+               return (Filter_Handle (Filter), Parameter_Data'(Mode => Void));
+
             else
-               return (Filter_Handle (Filter (Filter'First .. P1 - 1)),
-                       To_Unbounded_String (Filter (P1 + 1 .. P2 - 1)));
+               declare
+                  Name : constant String
+                    := Filter (Filter'First .. P1 - 1);
+
+                  Mode : constant Filters_Mode := Filter_Mode (Name);
+
+                  Parameter : constant String
+                    := Filter (P1 + 1 .. P2 - 1);
+               begin
+                  if Expect_Regexp (Mode) then
+                     return (Filter_Handle (Mode),
+                             Parameter_Data'(Regexp,
+                                             To_Unbounded_String (Parameter),
+                                             GNAT.Regexp.Compile (Parameter)));
+                  else
+                     return (Filter_Handle (Mode),
+                             Parameter_Data'(Templates_Parser.Str,
+                                             To_Unbounded_String (Parameter)));
+                  end if;
+               end;
             end if;
          end Name_Parameter;
 
@@ -446,7 +502,7 @@ package body Templates_Parser is
             for K in T.Filters'Range loop
                R := To_Unbounded_String
                  (T.Filters (K).Handle (To_String (R),
-                                        To_String (T.Filters (K).Parameters)));
+                                        T.Filters (K).Parameters));
             end loop;
 
             return To_String (R);
@@ -957,13 +1013,26 @@ package body Templates_Parser is
 
    package body Expr is separate;
 
+   -------------
+   -- Filters --
+   -------------
+
+   function Expect_Regexp (Mode : in Filters_Mode) return Boolean is
+   begin
+      if Mode = Match then
+         return True;
+      else
+         return False;
+      end if;
+   end Expect_Regexp;
+
    --------------------------
    -- Check_Null_Parameter --
    --------------------------
 
-   procedure Check_Null_Parameter (P : in String) is
+   procedure Check_Null_Parameter (P : in Parameter_Data) is
    begin
-      if P /= No_Parameter then
+      if P.Mode /= Void then
          Exceptions.Raise_Exception
            (Template_Error'Identity, "no parameter allowed in this filter");
       end if;
@@ -975,7 +1044,7 @@ package body Templates_Parser is
 
    function Capitalize_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String (S'Range);
@@ -1003,7 +1072,7 @@ package body Templates_Parser is
 
    function Clean_Text_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
 
@@ -1035,7 +1104,7 @@ package body Templates_Parser is
 
    function Coma_2_Point_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String := S;
@@ -1057,7 +1126,7 @@ package body Templates_Parser is
 
    function Contract_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
 
@@ -1103,7 +1172,7 @@ package body Templates_Parser is
 
    function Exist_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1121,7 +1190,7 @@ package body Templates_Parser is
 
    function Is_Empty_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1139,7 +1208,7 @@ package body Templates_Parser is
 
    function Lower_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1153,19 +1222,15 @@ package body Templates_Parser is
 
    function Match_Filter
      (S : in String;
-      P : in String := No_Parameter)
-     return String
-   is
-      Regexp : GNAT.Regexp.Regexp;
+      P : in Parameter_Data := No_Parameter)
+     return String is
    begin
       if P = No_Parameter then
          Exceptions.Raise_Exception
            (Template_Error'Identity, "missing parameter for MATCH filter");
       end if;
 
-      Regexp := GNAT.Regexp.Compile (P);
-
-      if GNAT.Regexp.Match (S, Regexp) then
+      if GNAT.Regexp.Match (S, P.Regexp) then
          return "TRUE";
       else
          return "FALSE";
@@ -1178,7 +1243,7 @@ package body Templates_Parser is
 
    function No_Digit_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String := S;
@@ -1202,7 +1267,7 @@ package body Templates_Parser is
 
    function No_Letter_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String := S;
@@ -1224,7 +1289,7 @@ package body Templates_Parser is
 
    function No_Space_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String (S'Range);
@@ -1248,7 +1313,7 @@ package body Templates_Parser is
 
    function Oui_Non_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1282,7 +1347,7 @@ package body Templates_Parser is
 
    function Point_2_Coma_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String := S;
@@ -1304,12 +1369,12 @@ package body Templates_Parser is
 
    function Repeat_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       N : Natural;
    begin
-      N := Natural'Value (P);
+      N := Natural'Value (To_String (P.S));
 
       declare
          R : String (1 .. N * S'Length);
@@ -1333,7 +1398,7 @@ package body Templates_Parser is
 
    function Reverse_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Result : String (S'Range);
@@ -1352,7 +1417,7 @@ package body Templates_Parser is
 
    function Trim_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1366,7 +1431,7 @@ package body Templates_Parser is
 
    function Upper_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1380,7 +1445,7 @@ package body Templates_Parser is
 
    function Web_Escape_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Max_Escape_Sequence : constant Positive := 5;
@@ -1420,7 +1485,7 @@ package body Templates_Parser is
 
    function Web_NBSP_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String
    is
       Nbsp_Token          : constant String := "&nbsp;";
@@ -1451,7 +1516,7 @@ package body Templates_Parser is
 
    function Yes_No_Filter
      (S : in String;
-      P : in String := No_Parameter)
+      P : in Parameter_Data := No_Parameter)
      return String is
    begin
       Check_Null_Parameter (P);
@@ -1548,16 +1613,31 @@ package body Templates_Parser is
    -------------------
 
    function Filter_Handle (Name : in String) return Filter_Function is
+      Mode : Filters_Mode := Filter_Mode (Name);
+   begin
+      return Filter_Table (Mode).Handle;
+   end Filter_Handle;
+
+   function Filter_Handle (Mode : in Filters_Mode) return Filter_Function is
+   begin
+      return Filter_Table (Mode).Handle;
+   end Filter_Handle;
+
+   -----------------
+   -- Filter_Mode --
+   -----------------
+
+   function Filter_Mode (Name : in String) return Filters_Mode is
    begin
       for K in Filter_Table'Range loop
          if Filter_Table (K).Name.all = Name then
-            return Filter_Table (K).Handle;
+            return K;
          end if;
       end loop;
 
       Exceptions.Raise_Exception
         (Internal_Error'Identity, "Unknown filter " & Name);
-   end Filter_Handle;
+   end Filter_Mode;
 
    -----------------
    -- Filter_Name --

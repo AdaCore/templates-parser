@@ -1,0 +1,70 @@
+
+--  Inline and IF
+
+word1
+@@IF@@ @_COND1_@
+   word2.1
+@@ELSE@@
+   word2.2
+@@END_IF@@
+word3
+
+@@INLINE@@
+word1
+@@IF@@ @_COND1_@
+            word2.1
+@@ELSE@@
+           word2.2
+@@END_IF@@
+word3
+@@END_INLINE@@
+
+word1
+@@IF@@ @_COND2_@
+   word2.1
+@@ELSE@@
+   word2.2
+@@END_IF@@
+word3
+
+@@INLINE( , )@@
+word1
+@@IF@@ @_COND2_@
+   word2.1
+@@ELSE@@
+   word2.2
+@@END_IF@@
+word3
+@@END_INLINE@@
+
+xyz
+
+--  Inline and TABLE
+
+@@TABLE@@
+@_VAR3_@
+@@END_TABLE@@
+
+@@INLINE(:)@@
+@@TABLE@@
+_@_VAR3_@_
+@@END_TABLE@@
+@@END_INLINE@@
+
+@@INLINE((:))@@
+@@TABLE@@
+_@_VAR3_@_
+@@END_TABLE@@
+xx
+@@END_INLINE@@
+
+@@INLINE(|)@@
+aa
+@@TABLE@@
+_@_VAR3_@_
+@@END_TABLE@@
+xx
+zz
+@@END_INLINE@@
+
+abc

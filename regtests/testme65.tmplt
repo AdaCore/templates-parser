@@ -1,0 +1,48 @@
+
+---
+
+@@TABLE@@
+  1. @_LABELS_@
+@@SECTION@@
+  @@IF@@ @_LABELS_@ = "lab2"
+    2. label 2
+  @@ELSE@@
+    2. @_LABELS_@
+  @@END_IF@@
+@@END_TABLE@@
+
+@@INLINE(|)@@
+@@TABLE@@
+  1. @_LABELS_@
+@@SECTION@@
+  @@IF@@ @_LABELS_@ = "lab2"
+    2. label 2
+  @@ELSE@@
+    2. @_LABELS_@
+  @@END_IF@@
+@@END_TABLE@@
+@@END_INLINE@@
+
+---
+
+@@TABLE@@
+before
+@@BEGIN@@
+@_LABELS_@
+@@SECTION@@
+sec: @_LABELS_@
+@@END@@
+after
+@@END_TABLE@@
+
+@@INLINE(, )@@
+@@TABLE@@
+before
+@@BEGIN@@
+@_LABELS_@
+@@SECTION@@
+sec: @_LABELS_@
+@@END@@
+after
+@@END_TABLE@@
+@@END_INLINE@@

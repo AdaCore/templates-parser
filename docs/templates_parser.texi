@@ -18,7 +18,7 @@
 @author Pascal Obry (pascal@@obry.net)
 
 @sp 1
-@url{http://www.obry.org}
+@url{http://www.obry.net}
 
 @vskip 0pt plus 1filll
 
@@ -34,7 +34,7 @@
 </font>
 
 <font size="+1">
-<p>@url{http://www.obry.org}
+<p>@url{http://www.obry.net}
 </font>
 
 @page
@@ -1488,7 +1488,7 @@ put in an @code{IF} tag statement. An @code{IF} tag statement can be put
 in a @code{TABLE} tag statement. Idem for the @code{INCLUDE} tag statement.
 
 @noindent
-Download page is @url{http://www.obry.org/}.
+Download page is @url{http://www.obry.net/}.
 
 @sp 3
 

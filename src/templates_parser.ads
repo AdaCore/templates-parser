@@ -196,13 +196,22 @@ package Templates_Parser is
    -----------------------------
 
    function Parse
-     (Filename     : in String;
-      Translations : in Translate_Table := No_Translation;
-      Cached       : in Boolean         := False)
+     (Filename          : in String;
+      Translations      : in Translate_Table := No_Translation;
+      Cached            : in Boolean         := False;
+      Keep_Unknown_Tags : in Boolean         := False)
      return String;
    --  Parse the Template_File replacing variables' occurences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
    --  recorded into a cache to quick retrieval.
+
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Table := No_Translation;
+      Cached            : in Boolean         := False;
+      Keep_Unknown_Tags : in Boolean         := False)
+     return Unbounded_String;
+   --  Idem as above but returns an Unbounded_String.
 
    function Translate
      (Template     : in String;

@@ -33,6 +33,7 @@ with Ada.Text_IO;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps;
 with Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 with Strings_Cutter;
 
 package body Templates_Parser is
@@ -101,10 +102,11 @@ package body Templates_Parser is
    -- Parse --
    -----------
 
-   function Parse (Template_Filename : in String;
-                   Translations      : in Translate_Table := No_Translation)
-                   return String
-   is
+   function Parse (Template     : in Template_File;
+                   Translations : in Translate_Table := No_Translation)
+                  return String is
+
+      Template_Filename : constant String := To_String (Template.Filename);
 
       File         : Text_IO.File_Type;
       Current_Line : Natural := 0;
@@ -317,13 +319,19 @@ package body Templates_Parser is
       procedure Get_Next_Line (Buffer, Trimed_Buffer : out String;
                                Last                  : out Natural) is
       begin
-         Text_IO.Get_Line (File, Buffer, Last);
          Current_Line := Current_Line + 1;
+
+         declare
+            Line : constant String
+              := To_String (Template.Lines (Current_Line));
+         begin
+            Buffer (Line'Range) := Line;
+            Last := Line'Last;
+         end;
 
          Fixed.Move (Fixed.Trim (Buffer (1 .. Last), Strings.Left),
                      Trimed_Buffer);
       end Get_Next_Line;
-
 
       -----------
       -- Parse --
@@ -581,13 +589,22 @@ package body Templates_Parser is
                      If_Level := If_Level + 1;
                   end if;
 
-                  if If_Level = 0
-                    and then Trimed_Buffer (Else_Range) = Else_Token
-                  then
-                     --  else part found, parse else-block as a main-if block
-                     --  without checking the condition.
+                  if If_Level = 0 then
 
-                     return Parse_If (Check_Condition => False);
+                     if Trimed_Buffer (Else_Range) = Else_Token then
+
+                        --  else part found, parse else-block as a main-if
+                        --  block without checking the condition.
+
+                        return Parse_If (Check_Condition => False);
+
+                     elsif Trimed_Buffer (End_Table_Range)
+                       = End_Table_Token
+                     then
+                        Fatal_Error (End_Table_Token & " found, "
+                                     & End_If_Token & " expected.");
+                     end if;
+
                   end if;
 
                   if Trimed_Buffer (End_If_Range) = End_If_Token then
@@ -684,6 +701,56 @@ package body Templates_Parser is
       end Parse;
 
    begin
+      while Current_Line < Template.Lines'Last loop
+
+         Get_Next_Line (Buffer, Trimed_Buffer, Last);
+
+         Result := Result & Parse (Line => Buffer (1 .. Last));
+
+      end loop;
+
+      return To_String (Result);
+   exception
+      when Template_Error =>
+         raise;
+
+      when others =>
+         raise Template_Error;
+   end Parse;
+
+   -----------
+   -- Parse --
+   -----------
+
+   function Parse (Template_Filename : in String;
+                   Translations      : in Translate_Table := No_Translation)
+                   return String
+   is
+      Template : Template_File;
+   begin
+      Template := Open (Template_Filename);
+
+      declare
+         Result : constant String := Parse (Template, Translations);
+      begin
+         Close (Template);
+         return Result;
+      end;
+   end Parse;
+
+   ----------
+   -- Open --
+   ----------
+
+   function Open (Template_Filename : in String)
+                 return Template_File
+   is
+      File   : Text_IO.File_Type;
+      Lines  : Template_Content (1 .. Max_Template_Lines);
+      Buffer : Buffer_Type;
+      Last   : Natural;
+      K      : Natural := 0;
+   begin
       begin
          Text_IO.Open (File => File,
                        Name => Template_Filename,
@@ -696,21 +763,36 @@ package body Templates_Parser is
 
       while not Text_IO.End_Of_File (File) loop
 
-         Get_Next_Line (Buffer, Trimed_Buffer, Last);
+         Text_IO.Get_Line (File, Buffer, Last);
 
-         Result := Result & Parse (Line => Buffer (1 .. Last));
+         K := K + 1;
+         Lines (K) := To_Unbounded_String (Buffer (1 .. Last));
 
       end loop;
 
       Text_IO.Close (File);
 
-      return To_String (Result);
+      return Template_File'(To_Unbounded_String (Template_Filename),
+                            new Template_Content'(Lines (1 .. K)));
    exception
       when Template_Error =>
          raise;
 
       when others =>
          raise Template_Error;
-   end Parse;
+   end Open;
+
+   -----------
+   -- Close --
+   -----------
+
+   procedure Close (Template : in out Template_File) is
+
+      procedure Free is
+         new Unchecked_Deallocation (Template_Content, Template_Lines);
+
+   begin
+      Free (Template.Lines);
+   end Close;
 
 end Templates_Parser;

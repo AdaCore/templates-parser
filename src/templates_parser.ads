@@ -34,9 +34,14 @@ package Templates_Parser is
 
    Template_Error : exception;
 
-   Default_Begin_Tag : constant String    := "@@_";
-   Default_End_Tag   : constant String    := "_@@";
-   Default_Separator : constant Character := '|';
+   type Template_File is private;
+
+   Max_Template_Lines : constant := 5_000;
+   --  maximum number of lines a template file can have.
+
+   Default_Begin_Tag  : constant String    := "@@_";
+   Default_End_Tag    : constant String    := "_@@";
+   Default_Separator  : constant Character := '|';
 
    type Association is private;
 
@@ -67,7 +72,22 @@ package Templates_Parser is
                    Translations      : in Translate_Table := No_Translation)
                    return String;
    --  parse the Template_File replacing variables' occurences by the
-   --  corresponding values. See template file syntax above.
+   --  corresponding values.
+
+   function Parse (Template     : in Template_File;
+                   Translations : in Translate_Table := No_Translation)
+                   return String;
+   --  parse the Template replacing variables' occurences by the
+   --  corresponding values.
+
+   function Open (Template_Filename : in String)
+                 return Template_File;
+   --  open a template file on disk and create an in-memory template to be
+   --  parsed later.
+
+   procedure Close (Template : in out Template_File);
+   --  when a template is not to be used anymore it must be close to release
+   --  the memory it used.
 
 private
 
@@ -86,5 +106,16 @@ private
                                 Null_Unbounded_String,
                                 ASCII.Nul,
                                 False));
+
+   subtype Line_Index is Natural range 0 .. Max_Template_Lines;
+
+   type Template_Content is array (Positive range <>) of Unbounded_String;
+   type Template_Lines is access Template_Content;
+
+   type Template_File is
+      record
+         Filename : Unbounded_String;
+         Lines    : Template_Lines;
+      end record;
 
 end Templates_Parser;

@@ -62,31 +62,35 @@ procedure Tcache is
    end Run;
 
 begin
-   Set ("a.tmplt", "@@INCLUDE@@ head.tmplt", "A", "@@INCLUDE@@ foot.tmplt");
-   Set ("b.tmplt", "@@INCLUDE@@ head.tmplt", "B", "@@INCLUDE@@ foot.tmplt");
-   Set ("c.tmplt", "@@INCLUDE@@ head.tmplt", "C", "@@INCLUDE@@ foot.tmplt");
-   Set ("head.tmplt", "heading");
-   Set ("foot.tmplt", "footing");
-   Set ("main.tmplt", "@@INCLUDE@@ incl.tmplt", "main");
-   Set ("incl.tmplt", "include file");
-   Set ("3level.tmplt", "@@INCLUDE@@ 3l1.tmplt", "3level");
-   Set ("3l1.tmplt", "@@INCLUDE@@ 3l2.tmplt", "3level-1");
-   Set ("3l2.tmplt", "This is 3 level 2");
-   Run;
-   Put_Line ("--------------------------");
+   for K in 1 .. 2 loop
+      Release_Cache;
+      Set ("a.tmplt", "@@INCLUDE@@ head.tmplt", "A", "@@INCLUDE@@ foot.tmplt");
+      Set ("b.tmplt", "@@INCLUDE@@ head.tmplt", "B", "@@INCLUDE@@ foot.tmplt");
+      Set ("c.tmplt", "@@INCLUDE@@ head.tmplt", "C", "@@INCLUDE@@ foot.tmplt");
+      Set ("head.tmplt", "heading");
+      Set ("foot.tmplt", "footing");
+      Set ("main.tmplt", "@@INCLUDE@@ incl.tmplt", "main");
+      Set ("incl.tmplt", "include file");
+      Set ("3level.tmplt", "@@INCLUDE@@ 3l1.tmplt", "3level");
+      Set ("3l1.tmplt", "@@INCLUDE@@ 3l2.tmplt", "3level-1");
+      Set ("3l2.tmplt", "This is 3 level 2");
+      Run;
+      Put_Line ("--------------------------");
 
-   delay 2.0;
-   Set ("foot.tmplt", "footing 2");
-   Set ("a.tmplt", "@@INCLUDE@@ head.tmplt", "New A",
-        "@@INCLUDE@@ foot.tmplt");
-   Set ("main.tmplt", "@@INCLUDE@@ incl.tmplt", "new main file");
-   Set ("incl.tmplt", "new include file");
-   Set ("3l2.tmplt", "This is 3 level 2 - v2");
-   Run;
-   Put_Line ("--------------------------");
+      delay 2.0;
+      Set ("foot.tmplt", "footing 2");
+      Set ("a.tmplt", "@@INCLUDE@@ head.tmplt", "New A",
+           "@@INCLUDE@@ foot.tmplt");
+      Set ("main.tmplt", "@@INCLUDE@@ incl.tmplt", "new main file");
+      Set ("incl.tmplt", "new include file");
+      Set ("3l2.tmplt", "This is 3 level 2 - v2");
+      Run;
+      Put_Line ("--------------------------");
 
-   delay 2.0;
-   Set ("incl.tmplt", "again a new include file");
-   Set ("3l2.tmplt", "This is 3 level 2 - v3");
-   Run;
+      delay 2.0;
+      Set ("incl.tmplt", "again a new include file");
+      Set ("3l2.tmplt", "This is 3 level 2 - v3");
+      Run;
+      Put_Line ("--------------------------");
+   end loop;
 end Tcache;

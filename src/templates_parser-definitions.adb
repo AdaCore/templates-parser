@@ -26,6 +26,9 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+--  $RCSfile$
+--  $Revision$ $Date$ $Author$
+
 with Ada.Text_IO;
 
 separate (Templates_Parser)

@@ -26,7 +26,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
+--  $RCSfile$
+--  $Revision$ $Date$ $Author$
 
 --  This is the standard version to be used with the standalone version of
 --  Templates_Parser.

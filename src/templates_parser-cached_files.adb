@@ -347,11 +347,15 @@ package body Cached_Files is
    is
       P : Tree;
    begin
+      --  Mark current tree
+
       if Mode = Used then
          T.Info.Next.Used := T.Info.Next.Used + 1;
       else
          T.Info.Next.Used := T.Info.Next.Used - 1;
       end if;
+
+      --  And mark all include files
 
       P := T.Info.I_File;
 

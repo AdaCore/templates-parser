@@ -2570,7 +2570,8 @@ package body Templates_Parser is
                Line := Line + 1;
 
                Input.Get_Line (File, Buffer, Last);
-               exit when Buffer (Buffer'First .. Buffer'First + 3) /= "@@--";
+               exit when Last < 4
+                 or else Buffer (Buffer'First .. Buffer'First + 3) /= "@@--";
 
                if Input.End_Of_File (File) then
                   --  We have reached the end of file, exit now.

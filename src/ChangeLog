@@ -1,5 +1,11 @@
 2005-02-16  Pascal Obry  <pascal@obry.org>
 
+	* templates_parser.adb:
+	(Get_Next_Line): Fix check for comment. In some cases an empty line
+	 after a comment was skipped.
+
+2005-02-16  Pascal Obry  <pascal@obry.org>
+
 	* templates_parser-cached_files.adb:
 	(Cached_Files): Remove the protected object. This is now
 	 configurable to have a templates_parser version that does not

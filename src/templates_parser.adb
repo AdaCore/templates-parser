@@ -31,7 +31,6 @@
 with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;
-with Ada.Text_IO;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Strings.Unbounded;
@@ -40,6 +39,8 @@ with Ada.Unchecked_Deallocation;
 with GNAT.Calendar.Time_IO;
 with GNAT.OS_Lib;
 with GNAT.Regexp;
+
+with Templates_Parser.Input;
 
 package body Templates_Parser is
 
@@ -1952,7 +1953,7 @@ package body Templates_Parser is
      return Static_Tree
    is
 
-      File   : Text_IO.File_Type;  --  file beeing parsed.
+      File   : Input.File_Type;    --  file beeing parsed.
 
       Buffer : String (1 .. 2048); --  current line content
       Last   : Natural;            --  index of last characters read in buffer
@@ -2119,13 +2120,13 @@ package body Templates_Parser is
 
       function Get_Next_Line return Boolean is
       begin
-         if Text_IO.End_Of_File (File) then
+         if Input.End_Of_File (File) then
             Last := 0;
             return True;
          else
             Line := Line + 1;
 
-            Text_IO.Get_Line (File, Buffer, Last);
+            Input.Get_Line (File, Buffer, Last);
 
             First := Strings.Fixed.Index_Non_Blank (Buffer (1 .. Last));
 
@@ -2337,11 +2338,11 @@ package body Templates_Parser is
          end if;
       end if;
 
-      Text_IO.Open (File, Text_IO.In_File, Filename, Form => "shared=no");
+      Input.Open (File, Filename, Form => "shared=no");
 
       New_T := Parse (Parse_Std);
 
-      Text_IO.Close (File);
+      Input.Close (File);
 
       --  T is the tree file, add two nodes (Info and C_Info) in front of the
       --  tree.

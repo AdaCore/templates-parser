@@ -138,20 +138,34 @@ private
 
    use Ada.Strings.Unbounded;
 
+   ------------------
+   --  Vector Tags --
+   ------------------
+
    type Vector_Tag_Node;
-
    type Vector_Tag_Node_Access is access Vector_Tag_Node;
-
-   type Vector_Tag is record
-      Count : Natural := 0;
-      Head  : Vector_Tag_Node_Access;
-      Last  : Vector_Tag_Node_Access;
-   end record;
 
    type Vector_Tag_Node is record
       Value : Unbounded_String;
       Next  : Vector_Tag_Node_Access;
    end record;
+
+   type Integer_Access is access Integer;
+
+   type Vector_Tag is new Ada.Finalization.Controlled with record
+      Ref_Count : Integer_Access;
+      Count     : Natural;
+      Head      : Vector_Tag_Node_Access;
+      Last      : Vector_Tag_Node_Access;
+   end record;
+
+   procedure Initialize (V : in out Vector_Tag);
+   procedure Finalize   (V : in out Vector_Tag);
+   procedure Adjust     (V : in out Vector_Tag);
+
+   ------------------
+   --  Association --
+   ------------------
 
    type Var_Kind is (Std, Vect);
 
@@ -172,6 +186,10 @@ private
                                 Null_Unbounded_String,
                                 Null_Unbounded_String));
 
+   -------------------
+   -- Template_File --
+   -------------------
+
    subtype Line_Index is Natural range 0 .. Max_Template_Lines;
 
    type Template_Content is array (Positive range <>) of Unbounded_String;
@@ -179,15 +197,14 @@ private
 
    type Counter is access Natural;
 
-   type Template_File is new Ada.Finalization.Controlled with
-      record
-         Count    : Counter;
-         Filename : Unbounded_String;
-         Lines    : Template_Lines;
-      end record;
+   type Template_File is new Ada.Finalization.Controlled with record
+      Count    : Counter;
+      Filename : Unbounded_String;
+      Lines    : Template_Lines;
+   end record;
 
    procedure Initialize (Template : in out Template_File);
-   procedure Finalize (Template : in out Template_File);
-   procedure Adjust (Template : in out Template_File);
+   procedure Finalize   (Template : in out Template_File);
+   procedure Adjust     (Template : in out Template_File);
 
 end Templates_Parser;

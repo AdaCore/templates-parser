@@ -1,4 +1,4 @@
-@@INLINE(, )@@
+@@INLINE(colors=")(, )(")@@
    @@TABLE@@
       @_COLORS_@
    @@END_TABLE@@

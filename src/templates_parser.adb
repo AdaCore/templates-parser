@@ -2472,27 +2472,35 @@ package body Templates_Parser is
                      --  Here we have an include variable name, replace it
 
                      T := Data.Parse (Get_Variable (To_String (T.Var.Name)));
-                     T.Next := Old.Next;
 
-                     case T.Kind is
-                        when Data.Var =>
-                           --  The new node is also a variable, inherit all the
-                           --  filters and attribute
-                           T.Var.Filters := Old.Var.Filters;
-                           T.Var.Attr    := Old.Var.Attr;
+                     if T = null then
+                        --  The result was the empty string, just remove this
+                        --  node from the tree.
+                        T := Old.Next;
 
-                        when Data.Text =>
-                           --  The new node is a value, apply filters if the
-                           --  previous node had some.
+                     else
+                        T.Next := Old.Next;
 
-                           if Old.Var.Filters /= null then
-                              T.Value := To_Unbounded_String
-                                (Translate (Old.Var, To_String (T.Value)));
-                           end if;
+                        case T.Kind is
+                           when Data.Var =>
+                              --  The new node is also a variable, inherit all
+                              --  the filters and attribute
+                              T.Var.Filters := Old.Var.Filters;
+                              T.Var.Attr    := Old.Var.Attr;
 
-                           --  Free filters
-                           Release (Old.Var);
-                     end case;
+                           when Data.Text =>
+                              --  The new node is a value, apply filters if the
+                              --  previous node had some.
+
+                              if Old.Var.Filters /= null then
+                                 T.Value := To_Unbounded_String
+                                   (Translate (Old.Var, To_String (T.Value)));
+                              end if;
+
+                              --  Free filters
+                              Release (Old.Var);
+                        end case;
+                     end if;
 
                      --  Free only node
                      Free (Old);

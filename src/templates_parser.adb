@@ -3708,6 +3708,14 @@ package body Templates_Parser is
    function Translate
      (Template     : in String;
       Translations : in Translate_Table := No_Translation)
+      return String is
+   begin
+      return Translate (Template, To_Set (Translations));
+   end Translate;
+
+   function Translate
+     (Template     : in String;
+      Translations : in Translate_Set)
       return String
    is
       T : Data.Tree := Data.Parse (Template);
@@ -3723,23 +3731,23 @@ package body Templates_Parser is
       ---------------
 
       function Translate (Var : in Tag_Var) return String is
+         use type Containers.Cursor_Type;
+         Pos : Containers.Cursor_Type;
       begin
-         for K in Translations'Range loop
-            if Var.Name = Translations (K).Variable then
-               declare
-                  Tk : constant Association := Translations (K);
-               begin
-                  case Tk.Kind is
+         Pos := Containers.Find (Translations.Set.all, To_String (Var.Name));
 
-                     when Std =>
-                        return Translate (Var, To_String (Tk.Value));
-
-                     when others =>
-                        return "";
-                  end case;
-               end;
-            end if;
-         end loop;
+         if Pos /= Containers.Null_Cursor then
+            declare
+               Item : constant Association := Containers.Element (Pos);
+            begin
+               case Item.Kind is
+                  when Std =>
+                     return Translate (Var, To_String (Item.Value));
+                  when others =>
+                     return "";
+               end case;
+            end;
+         end if;
 
          return "";
       end Translate;
@@ -3749,11 +3757,8 @@ package body Templates_Parser is
    begin
       while P /= null loop
          case P.Kind is
-            when Data.Text =>
-               Append (Results, P.Value);
-
-            when Data.Var =>
-               Append (Results, Translate (P.Var));
+            when Data.Text => Append (Results, P.Value);
+            when Data.Var  => Append (Results, Translate (P.Var));
          end case;
 
          P := P.Next;

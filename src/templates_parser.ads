@@ -205,7 +205,7 @@ package Templates_Parser is
       Cached            : in Boolean         := False;
       Keep_Unknown_Tags : in Boolean         := False)
       return Unbounded_String;
-   --  Idem as above but returns an Unbounded_String.
+   --  Idem but returns an Unbounded_String
 
    function Parse
      (Filename          : in String;
@@ -230,6 +230,12 @@ package Templates_Parser is
    --  Just translate the discrete variables in the Template string using the
    --  Translations table. This function does not parse the command tag (TABLE,
    --  IF, INCLUDE). All composite tags are replaced by the empty string.
+
+   function Translate
+     (Template     : in String;
+      Translations : in Translate_Set)
+      return String;
+   --  Idem with a Translation_Set
 
 private
 

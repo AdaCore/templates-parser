@@ -1,0 +1,2056 @@
+2005-02-16  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-cached_files.adb:
+	(Cached_Files): Remove the protected object. This is now
+	 configurable to have a templates_parser version that does not
+	 drag the tasking runtime.
+	(Add): Add a call to the Tasking.Lock and Tasking.Unlock.
+	(Get): Idem.
+	(Release): Idem.
+
+	* templates_parser.adb:
+	(Cached_Files): Remove the protected object. This is now
+	 configurable to have a templates_parser version that does not
+	 drag the tasking runtime.
+	Use new configuration unit to be able to use the templates engine
+	 alone or in the context of AWS.
+
+	* templates_parser-filter.adb:
+	Use new configuration unit to be able to use the templates engine
+	 alone or in the context of AWS.
+
+	* templates_parser-tasking__standard_tasking.adb:
+	Initial revision.
+
+	* templates_parser-tasking__no_tasking.adb:
+	Initial revision.
+
+	* templates_parser-tasking.ads:
+	Initial revision.
+
+	* templates_parser-input__standalone.adb: 
+	Initial revision.
+
+	* templates_parser-configuration__standalone.ads:
+	Initial revision.
+
+2005-02-12  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.ads, templates_parser.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-utils.ads, templates_parser-utils.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-query.ads, templates_parser-query.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-print_tree.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-input.ads, templates_parser-input.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-filter.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-expr.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-definitions.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-debug.ads, templates_parser-debug.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-data.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+	* templates_parser-cached_files.adb:
+	Moved from top src directory.
+	Update copyright notice.
+
+2005-01-09  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb (Module): 
+	(Name_Parameter): Fully prefix the return value to avoid ambiguity
+	 detected by recent GNAT versions.
+	(Check) [Include_Parameters]: New function.
+	(Get_Max_Lines): Properly check the include parameters. This fix
+	 handling of include tag statement inside a table tag statement.
+
+2004-12-17  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Parse_State_Access): New type.
+	(Parse_State): New field Parent which reference the parent state.
+	 This is used for include parameter referencing an alias or a
+	 parent include parameter.
+	(Empty_State): Update accordingly.
+	(Translate) [Tag_Var]: Add parameter State.
+	(I_Translate): Idem and properly handle reference to parent
+	 include parameters.
+	(Analyse): Update all calls to Translate and I_Translate to pass
+	 the state. Also update recursive call to Analyse.
+	
+2004-12-17  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Field): Minor optimization.
+
+2004-12-15  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-print_tree.adb:
+	Output the table attributes only if set.
+
+	* templates_parser.adb:
+	(A_Terminate_Sections_Token): New constant.
+	(A_Reverse_Token): New constant.
+	(Node) [Table_Stmt]: Add field Reverse_Index.
+	(Clear): Remove code for Position.
+	(Initialize): Idem.
+	(Finalize): Idem and initialize the new Tag_Nodes field.
+	("+") [String]: Remove code for Position and add support for new
+	 Tag_Nodes field.
+	("&") [*]: Idem.
+	(Field): Create the fast access array to nodes if needed. Use it
+	 to return the proper element.
+	(Count_Tag_Attributes): New routine to support attributes on tag
+	 commands.
+	(Get_Tag_Attribute): Idem.
+	(Is_Stmt): Update to handle tag attributes.
+	(Parse): Add support for table TERMINATE_SECTIONS and REVERSE
+	 attributes.
+	(Parse_State): Add Reverse_Index field.
+	(Empty_State): Update accordingly.
+
+	* templates_parser.ads:
+	(Cursor): Removed.
+	(Tag_Node_Arr): New type.
+	(Tag_Node_Arr_Access): New type.
+	(Tag_Data): Remove Position, add Tag_Nodes.
+
+2004-12-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+        (Quote): Fix style error.
+
+2004-12-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-definitions.adb:
+	Initial revision.
+
+	* templates_parser-expr.adb:
+	(Print_Tree): Use new Quote procedure.
+
+	* templates_parser-print_tree.adb:
+	Handle Set_Stmt.
+	Fix handling of the include parameters now that we can have
+	 default values.
+
+	* templates_parser.adb:
+	(Quote): New routine.
+	(Set_Token): New constant.
+	(Definitions): New package.
+	(NKind): Add Set_Stmt.
+	(Node): Handle Set_Stmt case.
+	(Load.Parse): Idem.
+	(Translate) [Tag_Var]: Check the definition table before checking
+	 the translate table.
+	(Analyse): Handle Set_Stmt case.
+	(Release): Idem.
+
+2004-11-24  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.adb:
+	(Add_Descriptions): Do not output empty value.
+	(B_Tag): Fix code to properly handle vectors with different size.
+
+2004-11-18  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Get_Next_Line): Properly increment the line number when skiping
+         comments.
+
+2004-11-16  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Field): Fix test to detect Up_Level attribute going on or above
+	 the top level.
+
+2004-11-15  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb:
+	(File_Exists_Token): New constant.
+	(Table): Add File_Exists filter.
+	(File_Exists): New filter.
+
+	* templates_parser.adb:
+	(Mode): Add File_Exists filter.
+	(File_Exists): New filter.
+
+2004-11-15  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Field): If Up_Level reference the top level (or above) we inline
+	 the variable.
+	(Parse): Properly detect the case where TERMINATE_SECTIONS
+	 attribute is used but no section is defined.
+
+2004-11-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	Minor comment fix.
+
+2004-11-12  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.ads, templates_parser-xml.adb:
+	(Value) [String]: New routine.
+	(Value) [Unbounded_String]: Idem.
+
+2004-11-12  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Translate): Remove not needed check.
+
+2004-11-12  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Attribute): Add Up_Level value.
+        (Attribute_Data): New record composed of an attribute defintiion and
+         its associated value.
+        (Tag_Var): Use Attribute_Data instead of Attribute only.
+        (Image): Add support for new Up_Level attribute.
+        (Get_Attribute): Returns now an Attribute_Data instead of a simple
+         Attribute. Handles new Up_Level attribute.
+        (Field): Add parameter Up_Value used to compute value position.
+        (Translate): Update to handle new Up_Level attribute.
+
+2004-11-11  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Find): New routine used to find filter separator.
+	(Unescape): New routine, removes \ for escaped characters in
+	 regpat replacement pattern.
+	(Name_Parameter): Use it.
+	(Get_Filter_Set): Returns the proper filter set slice.
+
+2004-11-06  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb:
+	(Max_Token): New constant.
+        (Min_Token): Idem.
+        (Table): Add Min and Max filters.
+        (Is_Number): Moved to parent package.
+        (Max): New filter.
+        (Min): Idem.
+        Minor reformatting.
+
+	* templates_parser.adb:
+        (Is_Number): Moved here from Filter separate.
+        (Filter): Add support for Min and Max filters.
+        (Max): New filter.
+        (Min): Idem.
+        (Load_Include_Parameters): Handle now named include parameters.
+
+
+2004-11-03  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.ads:
+        (For_Every_Association): New routine.
+
+	* templates_parser.adb:
+        (Absolute): New filter.
+        (Neg): New filter.
+        (For_Every_Association): New routine.
+        (Assoc): Handle properly the separator if specified.
+
+	* templates_parser-filter.adb:
+	(Abs_Token): New constant.
+        (Table): Add Absolute abd Neg filters.
+        (Is_Number): Add '-' as possible character.
+        (Absolute): New filter.
+        (Neg): New filter.
+
+2004-10-26  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(I_Kind): Removed.
+        (Parameters_Data): Removed.
+        (Include_Parameters): Change definition, this is cleaner.
+        (Flatten_Parameters): Translate variable here, this is cleaner and
+         it is possible to handle attributes.
+        (I_Translate): Inherit attribute only if the tag has no attribute
+         already definied. Handles include parameters with attribute.
+
+	* templates_parser-filter.adb:
+        (Value): Simplify code, the new include parameters set is now already
+         translated.
+
+2004-10-26  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Max_Include_Parameters): Moved to main body as it is shared by
+         two different sub-packages.
+        (I_Kind): New type.
+        (Parameters_Data): New record.
+        (Include_Parameters): New array.
+        (No_Include_Parameters): New constant.
+        (Callback): Add I parameter (flat include parameters).
+        Idem for all filters prototypes.
+        (Is_Number): New routine, moved here from filter body.
+        (Translate): Add new parameter I_Params.
+        (Analyse.Flatten_Parameters): New routine.
+        (Parse_State): Add new field F_Params.
+        (Empty_State): Update accordingly.
+        (Analyse): In Translate and Analyse calls properly pass the F_Params
+         state.
+        Minor reformatting.
+        This changes are made to support $<n> in filter parameters.
+
+	* templates_parser-filter.adb:
+	(Replace_One_Or_All): Add I parameters (include parameters).
+        (Value): Idem. Properly detect $<n> filter name and check in this
+         case the include parameter table.
+        Add I parameters to all filter routines. In filter having a filter
+         call Value with the include parameters.
+
+2004-10-16  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Load_Include_Parameters): Fix test to properly handle the last
+         include parameter if it has a single character.
+
+2004-10-15  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-expr.adb:
+	(Next_Token): Properly handle the "/" filter in if condition.
+	Patch contibuted by Jean-Pierre Rosen.
+
+2004-09-20  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Count_Sections): Fix algorithm.
+	(Parse): In the Parse_Block case properly detect empty section.
+	 Rewrite a block with a single section with no common section as a
+	 simple common section. Properly check the table parameter, raise
+	 an exception if the parameter is not known. Check that, if a
+	 TERMINATE_SECTIONS is specified in a table, all blocks have the
+	 same number of sections otherwise raise an exception.
+
+	* templates_parser-print_tree.adb:
+	Fix output when there is only a common section in a block.
+
+2004-09-19  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Begin_Token): New constant.
+	(End_Token): Idem.
+	(Nkind): Add Section_Block.
+	(Node): Add Section_Block entry. Add variable Sections_Count to
+	 avoid recomputing this value for each rendering.
+	(Parse_Mode): Add Parse_Block needed to support the new table's
+	 block feature.
+	(Parse.Count_Sections): New routine.
+	(Parse.Count_Blocks): New routine.
+	(Load.Parse): Handle new Parse_Block mode.
+	(Parse.Block_State): New type to keep track of the block
+	 status. Needed to have fast block/section handling.
+	(Parse_State): Add field Block of type Block_State.
+	(Get_Max_Lines.Count_Section): Removed from here, this is now
+	 computed at load time.
+	(Get_Max_Lines): Handles new Section_Block node.
+	(Analyse): Idem.
+	(Release): Idem.
+
+	* templates_parser-print_tree.adb:
+	Add output for the new Section_Block node.
+
+2004-09-18  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb:
+	(No_Context_Token): New constant.
+	(Table): Add No_Context entry.
+	(Mode_Value): Fix tests to exit from this routine.
+	(Is_No_Context): New routine.
+	(No_Context): New routine.
+
+	* templates_parser.adb:
+	(Filter.Mode): Add No_Context.
+	(Filter.No_Context): New routine.
+	(Filter.Is_No_Context): New routine.
+	(Get_Filter_Set): Check that if no context filter is given it is
+	 in the first position.
+	(Translate): Call the context callback after handling the default
+	 tags and only if there is no NO_CONTEXT filter specified.
+
+2004-09-02  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	Fix code to use new AI302 container Is_In prototype.
+
+	* templates_parser-xml.adb:
+	Fix code to use new AI302 container Is_In prototype.
+
+2004-08-05  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Clear): Properly initialize Min and Max as done in Initialize.
+
+2004-07-07  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-query.adb, templates_parser-debug.adb:
+	Some changes due to new Tag record structure to fix reference
+	 semantic implementation.
+
+	* templates_parser-xml.adb, templates_parser-utils.adb:
+	Some changes due to new Tag record structure to fix reference
+	 semantic implementation.
+
+	* templates_parser.adb:
+	(Get): New procedure.
+	Lot of changes due to new Tag record structure to fix reference
+	 semantic implementation.
+
+	* templates_parser.ads:
+	(Tag): Add comments about reference semantic. Fix referenc semantic
+	 implementation.
+	(Get): New procedure.
+
+2004-06-25  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb, templates_parser-xml.adb:
+	Some fixes due to AI302 changes.
+
+2004-06-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Tag_Var): Add N field (include parameter index).
+	(Is_Include_Variable): New function.
+	(Build) [Tag_Var]: Detect include variable and set index N.
+	(Max_Include_Parameters): New constant.
+	(Include_Parameters): New type.
+	(No_Parameter): New constant.
+	(Node): Add I_Params field.
+	(Replace_Include_Variables): Removed. We do not want to expand the
+	 include parameters at load time as, in the case of cached files,
+	 the include tree can be shared by multiple templates. This will
+	 be handled at parsing time.
+	(Load_Include_Parameters): New procedure that create a Data.Tree
+	 for each include parameter in I_Params field.
+	(Parse): Use it instead of Replace_Include_Variables.
+	(Table_State): Renamed Parse_State.
+	(Parse) [Unbounded_String]: Add I_Params field in Parse_State.
+	(I_Translate): New procedure.
+	(Flush); New procedure.
+	(Add): Use Flush.
+	(Analyse) [Data.Tree]: Handle include variables.
+	(Analyse) [Expr.Tree]: Idem.
+	(Analyse) []: Adjust state aggregates with new field.
+	(Release) [Tree]: Free memory associated with include parameters.
+
+	* templates_parser-print_tree.adb:
+	(Print_Tree): Output the include file parameters.
+
+	* templates_parser-data.adb:
+	(Parse): Minor reformatting. Add some comments.
+
+2004-06-04  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Clear): Initialize Nested_Level to 1.
+	(Initialize): Idem.
+	(Translate) [Tag_Var]: Improve error messages.
+	Patch contributed by Emmanuel Briot.
+
+	* templates_parser.adb:
+	("&") [Tag]: Properly set the nested level if the left value already
+	 contains values.
+
+2004-05-26  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Remove): New routine.
+	(Get): New routine.
+	(Parse) [all versions]: Context is now of Context_Access type. Fix
+	 accessibility check problem.
+
+	* templates_parser.ads:
+	(Null_Association): New constant.
+	(Remove): New routine.
+	(Get): New routine.
+	(TP_Context): Removed.
+	(Parse) [all versions]: Context is now of Context_Access type.
+
+2004-05-24  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Translate): Do not call Callback for Null_Context.
+	Minor reformatting.
+
+2004-05-19  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.adb:
+	(To_Utf8): New routine.
+	(Process): Properly generate Utf8.
+	(Load): New routine. First implementation of the XML loader.
+
+	* templates_parser-xml.ads:
+	(Load): New routine. First implementation of the XML loader.
+
+	* templates_parser.ads, templates_parser.adb:
+	(Insert) [Translate_Set]: New routine.
+
+2004-05-19  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.ads:
+	Minor comment fixes.
+	Remove tabulations introduced with the copy&paste of the DTD.
+
+2004-05-18  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-utils.ads, templates_parser-utils.adb:
+	Initial revision.
+
+	* templates_parser-xml.ads:
+	Add DTD.
+
+	* templates_parser-xml.adb:
+	New version based on the new DTD (should be stable now).
+
+	* templates_parser.adb:
+	(Parse) [All versions]: Add a Context parameter.
+	This implements the context/callback mechanism in the templates
+	 engine. This callback routine is used to get the value for a
+	 variable if not found in the translation set.
+	(Callback): New procedure.
+	(Is_True): Add pragma inline.
+	(Translate): Use context if variable was not in the translation set.
+
+	* templates_parser.ads:
+	(Context): New type.
+	(COntext_Access): New type.
+	(TP_Context): New subtype alias for Context above.
+	(Callback): New procedure.
+	(Null_Context): New constant.
+	(Parse) [All versions]: Add a Context parameter.
+	This implements the context/callback mechanism in the templates
+	 engine. This callback routine is used to get the value for a
+	 variable if not found in the translation set.
+
+2004-05-17  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb, templates_parser-xml.adb:
+	Changes to use new AI302 interface.
+
+	* templates_parser.ads, templates_parser.adb:
+	Changes to use new AI302 interface.
+
+2004-05-15  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.adb:
+	(Process_Std): Put in alphabetical order.
+
+2004-05-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Item) [Tag]: Renamed to Composite.
+	(Composite): Renaming of Item.
+	Sounds better and avoid some non upward compatibilities.
+
+2004-05-13  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-query.ads, templates_parser-query.adb:
+	(Vector): Renamed Composite.
+	(Nested_Level): New routine.
+	Update copyright notice.
+
+	* templates_parser-xml.adb:
+	Minor reformatting.
+
+2004-05-12  Pascal Obry  <pascal@obry.org>
+
+	* makefile:
+	(.SILENT): Remove build.
+	(build): Removed.
+	(clean): Do not call clean on directory obj.
+
+	* templates_parser.adb:
+	(Replace): Properly handle the case where the value is an empty
+	 string. In that case the Data.Tree object is null.
+
+2004-05-11  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Translate) [Translate_Set]: New version based on a Translate_Set.
+        Continued work for Templates_Engine speed-up.
+	Minor reformatting.
+
+2004-05-11  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.ads:
+	(Assoc) [Tag]: Add some comments.
+
+	* templates_parser-xml.adb:
+	(Is_Label): New routine. Detect properly all case where a tag is a
+	 label for a tag.
+	(Process): Use Is_Label.
+
+2004-05-11  Pascal Obry  <pascal@obry.org>
+
+	* makefile:
+	(DEBUG): Removed.
+	(build): Call build on obj directory.
+	(clean): Call clean on obj directory.
+
+	* templates_parser-filter.adb:
+	Change the spec of all filter routines to use a Translate_Set.
+	(Value): This version is far more efficient, the top level loop
+	 has been removed as it now uses a Translate_Set.
+
+	* templates_parser.adb:
+	(Image): Move to spec.
+	(Filter.Callback): Adjust parameter to use a Translate_Set. This
+	 change is also done for all filter routines.
+	(Translate): Change spec to use a Translate_Set for efficiency.
+	 This version is far more efficient, the top level loop has been
+	 removed.
+	(Check): This version is far more efficient, the top level loop
+	 has been removed as it now uses a Translate_Set.
+	(Initialize): New routine.
+	(Finalize): Idem.
+	(Adjust): Idem.
+	(Insert): New routtine.
+	(Exists): Idem.
+	(To_Set): Idem.
+	(Parse) [String]: New routine with a Translate_Set.
+	(Parse) [Unbounded_String]: New routine with a Translate_Set.
+	Minor reformatting.
+
+	* templates_parser.ads:
+	(Translate_Set): New type.
+	(Insert): New routtine.
+	(Exists): Idem.
+	(To_Set): Idem.
+	Add supports for translate set based on maps. This is far more
+	 efficient that having to read the translate table when looking
+	 for a specific tag name.
+	(Parse) [String]: New routine with a Translate_Set.
+	(Parse) [Unbounded_String]: New routine with a Translate_Set.
+	(Initialize): New routine.
+	(Finalize): Idem.
+	(Adjust): Idem.
+	(Image): Routine moved here from body.
+
+	* templates_parser-xml.ads, templates_parser-xml.adb:
+	Initial revision.
+
+2004-05-10  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(F_Sup): Add ??? about exception.
+        (Get_Max_Line): Remove condition for Table_Stmt to support properly
+         tag with any nested level at any table level.
+        (Check): Complete rewrite to handle properly tag with any nested level
+         at any table level.
+
+2004-05-09  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+        (Field): Better implementation to share code.
+
+2004-05-09  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-debug.ads, templates_parser-debug.adb:
+	Initial revision.
+
+	* templates_parser-query.adb:
+	(Vector): Change code to detect what a vector structure is. Now it
+         is checking if Nested_Level = 1.
+
+	* templates_parser.ads:
+	Lot of changes to support tags nested at any level. Vector_Tag and
+         Matrix_Tag are now implemented using this new generic tag
+         implementation.
+        (Print_Tree): Moved to private part. This can now be accessed from
+         Templates_Parser.Debug child package.
+
+	* templates_parser.adb:
+	Lot of changes to support tags nested at any level. Vector_Tag and
+         Matrix_Tag are now implemented using this new generic tag
+         implementation.
+
+2004-04-14  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb:
+	(BR_2_LF): Fix Constraint_Error if S is empty.
+
+2004-03-12  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-expr.adb:
+	(Next_Token): Properly handle filter parameters.
+        Minor reformatting.
+
+2004-03-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-cached_files.adb:
+	(Mark_Mode): New type.
+        (Update_Used_Counter): New routine.
+        (Add): Properly handle include files on reload.
+        (Get): Use Null_Static_Tree. Remove Load parameter. Call
+         Update_Used_Counter to mark main template file and all files
+         included.
+        (Release): Call Update_Used_Counter to release main template file and
+         all files included.
+        (Up_To_Date): Properly check for all include files not only the first
+         level.
+
+	* templates_parser-print_tree.adb:
+	(Print_Tree): Remove output of Ref field.
+        Update copyright notice.
+
+	* templates_parser.adb:
+	(Null_Static_Tree): New constant.
+        (Node) [Info]: Remove Ref field.
+        (Cached_Files.Get): Remove Load parameter.
+        (Load): Use Null_Static_Tree.
+        Minor reformatting.
+
+2004-03-08  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Minor reformatting.
+
+	* templates_parser-expr.adb:
+	Complete rewrite to be LL(0) parser.
+        Patch contributed by Jean-Pierre Rosen.
+
+2004-03-07  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Replace_One_Or_All): New routine used to implement the REPLACE and
+         REPLACE_ALL filters.
+        (Replace): Filter implemented using Replace_One_Or_All.
+        (Replace_All): Idem.
+
+2004-03-06  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-cached_files.adb:
+	(Add): Do not release include file. Fix cache handling. This introduces
+         a memory leak but it is better than a crash. See ???.
+
+	* templates_parser.adb:
+	(Release): Add Include parameter to control include file release.
+         Code clean up.
+        (Parse): Code clean up.
+
+2004-03-04  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Load): Improve previous check-in, do not put the Open into the
+	 exception handler.
+        Patch contributed by Jean-Pierre Rosen.
+
+2004-03-03  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Load): Ensure that the file is always closed even if the parsing
+         failed.
+        Patch contributed by Jean-Pierre Rosen.
+
+2004-02-07  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Check) [Tag]: New procedure.
+        (Check) [Data.Tree]: Use Check above (code moved from here).
+        (Check) [Expr.Tree]: New procedure.
+        (Get_Max_Line): Call Check for the condition on an If_Stmt.
+
+2004-02-06  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Parse): Remove return statement, never reached.
+	(Parse): Buffer, Last new variable to implement a cache. This
+	 improves the performance by avoiding to many reallocation on the
+	 Unbounded_String.
+	(Analyse.Add): New routine. Handle the cache.
+	Patch contributed by Jean-Pierre Rosen.
+
+2004-01-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Ada.IO_Exceptions): Removed as it is not used.
+	Minor style and case fixes to be compliant with AWS style.
+
+	* templates_parser-expr.adb:
+	(Parse): Add loop name in exit statement to be compliant with
+	 AWS style.
+
+	* templates_parser-filter.adb:
+	Fix casing error.
+	Minor reformatting.
+	Add some pragma Unreferenced to be compliant with AWS style.
+
+	* templates_parser-query.adb:
+	Remove duplicate routine header box.
+
+2004-01-14  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Add_Param): Replace value by its tag's value.
+
+	* templates_parser.adb:
+	Update copyright notice.
+
+2004-01-14  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Mode): Add Replace_Param.
+        (Replace_Param): New routine.
+        (Build): Fix handling of quote in filter parameter.
+
+	* templates_parser-filter.adb:
+	(Replace_Param_Token): New constant.
+	(Table): Add Replace_Param.
+        (Del_Param): Fix implementation, properly check the name of
+         the parameter.
+        (Replace_Param): New routine.
+
+2004-01-05  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Replace_All): Use Regpat.Match call compatible with GNAT 3.15p.
+        Update copyright notice.
+
+
+2003-12-20  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Add_Param_Token): New constant.
+	(Del_Param_Token): Idem.
+	(Table): Add Add_Param and Del_Param.
+	(Add_Param): New routine.
+	(Del_Param): Idem.
+
+	* templates_parser.adb:
+	(Mode): Add Add_Param and Del_Param.
+	(Add_Param): New routine.
+	(Del_Param): Idem.
+
+2003-12-19  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-input-aws.adb:
+	(Open): Remove call to Support_Compressed, not needed with the
+	 new AWS design.
+
+2003-12-17  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Translate): Add new variable NOW that represent the current date
+	 and time.
+
+2003-12-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Parameter_Data): Use a a Regpat instead of a Regexp.
+	(Name_Parameter): Properly build a Regpat.
+
+	* templates_parser-filter.adb:
+	(Match): Use GNAT.Regpat instead of GNAT.Regexp. This is upward
+	 compatible and now the template engine use only the GNAT.Regpat
+	 unit.
+	(Release): Properly release memory for the regpat used by match.
+
+2003-12-12  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Format_Date_Token): New constant.
+	(Table): Add Format_Date.
+	(Format_Date): New routine.
+
+	* templates_parser.adb:
+	(Mode): Add Format_Date.
+	(Format_Date): New routine.
+
+2003-12-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Replace_All_Token): New constant.
+	(Table): Add Replace_All entry.
+	(Parameter): Handle Replace_All.
+	(Replace): Handle case where replacement string is not a
+	 pattern. If no match return the original string.
+	(Replace_All): New routine.
+
+	* templates_parser.adb:
+	(Mode): Add Replace_All.
+	(Replace_All): New routine.
+
+2003-12-08  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Is_Number): New routine.
+	Add Translate_Table parameter to all filters routine.
+	(Repeat): Use translate table if argument is not a number.
+	(Plus): Idem and handles negative numbers.
+	(Minus): Idem.
+	(Multiply): Idem.
+	(Divide): Idem.
+	(Value): New routine.
+
+	* templates_parser.adb:
+	(Callback): Add a Translate_Table parameter.
+	Add Translate_Table parameter to all filters routine.
+	(Translate): Add a Translate_Table parameter.
+	(Analyze): Pass Translations to all Translate calls.
+
+2003-12-06  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	("&"): Add versions to prepend data into the vector.
+
+2003-12-03  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-input-aws.adb:
+	(Open): Set the support compressed feature to false. The template
+	 must be parse in uncompressed mode.
+
+2003-11-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Analyse): Do not use recursivity for consecutives Text
+	 nodes. This use lot less stack space and should be faster.
+
+2003-11-29  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Replace_Token): New variable.
+	(Table): Add entry for Replace.
+	(Parameter): Handles Replace filter.
+	(Image): Idem.
+	(Mode_Value): Fix algorithm, was sometimes looping forever looking
+	 for an unknown filter in some cases.
+	(Is_Number): Add function header.
+	(Replace): New implementation.
+	(Release) [Parameter_Data]: New impementation.
+	(Release) [Set]: New impementation.
+
+	* templates_parser.adb:
+	(Mode): Add Replace.
+	(Parameter_Mode): Add Regpat.
+	(Parameter_Data): Add variant part for Regpat.
+	(Release) [Parameter_Data]: New routine.
+	(Release) [Set]: New routine.
+	(Find_Slash): New routine, look for not escaped slash.
+	(Name_Parameter): Handles Regpat case.
+	(Release) [Tag]: Call Release for the filter set.
+	(Build_Include_Pathname): Fix detection of rooted filename, this
+	 time it should be ok.
+
+2003-11-08  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(build): Add templates_parser-input and templates_parser-query.
+	(clean): Add *~
+
+	* templates_parser-query.ads, templates_parser-query.adb:
+	Initial revision.
+
+	* templates_parser.ads:
+	(Association_Kind): Type moved from private part and renamed (was
+	 Var_Kind).
+
+2003-11-05  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-cached_files.adb:
+	(Get): Remove use type for GNAT.OS_Lib.OS_Time as it is not needed
+	 anymore.
+
+2003-10-28  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Error_Include_Filename): Removed.
+	(Error_Include_Message): New variable.
+	(Fatal_Error): Handle properly nested messages.
+	(Parse): Retrieve include filename message and set
+	 Error_Include_Message.
+	(Load): Fix way messages from include template are reported.
+
+2003-10-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Build_Include_Pathname): Properly handle rooted pathname and
+	 subdirectories.
+
+2003-09-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-filter.adb:
+	(Mode_Value): Use a dichotomy algorithm.
+	(Slice): New filter.
+
+	* templates_parser.adb:
+	Put all Filter tokens into Filter separate package.
+	(Mode): Sort in alphabetical order.
+	(Slice): New routine.
+	(Get_Slice): New routine.
+	(Name_Parameter): Handle slice.
+	(Parameter_Data): Idem.
+	(Get_Next_Line): Handle comments at end of template properly.
+
+2003-09-26  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Move all filter related codes to Templates_Parser.Filter separate
+	 package.
+	(Name_Parameter): Remove quote around filter parameter.
+
+	* templates_parser-filter.adb:
+	Initial revision.
+
+2003-09-24  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Field): Now procedure, return a boolean to True if value
+	 Found. Complete rewrite to use the cached position. This is a
+	 large speed-up for iterators.
+	(Clear): Properly initialize new fields.
+	(Initialize): Idem.
+	(Finalize): Properly free memory used by the new fields.
+	(Item): Implementation based on Field. Code was duplicated.
+	(Vector): Implementation based on Field. Code was duplicated.
+	(Translate): Use new Field routines.
+
+	* templates_parser.ads:
+	(Access_Vector_Tag_Node_Access): New type.
+	(Access_Matrix_Tag_Node_Access): Idem.
+	(Vector_Tag): Add Current, Pos fields.
+	(Matrux_Tag): Idem.
+	These new fields are used to cache the current position to speed
+	 up a lot iterators.
+
+2003-08-29  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Load.Parse): Do not use recursivity to read standards text
+	 line. This lower a lot the use of the stack and make it possible
+	 to parse large files.
+	Minor reformatting.
+
+2003-07-31  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Load): Properly detect missing include files and release
+	 the memory associated with the incomplete tree before raising a
+	 fatal error.
+
+2003-03-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Clear): Always call Finalize as this structure use a ref counter.
+	 Fix memory leak bug.
+
+2003-03-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Release): Properly free include files memory.
+
+2003-03-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Replace_Include_Variables): Also inherit the attributes. Complete
+	 previous fix.
+
+2003-03-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Minor comment fix.
+
+2003-03-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Replace_Include_Variables): Handle all cases. Expression are
+	 correctly replaced. Filters are inherited by the new variable or
+	 applied to the new static value.
+
+2003-03-11  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Get_Next_Line): Skip all CR at the end of line.
+
+2003-03-05  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-input-aws.adb:
+	Use IO_Exceptions instead of Text_IO.
+	(Open): Free allocated memory if Name_Error is raised.
+
+	* templates_parser-input.adb:
+	(Open): Free allocated memory if Name_Error is raised.
+
+2003-02-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Get_First_Parameter): Do not return the space after the filename
+	 if present.
+
+2003-02-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Update copyright notice.
+
+2003-02-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Replace_Include_Variables): New procedure.
+	(Get_All_Parameters): Change error message.
+	(Get_Next_Line): Skip comment lines.
+	(Parse): Call Replace_Include_Variables for include files.
+	Minor reformatting.
+
+2003-01-23  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Filter_LF_2_BR_Token): New constant.
+	(Filter_BR_2_LF_Token): New constant.
+	(Filters_Mode): Add FS_2_BR and BR_2_LF.
+	(BR_2_LF_Filter): New routine.
+	(LF_2_BR_Filter): New routine.
+	(Filter_Table): Add FS_2_BR and BR_2_LF.
+
+2003-01-16  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-expr.adb:
+	(Get_Token): Uses Index instead of Index_Non_Blank which handle
+	 only spaces.
+
+	* templates_parser.adb:
+	(Get_First_Parameter): Uses Index instead of Index_Non_Blank which
+	 handle only spaces.
+	(Get_Next_Line): Idem.
+
+2002-12-19  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Clear): Finalize vector if it was the last reference.
+	("&"): Fix Min and Max handling (cut&paste error).
+	(Initialize): Correctly initialize Min to Natural'Last.
+
+	* templates_parser.ads:
+	(Vector_Tag): Add comments about reference semantic.
+	(Matrix): Add comments.
+	(Clear): Add comments.
+
+2002-11-29  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Filter_Add_Token): Set to upper-case.
+	(Filter_Sub_Token): Idem.
+	(Filter_Mult_Token): Idem.
+	(Filter_Div_Token): Idem.
+	(Filter_Modula_Token): Idem.
+
+2002-11-29  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Image): New routine.
+	(Filter_Plus_Token): New constant.
+	(Filter_Add_Token): New constant.
+	(Filter_Minus_Token): New constant.
+	(Filter_Sub_Token): New constant.
+	(Filter_Multiply_Token): New constant.
+	(Filter_Mult_Token): New constant.
+	(Filter_Divide_Token): New constant.
+	(Filter_Div_Token): New constant.
+	(Filter_Modulo_Token): New constant.
+	(Filters_Mode): Add Plus, Add, Minus, Sub, Multiply, Mult, Divide,
+	 Div and Modulo.
+	(Plus_Filter): New routine.
+	(Minus_Filter): New routine.
+	(Divide_Filter): New routine.
+	(Multiply_Filter): New routine.
+	(Modulo_Filter): New routine.
+	(Filter_Table): Add entry for Plus, Add, Minus, Sub, Multiply,
+	 Mult, Divide, Div and Modulo.
+	In many places use Image.
+
+2002-11-28  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-data.adb:
+	Minor reformatting.
+
+	* templates_parser.adb:
+	(Attribute): New type.
+	(Tag): Add Attr attribute field.
+	(Image): Handle attribute.
+	(Get_Attribute): New function.
+	(Get_Var_Name): Change to handle attribute.
+	("+"): Initialize Min/Max matrix field.
+	("&"): Update  Min/Max matrix field.
+	(Initialize): Set Min and Max to 0.
+	(Vect_Size): New rotuine.
+	(Mat_Line): New routine.
+	(Mat_Min_Column): New routine.
+	(Mat_Max_Column): New routine.
+	(Translate): [for a tag], Handle attribute.
+	(Get_Max_Lines.Check): Handle only tag with no atribute. Use
+	 matrix's Max field instead of recomputing it here.
+	Minor reformatting.
+
+	* templates_parser.ads:
+	(Matrix_Tag): Add Min and Max fields.
+	Minor reformatting.
+
+2002-10-12  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-input-aws.adb:
+	(LF_Terminated): New routine.
+
+	* templates_parser-input.adb:
+	(File_Record): Add field to support stream buffered input.
+	 Implementation was based on Text_IO but it is now using Stream_IO.
+	(LF_Terminated): New routine.
+	(Get_Line): Implement stream buffered input. More efficient and
+	 can now recognized lines terminated with LF.
+	Change implementation of other routines to use Stream_IO instead
+	 of Text_IO.
+
+	* templates_parser-input.ads:
+	(LF_Terminated): New routine.
+
+	* templates_parser-print_tree.adb:
+	(Print_Tree): Text case, do not call New_Line. The new line is now
+	 part of the text data.
+	Update copyright notice.
+
+	* templates_parser.adb:
+	(Load): Add Include_File parameter. Call load with Include_File
+	 set to True in include case. Add the LF at then end of text line
+	 only if needed.
+	(Analyze): Text case, do not add LF at the end of line.
+
+2002-10-10  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-expr.adb:
+	(Parse): Handle string.
+	(Print_Tree): Quote value containing spaces. Correctly quote unary
+	 operators.
+	Update copyright notice.
+
+	* templates_parser.adb:
+	Reformat code.
+	Update copyright notice.
+
+2002-10-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-expr.adb:
+	(Is_Op): New function.
+	(Is_U_Op): New function.
+	(Image): New routine (for U_Ops).
+	(Value): New routine (for U_Ops).
+	(Parse): Handle U_Op case.
+	(Print_Tree): Handle U_Op case.
+	(Release): Handle U_Op case.
+
+	* templates_parser.adb:
+	(U_Ops): New type.
+	(Image): New routine (for U_Ops).
+	(Value): New routine (for U_Ops).
+	(NKind): Add U_Op (unary operator).
+	(Node): Handle U_Op.
+	(F_Diff): Add prototype.
+	(U_Ops_Fct): New type.
+	(F_Not): New routine.
+	(U_Op_Table): New variable.
+	(Analyse): Handle U_Op.
+
+	* templates_parser-expr.adb:
+	(Image): Add case for O_Diff.
+	(Value): Handle "/=" operator.
+	Support for /= operator.
+
+	* templates_parser.adb:
+	(Ops): Add O_Diff.
+	(F_Diff): New function.
+	(Analyse.Op_Table): Add entry for O_Diff.
+	Support for /= operator.
+
+2002-08-05  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-expr.adb:
+	(No_Quote): New function.
+	(Parse): Removes quote around variables and values.
+
+	* templates_parser-expr.adb:
+	(Get_Token): If a expression with parenthesis parsed, return
+	 parenthesis.
+	(Parse): L_Tok can be an expression (not only a value or variable).
+
+2002-06-29  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-input-aws.adb:
+	(Check_Open): New routine.
+	Use it in all routines to check the file status before using it.
+	(File_Record): Is a derived type insted of a record.
+
+2002-06-22  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(GARGS): Add rules for RELEASE / DEBUG modes.
+
+	* templates_parser.adb:
+	Remove with Ada.Text_IO.
+	Add unit Templates_Parser.Input.
+	(Load): Use input routines from Templates_Parser.Input instead of
+	 Text_IO.
+
+	* templates_parser-print_tree.adb:
+	Add with Ada.Text_IO.
+
+	* templates_parser-expr.adb:
+	Add with Ada.Text_IO.
+
+	* templates_parser-data.adb:
+	Add with Ada.Text_IO.
+
+	* templates_parser-input-aws.adb:
+	Initial revision.
+
+	* templates_parser-input.ads, templates_parser-input.adb:
+	Initial revision.
+
+2002-05-17  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Remove unused subtype.
+	Patch from Wiljan Derks.
+
+2002-03-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Add_Vector): Check that vector is not empty. Fix a bug reported
+	 by Dmitriy Anisimkov.
+
+2002-02-19  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	Fix minor comment's typo.
+
+2002-02-18  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-cached_files.adb:
+	(Add): If file is not in use, we still want to initialize Old to
+	 C_Info node. If tree in use, mark the new tree as not
+	 used.
+	(Prot.Get): Now a procedure instead of a function.
+	(Prot.Release): Add assertion. Remove test as this case should
+	 never happen.
+	Fix another memory leak in the cache handling.
+
+	* templates_parser.adb:
+	(Prot.Get): Now a procedure instead of a function.
+	(Load): Update to use Prot.Get. Add Assertion. Always set Old to
+	 the C_Info node.
+	(Parse): Call analyse on the C_Info tree.
+	Change to fix another memory leak in the cache handling.
+
+2002-02-17  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser-cached_files.adb:
+	(Add): Always initialize Old with current tree C_Info node.
+	(Get): Returns a static tree.
+	(Release): Parameter is now a Static_Tree.
+	Fix another bug with multitasking programs.
+
+	* templates_parser.adb:
+	(Prot.Release): Parameter is now a Static_Tree.
+	(Prot.Get): Returns a static tree.
+	(Load): Update to use cache interface.
+	(Parse): Idem.
+	Add many comments about cache handling has it is quite tricky
+	 piece of code.
+
+	* templates_parser-cached_files.adb:
+	(Prot.Release): Removes debug code.
+
+	* makefile:
+	Adjust for Cygwin make.
+
+	* templates_parser-cached_files.adb:
+	(Prot.Add): Add Old parameter. Add many comments, this part is
+	 tricky. Do not free a tree that is currently used by another
+	 task.
+	(Release): New procedure.
+	(Up_To_Date): Minor reformatting.
+	These changes provides a complete thread safe cache implementation.
+	This is the right fix for the previous check-in.
+
+	* templates_parser-print_tree.adb:
+	Handle C_Info node in many places.
+
+	* templates_parser.adb:
+	(Nkind): Add C_Info. (cache info node).
+	(Static_Tree): New type.
+	(Node): Handle C_Info,  Add comments. File (Include_Stmt case) is
+	 now a Static_Tree.
+	(Prot.Add): Add Old parameter.
+	(Load): Returns now a Static_Tree. Reorder the code to close the
+	 file as soon as possible. Build C_Info node.
+	(Print_Tree): Change to support Static_Tree.
+	(Get_Max_Line): Handle C_Info node.
+	(Analyze): Idem.
+	(Parse): Change to handle Static_Tree.
+	(Release): Handle C_Info node. Include_Stmt case handle
+	 Static_Tree.
+	These changes provides a complete thread safe cache implementation.
+
+2002-02-15  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(VERSION): Set to 3.4
+	Add regtst2 regression test.
+
+	* templates_parser-cached_files.adb:
+	(Prot.Add): Check if file is already added. Fix a bug in
+	 multithreaded appliations.
+
+2002-01-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(VERSION): Set to 3.3
+	(ada.sed): Fix quote usage.
+
+	* templates_parser.adb:
+	(Mat_List): Do not try to add a vector that does not exist. In the
+	 case of a matrix outside a table statement do not add the last LF.
+
+2002-01-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(VERSION): Set to 3.2
+
+	* templates_parser.adb:
+	(Get_Filter_Set): Remove wrong pragma assert.
+
+2001-11-24  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(distrib) create a tarball using VERSION.
+
+	* makefile:
+	(VERSION): new variable, used to build the tarball.
+
+	* templates_parser.adb:
+	Minor casing fix.
+
+	* templates_parser.texi:
+	Fix spelling.
+
+	* templates_parser.adb:
+	(Get_Next_Line): correctly compute end of line removing all
+	 trailing spaces.
+
+	* templates_parser.ads:
+	Fix spelling.
+
+2001-11-22  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Analyze): put the whole exception information into the exception
+	 message.
+
+2001-11-08  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* makefile:
+	(test): add 3 tests (error recovery).
+
+	* templates_parser.adb:
+	(Load.Parse): handle better some common errors.
+	(Is_Stmt): is now inlined.
+	Minor reformating.
+
+2001-09-11  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Item): Fix bug, advance the index counter.
+
+2001-09-03  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Item): new function.
+
+	* templates_parser-expr.adb:
+	(Release): fix bug in freeing the memory.
+
+2001-07-24  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Get_All_Parameters): removes trailing ASCII.CR. This fix
+	 condition handling when the template has a DOS format and is used
+	 under UNIX.
+	(Format_Number_Filter): Trim number. all spaces on the left or
+	 right is removed before processing it.
+
+2001-07-21  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.texi:
+	Document FORMAT_NUMBER filter.
+
+	* templates_parser.adb:
+	Add FORMAT_NUMBER filter implementation.
+	(Filter_Format_Number_Token): new constant.
+	(Filter_Mode): add Format_Number.
+	(Filter_Table): add Format_Number.
+	(Format_Number_Filter): new function.
+
+2001-07-16  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.texi:
+	Document SIZE filter.
+
+	* templates_parser.adb:
+	Add SIZE filter implementation.
+	(Filter_Size_Token): new constant.
+	(Filter_Mode): add Size.
+	(Filter_Table): add Size.
+	(Size_Filter): new function.
+
+2001-07-11  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.texi:
+	Update documentation for Web_Escape_Filter.
+
+	* templates_parser.adb:
+	(Web_Escape_Filter): Handle Web &quot;
+
+2001-06-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.texi:
+	Add documentation for ELSIF implementation.
+
+	* templates_parser.adb:
+	(End_If_Token): new constant.
+	(Parse_Mode): add Parse_Elsif.
+	(Parse): Implementation of ELSIF token. Add some checks about
+	 misplaced @@END_IF@@ and @@END_TABLE@@ statement.
+
+2001-06-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Parameter_Data): new type.
+	(Image): new function to return Parameter_Data string
+	 representation.
+	(Filter_Function): use Parameter_Data for parameters.
+	(Filter_Routine): Parameters field is now a Parameter_Data type.
+	(*_Filter): Filters function takes a Parameter_Data object instead
+	 of the Unbounded_String one.
+	(Check_Null_Parameter): idem.
+	(Filter_Handle): new function.
+	(Filter_Mode): new function.
+	(Image): for a Tag, use Image for Parameter_Data.
+	(Name_Parameter): change returned value to use new spec based on
+	 Parameter_Data.
+	(Expect_Regexp): new function.
+	(Match_Filter): use now the precompiled regexp in
+	 Parameter_Data. This is a important speed-up.
+
+2001-06-24  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Put all packages body separate and Print_Tree procedure.
+
+	* templates_parser-cached_files.adb, templates_parser-data.adb,
+	  templates_parser-expr.adb, templates_parser-print_tree.adb:
+	Initial revision (code separated from main unit).
+
+	* templates_parser.texi:
+	Reorganize the documentation. Add some info about
+	 filters. Described all specifics tags that are recognized.
+
+	* templates_parser.adb:
+	(Print_Tree): fix typo in section.
+
+2001-06-11  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Name_Parameter): better detect misformed filter parameter.
+
+	* templates_parser.adb:
+	(Name_Parameter): correctly handle regexp with parenthesis.
+	(Node): add line information into the node to be able to display
+	 line where error occurs during analysis (after parsing).
+	(Match_Filter): check that there is a parameter.
+	(Load): correctly set Line field for each node.
+
+	* templates_parser.adb:
+	(Filter_Repeat_Token): new constant.
+	(Filter_Match_Token): new constant.
+	(Filters_Mode): add Match and Repeat.
+	(Filter_Function): add a second parameter.
+	(Filter_Routine): new record.
+	(Filter_Set): is now an array of Filter_Routine.
+	(Check_Null_Parameter): new procedure.
+	(*_Filter): add a second parameter to pass filter's
+	 parameters. Check if no parameter are passed.
+	(Image): for tag, display filter parameter.
+	(Get_Filter_Set.Name_Parameter): new function.
+	(Get_Filter_Set): handle filter's parameter.
+	(Repeat_Filter): new function.
+	(Match_Filter): new function.
+	(Filter_Table): add Match and Repeat.
+	Minor reformatting.
+
+2001-05-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Contract_Filter): removes unused variable K.
+	(Translate): if Var is not found we still want to process the
+	 registedred filters.
+
+2001-05-28  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	Add some comments.
+
+	* templates_parser.texi:
+	Add Coma_2_Point and Point_2_Coma.
+
+	* templates_parser.ads:
+	(Parse): Add boolean parameter Keep_Unknown_Tags.
+
+	* templates_parser.adb:
+	(Parse): Add boolean parameter Keep_Unknown_Tags.
+	Add 2 new filters: Coma_2_Point and Point_2_Coma.
+	(Filter_Coma_2_Point_Token): new constant.
+	(Filter_Point_2_Coma_Token): idem.
+	(Filters_Mode): add Coma_2_Point and Point_2_Coma
+	(Coma_2_Point_Filter): new function.
+	(Point_2_Coma_Filter): idem.
+	(Filter_Table): add Coma_2_Point and Point_2_Coma.
+
+2001-05-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Minor comment editing.
+
+	* templates_parser.adb:
+	(Filter_Contract_Token): new constant.
+	(Filter_No_Digit_Token): idem.
+	(Filter_No_Letter_Token): idem.
+	(Filter_Trim_Token): idem.
+	(Filter_Web_Escape_Token): idem.
+	(Filter_Web_NBSP_Token): idem.
+	(Filters_Mode): add No_Digit, No_Letter, Contract, Trim,
+	 Web_Escape, Web_NBSP.
+	(Contract_Filter): new function.
+	(No_Digit_Filter): idem.
+	(No_Letter_Filter): idem.
+	(Trim_Filter): idem.
+	(Web_Escape_Filter): idem.
+	(Web_NBSP_Filter): idem.
+	(Filter_Table): add Contract, No_Digit, No_Letter, Trim, Web_Escape,
+	 Web_NBSP.
+
+2001-05-23  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Nkind): add Info into the enumeration.
+	(Node): add case for new Info node. removes File and Filename
+	 field from the Include_Stmt case (handled by info node).
+	(Cahced_Files): put Add and Get into a protected record. This
+	 package is now thread safe.
+	(Prot): new protected record.
+	(File_Data): removed.
+	(Get): new function.
+	(Add): lot of change to handle case of file already present but
+	 reloaded because it has changed on disk.
+	(Get): idem.
+	(Up_To_Date): new function. Check if file has changed on disk or
+	 not and if it is needed to reload it. This means a check for the
+	 main file and all include files for this file.
+	(Load): Add I_File variable and set it with the list of included
+	 files for current loaded file.
+	(Print_Tree): add code to display INFO node.
+	(Get_Max_Lines): handle Info node.
+	(Release): handle Info node.
+
+
+2001-05-22  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Fatal_Error): add pragma No_Return. Avoid compiler warning.
+	(Get_First_Parameter): handle case where there is only spaces
+	 after a tag.
+	(Get_Next_Line): handle case where there is only spaces on a line.
+
+2001-05-21  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Open_Par): removed.
+	(Close_Par): removed.
+	(Filter_Table): set to constant.
+	(Build_Include_Pathname): new function.
+	(Load): use Build_Include_Pathname when including a template
+	 file. This fix a bug when a template in a subdirectory where
+	 including another template without specifying a pathname.
+	Minor reformating.
+
+2001-05-16  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Vect_List): moved inside function using it.
+	(Mat_List): idem.
+	Minor reformating.
+
+	* templates_parser.adb:
+	A lot of changes. This new implementation is 2 or 3 times faster
+	 than the previous one.
+	(Internal_Error): new exception.
+	(Node): removed filed Has_Tag.
+	(With_Tag): new function.
+	(Filter_*_Token): remove @_ prefix.
+	(Check_Filter): removed.
+	(Through_Filter): removed.
+	(Filter_Length): removed.
+	(Identity_Filter): removed.
+	(Translate): removed.
+	(Filter_Handle): new function.
+	(Filter_Name): new function.
+
+	New type and method to handle a tag variable. This new abstraction
+	 is used to have better performance.
+	(Tag): new type.
+	(Build): new procedure to build Tag.
+	(Image): new procedure.
+	(Translate): new procedure.
+	(Release): new procedure.
+
+	New abstraction to build a standard line (where there is no Tag
+	 statement).
+	(Data): new package.
+
+	(Parse): use Data.Parse for parsing the text line.
+	(Load): open file with sharing=no.
+	(Print_Tree): update to display new format.
+	(Translate): add special tag variables YEAR, MONTH, DAY, HOUR,
+	 MINUTE, SECOND, MONTH_NAME and DAY_NAME.
+
+	* templates_parser.ads:
+	(Translate): fix comment.
+
+2001-05-13  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.texi:
+	Add doc for No_Space filter.
+
+	* templates_parser.adb:
+	(Filter_No_Space_Token): new constant.
+	(Filter_Mode): add No_Space.
+	(No_Space_Filter): new function.
+	Put all filter function in alphabetical order.
+	(Filter_Table): set No_Space entry.
+	(Check_Filter): minor reformating.
+
+	* templates_parser.adb:
+	(Parse): Use Append function to build the results instead of
+	 operator &. This avoid a lot of copy to/from the stack and we
+	 have a general speed up of a factor 4.
+
+	* templates_parser.adb:
+	(Image): Add support for xor condition operator.
+	(Value): Add support for xor condition operator.
+	(Op_Table): add xor in the table.
+	(Ops): add O_Xor.
+	(F_Xor): new function.
+
+	* templates_parser.texi:
+	Update documentation with new Templates_Parser features.
+
+2001-05-12  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Begin_Tag): new variable.
+	(End_Tag): new variable.
+	(Filter_*_Token): change start to "@_"
+	(Blank): move to global to share it.
+	(Expr): new package.
+	(Node): add Has_Tag boolean. It is set to True if the line does
+	 contains some tag and False otherwise.
+	(Assoc): remove Begin_Tag and End_Tag parameters.
+	(Get_All_Parameters): new function.
+	(Get_First_Parameter): Blank definition removed.
+	(Parse): set Has_Tag field.
+	(Print_Tree): output properly the condition tree for @@IF@@ tag
+	 statement.
+	(Analyze): new procedure (to Analyze expression tree).
+	(Translate): set internal variable to new format.
+	(Is_True): new function.
+	(Analyze): use Has_Tag variable to trigger call to
+	 Translate. Handle new condition expression.
+	(With_Tag): new function.
+
+	* templates_parser.ads:
+	(Set_Tag_Separators): new procedure.
+	(Assoc): remove Begin_Tag and End_Tag parameters.
+	(Default_Begin_Tag): set to "@_"
+	(Default_End_Tag): set to "_@"
+
+	* templates_parser.adb:
+	(Filter_Exist_Token): new constant.
+	(Filter_Is_Empty_Token): new constant.
+	(Filter_Mode): add Exist and Is_Empty.
+	(Exist_Filter): new function.
+	(Is_Empty_Filter): new function.
+	(Check): compute now the manimum number of items.
+	(Get_Max): idem. removes check for Natural'Last since now by
+	 default if no tag found the result is 0.
+
+2001-05-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Clear): new procedure.
+	(Initialize): new procedure for Matrix_Tag_Int.
+	(Finalize): idem.
+	(Adjust): idem.
+
+2001-05-09  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	(Matrix_Tag): new type.
+	(Size): new function. (on Matrix_Tag).
+	(Vector): new function.
+	(Assoc): new function (on Matrix_Tag).
+	(Matrix_Tag_Int): new type.
+	(Var_Kind): add Matrix.
+	(Association): add handling for Matrix.
+
+	* templates_parser.adb:
+	("+"): new function (Matrix_Tag constructor).
+	("&"): new function (Matrix_Tag constructor).
+	(Size): new function. (on Matrix_Tag).
+	(Vector): new function.
+	(Assoc): new function (on Matrix_Tag).
+	(Table_State): new type.
+	(Analyse): use Table_State instead of multiple variables. Hanlde
+	 properly matrix tag through the table state.
+	(Vect_List): new function.
+	(Mat_List): new function.
+	(Translate): fastest implementation. build properly vector or
+	 matrix image outside of TABLE tag statement. Build UP_TABLE_LINE
+	 tag value.
+	(Get_Max): complete rewrite to handle properly matrix tag value.
+
+2001-05-06  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	(Max_Template_Lines): removed. There is no more limitation.
+	(Size): new function.
+	(Parse): Add Cached parameter. Rename Template_Filename to Filename.
+	(Template_File): removed.
+	(Parse): version with Template_File removed.
+	(Open): removed.
+	Minor comment fixes.
+
+	* templates_parser.adb:
+	This a complete rewrite of the Templates_Parser engine. Now the
+	 file is read into memory and put into a tree. The tree is then
+	 analysed to create the resulting file from the templates. This is
+	 more dynamic and now an @@IF@@ tag statement inside a @@TABLE@@
+	 tag statement is analysed for each table expansion instead of
+	 beeing statically analysed during the first pass. (Max_Section):
+	 removed, not more limitation.
+	(Node): new type.
+	(Tree): new type.
+	(Cached_Files): new package.
+	(Size): new function.
+	(Field): return empty string is index too high.
+	(Load): new function.
+	(Print_Tree): new procedure.
+	(Parse): complete rewrite.
+	(Open): removed.
+	(Initialize): for Telmplate_File removed.
+	(Finalize): for Telmplate_File removed.
+	(Adjust): for Telmplate_File removed.
+	Minor comment fixes.
+
+2001-04-28  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	Add operators "+" for Character, Unbounded_String, Integer and boolean.
+
+2001-04-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	("&"): new version for Character, Boolean, Unbounded_String and
+	 Integer.
+	(Assoc): new version for Unbounded_String and Integer.
+
+	* templates_parser.adb:
+	("&"): new version for Character, Boolean, Unbounded_String and
+	 Integer.
+	(Assoc): new version for Unbounded_String and Integer.
+	(List): fix, return the empty string when there is no element.
+
+2001-04-27  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	Minor reformating.
+	Vector_Tas is now a Controlled type to avoid memory leak.
+
+	* templates_parser.adb:
+	("&"): change, now Vector_Tag is a controlled type.
+	("+"): idem.
+	(Finalize): new procedure (on Vector_Tag type).
+	(Initialize): idem.
+	(Adjust): idem.
+	Minor reformating.
+	Vector_Tas is now a Controlled type to avoid memory leak.
+	Note: this version has no memory leak at all.
+
+2001-04-26  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	Update copyright notice.
+
+2001-04-26  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	(Vector_Tag): new type.
+	("+"): Initial revision.
+	("&"): Initial revision.
+	(Assoc): new verison for Vector_Tag. Separator is now a string and
+	 is used to build list from a vector tag. A vector tag is not
+	 anymore a string with separator.
+	Reformat.
+
+	* templates_parser.adb:
+	Remove with String_Cutter (not used anymore).
+	(Count_Lines): change implementation, was using String_Cutter, use
+	 vector tag fields.
+	(Vector_Tag): new type.
+	("+"): Initial revision.
+	("&"): Initial revision.
+	(Assoc): new verison for Vector_Tag. Separator is now a string and
+	 is used to build list from a vector tag. A vector tag is not
+	 anymore a string with separator.
+	(Translate): change implementation, do not use String_Cutter anymore.
+	Reformat.
+
+2000-09-03  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Filter_Yes_No_Token): new constant.
+	(Filter_Oui_Non_Token): new constant.
+	(Filter_Mode): add entry for Yes_No and Oui_Non filters.
+	(Yes_No_Filter): new function.
+	(Oui_Non_Filter): new function.
+	(Filter_Table): add entry for above filters.
+	(Check_Filter): minor indentation fix.
+
+2000-02-07  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Major changes to implement tag variable filters.
+
+1999-12-08  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	minor reformating.
+
+1999-12-03  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Translate): fix bug when a empty discrete variable was used in table.
+
+1999-12-02  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Translate): new function
+
+1999-12-01  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	Minor reformating.
+	Add some comments
+
+1999-11-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Initialize): new procedure
+	(Finalize): new procedure
+	(Adjust): new procedure
+	(Close): removed. Not needed anymore because the Template_File is
+	 controlled.
+
+1999-11-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Parse, Open, Close): new unit
+	This new version implement the in-memory template file. This way it is
+	 possible to cache the template file in a server for better
+	 performance.
+
+1999-11-30  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	Minor comment added.
+
+1999-11-25  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	(Assoc): add Is_Vector boolean parameter. This must be set to true
+	 if we want to build a vector tag.
+
+	* templates_parser.adb:
+	(Assoc): add Is_Vector boolean parameter. This must be set to true
+	 if we want to build a vector tag.
+	(Translate): add support for tag with a single value in a table.
+
+1999-11-23  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	(Terminate_Sections_Token): new token for table
+	(Parse): handle case where the translation variable number does
+	 not exist. In this case we translate to an empty string.
+	(Parse_Table): new parameter for terminate sections mode
+	Fix exception handler.
+
+1999-11-20  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads:
+	removes documentation from the spec as it is in the documentation.
+
+	* templates_parser.adb:
+	Minor reformating.
+
+1999-11-20  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Add code to handle section in a table.
+	(Parse): add TABLE_LINE, NUMBER_LINE, TABLE_LEVEL tags handling
+	(Count_Lines): new function used to update Max_Lines variable.
+	(Parse): fix infinit loop bug when a table had no tag variable inside.
+	Check when the template file was not found.
+
+1999-11-01  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	First complete version
+
+1999-11-01  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.ads, templates_parser.adb:
+	Implement IF, TABLE, INCLUDE
+
+1999-11-01  Pascal Obry  <p.obry@wanadoo.fr>
+
+	* templates_parser.adb:
+	Initial revision

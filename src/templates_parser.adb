@@ -51,31 +51,33 @@ package body Templates_Parser is
    Begin_Tag : Unbounded_String := To_Unbounded_String (Default_Begin_Tag);
    End_Tag   : Unbounded_String := To_Unbounded_String (Default_End_Tag);
 
-   Table_Token              : constant String := "@@TABLE@@";
-   Terminate_Sections_Token : constant String := "@@TERMINATE_SECTIONS@@";
-   Section_Token            : constant String := "@@SECTION@@";
-   End_Table_Token          : constant String := "@@END_TABLE@@";
-   If_Token                 : constant String := "@@IF@@";
-   Else_Token               : constant String := "@@ELSE@@";
-   End_If_Token             : constant String := "@@END_IF@@";
-   Include_Token            : constant String := "@@INCLUDE@@";
+   Table_Token               : constant String := "@@TABLE@@";
+   Terminate_Sections_Token  : constant String := "@@TERMINATE_SECTIONS@@";
+   Section_Token             : constant String := "@@SECTION@@";
+   End_Table_Token           : constant String := "@@END_TABLE@@";
+   If_Token                  : constant String := "@@IF@@";
+   Else_Token                : constant String := "@@ELSE@@";
+   End_If_Token              : constant String := "@@END_IF@@";
+   Include_Token             : constant String := "@@INCLUDE@@";
 
-   Filter_Reverse_Token     : aliased constant String := "REVERSE";
-   Filter_Lower_Token       : aliased constant String := "LOWER";
-   Filter_Upper_Token       : aliased constant String := "UPPER";
-   Filter_Clean_Text_Token  : aliased constant String := "CLEAN_TEXT";
-   Filter_Contract_Token    : aliased constant String := "CONTRACT";
-   Filter_No_Space_Token    : aliased constant String := "NO_SPACE";
-   Filter_No_Digit_Token    : aliased constant String := "NO_DIGIT";
-   Filter_No_Letter_Token   : aliased constant String := "NO_LETTER";
-   Filter_Capitalize_Token  : aliased constant String := "CAPITALIZE";
-   Filter_Yes_No_Token      : aliased constant String := "YES_NO";
-   Filter_Oui_Non_Token     : aliased constant String := "OUI_NON";
-   Filter_Exist_Token       : aliased constant String := "EXIST";
-   Filter_Is_Empty_Token    : aliased constant String := "IS_EMPTY";
-   Filter_Trim_Token        : aliased constant String := "TRIM";
-   Filter_Web_Escape_Token  : aliased constant String := "WEB_ESCAPE";
-   Filter_Web_NBSP_Token    : aliased constant String := "WEB_NBSP";
+   Filter_Lower_Token        : aliased constant String := "LOWER";
+   Filter_Upper_Token        : aliased constant String := "UPPER";
+   Filter_Capitalize_Token   : aliased constant String := "CAPITALIZE";
+   Filter_Reverse_Token      : aliased constant String := "REVERSE";
+   Filter_Clean_Text_Token   : aliased constant String := "CLEAN_TEXT";
+   Filter_Contract_Token     : aliased constant String := "CONTRACT";
+   Filter_No_Space_Token     : aliased constant String := "NO_SPACE";
+   Filter_No_Digit_Token     : aliased constant String := "NO_DIGIT";
+   Filter_No_Letter_Token    : aliased constant String := "NO_LETTER";
+   Filter_Yes_No_Token       : aliased constant String := "YES_NO";
+   Filter_Oui_Non_Token      : aliased constant String := "OUI_NON";
+   Filter_Exist_Token        : aliased constant String := "EXIST";
+   Filter_Is_Empty_Token     : aliased constant String := "IS_EMPTY";
+   Filter_Trim_Token         : aliased constant String := "TRIM";
+   Filter_Web_Escape_Token   : aliased constant String := "WEB_ESCAPE";
+   Filter_Web_NBSP_Token     : aliased constant String := "WEB_NBSP";
+   Filter_Coma_2_Point_Token : aliased constant String := "COMA_2_POINT";
+   Filter_Point_2_Coma_Token : aliased constant String := "POINT_2_COMA";
 
    subtype Table_Range     is Positive range Table_Token'Range;
    subtype Section_Range   is Positive range Section_Token'Range;
@@ -96,26 +98,29 @@ package body Templates_Parser is
    --  replacing it in the template file.
 
    type Filters_Mode is
-     (Invert,
-      --  Reverse string
-
-      Lower,
-      --  Lower case
-
-      Upper,
-      --  Upper case
-
-      Capitalize,
-      --  Lower case except char before spaces and underscores
+     (Capitalize,
+      --  Lower case except char before spaces and underscores.
 
       Clean_Text,
       --  Only letter/digits all other chars are changed to spaces.
 
+      Coma_2_Point,
+      --  Replaces comas by points.
+
       Contract,
       --  Replaces a suite of spaces by a single space character.
 
-      No_Space,
-      --  Removes all spaces found in the value.
+      Exist,
+      --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
+
+      Invert,
+      --  Reverse string.
+
+      Is_Empty,
+      --  Returns "TRUE" if var is empty and "FALSE" otherwise.
+
+      Lower,
+      --  Lower case.
 
       No_Digit,
       --  Replace all digits by spaces.
@@ -123,26 +128,29 @@ package body Templates_Parser is
       No_Letter,
       --  Removes all letters by spaces.
 
-      Yes_No,
-      --  If True return Yes, If False returns No, else do nothing.
+      No_Space,
+      --  Removes all spaces found in the value.
 
       Oui_Non,
       --  If True return Oui, If False returns Non, else do nothing.
 
-      Exist,
-      --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
-
-      Is_Empty,
-      --  Returns "TRUE" if var is empty and "FALSE" otherwise.
+      Point_2_Coma,
+      --  Replaces points by comas.
 
       Trim,
-      --  Trim leading and trailing space
+      --  Trim leading and trailing space.
+
+      Upper,
+      --  Upper case.
 
       Web_Escape,
       --  Convert characters "<>&" to HTML equivalents: &lt;, &gt; and &amp;
 
-      Web_NBSP
-      --  Convert spaces to HTML &nbsp; - non breaking spaces
+      Web_NBSP,
+      --  Convert spaces to HTML &nbsp; - non breaking spaces.
+
+      Yes_No
+      --  If True return Yes, If False returns No, else do nothing.
       );
 
    type Filter_Function is access function (S : in String) return String;
@@ -159,22 +167,24 @@ package body Templates_Parser is
 
    --  filter functions, see above.
 
-   function Lower_Filter      (S : in String) return String;
-   function Reverse_Filter    (S : in String) return String;
-   function Upper_Filter      (S : in String) return String;
-   function Capitalize_Filter (S : in String) return String;
-   function Clean_Text_Filter (S : in String) return String;
-   function Contract_Filter   (S : in String) return String;
-   function No_Space_Filter   (S : in String) return String;
-   function No_Digit_Filter   (S : in String) return String;
-   function No_Letter_Filter  (S : in String) return String;
-   function Yes_No_Filter     (S : in String) return String;
-   function Oui_Non_Filter    (S : in String) return String;
-   function Exist_Filter      (S : in String) return String;
-   function Is_Empty_Filter   (S : in String) return String;
-   function Trim_Filter       (S : in String) return String;
-   function Web_Escape_Filter (S : in String) return String;
-   function Web_NBSP_Filter   (S : in String) return String;
+   function Capitalize_Filter   (S : in String) return String;
+   function Clean_Text_Filter   (S : in String) return String;
+   function Coma_2_Point_Filter (S : in String) return String;
+   function Contract_Filter     (S : in String) return String;
+   function Exist_Filter        (S : in String) return String;
+   function Is_Empty_Filter     (S : in String) return String;
+   function Lower_Filter        (S : in String) return String;
+   function No_Digit_Filter     (S : in String) return String;
+   function No_Letter_Filter    (S : in String) return String;
+   function No_Space_Filter     (S : in String) return String;
+   function Oui_Non_Filter      (S : in String) return String;
+   function Point_2_Coma_Filter (S : in String) return String;
+   function Reverse_Filter      (S : in String) return String;
+   function Trim_Filter         (S : in String) return String;
+   function Upper_Filter        (S : in String) return String;
+   function Web_Escape_Filter   (S : in String) return String;
+   function Web_NBSP_Filter     (S : in String) return String;
+   function Yes_No_Filter       (S : in String) return String;
 
    function Filter_Handle (Name : in String) return Filter_Function;
    --  Returns the filter function for the given filter name.
@@ -1430,6 +1440,22 @@ package body Templates_Parser is
       return Result;
    end Clean_Text_Filter;
 
+   -------------------------
+   -- Coma_2_Point_Filter --
+   -------------------------
+
+   function Coma_2_Point_Filter (S : in String) return String is
+      Result : String := S;
+   begin
+      for K in Result'Range loop
+         if Result (K) = ',' then
+            Result (K) := '.';
+         end if;
+      end loop;
+
+      return Result;
+   end Coma_2_Point_Filter;
+
    ---------------------
    -- Contract_Filter --
    ---------------------
@@ -1588,6 +1614,22 @@ package body Templates_Parser is
       end if;
    end Oui_Non_Filter;
 
+   -------------------------
+   -- Point_2_Coma_Filter --
+   -------------------------
+
+   function Point_2_Coma_Filter (S : in String) return String is
+      Result : String := S;
+   begin
+      for K in Result'Range loop
+         if Result (K) = '.' then
+            Result (K) := ',';
+         end if;
+      end loop;
+
+      return Result;
+   end Point_2_Coma_Filter;
+
    --------------------
    -- Reverse_Filter --
    --------------------
@@ -1710,20 +1752,29 @@ package body Templates_Parser is
    --  Filter Table
 
    Filter_Table : constant array (Filters_Mode) of Filter_Record
-     := (Lower          =>
-           (Filter_Lower_Token'Access,          Lower_Filter'Access),
-
-         Upper          =>
-           (Filter_Upper_Token'Access,          Upper_Filter'Access),
-
-         Capitalize     =>
+     := (Capitalize     =>
            (Filter_Capitalize_Token'Access,     Capitalize_Filter'Access),
 
          Clean_Text     =>
            (Filter_Clean_Text_Token'Access,     Clean_Text_Filter'Access),
 
+         Coma_2_Point   =>
+           (Filter_Coma_2_Point_Token'Access,   Coma_2_Point_Filter'Access),
+
          Contract       =>
            (Filter_Contract_Token'Access,       Contract_Filter'Access),
+
+         Exist          =>
+           (Filter_Exist_Token'Access,          Exist_Filter'Access),
+
+         Invert         =>
+           (Filter_Reverse_Token'Access,        Reverse_Filter'Access),
+
+         Is_Empty       =>
+           (Filter_Is_Empty_Token'Access,       Is_Empty_Filter'Access),
+
+         Lower          =>
+           (Filter_Lower_Token'Access,          Lower_Filter'Access),
 
          No_Digit       =>
            (Filter_No_Digit_Token'Access,       No_Digit_Filter'Access),
@@ -1734,29 +1785,26 @@ package body Templates_Parser is
          No_Space       =>
            (Filter_No_Space_Token'Access,       No_Space_Filter'Access),
 
-         Invert         =>
-           (Filter_Reverse_Token'Access,        Reverse_Filter'Access),
-
-         Yes_No         =>
-           (Filter_Yes_No_Token'Access,         Yes_No_Filter'Access),
-
          Oui_Non        =>
            (Filter_Oui_Non_Token'Access,        Oui_Non_Filter'Access),
 
-         Exist          =>
-           (Filter_Exist_Token'Access,          Exist_Filter'Access),
-
-         Is_Empty       =>
-           (Filter_Is_Empty_Token'Access,       Is_Empty_Filter'Access),
+         Point_2_Coma   =>
+           (Filter_Point_2_Coma_Token'Access,   Point_2_Coma_Filter'Access),
 
          Trim           =>
            (Filter_Trim_Token'Access,           Trim_Filter'Access),
+
+         Upper          =>
+           (Filter_Upper_Token'Access,          Upper_Filter'Access),
 
          Web_Escape     =>
            (Filter_Web_Escape_Token'Access,     Web_Escape_Filter'Access),
 
          Web_NBSP =>
-           (Filter_Web_NBSP_Token'Access,       Web_NBSP_Filter'Access)
+           (Filter_Web_NBSP_Token'Access,       Web_NBSP_Filter'Access),
+
+         Yes_No         =>
+           (Filter_Yes_No_Token'Access,         Yes_No_Filter'Access)
          );
 
    -------------------
@@ -2340,10 +2388,26 @@ package body Templates_Parser is
    -----------
 
    function Parse
-     (Filename     : in String;
-      Translations : in Translate_Table := No_Translation;
-      Cached       : in Boolean         := False)
-     return String
+     (Filename          : in String;
+      Translations      : in Translate_Table := No_Translation;
+      Cached            : in Boolean         := False;
+      Keep_Unknown_Tags : in Boolean         := False)
+     return String is
+   begin
+      return To_String
+        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags));
+   end Parse;
+
+   -----------
+   -- Parse --
+   -----------
+
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Table := No_Translation;
+      Cached            : in Boolean         := False;
+      Keep_Unknown_Tags : in Boolean         := False)
+     return Unbounded_String
    is
       type Table_State is record
          I, J           : Natural;
@@ -2588,7 +2652,14 @@ package body Templates_Parser is
                end if;
             end;
 
-            return "";
+            --  The tag was not found in the Translation_Table, we either
+            --  returns the empty string or we keep the tag as is.
+
+            if Keep_Unknown_Tags then
+               return To_String (Begin_Tag & Var.Name & End_Tag);
+            else
+               return "";
+            end if;
          end Translate;
 
          -------------
@@ -3082,7 +3153,7 @@ package body Templates_Parser is
          Release (T);
       end if;
 
-      return To_String (Results);
+      return Results;
    end Parse;
 
    -------------

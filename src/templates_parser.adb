@@ -855,6 +855,7 @@ package body Templates_Parser is
          end if;
 
          V := V.Next;
+         K := K + 1;
 
          if V = null then
             raise Constraint_Error;

@@ -49,6 +49,7 @@ package body Expr is
          when O_Esup  => return ">=";
          when O_Einf  => return "<=";
          when O_Equal => return "=";
+         when O_Diff  => return "/=";
       end case;
    end Image;
 
@@ -269,6 +270,9 @@ package body Expr is
 
       elsif O = "=" then
          return O_Equal;
+
+      elsif O = "/=" then
+         return O_Diff;
 
       else
          Exceptions.Raise_Exception

@@ -77,6 +77,9 @@ package body Cached_Files is
             Growth;
          end if;
 
+         Old := T.Next;
+         --  Old point to the current C_Info tree.
+
          loop
             exit when S > E;
 
@@ -105,6 +108,7 @@ package body Cached_Files is
                else
                   --  Tree is used, mark it as obsoleted, it will be removed
                   --  when no more used by the Prot.Release call.
+                  Old.Used     := Old.Used + 1;
                   Old.Obsolete := True;
                end if;
 
@@ -136,12 +140,12 @@ package body Cached_Files is
       function Get
         (Filename : in String;
          Load     : in Boolean)
-        return Tree
+        return Static_Tree
       is
          N : constant Natural := Get (Filename);
       begin
          if N = 0 then
-            return null;
+            return (null, null);
 
          else
             if Load then
@@ -149,7 +153,7 @@ package body Cached_Files is
             end if;
 
             Files (N).Next.Used := Files (N).Next.Used + 1;
-            return Files (N);
+            return (Files (N), Files (N).Next);
          end if;
       end Get;
 
@@ -157,13 +161,13 @@ package body Cached_Files is
       -- Release --
       -------------
 
-      procedure Release (C_Info : in out Tree) is
+      procedure Release (T : in out Static_Tree) is
       begin
-         if C_Info /= null then
-            C_Info.Used := C_Info.Used - 1;
+         if T.C_Info /= null then
+            T.C_Info.Used := T.C_Info.Used - 1;
 
-            if C_Info.Obsolete and then C_Info.Used = 0 then
-               Templates_Parser.Release (C_Info);
+            if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
+               Release (T.C_Info);
             end if;
          end if;
       end Release;

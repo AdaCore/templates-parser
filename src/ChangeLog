@@ -1,3 +1,51 @@
+2005-03-28  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(No_Quote): Improve check to avoid Constraint_Error.
+
+	* templates_parser-filter.adb:
+	(Repeat): Change implementation to accept inverted parameters. It
+	 is now possible to do @_REPEAT(3):VAR_@ (repeat 3 times var
+	 content) and also @_REPEAT(x):VAR_@ (repeat 'x' a number of time
+	 corresponding to VAR value).
+	(Value): Fix check to avoid Contraint_Error.
+	
+2005-03-27  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
+	(Inline_Token): New constant.
+	(End_Inline_Token): Idem.
+	(Nkind): Add Inline_Stmt.
+	(Node): Add support for Inline_Stmt.
+	(Get_Tag_Parameter): New function that returns the command tag
+	 parameter. This is currently used only for the new @@INLINE@@
+	 command tag.
+	(Is_Stmt): Rename With_Attributes parameter to Extended as used
+	 not only in the context of command tag attributes now. Improve
+	 check, should catch some more wrong syntax.
+	(Parse_Mode): Add Parse_Inline.
+	(Get_Tag_Attributes): Minor code cleanup.
+	(Rewrite_Inlined_Block): New routine used after parsing an inlined
+	 block. This routine rewrite some part of the tree. This gives
+	 better performance as it avoids too much checks at rendering time.
+	(Parse): Add support for inlined block.
+	(Parse_State): Add field Inline_Sep.
+	(Empty_State): Adjust accordingly.
+	(Last_Was_Sep): New parse global status status.
+	(Add) [String, Boolean]: Move one level upper as shared now.
+	(Get_Max_Lines): Add support for new Inline_Stmt node.
+	(Analyze): Add support for new Inline_Stmt node. Output the inline
+	 separators when needed.
+	(Release): Add support for new Inline_Stmt node.
+	Minor reformatting.
+
+	* templates_parser-print_tree.adb:
+	(Print_Tree): Handle new Inline_Stmt node.
+
+	* templates_parser-data.adb:
+	(Print_Tree): Adjust to handle inlined block. The inlined text
+	 node have no LF terminator now.
+
 2005-02-28  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser-filter.adb:
@@ -68,7 +116,7 @@
 	* templates_parser-tasking.ads:
 	Initial revision.
 
-	* templates_parser-input__standalone.adb: 
+	* templates_parser-input__standalone.adb:
 	Initial revision.
 
 	* templates_parser-configuration__standalone.ads:
@@ -122,7 +170,7 @@
 
 2005-01-09  Pascal Obry  <pascal@obry.org>
 
-	* templates_parser.adb (Module): 
+	* templates_parser.adb (Module):
 	(Name_Parameter): Fully prefix the return value to avoid ambiguity
 	 detected by recent GNAT versions.
 	(Check) [Include_Parameters]: New function.
@@ -142,7 +190,7 @@
 	 include parameters.
 	(Analyse): Update all calls to Translate and I_Translate to pass
 	 the state. Also update recursive call to Analyse.
-	
+
 2004-12-17  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser.adb:

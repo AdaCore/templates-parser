@@ -2735,7 +2735,7 @@ package body Templates_Parser is
                                     Translations);
 
                               elsif Var.Attr /= Nil then
-                              Exceptions.Raise_Exception
+                                 Exceptions.Raise_Exception
                                    (Template_Error'Identity,
                                     "This attribute is not valid for a "
                                     & "vector tag");
@@ -3089,6 +3089,7 @@ package body Templates_Parser is
 
             function F_Sup (L, R : in String) return String is
             begin
+               --  ??? remove exception handler
                if Integer'Value (L) > Integer'Value (R) then
                   return "TRUE";
                else
@@ -3161,7 +3162,10 @@ package body Templates_Parser is
                N : in Positive)
                return Natural;
             --  Recursivelly descend the tree and compute the max lines that
-            --  will be displayed into the table.
+            --  will be displayed into the table. N is the variable embedded
+            --  level regarding the table statement. N=1 means that the
+            --  variable is just under the analysed table. N=2 means that the
+            --  variable is found inside a nested table statement. And so on.
 
             function Count_Section return Natural;
             --  Returns the number of section into table T;
@@ -3206,6 +3210,37 @@ package body Templates_Parser is
                -----------
 
                function Check (T : in Tag_Var) return Natural is
+                  Table_Level : constant Positive := State.Table_Level + 1;
+                  --  This is the current table level, State.Table_Level is
+                  --  not yet updated when calling this routine.
+
+                  function Max (T : in Tag; N : in Natural) return Natural;
+                  --  ???
+
+                  function Max (T : in Tag; N : in Natural) return Natural is
+                     Result : Natural := 0;
+                  begin
+                     declare
+                        P : Tag_Node_Access := T.Head;
+                     begin
+                        while p /= null loop
+                           if P.Kind = Value_Set then
+                              if N = 1 then
+                                 Result :=
+                                   Natural'Max (Result, P.VS.Count);
+                              else
+                                 Result := Natural'Max
+                                   (Result, Max (P.VS.all, N - 1));
+                              end if;
+                           end if;
+                           P := P.Next;
+                        end loop;
+                     end;
+                     return Result;
+                  end Max;
+
+                  Rr          : Natural;
+
                begin
                   for K in Translations'Range loop
                      --  ??? Remove this loop when the translation table
@@ -3216,52 +3251,47 @@ package body Templates_Parser is
                         if T.Name = Tk.Variable then
 
                            if Tk.Kind = Composite then
-                              --  ??? Simple rules to support 2 levels
-                              --  This must be fixed to properly handle
-                              --  any level. For now it is good enough to
-                              --  emulate the Vector_Tag and Matrix_Tag.
+                              if N > Tk.Comp_Value.Nested_Level then
+                                 --  Ignore this variable as it is deeper than
+                                 --  its nested level.
+                                 return 0;
+                              end if;
 
+                              --  We look first at two common cases to handle
+                              --  more efficiently tag into a single or two
+                              --  table statement.
 
-                              if N = 1 then
-                                 if Tk.Comp_Value.Nested_Level = 1 then
-                                    --  This is a flat composite tag (Vector)
-                                    --  into a top level table statement. The
-                                    --  number of iterations for this table
-                                    --  statement correspond to the number of
-                                    --  item into the vector.
-                                    return Size (Tk.Comp_Value);
+                              if Table_Level = 1
+                                or else Tk.Comp_Value.Nested_Level = 1
+                              then
+                                 --  First table level, or flat composite, the
+                                 --  number of iterations corresponds to the
+                                 --  number of item into this tag.
+                                 return Size (Tk.Comp_Value);
 
-                                 else
-                                    if State.Table_Level = 0 then
-                                       --  This is nested composite tag
-                                       --  (Matrix) into a top level table
-                                       --  statement. The number of iterations
-                                       --  for this table statement correspond
-                                       --  to the number of items into the
-                                       --  table.
-                                       return Size (Tk.Comp_Value);
-                                    else
-                                       --  This is nested composite tag
-                                       --  (Matrix) into an embbeded table
-                                       --  statement (table statement into a
-                                       --  table statement). The number of
-                                       --  iterations for this table statement
-                                       --  correspond to the largest number of
-                                       --  items in composite tag.
-                                       return Tk.Comp_Value.Max;
-                                    end if;
-                                 end if;
+                              elsif Table_Level = 2
+                                and then N = 1
+                              then
+                                 --  Table level 2 while looking to nested
+                                 --  variable.
+                                 return Tk.Comp_Value.Max;
 
                               else
-                                 --  This is a nested composite tag (Matrix)
-                                 --  into an embedded table statement (table
-                                 --  statement into a table statement) analysed
-                                 --  at the second block level. This is to
-                                 --  report the number of iterations for upper
-                                 --  level table statement. This number of
-                                 --  iterations correspond to the smallest
-                                 --  number of vectors into the table.
-                                 return Tk.Comp_Value.Count;
+                                 --  All other cases here
+                                 declare
+                                    K : constant Positive
+                                      := Tk.Comp_Value.Nested_Level - N + 1;
+                                    --  K is the variable indice for which
+                                    --  the number of items is looked for.
+                                 begin
+                                    if K = 1 then
+                                       return Size (Tk.Comp_Value);
+                                    elsif K = 2 then
+                                       return Tk.Comp_Value.Max;
+                                    else
+                                       return Max (Tk.Comp_Value, K - 1);
+                                    end if;
+                                 end;
                               end if;
                            end if;
                         end if;
@@ -3329,16 +3359,9 @@ package body Templates_Parser is
                               Get_Max_Lines (T.N_False, N))));
 
                   when Table_Stmt =>
-                     --  ??? The condition should certainly be removed
-                     --  for the composite Tag mode support. Right now this is
-                     --  ok to support Vector_Tag and Matrix_Tag.
-                     if N = 1 then
-                        return Natural'Max
-                          (Get_Max_Lines (T.Sections, N + 1),
-                           Get_Max_Lines (T.Next, N));
-                     else
-                        return Natural'First;
-                     end if;
+                     return Natural'Max
+                       (Get_Max_Lines (T.Sections, N + 1),
+                        Get_Max_Lines (T.Next, N));
 
                   when Section_Stmt =>
                      return Natural'Max

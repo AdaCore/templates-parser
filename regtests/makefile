@@ -8,12 +8,13 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
         testme36 testme37 testme39 testme40 testme41 testme42 blocks1 \
 	blocks2 blocks5 blocks7 testme43 testme44 testme45 testme46 \
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
-	testme56 testme57 testme58 testme60 testme61 testme62 testme63
+	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
+	testme65
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \
 	testme30 testme31 testme32 testme38 blocks3 blocks4 blocks6 testme53 \
-	testme54 testme59
+	testme54 testme59 testme64
 
 STANDALONE_TESTS := test_templates_if testcat testme9_run testme10_run
 

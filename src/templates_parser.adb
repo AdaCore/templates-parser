@@ -122,7 +122,7 @@ package body Templates_Parser is
       Format_Number,
       --  Returns the number with a space added between each 3 digits
       --  blocks. The decimal part is not transformed. If the data is not a
-      --  number nothing is done.
+      --  number nothing is done. The data is trimmed before processing it.
 
       Invert,
       --  Reverse string.
@@ -1210,6 +1210,8 @@ package body Templates_Parser is
       P : in Parameter_Data := No_Parameter)
      return String
    is
+      TS : constant String := Strings.Fixed.Trim (S, Both);
+
       function Is_Number return Boolean;
       --  Returns true if S is a number.
 
@@ -1217,11 +1219,11 @@ package body Templates_Parser is
 
       function Is_Number return Boolean is
       begin
-         for K in S'Range loop
-            if S (K) = '.' then
+         for K in TS'Range loop
+            if TS (K) = '.' then
                Point := K;
 
-            elsif not Characters.Handling.Is_Digit (S (K)) then
+            elsif not Characters.Handling.Is_Digit (TS (K)) then
                return False;
             end if;
          end loop;
@@ -1229,7 +1231,7 @@ package body Templates_Parser is
          return True;
       end Is_Number;
 
-      Result : String (1 .. S'Length * 2);
+      Result : String (1 .. TS'Length * 2);
       K      : Positive := Result'Last;
 
       I      : Natural;
@@ -1241,17 +1243,17 @@ package body Templates_Parser is
       if Is_Number then
 
          if Point = 0 then
-            I := S'Last;
+            I := TS'Last;
          else
             I := Point - 1;
          end if;
 
-         for P in reverse S'First .. I loop
-            Result (K) := S (P);
+         for P in reverse TS'First .. I loop
+            Result (K) := TS (P);
             K := K - 1;
             Count := Count + 1;
 
-            if Count mod 3 = 0 and then P /= S'First then
+            if Count mod 3 = 0 and then P /= TS'First then
                Result (K) := ' ';
                K := K - 1;
             end if;
@@ -1261,7 +1263,7 @@ package body Templates_Parser is
             return Result (K + 1 .. Result'Last);
 
          else
-            return Result (K + 1 .. Result'Last) & S (Point .. S'Last);
+            return Result (K + 1 .. Result'Last) & TS (Point .. TS'Last);
          end if;
 
       else
@@ -2000,6 +2002,14 @@ package body Templates_Parser is
          Start : Natural;
       begin
          Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
+
+         if Buffer (Last) = ASCII.CR then
+            --  last character is a DOS CR (certainly because the template
+            --  file is in DOS format), ignore it as this is not part of the
+            --  parameter.
+            Last := Last - 1;
+         end if;
+
          return Buffer (Start .. Last);
       end Get_All_Parameters;
 

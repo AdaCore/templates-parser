@@ -1,6 +1,12 @@
 2005-03-28  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser.adb:
+	(Get_Tag_Parameters): Add parameter Default. It is now possible to
+	 pass an empty string to the INLINE tag command.
+
+2005-03-28  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser.adb:
 	(No_Quote): Improve check to avoid Constraint_Error.
 
 	* templates_parser-filter.adb:

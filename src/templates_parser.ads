@@ -51,7 +51,9 @@ package Templates_Parser is
                    End_Tag   : in String    := Default_End_Tag;
                    Separator : in Character := Default_Separator)
                    return Association;
-   --  build an Association to be added to a Translate_Table.
+   --  build an Association to be added to a Translate_Table. Is_Vector is
+   --  set to true to build a vector variable. The Separator can be used to
+   --  set the character used between values of a vector variable.
 
    function Assoc (Variable  : in String;
                    Value     : in Boolean;

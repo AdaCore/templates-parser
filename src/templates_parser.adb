@@ -2499,14 +2499,19 @@ package body Templates_Parser is
                if State.Table_Level = 0 then
                   --  A Matrix outside a table statement.
 
-                  while P /= null loop
+                  loop
                      Add_Vector (P.Vect);
-                     Append (Result, ASCII.LF);
                      P := P.Next;
+
+                     exit when P = null;
+
+                     Append (Result, ASCII.LF);
                   end loop;
 
                else
-                  Add_Vector (Vector (A.Mat_Value, State.J));
+                  if not (State.J > A.Mat_Value.M.Count) then
+                     Add_Vector (Vector (A.Mat_Value, State.J));
+                  end if;
                end if;
 
                return To_String (Result);

@@ -116,46 +116,27 @@ package body Templates_Parser is
       --  Filters setting --
       ----------------------
 
-      Lower_Token         : aliased constant String := "LOWER";
-      Upper_Token         : aliased constant String := "UPPER";
-      Capitalize_Token    : aliased constant String := "CAPITALIZE";
-      Reverse_Token       : aliased constant String := "REVERSE";
-      Repeat_Token        : aliased constant String := "REPEAT";
-      Size_Token          : aliased constant String := "SIZE";
-      Clean_Text_Token    : aliased constant String := "CLEAN_TEXT";
-      Contract_Token      : aliased constant String := "CONTRACT";
-      No_Space_Token      : aliased constant String := "NO_SPACE";
-      No_Digit_Token      : aliased constant String := "NO_DIGIT";
-      No_Letter_Token     : aliased constant String := "NO_LETTER";
-      Format_Number_Token : aliased constant String := "FORMAT_NUMBER";
-      Yes_No_Token        : aliased constant String := "YES_NO";
-      Oui_Non_Token       : aliased constant String := "OUI_NON";
-      Exist_Token         : aliased constant String := "EXIST";
-      Is_Empty_Token      : aliased constant String := "IS_EMPTY";
-      Match_Token         : aliased constant String := "MATCH";
-      Trim_Token          : aliased constant String := "TRIM";
-      Web_Escape_Token    : aliased constant String := "WEB_ESCAPE";
-      Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
-      Coma_2_Point_Token  : aliased constant String := "COMA_2_POINT";
-      Point_2_Coma_Token  : aliased constant String := "POINT_2_COMA";
-      LF_2_BR_Token       : aliased constant String := "LF_2_BR";
-      BR_2_LF_Token       : aliased constant String := "BR_2_LF";
-      Plus_Token          : aliased constant String := """+""";
-      Add_Token           : aliased constant String := "ADD";
-      Minus_Token         : aliased constant String := """-""";
-      Sub_Token           : aliased constant String := "SUB";
-      Multiply_Token      : aliased constant String := """*""";
-      Mult_Token          : aliased constant String := "MULT";
-      Divide_Token        : aliased constant String := """/""";
-      Div_Token           : aliased constant String := "DIV";
-      Modulo_Token        : aliased constant String := "MOD";
-
       --  A filter appear just before a tag variable (e.g. @_LOWER:SOME_VAR_@
       --  and means that the filter LOWER should be applied to SOME_VAR before
       --  replacing it in the template file.
 
       type Mode is
-        (BR_2_LF,
+        (Multiply,
+         --  Multiply the given parameter to the string (operator "*")
+
+         Plus,
+         --  Add the given parameter to the string (operator "+")
+
+         Minus,
+         --  Substract the given parameter to the string (operator "-")
+
+         Divide,
+         --  Divide the given parameter to the string (operator "/")
+
+         Add,
+         --  Add the given parameter to the string
+
+         BR_2_LF,
          --  Replaces all <BR> HTML tag by a LF character.
 
          Capitalize,
@@ -170,6 +151,9 @@ package body Templates_Parser is
          Contract,
          --  Replaces a suite of spaces by a single space character.
 
+         Div,
+         --  Divide the given parameter to the string
+
          Exist,
          --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
 
@@ -177,9 +161,6 @@ package body Templates_Parser is
          --  Returns the number with a space added between each 3 digits
          --  blocks. The decimal part is not transformed. If the data is not a
          --  number nothing is done. The data is trimmed before processing it.
-
-         Invert,
-         --  Reverse string.
 
          Is_Empty,
          --  Returns "TRUE" if var is empty and "FALSE" otherwise.
@@ -192,6 +173,12 @@ package body Templates_Parser is
 
          Match,
          --  Returns "TRUE" if var match the pattern passed as argument.
+
+         Modulo,
+         --  Returns current value modulo N (N is the filter parameter)
+
+         Mult,
+         --  Multiply the given parameter to the string
 
          No_Digit,
          --  Replace all digits by spaces.
@@ -212,8 +199,17 @@ package body Templates_Parser is
          --  Returns N copy of the original string. The number of copy is
          --  passed as parameter.
 
+         Invert,
+         --  Reverse string.
+
          Size,
          --  Returns the number of characters in the string value.
+
+         Slice,
+         --  Returns a slice of the string.
+
+         Sub,
+         --  Substract the given parameter to the string
 
          Trim,
          --  Trim leading and trailing space.
@@ -227,30 +223,14 @@ package body Templates_Parser is
          Web_NBSP,
          --  Convert spaces to HTML &nbsp; - non breaking spaces.
 
-         Yes_No,
+         Yes_No
          --  If True return Yes, If False returns No, else do nothing.
-
-         Plus, Add,
-         --  Add the given parameter to the string
-
-         Minus, Sub,
-         --  Substract the given parameter to the string
-
-         Multiply, Mult,
-         --  Multiply the given parameter to the string
-
-         Divide, Div,
-         --  Divide the given parameter to the string
-
-         Modulo
-           --  Returns current value modulo N (N is the filter parameter)
         );
 
-      function Expect_Regexp (Mode : in Filter.Mode) return Boolean;
-      --  Returns True if the filter Mode expect a regular expression as
-      --  parameter.
+      type Parameter_Mode is (Void, Str, Regexp, Slice);
 
-      type Parameter_Mode is (Void, Str, Regexp);
+      function Parameter (Mode : in Filter.Mode) return Parameter_Mode;
+      --  Returns the parameter mode for the given filter.
 
       type Parameter_Data (Mode : Parameter_Mode := Void) is record
          case Mode is
@@ -263,6 +243,10 @@ package body Templates_Parser is
             when Regexp =>
                R_Str  : Unbounded_String;
                Regexp : GNAT.Regexp.Regexp;
+
+            when Slice =>
+               First : Natural;
+               Last  : Natural;
          end case;
       end record;
 
@@ -352,6 +336,9 @@ package body Templates_Parser is
         (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
       function Size
+        (S : in String; P : in Parameter_Data := No_Parameter) return String;
+
+      function Slice
         (S : in String; P : in Parameter_Data := No_Parameter) return String;
 
       function Trim
@@ -541,6 +528,31 @@ package body Templates_Parser is
          --  Given a Filter description, returns the filter handle and
          --  parameter.
 
+         procedure Get_Slice (Slice : in String; First, Last : out Natural);
+         --  Returns the First and Last slice index as parsed into the Slice
+         --  string. Retruns First and Last set to 0 if there is not valid
+         --  slice definition in Slice.
+
+         ---------------
+         -- Get_Slice --
+         ---------------
+
+         procedure Get_Slice (Slice : in String; First, Last : out Natural) is
+            P1 : constant Natural := Fixed.Index (Slice, "..");
+         begin
+            First := 0;
+            Last  := 0;
+
+            if P1 = 0 then
+               Exceptions.Raise_Exception
+                 (Template_Error'Identity, "slice expected """ & Slice & '"');
+
+            else
+               First := Natural'Value (Slice (Slice'First .. P1 - 1));
+               Last  := Natural'Value (Slice (P1 + 2 .. Slice'Last));
+            end if;
+         end Get_Slice;
+
          --------------------
          -- Name_Parameter --
          --------------------
@@ -568,6 +580,7 @@ package body Templates_Parser is
             end if;
 
             if P1 = 0 then
+               --  No parenthesis, so there is no parameter to parse
                return (F.Handle (Filter),
                        F.Parameter_Data'(Mode => F.Void));
 
@@ -581,18 +594,34 @@ package body Templates_Parser is
                   Parameter : constant String
                     := No_Quote (Filter (P1 + 1 .. P2 - 1));
                begin
-                  if F.Expect_Regexp (Mode) then
-                     return (F.Handle (Mode),
-                             F.Parameter_Data'
-                               (F.Regexp,
-                                To_Unbounded_String (Parameter),
-                                GNAT.Regexp.Compile (Parameter)));
-                  else
-                     return (F.Handle (Mode),
-                             F.Parameter_Data'
-                               (F.Str,
-                                To_Unbounded_String (Parameter)));
-                  end if;
+                  case F.Parameter (Mode) is
+                     when F.Regexp =>
+                        return (F.Handle (Mode),
+                                F.Parameter_Data'
+                                  (F.Regexp,
+                                   To_Unbounded_String (Parameter),
+                                   GNAT.Regexp.Compile (Parameter)));
+
+                     when F.Slice =>
+                        declare
+                           First, Last : Natural;
+                        begin
+                           Get_Slice (Parameter, First, Last);
+
+                           return (F.Handle (Mode),
+                                   F.Parameter_Data'(F.Slice, First, Last));
+                        end;
+
+                     when F.Str =>
+                        return (F.Handle (Mode),
+                                F.Parameter_Data'
+                                  (F.Str,
+                                   To_Unbounded_String (Parameter)));
+
+                     when F.Void =>
+                        pragma Warnings (Off);
+                        null;
+                  end case;
                end;
             end if;
          end Name_Parameter;
@@ -1730,6 +1759,12 @@ package body Templates_Parser is
             loop
                Input.Get_Line (File, Buffer, Last);
                exit when Buffer (Buffer'First .. Buffer'First + 3) /= "@@--";
+
+               if Input.End_Of_File (File) then
+                  --  We have reached the end of file, exit now.
+                  Last := 0;
+                  return True;
+               end if;
             end loop;
 
             First := Strings.Fixed.Index (Buffer (1 .. Last), Blank, Outside);

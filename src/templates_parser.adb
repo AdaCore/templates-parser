@@ -98,6 +98,32 @@ package body Templates_Parser is
       end if;
    end Assoc;
 
+   ---------------
+   -- Translate --
+   ---------------
+
+   procedure Translate (Str : in out Unbounded_String;
+                        Tag : in     String;
+                        To  : in     String);
+   --  Translate all tags named Tag in Str by To
+
+   procedure Translate (Str : in out Unbounded_String;
+                        Tag : in     String;
+                        To  : in     String) is
+      Pos : Natural;
+   begin
+      loop
+         Pos := Index (Str, Tag);
+
+         exit when Pos = 0;
+
+         if Pos /= 0 then
+            Replace_Slice (Str, Pos, Pos + Tag'Length - 1, To);
+         end if;
+      end loop;
+   end Translate;
+
+
    -----------
    -- Parse --
    -----------
@@ -126,11 +152,6 @@ package body Templates_Parser is
                      return Boolean;
       --  check that Tag exist in the translation table and that its value is
       --  set to Value.
-
-      procedure Translate (Str : in out Unbounded_String;
-                           Tag : in     String;
-                           To  : in     String);
-      --  Translate all tags named Tag in Str by To
 
       procedure Translate (Str : in out Unbounded_String);
       --  Translate all tags in the translations table and the specials tags
@@ -172,26 +193,6 @@ package body Templates_Parser is
          end loop;
          return False;
       end Exist;
-
-      ---------------
-      -- Translate --
-      ---------------
-
-      procedure Translate (Str : in out Unbounded_String;
-                           Tag : in     String;
-                           To  : in     String) is
-         Pos : Natural;
-      begin
-         loop
-            Pos := Index (Str, Tag);
-
-            exit when Pos = 0;
-
-            if Pos /= 0 then
-               Replace_Slice (Str, Pos, Pos + Tag'Length - 1, To);
-            end if;
-         end loop;
-      end Translate;
 
       procedure Translate (Str : in out Unbounded_String) is
       begin
@@ -728,6 +729,24 @@ package body Templates_Parser is
    begin
       return Parse (Open (Template_Filename), Translations);
    end Parse;
+
+   ---------------
+   -- Translate --
+   ---------------
+
+   function Translate (Template : in String;
+                       Translations : in Translate_Table := No_Translation)
+                      return String
+   is
+      New_Template : Unbounded_String := To_Unbounded_String (Template);
+   begin
+      for T in Translations'Range loop
+         Translate (New_Template,
+                    To_String (Translations (T).Variable),
+                    To_String (Translations (T).Value));
+      end loop;
+      return To_String (New_Template);
+   end Translate;
 
    ----------
    -- Open --

@@ -82,6 +82,13 @@ package Templates_Parser is
    --  parse the Template replacing variables' occurences by the
    --  corresponding values.
 
+   function Translate (Template : in String;
+                       Translations : in Translate_Table := No_Translation)
+                      return String;
+   --  just translate the variable in the Template using the Translations
+   --  table. This function does not parse the command tag (TABLE, IF,
+   --  INCLUDE).
+
    function Open (Template_Filename : in String)
                  return Template_File;
    --  open a template file on disk and create an in-memory template to be

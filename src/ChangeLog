@@ -1,5 +1,20 @@
 2005-02-16  Pascal Obry  <pascal@obry.org>
 
+	* templates_parser-tasking__standard_tasking.adb:
+	Split CVS tag to avoid long lines.
+
+	* templates_parser-tasking__no_tasking.adb:
+	Split CVS tag to avoid long lines.
+
+	* templates_parser-input__standalone.adb:
+	Split CVS tag to avoid long lines.
+
+	* templates_parser-definitions.adb:
+	Split CVS tag to avoid long lines.
+
+	* templates_parser-configuration__standalone.ads:
+	Split CVS tag to avoid long lines.
+
 	* templates_parser.adb:
 	(Get_Next_Line): Fix check for comment. In some cases an empty line
 	 after a comment was skipped.

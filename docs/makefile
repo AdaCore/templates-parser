@@ -62,13 +62,13 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	touch $@
 
 %.adb.res: %.adb %.exe
-	echo "@example"          > $<.res
-	echo "@cartouche"       >> $<.res
+	echo "@cartouche"        > $<.res
+	echo "@example"         >> $<.res
 	echo "@group"           >> $<.res
 	`basename $@ .adb.res`  >> $<.res
 	echo "@end group"       >> $<.res
-	echo "@end cartouche"   >> $<.res
 	echo "@end example"     >> $<.res
+	echo "@end cartouche"   >> $<.res
 
 %.adb.html: %.adb %.exe
 	`basename $@ .adb.html` >> $<.html

@@ -26,9 +26,7 @@ echo "@smallexample"     >>${TMPTAR}
 if [ $# = 1 ]; then
 echo "@group"            >>${TMPTAR}
 fi
-echo ""                  >>${TMPTAR}
 sed -f ada.sed genout    >>${TMPTAR}
-echo ""                  >>${TMPTAR}
 if [ $# = 1 ]; then
 echo "@end group"        >>${TMPTAR}
 fi

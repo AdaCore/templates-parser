@@ -346,7 +346,26 @@ package body Filter is
       T : in Translate_Table := No_Translation)
       return String
    is
-      Param : constant String := To_String (P.S);
+      function Get (Str : in String) return String;
+      pragma Inline (Get);
+      --  Returns the parameter key=value to be added
+
+      ---------
+      -- Get --
+      ---------
+
+      function Get (Str : in String) return String is
+         P : constant Natural := Strings.Fixed.Index (Str, "=");
+      begin
+         if P = 0 then
+            return Str;
+         else
+            return Str (Str'First .. P) & Value (Str (P + 1 .. Str'Last), T);
+         end if;
+      end Get;
+
+      Param : constant String := Get (To_String (P.S));
+
    begin
       if Strings.Fixed.Index (S, "?") = 0 then
          --  No parameter yet

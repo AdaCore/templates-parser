@@ -3047,7 +3047,7 @@ package body Templates_Parser is
                        (Template_Error'Identity,
                         "In " & Filename
                         & " at line" & Natural'Image (T.Line) & ' '
-                        & Exceptions.Exception_Message (E) & '.');
+                        & Exceptions.Exception_Information (E) & '.');
                end;
 
                Append (Results, ASCII.LF);

@@ -28,8 +28,6 @@
 
 --  $Id$
 
---  2001-05-25 Sune Falck Added TRIM, ESCAPE, SPACE filters
-
 with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;

@@ -1,0 +1,11 @@
+.@_REPEAT( ):THREE_@.
+.@_REPEAT(x):THREE_@.
+.@_REPEAT(3):THREE_@.
+.@_REPEAT(3):VAR6_@.
+.@_REPEAT(THREE):VAR6_@.
+
+.@_REPEAT( , ):THREE_@.
+.@_REPEAT(" , "):THREE_@.
+
+3 times nothing: .@_REPEAT():THREE_@.
+nothing 3 times: .@_REPEAT(3):VAR4_@.

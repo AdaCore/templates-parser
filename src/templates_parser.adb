@@ -2019,9 +2019,10 @@ package body Templates_Parser is
          return Result;
       end Image;
 
-      C : Natural;
-      P : Natural;
-      R : Tag_Node_Access;
+      C       : Natural;
+      P       : Natural;
+      R       : Tag_Node_Access;
+      Inlined : Boolean := False;
    begin
       Found := True;
 
@@ -2029,12 +2030,15 @@ package body Templates_Parser is
          C := Cursor'Last - T.Data.Nested_Level + 1 - Up_Value;
          P := Cursor (C);
 
+      elsif T.Data.Nested_Level < Up_Value then
+         Inlined := True;
+
       elsif Cursor'Length /= 0 then
          C := Cursor'First;
          P := Cursor (C);
       end if;
 
-      if Cursor'Length = 0 then
+      if Cursor'Length = 0 or else Inlined then
          --  No cursor, we just want the streamed T image
          Result := Image (T);
 
@@ -2994,12 +2998,15 @@ package body Templates_Parser is
             --  that there is more than one block, all blocks have the same
             --  number of section.
 
-            if T.Terminate_Sections and then T.Blocks_Count > 1 then
+            if T.Terminate_Sections and then T.Blocks_Count >= 1 then
                declare
-                  Size : constant Positive := T.Blocks.Sections_Count;
-                  B    : Tree              := T.Blocks.Next;
+                  Size : Natural := T.Blocks.Sections_Count;
+                  Max  : Natural := Size;
+                  B    : Tree    := T.Blocks.Next;
                begin
                   while B /= null loop
+                     Max := Natural'Max (Max, B.Sections_Count);
+
                      if B.Sections_Count /= Size
                        and then B.Sections_Count /= 0
                      then
@@ -3009,6 +3016,15 @@ package body Templates_Parser is
                      end if;
                      B := B.Next;
                   end loop;
+
+                  --  Check wether we have sections with the TERMINATE_SECTION
+                  --  attribute.
+
+                  if Max = 0 then
+                     Fatal_Error
+                       ("TERMINATE_SECTIONS attribute given, but no section"
+                        & " defined");
+                  end if;
                end;
             end if;
 
@@ -4129,7 +4145,6 @@ package body Templates_Parser is
             Max_Lines := Result;
 
             if T.Terminate_Sections then
-
                --  ??? This part of code handle properly only table with a
                --  single block. What should be done if there is multiple
                --  blocks ? Should all blocks be of the same size ?

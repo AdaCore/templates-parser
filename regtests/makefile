@@ -33,7 +33,7 @@ EXP_TESTS      = regtst2 regtst3 $(XTESTS)
 
 MAIN_TESTS     = testme print_tree filter
 
-DIFF_ARGS = -c --strip-trailing-cr
+DIFF_ARGS = -c -w
 
 ifeq (${OS}, Windows_NT)
 EXE=.exe
@@ -112,7 +112,7 @@ init:
 
 test:  init testme print_tree $(STANDALONE_TESTS) $(STD_TESTS) $(EXP_TESTS) \
 	$(TESTS_RUN) $(TESTS_TREE_RUN)
-ifeq ($(PRJ_XMLADA), Installed)
+ifeq ($(TP_XMLADA), Installed)
 	-rm -f ts.f.xml tsr.f.xml
 	filter < ts.xml | sort > ts.f.xml
 	filter < tsr.xml | sort > tsr.f.xml

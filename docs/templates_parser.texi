@@ -637,8 +637,8 @@ capitalized (all upper, all lower or first letter capital).
 @noindent
 For example:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
 
@@ -655,8 +655,8 @@ If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
 @@_"+"(TWO):ONE_@@                          ->  3
 @@_"-"(TWO):ONE_@@                          ->  -1
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @node Attributes
 @subsection Attributes
@@ -704,8 +704,8 @@ can be applied only to a composite tag having two nested level - a matrix.
 @noindent
 For example:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 If VEC is set to "@i{<1 , 2>}" and MAT to "@i{<a, b, c> ; <2, 3, 5, 7>}" then:
 
@@ -717,8 +717,8 @@ If VEC is set to "@i{<1 , 2>}" and MAT to "@i{<a, b, c> ; <2, 3, 5, 7>}" then:
 @@_MAT'Max_Column_@@          ->  4
 
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @node Other variable tags
 @section Other variable tags
@@ -834,8 +834,8 @@ Every line starting with @b{@@@@--} are comments and are completly
 ignored by the parser. The resulting page will have the exact same
 format and number of lines with or without the comments.
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@-- This template is used to display the client's data
 @@@@-- It uses the following tags:
@@ -847,8 +847,8 @@ format and number of lines with or without the comments.
 
 ...
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @node INCLUDE tag statement
 @section INCLUDE tag statement
@@ -858,8 +858,8 @@ format and number of lines with or without the comments.
 This tag is used to include another template file. This is useful if you
 have the same header and/or footer in all your HTML pages. For example:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@INCLUDE@@@@ header.tmplt
 
@@ -867,8 +867,8 @@ have the same header and/or footer in all your HTML pages. For example:
 
 @@@@INCLUDE@@@@ footer.tmplt
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 It is also possible to pass arguments to the include file. These parameters
@@ -877,13 +877,13 @@ parameters into the included file with the special variable names
 @code{@@_$<n>_@@}, where @i{n} is the include's parameter indice (0 is
 the include filename, 1 the first parameter and so on).
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@INCLUDE@@@@ another.tmplt @@_VAR_@@ azerty
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 In file @file{another.tmplt}
@@ -906,15 +906,15 @@ Note that it is possible to pass the include parameters using names,
 a set of positional parameters can be pass first, so all following
 include command are identical:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@INCLUDE@@@@ another.tmplt one two three four "a text"
 @@@@INCLUDE@@@@ another.tmplt (one, two, 3 => three, 4 => four, 5 => "a text")
 @@@@INCLUDE@@@@ another.tmplt (one, 5 => "a text", 3 => three, 2 => two, 4 => four)
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @node IF tag statement
 @section IF tag statement
@@ -923,8 +923,8 @@ include command are identical:
 @noindent
 This is the conditional tag statement. The complete form is:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@IF@@@@ <expression1>
    part1
@@ -934,8 +934,8 @@ This is the conditional tag statement. The complete form is:
    part3
 @@@@END_IF@@@@
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 The part1 one will be parsed if expression1 evaluate to "TRUE", part2
@@ -988,8 +988,8 @@ having the same precedence. To build an expression it is possible to
 use the parentheses to change the evaluation order. A value with
 spaces must be quoted as a string. So valid expressions could be:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@IF@@@@ (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
 
@@ -999,8 +999,8 @@ spaces must be quoted as a string. So valid expressions could be:
 
 @@@@IF@@@@ @@_VAR1_@@ = "a value"
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 Note also that variables and values can be surrounded by quotes if needed.
@@ -1010,8 +1010,8 @@ Quotes are needed if a value contain spaces.
 To generate a conditional variable tag it is possible to use the
 following @b{Templates_Parser} function:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @b{function} Assoc (Variable  : @b{in} String;
                 Value     : @b{in} Boolean;
@@ -1020,8 +1020,8 @@ following @b{Templates_Parser} function:
 @i{--  Translate_Table. It set the variable to TRUE or FALSE depending on}
 @i{--  Value.}
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 Let's see an example using an @code{IF} tag statement. With the following
@@ -1071,8 +1071,8 @@ complex Web pages.
 Syntax:
 
 @cindex Command, TERMINATE_SECTIONS
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@ 
       ...
@@ -1084,8 +1084,8 @@ Syntax:
       ...
 @@@@END_TABLE@@@@
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 Let's have an example. With the following template:
@@ -1112,8 +1112,8 @@ space ", ".
 @noindent
 The complete prototype for the @code{Tag} Assoc function is:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @b{function} Assoc (Variable  : @b{in} String;
                 Value     : @b{in} Tag;
@@ -1123,8 +1123,8 @@ The complete prototype for the @code{Tag} Assoc function is:
 @i{--  This is a tag association. Separator will be used when outputting the}
 @i{--  a flat representation of the Tag (outside a table statement).}
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 A table can contain many sections. The section to use will be selected
@@ -1295,24 +1295,24 @@ everywhere. It is then easier to change the color afterward.
 The first form, to define a simple constant that can be used as any
 other variable in a template file, is:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@SET@@@@ <name> = <value>
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 The second form, to define an alias for a template file parameter, is:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@SET@@@@ <name> = $n [| <default_value>]
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 In this case <name> is an alias for the Nth include parameter. In this
@@ -1321,8 +1321,8 @@ if the Nth include parameter is not specified.
 
 Some examples:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @@@@SET@@@@ COLOR = red
 
@@ -1330,8 +1330,8 @@ Some examples:
 
 @@@@SET@@@@ COLOR = $4 | green
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @noindent
 It is important to note that a variable is set global to a template
@@ -1363,8 +1363,8 @@ is called by the parser. The default callback method does nothing, it
 is up to the user to define it. The callback procedure is defined as
 follow:
 
-@smallexample
 @cartouche
+@smallexample
 @group
 @b{procedure} Callback
   (Context  : @b{access} Templates_Parser.Context;
@@ -1372,8 +1372,8 @@ follow:
    Result   :    @b{out} Unbounded_String;
    Found    :    @b{out} Boolean);
 @end group
-@end cartouche
 @end smallexample
+@end cartouche
 
 @code{Result} must be set with the value for the tag @code{Variable}
 and @code{Found} set to @code{True}, otherwise @code{Found} can be set

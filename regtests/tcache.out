@@ -51,3 +51,58 @@ new main file
 This is 3 level 2 - v3
 3level-1
 3level
+--------------------------
+heading
+A
+footing
+
+heading
+B
+footing
+
+heading
+C
+footing
+
+include file
+main
+This is 3 level 2
+3level-1
+3level
+--------------------------
+heading
+New A
+footing 2
+
+heading
+B
+footing 2
+
+heading
+C
+footing 2
+
+new include file
+new main file
+This is 3 level 2 - v2
+3level-1
+3level
+--------------------------
+heading
+New A
+footing 2
+
+heading
+B
+footing 2
+
+heading
+C
+footing 2
+
+again a new include file
+new main file
+This is 3 level 2 - v3
+3level-1
+3level
+--------------------------

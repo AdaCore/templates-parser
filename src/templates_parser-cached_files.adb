@@ -26,7 +26,10 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
+--  $RCSfile$
+--  $Revision$ $Date$ $Author$
+
+with Templates_Parser.Tasking;
 
 separate (Templates_Parser)
 
@@ -57,147 +60,163 @@ package body Cached_Files is
    procedure Update_Used_Counter (T : in out Static_Tree; Mode : in Mark_Mode);
    --  Update C_Info used counter according to Mode
 
-   protected body Prot is
+   ---------
+   -- Add --
+   ---------
 
-      ---------
-      -- Add --
-      ---------
+   procedure Add
+     (Filename : in     String;
+      T        : in     Tree;
+      Old      :    out Tree)
+   is
+      L_Filename : constant Unbounded_String
+        := To_Unbounded_String (Filename);
 
-      procedure Add
-        (Filename : in     String;
-         T        : in     Tree;
-         Old      :    out Tree)
-      is
-         L_Filename : constant Unbounded_String
-           := To_Unbounded_String (Filename);
+      S : Natural := 1;
+      E : Natural := Index;
+      N : Natural;
+      I : Tree;
 
-         S : Natural := 1;
-         E : Natural := Index;
-         N : Natural;
-         I : Tree;
+   begin
+      Tasking.Lock;
+      --  Does the table initialized and do we have enough place on it ?
 
-      begin
-         --  Does the table initialized and do we have enough place on it ?
+      if Files = null or else Index = Files'Last then
+         Growth;
+      end if;
 
-         if Files = null or else Index = Files'Last then
-            Growth;
-         end if;
+      loop
+         exit when S > E;
 
-         loop
-            exit when S > E;
+         N := (S + E) / 2;
 
-            N := (S + E) / 2;
+         if Files (N).Filename = L_Filename then
+            --  This is a file that was already loaded. If loaded again
+            --  it is because the file timestamp has changed. We want to
+            --  just update the tree and not the info node (first node).
 
-            if Files (N).Filename = L_Filename then
-               --  This is a file that was already loaded. If loaded again
-               --  it is because the file timestamp has changed. We want to
-               --  just update the tree and not the info node (first node).
+            Old := Files (N).Next;
+            --  This is a pointer to the C_Info tree node, skipping the
+            --  info node (first node).
 
-               Old := Files (N).Next;
-               --  This is a pointer to the C_Info tree node, skipping the
-               --  info node (first node).
+            I := Files (N).I_File;
+            --  Old include files dependances
 
-               I := Files (N).I_File;
-               --  Old include files dependances
+            Files (N).Next      := T.Next;
+            Files (N).Timestamp := T.Timestamp;
+            Files (N).I_File    := T.I_File;
 
-               Files (N).Next      := T.Next;
-               Files (N).Timestamp := T.Timestamp;
-               Files (N).I_File    := T.I_File;
+            --  Now free old I_File
 
-               --  Now free old I_File
+            declare
+               O : Tree;
+            begin
+               while I /= null loop
+                  O := I;
+                  I := I.Next;
+                  Free (O);
+               end loop;
+            end;
 
-               declare
-                  O : Tree;
-               begin
-                  while I /= null loop
-                     O := I;
-                     I := I.Next;
-                     Free (O);
-                  end loop;
-               end;
+            --  This part is tricky, the tree could be currently used
+            --  (parsed). So we need to be careful to not release the tree
+            --  too early.
 
-               --  This part is tricky, the tree could be currently used
-               --  (parsed). So we need to be careful to not release the tree
-               --  too early.
+            if Old.Used = 0 then
+               --  File is not currently used, we can release it safely
+               Release (Old, Include => False);
 
-               if Old.Used = 0 then
-                  --  File is not currently used, we can release it safely
-                  Release (Old, Include => False);
-
-                  Old := T.Next;
-
-               else
-                  --  Tree is used, mark it as obsoleted, it will be removed
-                  --  when no more used by the Prot.Release call.
-                  Old.Obsolete := True;
-
-                  --  But current tree is not used, it has been posted here
-                  --  for futur use. But if replaced right away it should be
-                  --  freed.
-                  Files (N).Next.Used := 0;
-               end if;
-
-               --  Nothing more to do in this case
-
-               return;
-
-            elsif Files (N).Filename < L_Filename then
-               S := N + 1;
+               Old := T.Next;
 
             else
-               E := N - 1;
+               --  Tree is used, mark it as obsoleted, it will be removed
+               --  when no more used by the Prot.Release call.
+               Old.Obsolete := True;
+
+               --  But current tree is not used, it has been posted here
+               --  for futur use. But if replaced right away it should be
+               --  freed.
+               Files (N).Next.Used := 0;
             end if;
-         end loop;
 
-         --  Filename was not found, insert it in the array at position S
+            --  Nothing more to do in this case
 
-         Files (S + 1 .. Index + 1) := Files (S .. Index);
+            Tasking.Unlock;
+            return;
 
-         Index := Index + 1;
-
-         Files (S) := T;
-
-         Old := T.Next;
-         --  Old point to the current C_Info tree
-      end Add;
-
-      ---------
-      -- Get --
-      ---------
-
-      procedure Get
-        (Filename : in     String;
-         Result   :    out Static_Tree)
-      is
-         N : constant Natural := Get (Filename);
-      begin
-         if N = 0 then
-            Result := Null_Static_Tree;
+         elsif Files (N).Filename < L_Filename then
+            S := N + 1;
 
          else
-            Result := (Files (N), Files (N).Next);
-
-            Update_Used_Counter (Result, Mode => Used);
+            E := N - 1;
          end if;
-      end Get;
+      end loop;
 
-      -------------
-      -- Release --
-      -------------
+      --  Filename was not found, insert it in the array at position S
 
-      procedure Release (T : in out Static_Tree) is
-      begin
-         pragma Assert (T.C_Info /= null);
+      Files (S + 1 .. Index + 1) := Files (S .. Index);
 
-         Update_Used_Counter (T, Mode => Released);
+      Index := Index + 1;
 
-         if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
-            pragma Assert (T.Info.Next /= T.C_Info);
-            Release (T.C_Info, Include => False);
-         end if;
-      end Release;
+      Files (S) := T;
 
-   end Prot;
+      Old := T.Next;
+      --  Old point to the current C_Info tree
+
+      Tasking.Unlock;
+   exception
+      when others =>
+         Tasking.Unlock;
+         raise;
+   end Add;
+
+   ---------
+   -- Get --
+   ---------
+
+   procedure Get
+     (Filename : in     String;
+      Result   :    out Static_Tree)
+   is
+      N : constant Natural := Get (Filename);
+   begin
+      Tasking.Lock;
+      if N = 0 then
+         Result := Null_Static_Tree;
+
+      else
+         Result := (Files (N), Files (N).Next);
+
+         Update_Used_Counter (Result, Mode => Used);
+      end if;
+      Tasking.Unlock;
+   exception
+      when others =>
+         Tasking.Unlock;
+         raise;
+   end Get;
+
+   -------------
+   -- Release --
+   -------------
+
+   procedure Release (T : in out Static_Tree) is
+   begin
+      pragma Assert (T.C_Info /= null);
+      Tasking.Lock;
+
+      Update_Used_Counter (T, Mode => Released);
+
+      if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
+         pragma Assert (T.Info.Next /= T.C_Info);
+         Release (T.C_Info, Include => False);
+      end if;
+      Tasking.Unlock;
+   exception
+      when others =>
+         Tasking.Unlock;
+         raise;
+   end Release;
 
    ---------
    -- Get --
@@ -269,15 +288,16 @@ package body Cached_Files is
    ----------------
 
    function Up_To_Date (T : in Tree) return Boolean is
-      use GNAT;
-      use type GNAT.OS_Lib.OS_Time;
+      use Configuration;
 
       P      : Tree;
       Result : Boolean;
    begin
       --  Check main file
 
-      if OS_Lib.File_Time_Stamp (To_String (T.Filename)) /= T.Timestamp then
+      if Configuration.File_Time_Stamp
+        (To_String (T.Filename)) /= T.Timestamp
+      then
          return False;
       end if;
 

@@ -235,7 +235,7 @@ package body Cached_Files is
 
       Tasking.Unlock;
    exception
-      when E : others =>
+      when others =>
          Tasking.Unlock;
          raise;
    end Release;

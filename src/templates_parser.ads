@@ -203,7 +203,11 @@ package Templates_Parser is
      return String;
    --  Parse the Template_File replacing variables' occurences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
-   --  recorded into a cache to quick retrieval.
+   --  recorded into a cache to quick retrieval. If Keep_Unknown_Tags is set
+   --  to True then tags that are not in the translate table are keept
+   --  as-is if it is part of the template data. If this tags is part of a
+   --  condition (in an IF statement tag), the condition will evaluate to
+   --  False.
 
    function Parse
      (Filename          : in String;

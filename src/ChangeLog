@@ -1,12 +1,18 @@
+2005-03-30  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-print_tree.adb:
+	Removes the "_STMT" statement node names suffix for a lighter tree
+	 output.
+
 2005-03-30  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser.adb:
 	(Node) [Inline_Stmt]: Add Before and After field.
-        (Get_Tag_Parameter): Improve to support any number of tag parameter.
-        (Get_Tag_Parameter_Count): New routine.
-        (Parse): Handle the new INLINE tag parameters before/after text.
-        (Analyse): Idem.
-        This new INLINE tag command permit a finer control on the layout.
+	(Get_Tag_Parameter): Improve to support any number of tag parameter.
+	(Get_Tag_Parameter_Count): New routine.
+	(Parse): Handle the new INLINE tag parameters before/after text.
+	(Analyse): Idem.
+	This new INLINE tag command permit a finer control on the layout.
 
 2005-03-28  Pascal Obry  <pascal@obry.org>
 

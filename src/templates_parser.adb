@@ -93,7 +93,10 @@ package body Templates_Parser is
 
    function No_Quote (Str : in String) return String is
    begin
-      if Str (Str'First) = '"' and then Str (Str'Last) = '"' then
+      if Str'Length > 1
+        and then Str (Str'First) = '"'
+        and then Str (Str'Last) = '"'
+      then
          return Str (Str'First + 1 .. Str'Last - 1);
       else
          return Str;

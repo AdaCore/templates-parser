@@ -146,6 +146,8 @@ package body Templates_Parser is
    Else_Token                 : constant String := "@@ELSE@@";
    End_If_Token               : constant String := "@@END_IF@@";
    Include_Token              : constant String := "@@INCLUDE@@";
+   Inline_Token               : constant String := "@@INLINE@@";
+   End_Inline_Token           : constant String := "@@END_INLINE@@";
    A_Terminate_Sections_Token : constant String := "TERMINATE_SECTIONS";
    A_Reverse_Token            : constant String := "REVERSE";
 
@@ -1486,7 +1488,8 @@ package body Templates_Parser is
                   Table_Stmt,    --  a TABLE tag statement
                   Section_Block, --  a TABLE block (common, section)
                   Section_Stmt,  --  a TABLE section
-                  Include_Stmt); --  an INCLUDE tag statement
+                  Include_Stmt,  --  an INCLUDE tag statement
+                  Inline_Stmt);  --  an INLINE tag statement
 
    --  A template line is coded as a suite of Data and Var element.
 
@@ -1561,6 +1564,10 @@ package body Templates_Parser is
          when Include_Stmt =>
             File     : Static_Tree;
             I_Params : Include_Parameters;
+
+         when Inline_Stmt =>
+            Sep     : Unbounded_String;
+            I_Block : Tree;
       end case;
    end record;
 
@@ -2394,28 +2401,30 @@ package body Templates_Parser is
       function Get_Tag_Attribute (K : in Positive) return String;
       --  Returns the Nth tag attribute
 
+      function Get_Tag_Parameter return String;
+      --  Returns the tag parameter found between parenthesis or the empty
+      --  string if not found.
+
       function Is_Stmt
-        (Stmt : in String; With_Attributes : in Boolean := False)
-         return Boolean;
+        (Stmt : in String; Extended : in Boolean := False) return Boolean;
       pragma Inline (Is_Stmt);
       --  Returns True is Stmt is found at the begining of the current line
-      --  ignoring leading blank characters.
+      --  ignoring leading blank characters. If Extended is True it recognize
+      --  statement attributes or parameter.
 
       function EOF return Boolean;
       pragma Inline (EOF);
       --  Returns True if the end of file has been reach.
 
       function Build_Include_Pathname
-        (Include_Filename : in Unbounded_String)
-         return String;
+        (Include_Filename : in Unbounded_String) return String;
       --  Returns the full pathname to the include file (Include_Filename). It
       --  returns Include_Filename if there is a pathname specified, or the
       --  pathname of the main template file as a prefix of the include
       --  filename.
 
       function Load_Include_Parameters
-        (Parameters : in String)
-         return Include_Parameters;
+        (Parameters : in String) return Include_Parameters;
       --  Returns the include parameters found by parsing Parameters
 
       type Parse_Mode is
@@ -2426,7 +2435,8 @@ package body Templates_Parser is
          Parse_Table,            --  in a table statement
          Parse_Block,            --  in a table block statement
          Parse_Section,          --  in new section
-         Parse_Section_Content   --  in section content
+         Parse_Section_Content,  --  in section content
+         Parse_Inline            --  in an inline block statement
         );
 
       function Parse
@@ -2615,7 +2625,7 @@ package body Templates_Parser is
       function Get_Tag_Attribute (K : in Positive) return String is
          S : Positive := First + 2;
          L : constant Natural :=
-               Strings.Fixed.Index (Buffer (S .. Buffer'Last), "@@");
+               Strings.Fixed.Index (Buffer (S .. Last), "@@");
          E : Natural;
       begin
          for I in 1 .. K loop
@@ -2633,23 +2643,50 @@ package body Templates_Parser is
          return Buffer (S + 1 .. E - 1);
       end Get_Tag_Attribute;
 
+      -----------------------
+      -- Get_Tag_Parameter --
+      -----------------------
+
+      function Get_Tag_Parameter return String is
+         L : constant Natural :=
+               Strings.Fixed.Index (Buffer (First .. Last), ")@@");
+         I : Natural;
+      begin
+         if L = 0 then
+            return "";
+
+         else
+            I := Strings.Fixed.Index (Buffer (First .. L), "(");
+
+            if I = 0 then
+               Fatal_Error ("Missing parenthesis in tag command");
+            else
+               return Buffer (I + 1 .. L - 1);
+            end if;
+         end if;
+      end Get_Tag_Parameter;
+
       -------------
       -- Is_Stmt --
       -------------
 
       function Is_Stmt
-        (Stmt : in String; With_Attributes : in Boolean := False)
-         return Boolean
+        (Stmt : in String; Extended : in Boolean := False) return Boolean
       is
          Offset : Natural := 0;
       begin
-         if With_Attributes then
+         if Extended then
             Offset := 2;
          end if;
 
          return Last /= 0
            and then Buffer (First .. First + Stmt'Length - 1 - Offset) =
-                      Stmt (Stmt'First .. Stmt'Last - Offset);
+                      Stmt (Stmt'First .. Stmt'Last - Offset)
+           and then (not Extended
+                     or else
+                       (Buffer (First + Stmt'Length - Offset) = '''
+                        or else Buffer (First + Stmt'Length - Offset) = '('
+                        or else Buffer (First + Stmt'Length - Offset) = '@'));
       end Is_Stmt;
 
       -----------------------------
@@ -2886,6 +2923,11 @@ package body Templates_Parser is
          pragma Inline (Count_Blocks);
          --  Returns the number of sections in T (Table_Stmt)
 
+         procedure Rewrite_Inlined_Block (T : in Tree; Sep : in String);
+         --  Recursive procedure that rewrite all text nodes in an inlined
+         --  block. In such a block the spaces before and after text are
+         --  meaningless and LF are replaced by the given separator.
+
          ------------------
          -- Count_Blocks --
          ------------------
@@ -2916,6 +2958,91 @@ package body Templates_Parser is
             return C;
          end Count_Sections;
 
+         ---------------------------
+         -- Rewrite_Inlined_Block --
+         ---------------------------
+
+         procedure Rewrite_Inlined_Block (T : in Tree; Sep : in String) is
+
+            procedure Rewrite (T : in Tree; Last, In_Table : in Boolean);
+            --  Last is set to True if we are checking the last node
+
+            -------------
+            -- Rewrite --
+            -------------
+
+            procedure Rewrite (T : in Tree; Last, In_Table : in Boolean) is
+               use type Data.Tree;
+               N : Tree := T;
+               D : Data.Tree;
+            begin
+               while N /= null loop
+                  case N.Kind is
+                     when Text =>
+                        D := N.Text;
+
+                        while D /= null loop
+                           case D.Kind is
+                              when Data.Text =>
+                                 declare
+                                    Len : constant Natural := Length (D.Value);
+                                 begin
+                                    if Element (D.Value, Len) = ASCII.LF
+                                      and then
+                                        (not Last
+                                         or else N.Next /= null
+                                         or else D.Next /= null
+                                         or else In_Table)
+                                    then
+                                       Delete (D.Value, Len, Len);
+                                       Trim (D.Value, Blank, Blank);
+                                       if not In_Table then
+                                          --  Inside a table we do no want to
+                                          --  add the separator, this must be
+                                          --  done during the rendering as we
+                                          --  need to have the actual vector
+                                          --  values.
+                                          Append (D.Value, Sep);
+                                       end if;
+
+                                    else
+                                       Trim (D.Value, Blank, Blank);
+                                    end if;
+                                 end;
+
+                              when Data.Var  =>
+                                 null;
+                           end case;
+
+                           D := D.Next;
+                        end loop;
+
+                     when If_Stmt =>
+                        Rewrite (N.N_True, N.Next = null, In_Table);
+                        Rewrite (N.N_False, N.Next = null, In_Table);
+
+                     when Table_Stmt =>
+                        Rewrite (N.Blocks, N.Next = null, In_Table => True);
+
+                     when Section_Block =>
+                        Rewrite (N.Common, Last, In_Table);
+                        Rewrite (N.Sections, Last, In_Table);
+
+                     when Section_Stmt =>
+                        Rewrite (N.N_Section, Last, In_Table);
+
+                     when others =>
+                        null;
+                  end case;
+
+                  N := N.Next;
+               end loop;
+            end Rewrite;
+
+         begin
+            Rewrite (T, Last => True, In_Table => False);
+         end Rewrite_Inlined_Block;
+
          T : Tree;
 
       begin
@@ -2939,6 +3066,16 @@ package body Templates_Parser is
                if Is_Stmt (End_Table_Token) then
                   Fatal_Error
                     ("@@END_TABLE@@ found outside a @@TABLE@@ statement");
+               end if;
+
+               if Is_Stmt (End_Inline_Token) then
+                  Fatal_Error
+                    ("@@END_INLINE@@ found outside an @@INLINE@@ statement");
+               end if;
+
+               if Is_Stmt (End_Token) then
+                  Fatal_Error
+                    ("@@END@@ found outside a @@BEGIN@@ block statement");
                end if;
 
             when Parse_If =>
@@ -3087,6 +3224,11 @@ package body Templates_Parser is
                if Is_Stmt (End_If_Token) then
                   Fatal_Error ("@@END_IF@@ found, @@END_TABLE@@ expected");
                end if;
+
+            when Parse_Inline =>
+               if Is_Stmt (End_Inline_Token) then
+                  return null;
+               end if;
          end case;
 
          if Is_Stmt (If_Token) or else Is_Stmt (Elsif_Token) then
@@ -3114,7 +3256,7 @@ package body Templates_Parser is
 
             return T;
 
-         elsif Is_Stmt (Table_Token, With_Attributes => True) then
+         elsif Is_Stmt (Table_Token, Extended => True) then
             T := new Node (Table_Stmt);
 
             T.Line := Line;
@@ -3236,6 +3378,31 @@ package body Templates_Parser is
 
             return T;
 
+         elsif Is_Stmt (Inline_Token, Extended => True) then
+            T := new Node (Inline_Stmt);
+
+            declare
+               Parameter : constant String := Get_Tag_Parameter;
+            begin
+               if Parameter = "" then
+                  --  No parameter, the default is a single space
+                  T.Sep := To_Unbounded_String (" ");
+               else
+                  T.Sep := To_Unbounded_String (Parameter);
+               end if;
+            end;
+
+            T.I_Block := Parse (Parse_Inline);
+
+            --  Now we have parsed the full tree to inline. Rewrite this tree
+            --  to replace all text node by a stripped version.
+
+            Rewrite_Inlined_Block (T.I_Block, To_String (T.Sep));
+
+            T.Next := Parse (Mode);
+
+            return T;
+
          else
             declare
                Root, N : Tree;
@@ -3256,7 +3423,7 @@ package body Templates_Parser is
                     and then (not Input.End_Of_File (File)
                                 or else Include_File)
                   then
-                     --  Add a LF is the read line with terminated by a LF. Do
+                     --  Add a LF if the read line is terminated by a LF. Do
                      --  not add this LF if we reach the end of file except for
                      --  included files.
 
@@ -3277,12 +3444,14 @@ package body Templates_Parser is
                     or else Is_Stmt (Else_Token)
                     or else Is_Stmt (End_If_Token)
                     or else Is_Stmt (Include_Token)
-                    or else Is_Stmt (Table_Token, With_Attributes => True)
+                    or else Is_Stmt (Table_Token, Extended => True)
                     or else Is_Stmt (Section_Token)
                     or else Is_Stmt (End_Table_Token)
                     or else Is_Stmt (Begin_Token)
                     or else Is_Stmt (End_Token)
                     or else Is_Stmt (Set_Token)
+                    or else Is_Stmt (Inline_Token, Extended => True)
+                    or else Is_Stmt (End_Inline_Token)
                   then
                      T.Next := Parse (Mode, No_Read => True);
                      return Root;
@@ -3434,6 +3603,7 @@ package body Templates_Parser is
          Max_Expand     : Natural;
          Reverse_Index  : Boolean;
          Table_Level    : Natural;
+         Inline_Sep     : Unbounded_String;
          Blocks_Count   : Natural;
          I_Params       : Include_Parameters;
          F_Params       : Filter.Include_Parameters;
@@ -3442,7 +3612,7 @@ package body Templates_Parser is
       end record;
 
       Empty_State : constant Parse_State
-        := ((1 .. 10 => 0), 0, 0, False, 0, 0,
+        := ((1 .. 10 => 0), 0, 0, False, 0, Null_Unbounded_String, 0,
             No_Parameter, Filter.No_Include_Parameters,
             Empty_Block_State, null);
 
@@ -3451,6 +3621,9 @@ package body Templates_Parser is
       Buffer  : String (1 .. 4 * 1_024);
       Last    : Natural := 0;
       --  Cache to avoid too many reallocation using Append on Results above
+
+      Last_Was_Sep : Boolean := False;
+      --  Used to avoid two consecutive separators
 
       Now     : Calendar.Time;
       D_Map   : Definitions.Map;
@@ -3508,6 +3681,11 @@ package body Templates_Parser is
            (Var : in Tag_Var; State : in Parse_State) return String;
          --  As above but for an include variable
 
+         procedure Add (S : in String; Sep : in Boolean := False);
+         --  Add S into Results (using Buffer cache if possible). If Sep is
+         --  true S is a separator. We keep track of this as we do not want to
+         --  have two separators side by side.
+
          procedure Flush;
          pragma Inline (Flush);
          --  Flush buffer to Results
@@ -3520,6 +3698,31 @@ package body Templates_Parser is
          --  value.
 
          L_State : aliased constant Parse_State := State;
+
+         ---------
+         -- Add --
+         ---------
+
+         procedure Add (S : in String; Sep : in Boolean := False) is
+         begin
+            if Sep and Last_Was_Sep then
+               return;
+            end if;
+
+            if Last + S'Length > Buffer'Last then
+               --  Not enough cache space, flush buffer
+               Flush;
+            end if;
+
+            if S'Length >= Buffer'Length then
+               Append (Results, S);
+            else
+               Buffer (Last + 1 .. Last + S'Length) := S;
+               Last := Last + S'Length;
+            end if;
+
+            Last_Was_Sep := Sep;
+         end Add;
 
          ------------------------
          -- Flatten_Parameter  --
@@ -3895,28 +4098,6 @@ package body Templates_Parser is
 
          procedure Analyze (D : in Data.Tree) is
             use type Data.Tree;
-
-            procedure Add (S : in String);
-            --  Add S into Results (using Buffer cache if possible)
-
-            ---------
-            -- Add --
-            ---------
-
-            procedure Add (S : in String) is
-            begin
-               if Last + S'Length > Buffer'Last then
-                  --  Not enough cache space, flush buffer
-                  Flush;
-               end if;
-
-               if S'Length >= Buffer'Length then
-                  Append (Results, S);
-               else
-                  Buffer (Last + 1 .. Last + S'Length) := S;
-                  Last := Last + S'Length;
-               end if;
-            end Add;
 
             T : Data.Tree := D;
 
@@ -4400,6 +4581,11 @@ package body Templates_Parser is
                         Natural'Max
                           (Check (T.I_Params),
                            Get_Max_Lines (T.Next, N)));
+
+                  when Inline_Stmt =>
+                     return Natural'Max
+                       (Get_Max_Lines (T.Next, N),
+                        Get_Max_Lines (T.I_Block, N));
                end case;
             end Get_Max_Lines;
 
@@ -4511,12 +4697,19 @@ package body Templates_Parser is
                                         Max_Lines, Max_Expand,
                                         T.Reverse_Index,
                                         State.Table_Level + 1,
+                                        State.Inline_Sep,
                                         T.Blocks_Count,
                                         State.I_Params,
                                         State.F_Params,
                                         Empty_Block_State,
                                         L_State'Unchecked_Access));
                end;
+
+               if State.Inline_Sep /= Null_Unbounded_String
+                 and then T.Next /= null
+               then
+                  Add (To_String (State.Inline_Sep), Sep => True);
+               end if;
 
                Analyze (T.Next, State);
 
@@ -4558,11 +4751,19 @@ package body Templates_Parser is
                                            State.Max_Lines, State.Max_Expand,
                                            State.Reverse_Index,
                                            State.Table_Level,
+                                           State.Inline_Sep,
                                            State.Blocks_Count,
                                            State.I_Params,
                                            State.F_Params,
                                            Empty_Block_State,
                                            L_State'Unchecked_Access));
+
+                           if State.Inline_Sep /= Null_Unbounded_String
+                             and then Block.Common /= null
+                             and then Block.Sections /= null
+                           then
+                              Add (To_String (State.Inline_Sep), Sep => True);
+                           end if;
 
                            Analyze
                              (Block.Sections,
@@ -4570,11 +4771,20 @@ package body Templates_Parser is
                                            State.Max_Lines, State.Max_Expand,
                                            State.Reverse_Index,
                                            State.Table_Level,
+                                           State.Inline_Sep,
                                            State.Blocks_Count,
                                            State.I_Params,
                                            State.F_Params,
                                            B_State (B),
                                            L_State'Unchecked_Access));
+
+                           if State.Inline_Sep /= Null_Unbounded_String
+                             and then (K /= State.Max_Expand
+                                       or else Block.Next /= null)
+                           then
+                              Add (To_String (State.Inline_Sep), Sep => True);
+                           end if;
+
                            Block := Block.Next;
                            B := B + 1;
                         end loop;
@@ -4589,6 +4799,7 @@ package body Templates_Parser is
                                State.Max_Lines, State.Max_Expand,
                                State.Reverse_Index,
                                State.Table_Level,
+                               State.Inline_Sep,
                                State.Blocks_Count,
                                State.I_Params,
                                State.F_Params,
@@ -4600,9 +4811,25 @@ package body Templates_Parser is
                         Parse_State'(State.Cursor,
                                      State.Max_Lines, State.Max_Expand,
                                      State.Reverse_Index,
-                                     State.Table_Level, State.Blocks_Count,
+                                     State.Table_Level,
+                                     State.Inline_Sep,
+                                     State.Blocks_Count,
                                      T.I_Params,
                                      Flatten_Parameters (T.I_Params),
+                                     State.Block,
+                                     L_State'Unchecked_Access));
+               Analyze (T.Next, State);
+
+            when Inline_Stmt =>
+               Analyze (T.I_Block,
+                        Parse_State'(State.Cursor,
+                                     State.Max_Lines, State.Max_Expand,
+                                     State.Reverse_Index,
+                                     State.Table_Level,
+                                     T.Sep,
+                                     State.Blocks_Count,
+                                     State.I_Params,
+                                     State.F_Params,
                                      State.Block,
                                      L_State'Unchecked_Access));
                Analyze (T.Next, State);
@@ -4681,7 +4908,7 @@ package body Templates_Parser is
 
          when Set_Stmt =>
             Definitions.Release (T.Def);
-            Release (T.Next);
+            Release (T.Next, Include);
 
          when If_Stmt  =>
             Expr.Release (T.Cond);
@@ -4712,6 +4939,10 @@ package body Templates_Parser is
                end loop;
 
             end if;
+            Release (T.Next, Include);
+
+         when Inline_Stmt =>
+            Release (T.I_Block, Include);
             Release (T.Next, Include);
       end case;
 

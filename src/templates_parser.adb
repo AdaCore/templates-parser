@@ -2368,12 +2368,6 @@ package body Templates_Parser is
             C : Natural := 0;
             S : Tree    := T;
          begin
-            if T = null then
-               --  No section found, in this case we have at least on common
-               --  section, even if this one is empty
-               return 1;
-            end if;
-
             while S /= null loop
                C := C + 1;
                S := S.N_Section;
@@ -2456,6 +2450,11 @@ package body Templates_Parser is
                begin
                   Tmp := Parse (Parse_Section);
 
+                  if Tmp = null then
+                     --  This section is empty
+                     return null;
+                  end if;
+
                   if Is_Stmt (Begin_Token) then
                      --  It means that the section parsed above was common
                      T.Common   := Tmp.Next;
@@ -2476,6 +2475,14 @@ package body Templates_Parser is
 
                T.Sections_Count := Count_Sections (T.Sections);
 
+               if T.Sections_Count = 1 and then T.Common = null then
+                  --  A single section and no common section, rewrite it as a
+                  --  simple common section.
+                  T.Common := T.Sections.Next;
+                  Free (T.Sections);
+                  T.Sections_Count := 0;
+               end if;
+
                if Is_Stmt (End_Table_Token) then
                   T.Next := null;
                else
@@ -2494,6 +2501,14 @@ package body Templates_Parser is
                T.Line := Line;
 
                T.Next := Parse (Parse_Section_Content);
+
+               if Is_Stmt (End_Table_Token) and then T.Next = null then
+                  --  Check if this section was empty, this happen when
+                  --  we parse a section after @@END@@ followed by the end
+                  --  of the table.
+                  Free (T);
+                  return null;
+               end if;
 
                if Is_Stmt (End_Table_Token)
                  or else Is_Stmt (Begin_Token)
@@ -2563,12 +2578,43 @@ package body Templates_Parser is
 
             T.Line := Line;
 
-            T.Terminate_Sections
-              := Get_First_Parameter = Terminate_Sections_Token;
+            declare
+               Param : constant Unbounded_String := Get_First_Parameter;
+            begin
+               if Param = Null_Unbounded_String then
+                  T.Terminate_Sections := False;
+               elsif Param = Terminate_Sections_Token then
+                  T.Terminate_Sections := True;
+               else
+                  Fatal_Error ("Unknown table parameter " & To_String (Param));
+               end if;
+            end;
 
             T.Blocks       := Parse (Parse_Block);
             T.Next         := Parse (Mode);
             T.Blocks_Count := Count_Blocks (T.Blocks);
+
+            --  Check now that if we have TERMINATE_SECTIONS option set and
+            --  that there is more than one block, all blocks have the same
+            --  number of section.
+
+            if T.Terminate_Sections and then T.Blocks_Count > 1 then
+               declare
+                  Size : constant Positive := T.Blocks.Sections_Count;
+                  B    : Tree              := T.Blocks.Next;
+               begin
+                  while B /= null loop
+                     if B.Sections_Count /= Size
+                       and then B.Sections_Count /= 0
+                     then
+                        Fatal_Error
+                          ("All sections must have the same size "
+                           & "when using TERMINATE_SECTIONS option");
+                     end if;
+                     B := B.Next;
+                  end loop;
+               end;
+            end if;
 
             return T;
 

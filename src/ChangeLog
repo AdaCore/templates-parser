@@ -1,3 +1,14 @@
+2005-02-28  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-filter.adb:
+	(Web_Encode_Token): New constant.
+	(Table): Add Web_Encode.
+	(Web_Encode): New routine.
+
+	* templates_parser.adb:
+	(Mode): Add Web_Encode.
+	(Web_Encode): New routine used to implement the new WEB_ENCODE filter.
+
 2005-02-17  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser-input.adb:

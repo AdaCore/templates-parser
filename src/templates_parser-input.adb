@@ -31,15 +31,22 @@
 --  This is the standard version to be used with the standalone version of
 --  Templates_Parser.
 
-with Ada.Text_IO;
+with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Deallocation;
 
 package body Templates_Parser.Input is
 
    use Ada;
+   use Ada.Streams;
+
+   Buffer_Size : constant := 8_192;
 
    type File_Record is record
-      File : Text_IO.File_Type;
+      File    : Stream_IO.File_Type;
+      LFT     : Boolean; -- LF terminated state
+      Buffer  : Streams.Stream_Element_Array (1 .. Buffer_Size);
+      Current : Streams.Stream_Element_Offset;
+      Last    : Streams.Stream_Element_Count;
    end record;
 
    procedure Free is new Ada.Unchecked_Deallocation (File_Record, File_Type);
@@ -51,9 +58,9 @@ package body Templates_Parser.Input is
    procedure Close (File : in out File_Type) is
    begin
       if File = null then
-         raise Text_IO.Status_Error;
+         raise Stream_IO.Status_Error;
       else
-         Text_IO.Close (File.File);
+         Stream_IO.Close (File.File);
       end if;
       Free (File);
    exception
@@ -68,11 +75,25 @@ package body Templates_Parser.Input is
    function End_Of_File (File : in File_Type) return Boolean is
    begin
       if File = null then
-         raise Text_IO.Status_Error;
+         raise Stream_IO.Status_Error;
       else
-         return Text_IO.End_Of_File (File.File);
+         return Stream_IO.End_Of_File (File.File)
+           and then File.Current > File.Last;
       end if;
    end End_Of_File;
+
+   -------------------
+   -- LF_Terminated --
+   -------------------
+
+   function LF_Terminated (File : in File_Type) return Boolean is
+   begin
+      if File = null then
+         raise Stream_IO.Status_Error;
+      else
+         return File.LFT;
+      end if;
+   end LF_Terminated;
 
    --------------
    -- Get_Line --
@@ -81,12 +102,69 @@ package body Templates_Parser.Input is
    procedure Get_Line
      (File   : in     File_Type;
       Buffer :    out String;
-      Last   :    out Natural) is
+      Last   :    out Natural)
+   is
+      C : Character;
+      --  Current character.
+
+      procedure Next_Char;
+      --  Set C with next character in the file, update Resource.Last.
+
+      ---------------
+      -- Next_Char --
+      ---------------
+
+      procedure Next_Char is
+      begin
+         if File.Current > File.Last then
+            Stream_IO.Read (File.File, File.Buffer, File.Last);
+            File.Current := File.Buffer'First;
+         end if;
+
+         C := Character'Val (File.Buffer (File.Current));
+         File.Current := File.Current + 1;
+      end Next_Char;
+
    begin
       if File = null then
-         raise Text_IO.Status_Error;
+         raise Stream_IO.Status_Error;
+
       else
-         Text_IO.Get_Line (File.File, Buffer, Last);
+         Last     := 0;
+         File.LFT := False;
+
+         loop
+            Next_Char;
+
+            if File.Last < File.Buffer'First then
+               exit;
+
+            else
+               if C = ASCII.LF then         -- UNIX style line terminator
+                  File.LFT := True;
+                  exit;
+
+               elsif C = ASCII.CR then      -- DOS style line terminator
+                  Next_Char;
+
+                  if File.Last < File.Buffer'First then -- no more char
+                     exit;
+
+                  elsif  C = ASCII.LF then  --  Ok, found CR+LF
+                     File.LFT := True;
+                     exit;
+
+                  else                      --  CR, but no LF, continue reading
+                     Last := Last + 1;
+                     Buffer (Last) := C;
+                  end if;
+
+               else
+                  Last := Last + 1;
+                  Buffer (Last) := C;
+               end if;
+            end if;
+         end loop;
       end if;
    end Get_Line;
 
@@ -104,7 +182,11 @@ package body Templates_Parser.Input is
       end if;
 
       File := new File_Record;
-      Text_IO.Open (File.File, Text_IO.In_File, Name, Form);
+
+      File.Current := 1;
+      File.Last    := 0;
+
+      Stream_IO.Open (File.File, Stream_IO.In_File, Name, Form);
    end Open;
 
 end Templates_Parser.Input;

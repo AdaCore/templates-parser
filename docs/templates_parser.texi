@@ -15,7 +15,7 @@
 @title Templates Parser User's Guide
 @subtitle $Revision$
 @subtitle Date: @today{}
-@author Pascal Obry (pascal@@obry.org)
+@author Pascal Obry (pascal@@obry.net)
 
 @sp 1
 @url{http://www.obry.org}
@@ -30,7 +30,7 @@
 <font size="+2">
 <p>$Revision$
 <p>Date: @today{}
-<p>Pascal Obry (pascal@@obry.org)
+<p>Pascal Obry (pascal@@obry.net)
 </font>
 
 <font size="+1">

@@ -56,28 +56,29 @@ package Templates_Parser is
                    Begin_Tag : in String    := Default_Begin_Tag;
                    End_Tag   : in String    := Default_End_Tag;
                    Separator : in Character := Default_Separator)
-                   return Association;
+                  return Association;
    --  build an Association to be added to a Translate_Table. Is_Vector is
-   --  set to true to build a vector variable. The Separator can be used to
-   --  set the character used between values of a vector variable.
+   --  set to true to build a vector variable. Separator can be used to
+   --  change the character used between values of a vector variable. If
+   --  Is_Vector is false then Separator is ignored.
 
    function Assoc (Variable  : in String;
                    Value     : in Boolean;
                    Begin_Tag : in String    := Default_Begin_Tag;
                    End_Tag   : in String    := Default_End_Tag)
-                   return Association;
+                  return Association;
    --  build an Association to be added to a Translate_Table. It set an assoc
    --  for variable to "TRUE" if value is true and "FALSE" otherwise.
 
    function Parse (Template_Filename : in String;
                    Translations      : in Translate_Table := No_Translation)
-                   return String;
+                  return String;
    --  parse the Template_File replacing variables' occurences by the
    --  corresponding values.
 
    function Parse (Template     : in Template_File;
                    Translations : in Translate_Table := No_Translation)
-                   return String;
+                  return String;
    --  parse the Template replacing variables' occurences by the
    --  corresponding values.
 

@@ -224,6 +224,9 @@ package body Templates_Parser is
          --  Idem as above, but replace all matches. This equivalent to the
          --  well known "s/<regexp>/<new value>/g" sed command.
 
+         Replace_Param,
+         --  Idem as @_ADD_PARAM(key=value):DEL_PARAM(key):VAR_@
+
          Invert,
          --  Reverse string.
 
@@ -454,6 +457,12 @@ package body Templates_Parser is
          T : in Translate_Table := No_Translation)
          return String;
 
+      function Replace_Param
+        (S : in String;
+         P : in Parameter_Data  := No_Parameter;
+         T : in Translate_Table := No_Translation)
+         return String;
+
       function Reverse_Data
         (S : in String;
          P : in Parameter_Data  := No_Parameter;
@@ -636,7 +645,7 @@ package body Templates_Parser is
         := Strings.Fixed.Index (Str, ":", Strings.Backward);
       --  Last filter separator
 
-      A_Sep : constant Natural
+      A_Sep : Natural
         := Strings.Fixed.Index (Str, "'", Strings.Backward);
       --  Attribute separator
 
@@ -905,6 +914,11 @@ package body Templates_Parser is
       end Get_Var_Name;
 
    begin
+      if A_Sep <= F_Sep then
+         --  This is not an attribute in fact, but something like:
+         --  Filter(that's it):VAR
+         A_Sep := 0;
+      end if;
       return (Get_Var_Name (Str), Get_Filter_Set (Str), Get_Attribute (Str));
    end Build;
 

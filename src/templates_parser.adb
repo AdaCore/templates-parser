@@ -57,6 +57,7 @@ package body Templates_Parser is
    Section_Token             : constant String := "@@SECTION@@";
    End_Table_Token           : constant String := "@@END_TABLE@@";
    If_Token                  : constant String := "@@IF@@";
+   Elsif_Token               : constant String := "@@ELSIF@@";
    Else_Token                : constant String := "@@ELSE@@";
    End_If_Token              : constant String := "@@END_IF@@";
    Include_Token             : constant String := "@@INCLUDE@@";
@@ -1827,6 +1828,7 @@ package body Templates_Parser is
       type Parse_Mode is
         (Parse_Std,              --  in standard line
          Parse_If,               --  in a if statement
+         Parse_Elsif,            --  in elsif part of a if statement
          Parse_Else,             --  in else part of a if statement
          Parse_Table,            --  in a table statement
          Parse_Section,          --  in new section
@@ -1961,7 +1963,7 @@ package body Templates_Parser is
       function Parse (Mode : in Parse_Mode) return Tree is
          T : Tree;
       begin
-         if Mode /= Parse_Section then
+         if Mode /= Parse_Section and then Mode /= Parse_Elsif then
             if Get_Next_Line then
                return null;
             end if;
@@ -1969,10 +1971,31 @@ package body Templates_Parser is
 
          case Mode is
             when Parse_Std =>
-               null;
+               if Is_Stmt (End_If_Token) then
+                  Fatal_Error ("@@END_IF@@ found outside an @@IF@@ statement");
+               end if;
+
+               if Is_Stmt (End_Table_Token) then
+                  Fatal_Error
+                    ("@@END_TABLE@@ found outside a @@TABLE@@ statement");
+               end if;
 
             when Parse_If =>
-               if Is_Stmt (Else_Token) or else Is_Stmt (End_If_Token) then
+               if Is_Stmt (Else_Token)
+                 or else Is_Stmt (Elsif_Token)
+                 or else Is_Stmt (End_If_Token)
+               then
+                  return null;
+               end if;
+
+               if Is_Stmt (End_Table_Token) then
+                  Fatal_Error ("@@END_TABLE@@ found, @@END_IF@@ expected");
+               end if;
+
+            when Parse_Elsif =>
+               if Is_Stmt (Else_Token)
+                 or else Is_Stmt (End_If_Token)
+               then
                   return null;
                end if;
 
@@ -1987,6 +2010,10 @@ package body Templates_Parser is
 
                if Is_Stmt (End_Table_Token) then
                   Fatal_Error ("@@END_TABLE@@ found, @@END_IF@@ expected");
+               end if;
+
+               if Is_Stmt (Elsif_Token) then
+                  Fatal_Error ("@@ELSIF@@ found after @@ELSE@@");
                end if;
 
             when Parse_Section =>
@@ -2031,7 +2058,7 @@ package body Templates_Parser is
 
          end case;
 
-         if Is_Stmt (If_Token) then
+         if Is_Stmt (If_Token) or else Is_Stmt (Elsif_Token) then
             T := new Node (If_Stmt);
 
             T.Line := Line;
@@ -2041,8 +2068,13 @@ package body Templates_Parser is
 
             if Is_Stmt (End_If_Token) then
                T.N_False := null;
+
+            elsif Is_Stmt (Elsif_Token) then
+               T.N_False := Parse (Parse_Elsif);
+
             else
                T.N_False := Parse (Parse_Else);
+
             end if;
 
             T.Next    := Parse (Mode);

@@ -40,9 +40,12 @@ package body Templates_Parser is
    use Ada;
    use Ada.Strings;
 
+   Max_Section     : constant := 10;
+
    subtype Buffer_Type is String (1 .. 1_024);
 
    Table_Token     : constant String := "@@TABLE@@";
+   Section_Token   : constant String := "@@SECTION@@";
    End_Table_Token : constant String := "@@END_TABLE@@";
    If_Token        : constant String := "@@IF@@";
    Else_Token      : constant String := "@@ELSE@@";
@@ -50,6 +53,7 @@ package body Templates_Parser is
    Include_Token   : constant String := "@@INCLUDE@@";
 
    subtype Table_Range     is Positive range Table_Token'Range;
+   subtype Section_Range   is Positive range Section_Token'Range;
    subtype End_Table_Range is Positive range End_Table_Token'Range;
    subtype If_Range        is Positive range If_Token'Range;
    subtype Else_Range      is Positive range Else_Token'Range;
@@ -104,6 +108,10 @@ package body Templates_Parser is
       Table_Level  : Natural := 0;
       If_Level     : Natural := 0;
 
+      Max_Lines    : Natural := 0;
+      --  maximum number if lines in the table. This variable is always set to
+      --  0 outside of a table.
+
       -----------------
       -- Fatal_Error --
       -----------------
@@ -141,43 +149,71 @@ package body Templates_Parser is
       -- Translate --
       ---------------
 
-      --  Translate all tags in Str.
+      procedure Translate (Str : in out Unbounded_String;
+                           Tag : in     String;
+                           To  : in     String);
+      --  Translate all tags named Tag in Str by To
 
-      procedure Translate (Str : in out Unbounded_String) is
-         Pos : Natural;
-      begin
-         for K in Translations'Range loop
+      procedure Translate (Str : in out Unbounded_String);
+      --  Translate all tags in the translations table and the specials tags
+      --  in Str by their corresponding value.
 
-            loop
-               Pos := Index
-                 (Str,
-                  To_String (Translations (K).Variable));
-
-               exit when Pos = 0;
-
-               Replace_Slice
-                 (Str,
-                  Pos,
-                  Pos + Length (Translations (K).Variable) - 1,
-                  To_String (Translations (K).Value));
-            end loop;
-
-         end loop;
-      end Translate;
-
+      procedure Translate (Str  : in out Unbounded_String;
+                           N    : in     Positive;
+                           Stop :    out Boolean);
       --  Translate all tags in Str with the Nth Tag's value. This procedure
       --  is used to build the tables. Tags used in a table are a set of
       --  values separated by a special character.
+
+      procedure Translate (Str : in out Unbounded_String;
+                           Tag : in     String;
+                           To  : in     String) is
+         Pos : Natural;
+      begin
+         loop
+            Pos := Index (Str, Tag);
+
+            exit when Pos = 0;
+
+            if Pos /= 0 then
+               Replace_Slice (Str, Pos, Pos + Tag'Length - 1, To);
+            end if;
+         end loop;
+      end Translate;
+
+      procedure Translate (Str : in out Unbounded_String) is
+      begin
+         for K in Translations'Range loop
+
+            Translate (Str,
+                       To_String (Translations (K).Variable),
+                       To_String (Translations (K).Value));
+         end loop;
+
+         Translate (Str,
+                    Tag => "@@_NUMBER_LINE_@@",
+                    To  => Fixed.Trim (Positive'Image (Max_Lines),
+                                       Strings.Both));
+
+         Translate (Str,
+                    Tag => "@@_TABLE_LEVEL_@@",
+                    To  => Fixed.Trim (Positive'Image (Table_Level),
+                                       Strings.Both));
+      end Translate;
 
       procedure Translate (Str  : in out Unbounded_String;
                            N    : in     Positive;
                            Stop :    out Boolean)
       is
          use Strings_Cutter;
-         Pos : Natural;
-         CS  : Cutted_String;
+         Pos   : Natural;
+         CS    : Cutted_String;
+
       begin
          Stop := False;
+
+         --  for every entry in the translation table
+
          for K in Translations'Range loop
 
             loop
@@ -192,6 +228,7 @@ package body Templates_Parser is
                        String'(1 => Translations (K).Separator));
 
                --  we stop when we reach the maximum number of field
+
                Stop := (N = Field_Count (CS) or else Field_Count (CS) = 0);
 
                --  if there is no value for the tag, just replace it with an
@@ -215,6 +252,23 @@ package body Templates_Parser is
             end loop;
 
          end loop;
+
+         --  translate special tags
+
+         Translate (Str,
+                    Tag => "@@_TABLE_LINE_@@",
+                    To  => Fixed.Trim (Positive'Image (N), Strings.Both));
+
+         Translate (Str,
+                    Tag => "@@_NUMBER_LINE_@@",
+                    To  => Fixed.Trim (Positive'Image (Max_Lines),
+                                       Strings.Both));
+
+         Translate (Str,
+                    Tag => "@@_TABLE_LEVEL_@@",
+                    To  => Fixed.Trim (Positive'Image (Table_Level),
+                                       Strings.Both));
+
       end Translate;
 
       --  variables used by Parse
@@ -274,12 +328,39 @@ package body Templates_Parser is
          --  positioned on the line just after the Include_Token line.
 
          function Parse_Table return String is
+
+            type Sections is array (Positive range <>) of Unbounded_String;
+
             Buffer        : Buffer_Type;
             Trimed_Buffer : Buffer_Type;
             Last          : Natural;
-            Lines         : Unbounded_String;
+            Lines         : Sections (1 .. Max_Section);
             Str           : Unbounded_String;
             Result        : Unbounded_String;
+            Section       : Positive := 1;
+
+            function Count_Lines (Lines : Sections) return Natural is
+               use Strings_Cutter;
+               Max_Values : Natural := 0;
+               CS         : Cutted_String;
+            begin
+               for S in Lines'Range loop
+                  for T in Translations'Range loop
+                     if Index (Lines (S),
+                               To_String (Translations (T).Variable)) /= 0
+                     then
+                        Create (CS,
+                                To_String (Translations (T).Value),
+                                String'(1 => Translations (T).Separator));
+                        Max_Values := Natural'Max (Max_Values,
+                                                   Field_Count (CS));
+                        Destroy (CS);
+                     end if;
+                  end loop;
+               end loop;
+               return Max_Values;
+            end Count_Lines;
+
          begin
 
             Table_Level := Table_Level + 1;
@@ -288,18 +369,19 @@ package body Templates_Parser is
                Get_Next_Line (Buffer, Trimed_Buffer, Last);
 
                if Last = 0 then
-                  Lines := Lines & ASCII.LF;
+                  --  this is an empty line
+                  Lines (Section) := Lines (Section) & ASCII.LF;
                else
                   if Trimed_Buffer (If_Range) = If_Token then
-                     Lines := Lines & Parse_If
+                     Lines (Section) := Lines (Section) & Parse_If
                        (Fixed.Trim
                         (Trimed_Buffer (If_Range'Last + 2 .. Last), Both));
 
                   elsif Trimed_Buffer (Table_Range) = Table_Token then
-                     Lines := Lines & Parse_Table;
+                     Lines (Section) := Lines (Section) & Parse_Table;
 
                   elsif Trimed_Buffer (Include_Range) = Include_Token then
-                     Lines := Lines & Parse_Include
+                     Lines (Section) := Lines (Section) & Parse_Include
                        (Fixed.Trim
                         (Trimed_Buffer (Include_Range'Last + 2 .. Last),
                          Both));
@@ -309,26 +391,44 @@ package body Templates_Parser is
                         K    : Positive := 1;
                         Stop : Boolean;
                      begin
-                        loop
-                           Str := Lines;
-                           Translate (Str, K, Stop);
 
-                           Result := Result & To_String (Str);
+                        Max_Lines := Count_Lines (Lines (1 .. Section));
 
-                           exit when Stop;
+                        if Max_Lines = 0 then
 
-                           K := K + 1;
-                        end loop;
+                           Fatal_Error ("A table does not contain variables");
+
+                        else
+
+                           loop
+                              Str := Lines ((K - 1) mod Section + 1);
+                              Translate (Str, K, Stop);
+
+                              Result := Result & To_String (Str);
+
+                              exit when Stop;
+
+                              K := K + 1;
+                           end loop;
+
+                        end if;
+
+                        Max_Lines := 0;
 
                         exit;
                      end;
+
+                  elsif Trimed_Buffer (Section_Range) = Section_Token then
+
+                     Section := Section + 1;
 
                   elsif Trimed_Buffer (End_If_Range) = End_If_Token then
                      Fatal_Error (End_If_Token & " found, "
                                   & End_Table_Token & " expected.");
 
                   else
-                     Lines := Lines & Buffer (1 .. Last) & ASCII.LF;
+                     Lines (Section) := Lines (Section)
+                       & Buffer (1 .. Last) & ASCII.LF;
                   end if;
                end if;
             end loop;
@@ -547,9 +647,15 @@ package body Templates_Parser is
       end Parse;
 
    begin
-      Text_IO.Open (File => File,
-                    Name => Template_Filename,
-                    Mode => Text_IO.In_File);
+      begin
+         Text_IO.Open (File => File,
+                       Name => Template_Filename,
+                       Mode => Text_IO.In_File);
+      exception
+         when Text_IO.Name_Error =>
+            Exceptions.Raise_Exception (Template_Error'Identity,
+                                        "template file not found");
+      end;
 
       while not Text_IO.End_Of_File (File) loop
 
@@ -562,6 +668,9 @@ package body Templates_Parser is
       Text_IO.Close (File);
 
       return To_String (Result);
+   exception
+      when others =>
+            raise Template_Error;
    end Parse;
 
 end Templates_Parser;

@@ -100,7 +100,7 @@ ada.sed: makefile
 force:
 
 clean:
-	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali \
+	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
 		templates_parser*.ads.texi ada.sed \
 		templates_parser.html templates_parser.pdf \

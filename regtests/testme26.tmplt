@@ -1,0 +1,13 @@
+
+@@-- A comment for the template
+
+First include:
+@@INCLUDE@@ include.tmplt @_VAR1_@
+
+@@-- Another one
+
+Second include:
+@@INCLUDE@@ include.tmplt @_VAR1_@ toto
+
+Third include:
+@@INCLUDE@@ include.tmplt "@_VAR1_@" "toto titi" "tutu tata"

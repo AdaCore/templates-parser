@@ -1,0 +1,32 @@
+
+@_VAR1_@
+[@_REPLACE(a(.*)ue):VAR1_@]
+
+@_VAR1_@
+[@_REPLACE(^([a-z]+) ([a-z]+).*/\2 \1):VAR1_@]
+
+@_SLICE(2..8):CONTRACT:NO_DIGIT:CLEAN_TEXT:FILTER_@
+[@_REPLACE(^([a-z]+) ([a-z]+).*/\2 \1):SLICE(2..8):CONTRACT:NO_DIGIT:CLEAN_TEXT:FILTER_@]
+
+@_FILTER_@
+[@_REPLACE(^[^6]+([^9]+).*$/1 (\1)):FILTER_@]
+
+@_FILTER_@
+[@_REPLACE(^(.*)6(.*)2(.*)$/1 (\1) 2 (\2) 3 (\3)):FILTER_@]
+
+@_FILTER_@
+[@_REPLACE(^(.*)<(.*)2(.*)$/1 (\1) 2 (\2) 3 (\3)):FILTER_@]
+
+@_REPLACE(([^_]+)):VT_@
+@_REPLACE(([a-z]+)_([a-z]+)/\2_\1):VT_@
+
+@_REPLACE(word/WORD):FILTER_@
+
+     @_TEXT_@
+toto @_REPLACE(toto/....):TEXT_@
+titi @_REPLACE(titi/....):TEXT_@
+tata @_REPLACE(tata/....):TEXT_@
+toto @_REPLACE_ALL(toto/....):TEXT_@
+titi @_REPLACE_ALL(titi/....):TEXT_@
+tata @_REPLACE_ALL(tata/....):TEXT_@
+tata @_REPLACE_ALL(tata/_\1_):TEXT_@

@@ -1,0 +1,25 @@
+
+@@-- Include file
+@_$0_@
+1> @_$1_@
+
+2> @_$2_@
+
+3> @_WEB_NBSP:$2_@
+4> @_WEB_NBSP:$1_@
+
+@@IF@@ @_$2_@ = toto
+5>   @_$1_@
+@@END_IF@@
+
+@@IF@@ @_WEB_NBSP:$2_@ = toto or @_WEB_NBSP:$1_@ = "xx yy"
+6>   @_$2_@
+@@END_IF@@
+
+@@TABLE@@
+7> @_VAR3_@
+8> @_$1_@
+@@SECTION@@
+9> @_$2_@
+@@END_TABLE@@
+----------

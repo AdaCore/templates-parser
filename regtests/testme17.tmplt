@@ -1,0 +1,30 @@
+
+@@IF@@ @_VAR1_@ = "a value"
+  OK
+@@ELSE@@
+  NOK
+@@END_IF@@
+
+@@IF@@ @_VAR1_@ /= value
+  OK
+@@ELSE@@
+  NOK
+@@END_IF@@
+
+@@IF@@ @_VAR1_@ /= "value"
+  OK
+@@ELSE@@
+  NOK
+@@END_IF@@
+
+@@IF@@ "a value" = @_VAR1_@
+  OK
+@@ELSE@@
+  NOK
+@@END_IF@@
+
+@@IF@@ "toto value" /= @_VAR1_@
+  OK
+@@ELSE@@
+  NOK
+@@END_IF@@

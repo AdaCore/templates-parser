@@ -1,0 +1,47 @@
+
+--  Table 1
+
+@@TABLE@@
+@@TABLE@@
+  @_LABELS'Up_Level_@:@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+--  Table 2
+
+@@TABLE@@
+@_LABELS_@
+@@TABLE@@
+  @_LABELS'Up_Level(1)_@:@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+--  Table 3
+
+@@TABLE@@
+@_LABELS_@
+@@TABLE@@
+@_LABELS_@
+@@TABLE@@
+  @_LABELS'Up_Level(1)_@:@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+@@END_TABLE@@
+
+--  Table 4
+
+@@TABLE@@
+@_LABELS_@
+@@TABLE@@
+@_LABELS_@
+@@TABLE@@
+  @_LABELS'Up_Level(2)_@:@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+@@END_TABLE@@
+
+--  Table 5
+
+@@TABLE@@
+@_LABELS'Up_Level(2)_@ {@_LABELS_@}
+@@END_TABLE@@

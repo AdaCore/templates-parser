@@ -1,0 +1,85 @@
+
+Add "toto=titi"
+
+http://host:port/  =>  http://host:port/?toto=titi
+http://host/  =>  http://host/?toto=titi
+http://host/?  =>  http://host/?toto=titi
+http://host/?param1=un  =>  http://host/?param1=un&toto=titi
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un&param2=deux&toto=titi
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=trois&toto=titi
+
+Del "param1"
+
+http://host:port/  =>  http://host:port/
+http://host/  =>  http://host/
+http://host/?  =>  http://host/?
+http://host/?param1=un  =>  http://host/
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param2=deux
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param2=deux&param3=trois
+
+Del "param2"
+
+http://host:port/  =>  http://host:port/
+http://host/  =>  http://host/
+http://host/?  =>  http://host/?
+http://host/?param1=un  =>  http://host/?param1=un
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param3=trois
+
+Del "param3"
+
+http://host:port/  =>  http://host:port/
+http://host/  =>  http://host/
+http://host/?  =>  http://host/?
+http://host/?param1=un  =>  http://host/?param1=un
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un&param2=deux
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux
+
+Replace "param1"
+
+http://host:port/  =>  http://host:port/?param1=one
+http://host/  =>  http://host/?param1=one
+http://host/?  =>  http://host/?param1=one
+http://host/?param1=un  =>  http://host/?param1=one
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param2=deux&param1=one
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param2=deux&param3=trois&param1=one
+
+Replace "param2"
+
+http://host:port/  =>  http://host:port/?param2=two
+http://host/  =>  http://host/?param2=two
+http://host/?  =>  http://host/?param2=two
+http://host/?param1=un  =>  http://host/?param1=un&param2=two
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un&param2=two
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param3=trois&param2=two
+
+Replace "param3"
+
+http://host:port/  =>  http://host:port/?param3=3
+http://host/  =>  http://host/?param3=3
+http://host/?  =>  http://host/?param3=3
+http://host/?param1=un  =>  http://host/?param1=un&param3=3
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un&param2=deux&param3=3
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=3
+
+Replace "param3"
+
+http://host:port/  =>  http://host:port/?param3=3
+http://host/  =>  http://host/?param3=3
+http://host/?  =>  http://host/?param3=3
+http://host/?param1=un  =>  http://host/?param1=un&param3=3
+http://host:port/?param1=un&param2=deux  =>  http://host:port/?param1=un&param2=deux&param3=3
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=3
+
+Delete param not existing
+
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=trois
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=trois
+
+Add using a tag
+
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=trois&param3=123.9
+
+Replace using a tag
+
+http://host?param1=un&param2=deux&param3=trois  =>  http://host?param1=un&param2=deux&param3=123.9

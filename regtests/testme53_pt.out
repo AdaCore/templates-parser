@@ -1,0 +1,10 @@
+[INFO] testme53.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2:\1):VT_@
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2):\1):VT_@
+[TEXT] @_UPPER:REPLACE(([a-z]+)_([a-z]+)/\2:\1):VT_@
+[TEXT] @_UPPER:REPLACE(([a-z]+)_([a-z]+)/\2(:\1):VT_@
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2)_@\1):VT_@
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2)@_\1):VT_@
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2)@\_\1):VT_@

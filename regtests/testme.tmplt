@@ -1,0 +1,61 @@
+
+This is a test template for Templates_Parser
+
+A single value : @_VAR1_@
+
+Should be 0 : @_NUMBER_LINE_@
+Should be 0 : @_TABLE_LEVEL_@
+
+A table :
+
+@@TABLE@@
+@_VAR2_@
+@@END_TABLE@@
+
+@@IF@@  @_COND1_@
+  ERROR: test is not correct
+@@ELSE@@
+  OK: test passed
+@@END_IF@@
+
+@@IF@@         @_COND2_@
+  OK: test passed
+@@ELSE@@
+  ERROR: test is not correct
+@@END_IF@@
+
+@@IF@@ @_COND2_@
+   @@TABLE@@
+     ligne: {@_TABLE_LINE_@ of @_NUMBER_LINE_@} [@_VAR2_@]
+   @@SECTION@@
+     ligne: Another section @_TABLE_LINE_@ [@_VAR2_@]
+   @@SECTION@@
+     Well a another one [@_VAR2_@]
+   @@END_TABLE@@
+@@END_IF@@
+
+@@TABLE@@ @@TERMINATE_SECTIONS@@
+  ligne: {@_TABLE_LINE_@ of @_NUMBER_LINE_@} [@_VAR2_@]
+@@SECTION@@
+  ligne: Another section @_TABLE_LINE_@ [@_VAR2_@]
+@@SECTION@@
+  Well a another one [@_VAR2_@]
+@@END_TABLE@@
+
+@@TABLE@@
+   A| @_TABLE_LINE_@ @_VAR2_@ (@_TABLE_LEVEL_@)
+   @@TABLE@@
+      B| @_TABLE_LINE_@ @_VAR3_@ (@_TABLE_LEVEL_@)
+   @@SECTION@@
+      B| {@_TABLE_LINE_@ of @_NUMBER_LINE_@} another table
+      @@TABLE@@
+         C| @_TABLE_LINE_@ @_VAR3_@ (@_TABLE_LEVEL_@)
+      @@END_TABLE@@
+   @@END_TABLE@@
+@@END_TABLE@@
+
+Cond1: @_COND1_@ - @_YES_NO:COND1_@ - @_OUI_NON:COND1_@
+Cond2: @_COND2_@ - @_YES_NO:COND2_@ - @_OUI_NON:COND2_@
+
+Should be 0 : @_NUMBER_LINE_@
+Should be 0 : @_TABLE_LEVEL_@

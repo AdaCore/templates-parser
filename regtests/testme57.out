@@ -1,0 +1,21 @@
+The classes: Class1, Class2
+The members: Member1.1, Member1.2
+Member2.1, Member2.2, Member2.3
+
+Class1
+MISSING OUTPUT:Class1, Class2
+->Class1::Member1.1
+  ERROR IF PRESENT:Class1, Class2
+->Class1::Member1.2
+  ERROR IF PRESENT:Class1, Class2
+
+Class2
+MISSING OUTPUT:Class1, Class2
+->Class2::Member2.1
+  ERROR IF PRESENT:Class1, Class2
+->Class2::Member2.2
+  ERROR IF PRESENT:Class1, Class2
+->Class2::Member2.3
+  ERROR IF PRESENT:Class1, Class2
+
+

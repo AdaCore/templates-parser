@@ -1,0 +1,16 @@
+
+Test include parameters in filters:
+
+With 2 and 4
+
+@@INCLUDE@@ testme45.incl 2 4
+
+With 80 and 8
+
+@@INCLUDE@@ testme45.incl 80 8
+
+With @ _TWO_ @ and @ _THREE_ @
+
+@@INCLUDE@@ testme45.incl @_TWO_@ @_THREE_@
+
+@@INCLUDE@@ testme45.incl @_LABELS'Length_@ 3

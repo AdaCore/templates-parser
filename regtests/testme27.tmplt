@@ -1,0 +1,4 @@
+
+@@-- A comment for the template
+
+@@INCLUDE@@ include2.tmplt @_VAR1_@ @_VAR3_@ @_MAT_@

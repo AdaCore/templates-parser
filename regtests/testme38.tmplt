@@ -1,0 +1,6 @@
+Does it match? @_YES_NO:MATCH(Test):TEST_VAR_@
+@@IF@@ @_MATCH(Test):TEST_VAR_@
+ It definetely match !
+@@ELSE@@
+ Hmm... Contradiction!
+@@END_IF@@

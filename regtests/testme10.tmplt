@@ -1,0 +1,33 @@
+
+One @_ONE_@
+
+Unknown @_unknown_@
+
+@@IF@@ @_ONE_@ = 1
+  1
+@@ELSE@@
+  error
+@@END_IF@@
+
+@@IF@@ @_EXIST:unknown_@
+  error
+@@ELSE@@
+  ok, not EXIST
+@@END_IF@@
+
+@@IF@@ @_IS_EMPTY:unknown_@
+  error
+@@ELSE@@
+  ok, not EMPTY
+@@END_IF@@
+
+@@IF@@ @_unknown_@ = 1
+  error, unknown = 1
+@@ELSE@@
+  ok, @_unknown_@ not equal to 1
+@@END_IF@@
+
+
+@@TABLE@@
+@_VAR3_@ @_unknown_@
+@@END_TABLE@@

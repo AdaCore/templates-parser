@@ -1,0 +1,2 @@
+
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : In blocks7.tmplt at line 17 All sections must have the same size when using TERMINATE_SECTIONS option.

@@ -1,0 +1,123 @@
+
+Test for complex condition:
+
+1)
+@@IF@@ @_COND1_@ or @_COND2_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+2)
+@@IF@@ @_COND1_@ and @_COND2_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+3)
+@@IF@@ @_ONE_@ > @_TWO_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+4)
+@@IF@@ @_ONE_@ >= @_TWO_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+5)
+@@IF@@ @_ONE_@ < @_TWO_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+6)
+@@IF@@ @_ONE_@ <= @_TWO_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+7)
+@@IF@@ @_ONE_@ = @_TWO_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+8)
+@@IF@@ @_THREE_@ = @_THREE_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+8)
+@@IF@@ (@_THREE_@ = @_THREE_@) and @_COND2_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+9)
+@@IF@@ (@_THREE_@ = @_THREE_@) or @_COND1_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+10)
+@@IF@@ (@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@)
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+11)
+@@IF@@ (@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@) and (@_COND1_@)
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+12)
+@@IF@@ @_COND2_@ or ((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@) and (@_COND1_@))
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+13)
+@@TABLE@@
+@@IF@@ @_UPPER:VAR3_@ = TWO
+This is value two !
+@@ELSE@@
+@_VAR3_@
+@@END_IF@@
+@@END_TABLE@@
+
+14)
+@@IF@@ @_COND1_@ xor @_COND2_@
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+15)
+@@IF@@ @_COND1_@ xor @_COND1_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@
+
+16)
+@@IF@@ @_COND2_@ xor @_COND2_@
+NOK
+@@ELSE@@
+OK
+@@END_IF@@

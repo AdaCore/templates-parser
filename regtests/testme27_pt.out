@@ -1,0 +1,30 @@
+[INFO] testme27.tmplt
+ -> include2.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] 
+[INCLUDE_STMT] include2.tmplt
+    $0 = include2.tmplt
+    $1 = @_VAR1_@
+    $2 = @_VAR3_@
+    $3 = @_MAT_@
+  [INFO] include2.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] @_$0_@
+  [TEXT] 
+  [TEXT] 1> @_$1_@
+  [TEXT] 
+  [TEXT] 2> @_$2'Length_@
+  [TEXT] 
+  [TEXT] 3> @_$3'Line_@
+  [TEXT] 
+  [TEXT] 4> @_$3'Min_Column_@
+  [TEXT] 
+  [TEXT] 5> @_$3'Max_Column_@
+  [TEXT] 
+  [IF_STMT] (@_$2'Length_@ > 1)
+    [TEXT] ok
+  [ELSE]
+    [TEXT] nok
+  [END_IF_STMT]

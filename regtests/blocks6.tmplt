@@ -1,0 +1,16 @@
+
+@@TABLE@@ @@TERMINATE_SECTIONS@@
+---
+code with @_VAR3_@
+@@BEGIN@@
+   red
+@@SECTION@@
+   green
+@@END@@
+end of the text.
+@@BEGIN@@
+   1
+@@SECTION@@
+   2
+@@END@@
+@@END_TABLE@@

@@ -1,0 +1,54 @@
+[INFO] ftp.tmplt
+[C_INFO]  1 FALSE
+[TEXT] <html lang="en">
+[TEXT] <head>
+[TEXT] <title>GNAT Pro Server</title>
+[TEXT] 
+[TEXT] 
+[TEXT] </head>
+[TEXT] <body>
+[TEXT] <h1 align="center">Upload/Download (Wavefront)</h1>
+[TEXT] 
+[TEXT] <h2>Files in your repository:</h2>
+[TEXT] 
+[TEXT] <form action="/ftp" method="post">
+[TEXT] 
+[TEXT] <table width="100%" border="0">
+[TABLE_STMT]
+  [BLOCK]
+    [SECTION_STMT]
+      [IF_STMT] (@_DEPTH_@ = +1)
+        [TEXT] <table width="90%">begin table
+      [ELSE]
+        [IF_STMT] (@_DEPTH_@ = -1)
+          [TEXT] </table>end table
+        [ELSE]
+          [TEXT] <tr bgcolor="lightblue" border="1">
+          [TEXT] <td border="0"><input type="radio" name="filename" value="@_FILE_NAME_@" />
+          [TEXT] @_ITEM_@ @_DEPTH_@
+          [TEXT] </td>
+          [TEXT] </tr>
+        [END_IF_STMT]
+      [END_IF_STMT]
+    [SECTION_STMT]
+      [IF_STMT] (@_DEPTH_@ = +1)
+        [TEXT] <table width="90%">begin table
+      [ELSE]
+        [IF_STMT] ((@_DEPTH_@ = -1) and (@_DEPTH_@ = -1))
+          [TEXT] </table>end table
+        [ELSE]
+          [TEXT] <tr bgcolor="lightsteelblue" border="1">
+          [TEXT] <td border="0"><input type="radio" name="filename" value="@_FILE_NAME_@" />
+          [TEXT] @_ITEM_@  @_DEPTH_@
+          [TEXT] </td>
+          [TEXT] </tr>
+        [END_IF_STMT]
+      [END_IF_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] </table>
+[TEXT] </form>
+[TEXT] 
+[TEXT] </body>
+[TEXT] 
+[TEXT] </html>

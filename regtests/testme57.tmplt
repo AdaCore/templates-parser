@@ -1,0 +1,14 @@
+The classes: @_CLASS_@
+The members: @_MEMBER_@
+
+@@TABLE@@
+@_CLASS_@
+MISSING OUTPUT:@_CLASS'UP_LEVEL(1)_@
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@
+->@_CLASS'UP_LEVEL(1)_@::@_MEMBER_@
+  ERROR IF PRESENT:@_CLASS'UP_LEVEL(2)_@
+@@END_IF@@
+@@END_TABLE@@
+
+@@END_TABLE@@

@@ -1,0 +1,37 @@
+
+*** Nested 3 level outside TABLE
+
+@_NESTED_3_@
+
+*** Nested 3 level into TABLE level 1
+
+@@TABLE@@
+@_UP_TABLE_LINE_@, @_TABLE_LINE_@
+@_NESTED_3_@
+@@END_TABLE@@
+
+*** Nested 3 level into TABLE level 2
+
+@@TABLE@@
+[ @_TABLE_LINE_@
+@@TABLE@@
+   @_UP_TABLE_LINE_@, @_TABLE_LINE_@
+   @_NESTED_3_@
+@@END_TABLE@@
+]
+@@END_TABLE@@
+
+*** Nested 3 level into TABLE level 3
+
+@@TABLE@@
+<
+@@TABLE@@
+   [
+@@TABLE@@
+      @_UP_TABLE_LINE_@, @_TABLE_LINE_@
+      @_NESTED_3_@
+@@END_TABLE@@
+   ]
+@@END_TABLE@@
+>
+@@END_TABLE@@

@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<error code="@_CODE_@" message="@_WEB_ESCAPE:MESSAGE_@"
+details=
+"@_WEB_ESCAPE:DETAIL_@"/>

@@ -1,0 +1,6 @@
+
+Some text here.
+
+@@INCLUDE@@ testme2.tmplt
+
+Some text after the include.

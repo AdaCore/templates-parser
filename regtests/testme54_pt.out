@@ -1,0 +1,82 @@
+[INFO] testme54.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] --  Table 1
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] --  Table 2
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] --  Table 3
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] @_LABELS_@
+            [TABLE_STMT]
+              [BLOCK]
+                [COMMON]
+                  [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+              [END_BLOCK]
+            [END_TABLE_STMT]
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] --  Table 4
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] @_LABELS_@
+            [TABLE_STMT]
+              [BLOCK]
+                [COMMON]
+                  [TEXT]   @_LABELS'Up_Level(2)_@:@_MAT_@
+              [END_BLOCK]
+            [END_TABLE_STMT]
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] --  Table 5
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS'Up_Level(2)_@ {@_LABELS_@}
+  [END_BLOCK]
+[END_TABLE_STMT]

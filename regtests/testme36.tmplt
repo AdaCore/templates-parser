@@ -1,0 +1,85 @@
+
+Add "toto=titi"
+
+@_URL1_@  =>  @_ADD_PARAM(toto=titi):URL1_@
+@_URL2_@  =>  @_ADD_PARAM(toto=titi):URL2_@
+@_URL3_@  =>  @_ADD_PARAM(toto=titi):URL3_@
+@_URL4_@  =>  @_ADD_PARAM(toto=titi):URL4_@
+@_URL5_@  =>  @_ADD_PARAM(toto=titi):URL5_@
+@_URL6_@  =>  @_ADD_PARAM(toto=titi):URL6_@
+
+Del "param1"
+
+@_URL1_@  =>  @_DEL_PARAM(param1):URL1_@
+@_URL2_@  =>  @_DEL_PARAM(param1):URL2_@
+@_URL3_@  =>  @_DEL_PARAM(param1):URL3_@
+@_URL4_@  =>  @_DEL_PARAM(param1):URL4_@
+@_URL5_@  =>  @_DEL_PARAM(param1):URL5_@
+@_URL6_@  =>  @_DEL_PARAM(param1):URL6_@
+
+Del "param2"
+
+@_URL1_@  =>  @_DEL_PARAM(param2):URL1_@
+@_URL2_@  =>  @_DEL_PARAM(param2):URL2_@
+@_URL3_@  =>  @_DEL_PARAM(param2):URL3_@
+@_URL4_@  =>  @_DEL_PARAM(param2):URL4_@
+@_URL5_@  =>  @_DEL_PARAM(param2):URL5_@
+@_URL6_@  =>  @_DEL_PARAM(param2):URL6_@
+
+Del "param3"
+
+@_URL1_@  =>  @_DEL_PARAM(param3):URL1_@
+@_URL2_@  =>  @_DEL_PARAM(param3):URL2_@
+@_URL3_@  =>  @_DEL_PARAM(param3):URL3_@
+@_URL4_@  =>  @_DEL_PARAM(param3):URL4_@
+@_URL5_@  =>  @_DEL_PARAM(param3):URL5_@
+@_URL6_@  =>  @_DEL_PARAM(param3):URL6_@
+
+Replace "param1"
+
+@_URL1_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL1_@
+@_URL2_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL2_@
+@_URL3_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL3_@
+@_URL4_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL4_@
+@_URL5_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL5_@
+@_URL6_@  =>  @_ADD_PARAM(param1=one):DEL_PARAM(param1):URL6_@
+
+Replace "param2"
+
+@_URL1_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL1_@
+@_URL2_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL2_@
+@_URL3_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL3_@
+@_URL4_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL4_@
+@_URL5_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL5_@
+@_URL6_@  =>  @_ADD_PARAM(param2=two):DEL_PARAM(param2):URL6_@
+
+Replace "param3"
+
+@_URL1_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL1_@
+@_URL2_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL2_@
+@_URL3_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL3_@
+@_URL4_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL4_@
+@_URL5_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL5_@
+@_URL6_@  =>  @_ADD_PARAM(param3=3):DEL_PARAM(param3):URL6_@
+
+Replace "param3"
+
+@_URL1_@  =>  @_REPLACE_PARAM(param3=3):URL1_@
+@_URL2_@  =>  @_REPLACE_PARAM(param3=3):URL2_@
+@_URL3_@  =>  @_REPLACE_PARAM(param3=3):URL3_@
+@_URL4_@  =>  @_REPLACE_PARAM(param3=3):URL4_@
+@_URL5_@  =>  @_REPLACE_PARAM(param3=3):URL5_@
+@_URL6_@  =>  @_REPLACE_PARAM(param3=3):URL6_@
+
+Delete param not existing
+
+@_URL6_@  =>  @_DEL_PARAM(param):URL6_@
+@_URL6_@  =>  @_DEL_PARAM(toto):URL6_@
+
+Add using a tag
+
+@_URL6_@  =>  @_ADD_PARAM(param3=NUM3):URL6_@
+
+Replace using a tag
+
+@_URL6_@  =>  @_REPLACE_PARAM(param3=NUM3):URL6_@

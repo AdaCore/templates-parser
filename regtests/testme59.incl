@@ -1,0 +1,28 @@
+@@IF@@ not @_$9_@
+   @@SET@@ P1 = toto
+   @@SET@@ P2 = $2 | deux
+@@ELSE@@
+   @@SET@@ P1 = "this is P1"
+   @@SET@@ P2 = "this is P2"
+@@END_IF@@
+
+@@SET@@ P3 = $3 | "trois et trois"
+@@SET@@ P4 = $4 | quatre
+@@SET@@ P5 = $5 | cinq
+@@SET@@ P6 = $6 | six
+@@SET@@ P7 = $7 | sept
+@@SET@@ P8 = $8 | huit
+@@SET@@ P9 = $9 | neuf
+@@SET@@ ALIAS = $2
+@@SET@@ CST = toujours
+
+1) @_$1_@, @_P1_@, @_UPPER:P1_@
+2) @_$2_@, @_P2_@, @_ALIAS_@
+3) @_$3_@, @_P3_@
+4) @_$4_@, @_P4_@
+5) @_$5_@, @_P5_@
+6) @_$6_@, @_P6_@
+7) @_$7_@, @_P7_@
+8) @_$8_@, @_P8_@
+9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
+@_CST_@

@@ -1,0 +1,5 @@
+2005-02-12  Pascal Obry  <pascal@obry.org>
+
+	* templates_parser-xml.ads templates_parser-xml.adb:
+	Moved here from top xsrc/ directory.
+	Update copyright notice.

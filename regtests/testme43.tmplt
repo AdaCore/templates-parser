@@ -1,0 +1,12 @@
+
+@@IF@@ @_FILE_@ = /home/user
+OK
+@@ELSE@@
+NOK
+@@END_IF@@
+
+@@IF@@ @_"/"(2):TWO_@ = 1
+OK
+@@ELSE@@
+NOK
+@@END_IF@@

@@ -1,0 +1,9 @@
+
+Test for the vector tag prepend
+@_INV_@
+
+In a table:
+
+@@TABLE@@
+@_INV_@
+@@END_TABLE@@

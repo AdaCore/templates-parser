@@ -1,0 +1,108 @@
+[INFO] testme6.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] This is a test for the matrix feature:
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TEXT] @_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+      [TEXT] ---
+      [TEXT] [@_MAT_@]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A table with labels (vector):
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] 
+      [TEXT] Label: @_LABELS_@
+      [TEXT] 
+      [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TEXT] @_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix inside a table with labels (vectors):
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] 
+      [TEXT] Label: @_LABELS_@
+      [TEXT] 
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] 
+            [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TABLE_STMT]
+              [BLOCK]
+                [COMMON]
+                  [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+                  [TEXT] @_MAT_@
+              [END_BLOCK]
+            [END_TABLE_STMT]
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix outside a table:
+[TEXT] 
+[TEXT] @_MAT_@
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix with section:
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TABLE_STMT]
+        [BLOCK]
+          [SECTION_STMT]
+            [TEXT] S1) @_MAT_@
+          [SECTION_STMT]
+            [TEXT] S2) @_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] Idem with @@TERMINATE_SECTIONS@@
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TABLE_STMT] TERMINATE_SECTIONS
+        [BLOCK]
+          [SECTION_STMT]
+            [TEXT] S1) @_MAT_@
+          [SECTION_STMT]
+            [TEXT] S2) @_MAT_@
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]

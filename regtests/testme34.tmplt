@@ -1,0 +1,14 @@
+
+Try negative numbers:
+
+1) @_"-"(4):ONE_@
+2) @_"+"(-4):ONE_@
+
+Try filters with tag arguments:
+
+Plus     : @_"+"(THREE):"+"(TWO):ONE_@
+Minus    : @_"-"(THREE):"-"(TWO):ONE_@
+Multiply : @_"*"(THREE):"*"(TWO):ONE_@
+Divide   : @_"/"(TWO):"-"(ONE):THREE_@
+
+Replace  : @_REPLACE(([^6]*).*/REPL):FILTER_@

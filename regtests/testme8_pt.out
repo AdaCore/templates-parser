@@ -1,0 +1,128 @@
+[INFO] testme8.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Test for complex condition:
+[TEXT] 
+[TEXT] 1)
+[IF_STMT] (@_COND1_@ or @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 2)
+[IF_STMT] (@_COND1_@ and @_COND2_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 3)
+[IF_STMT] (@_ONE_@ > @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 4)
+[IF_STMT] (@_ONE_@ >= @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 5)
+[IF_STMT] (@_ONE_@ < @_TWO_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 6)
+[IF_STMT] (@_ONE_@ <= @_TWO_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 7)
+[IF_STMT] (@_ONE_@ = @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 8)
+[IF_STMT] (@_THREE_@ = @_THREE_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 8)
+[IF_STMT] ((@_THREE_@ = @_THREE_@) and @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 9)
+[IF_STMT] ((@_THREE_@ = @_THREE_@) or @_COND1_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 10)
+[IF_STMT] ((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@))
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 11)
+[IF_STMT] (((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@)) and @_COND1_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 12)
+[IF_STMT] (@_COND2_@ or (((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@)) and @_COND1_@))
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 13)
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [IF_STMT] (@_UPPER:VAR3_@ = TWO)
+        [TEXT] This is value two !
+      [ELSE]
+        [TEXT] @_VAR3_@
+      [END_IF_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TEXT] 14)
+[IF_STMT] (@_COND1_@ xor @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 15)
+[IF_STMT] (@_COND1_@ xor @_COND1_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]
+[TEXT] 
+[TEXT] 16)
+[IF_STMT] (@_COND2_@ xor @_COND2_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF_STMT]

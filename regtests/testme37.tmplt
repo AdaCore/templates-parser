@@ -1,0 +1,26 @@
+
+>1
+@@TABLE@@
+@@IF@@ @_V5_@ = two
+ok
+@@ELSE@@
+test
+@@END_IF@@
+@@END_TABLE@@
+<1
+
+>2
+@@TABLE@@
+@@IF@@ @_V5_@ = two
+ok
+@@END_IF@@
+@@END_TABLE@@
+<2
+
+>3
+@@TABLE@@
+@@IF@@ @_V5_@ /= two
+ok
+@@END_IF@@
+@@END_TABLE@@
+<3

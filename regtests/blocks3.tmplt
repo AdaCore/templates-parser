@@ -1,0 +1,19 @@
+ligne1
+@@TABLE@@
+  ---
+  partie commune 1
+  partie commune 2
+  @@BEGIN@@
+    dans la table @_VAR3_@
+  @@SECTION@@
+    in the table @_VAR3_@
+  @@END@@
+  partie commune 3
+  @@BEGIN@@
+    dans la table "@_VAR2_@"
+  @@SECTION@@
+    in the table "@_VAR2_@"
+  @@END@@
+  partie commune 4
+@@END_TABLE@@
+ligne2

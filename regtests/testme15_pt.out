@@ -1,0 +1,7 @@
+[INFO] testme15.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[IF_STMT] (@_TWO_@ > 0)
+  [TEXT]   here
+[ELSE]
+[END_IF_STMT]

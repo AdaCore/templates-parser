@@ -1,0 +1,32 @@
+
+a value
+[ val]
+
+a value
+[value a]
+
+a text 
+[text a]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (6   words & good   )]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (   a text with < ) 2 (   words & good   9) 3 (  chars like + > )]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (   a text with ) 2 ( 6   words & good   9) 3 (  chars like + > )]
+
+vector_tag
+tag_vector
+
+   a text with < 6   WORDs & good   92  chars like + > 
+
+     toto titi tata tata titi toto tata titi toto titi titi
+toto .... titi tata tata titi toto tata titi toto titi titi
+titi toto .... tata tata titi toto tata titi toto titi titi
+tata toto titi .... tata titi toto tata titi toto titi titi
+toto .... titi tata tata titi .... tata titi .... titi titi
+titi toto .... tata tata .... toto tata .... toto .... ....
+tata toto titi .... .... titi toto .... titi toto titi titi
+tata toto titi _\1_ _\1_ titi toto _\1_ titi toto titi titi

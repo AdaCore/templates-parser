@@ -1,0 +1,6 @@
+
+Some dates formatted:
+
+@_FORMAT_DATE(%Y-%m-%d):DATE1_@
+@_FORMAT_DATE(%Y-%m-%d):DATE2_@
+@_FORMAT_DATE(%A %B %d %Y, %T):DATE2_@

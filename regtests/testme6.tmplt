@@ -1,0 +1,73 @@
+
+This is a test for the matrix feature:
+
+@@TABLE@@
+Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@@TABLE@@
+Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@_MAT_@
+@@END_TABLE@@
+---
+[@_MAT_@]
+@@END_TABLE@@
+
+======================================================================
+
+A table with labels (vector):
+
+@@TABLE@@
+
+Label: @_LABELS_@
+
+Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@@TABLE@@
+Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+======================================================================
+
+A matrix inside a table with labels (vectors):
+
+@@TABLE@@
+
+Label: @_LABELS_@
+
+@@TABLE@@
+
+Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@@TABLE@@
+Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+@_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+@@END_TABLE@@
+
+======================================================================
+
+A matrix outside a table:
+
+@_MAT_@
+
+======================================================================
+
+A matrix with section:
+
+@@TABLE@@
+@@TABLE@@
+S1) @_MAT_@
+@@SECTION@@
+S2) @_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+Idem with @@TERMINATE_SECTIONS@@
+
+@@TABLE@@
+@@TABLE@@ @@TERMINATE_SECTIONS@@
+S1) @_MAT_@
+@@SECTION@@
+S2) @_MAT_@
+@@END_TABLE@@
+@@END_TABLE@@

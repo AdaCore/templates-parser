@@ -1,0 +1,10 @@
+
+@@SET@@ ALIAS = $5
+
+testme61_1: @_$5_@ @_ALIAS_@
+
+@@IF@@ @_EXIST:$5_@
+@@INCLUDE@@ testme61_2.incl @_$5_@
+@@INCLUDE@@ testme61_2.incl (1=>@_$5_@)
+@@INCLUDE@@ testme61_2.incl (1=>@_ALIAS_@)
+@@END_IF@@

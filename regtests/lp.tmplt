@@ -1,0 +1,31 @@
+
+
+
+
+
+
+
+
+
+
+Line @_GROUP_ACR_M'Line_@
+Min  @_GROUP_ACR_M'Min_Column_@
+Max  @_GROUP_ACR_M'Max_Column_@
+===
+@@TABLE@@
+[
+@@TABLE@@
+@_GROUP_ACR_M_@,
+@@END_TABLE@@
+]
+
+@@END_TABLE@@
+===
+
+
+
+
+
+
+
+

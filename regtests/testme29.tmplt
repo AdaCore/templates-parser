@@ -1,0 +1,14 @@
+
+Test MATCH() routine.
+
+TRUE  = @_MATCH(.*words.*):FILTER_@
+TRUE  = @_MATCH(".*words.*"):FILTER_@
+
+TRUE  = @_MATCH(.*   words.*):FILTER_@
+TRUE  = @_MATCH(".*   words.*"):FILTER_@
+
+TRUE  = @_MATCH(   a.*):FILTER_@
+TRUE  = @_MATCH("   a.*"):FILTER_@
+
+FALSE = @_MATCH(.*    words.*):FILTER_@
+FALSE = @_MATCH(".*    words.*"):FILTER_@

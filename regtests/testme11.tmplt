@@ -1,0 +1,20 @@
+
+@@IF@@ @_COND1_@
+   nok1
+@@ELSIF@@ false
+   nok2
+@@ELSIF@@ 8
+   nok3
+@@ELSIF@@ sze
+   nok4
+@@ELSIF@@ @_COND2_@
+   ok1
+@@ELSE@@
+   else part
+@@END_IF@@
+
+@@IF@@ @_COND2_@
+  ok cond2
+@@ELSE@@
+  nok cond2
+@@END_IF@@

@@ -1,0 +1,50 @@
+[INFO] testme7.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [TEXT] @_TABLE_LINE_@
+            [TEXT] [@_MATDSIZE_@]
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TABLE_STMT]
+        [BLOCK]
+          [COMMON]
+            [IF_STMT] @_EXIST:MATDSIZE_@
+              [TEXT] @_TABLE_LINE_@
+              [TEXT] [@_MATDSIZE_@]
+            [ELSE]
+            [END_IF_STMT]
+        [END_BLOCK]
+      [END_TABLE_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [TEXT] >@_V5_@
+      [TEXT] >@_V6_@
+  [END_BLOCK]
+[END_TABLE_STMT]
+[TEXT] 
+[TABLE_STMT]
+  [BLOCK]
+    [COMMON]
+      [IF_STMT] @_EXIST:V6_@
+        [TEXT] >@_V5_@
+        [TEXT] >@_V6_@
+      [ELSE]
+      [END_IF_STMT]
+  [END_BLOCK]
+[END_TABLE_STMT]

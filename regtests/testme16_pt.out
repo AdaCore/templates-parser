@@ -1,0 +1,86 @@
+[INFO] testme16.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[IF_STMT] (@_TWO_@ = 2)
+  [TEXT]    OK 2
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] (@_TWO_@ /= 3)
+  [TEXT]    OK 2
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] (not (@_TWO_@ = 3))
+  [TEXT]    OK 2
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 1) or (not (@_TWO_@ = 3)))
+  [TEXT]    OK
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 2) or (not (@_TWO_@ = 3)))
+  [TEXT]    OK
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 2) and (not (@_TWO_@ = 3)))
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 1) and (not (@_TWO_@ = 3)))
+  [TEXT]    OK
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((not (@_TWO_@ = 3)) and (not (@_ONE_@ = 2)))
+  [TEXT]    OK
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((not (@_TWO_@ = 3)) and (not (@_ONE_@ = 2)))
+  [TEXT]    OK
+[ELSE]
+  [TEXT]    NOK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((not (@_TWO_@ = 3)) and (not (@_ONE_@ = 1)))
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((not (@_TWO_@ = 3)) and (not (@_ONE_@ = 1)))
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] (not @_COND2_@)
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 1) and (not @_COND2_@))
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]
+[TEXT] 
+[IF_STMT] ((@_ONE_@ = 1) and (not @_COND2_@))
+  [TEXT]    NOK
+[ELSE]
+  [TEXT]    OK
+[END_IF_STMT]

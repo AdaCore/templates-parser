@@ -1,0 +1,14 @@
+
+Test MATCH() routine.
+
+TRUE  = TRUE
+TRUE  = TRUE
+
+TRUE  = TRUE
+TRUE  = TRUE
+
+TRUE  = TRUE
+TRUE  = TRUE
+
+FALSE = FALSE
+FALSE = FALSE

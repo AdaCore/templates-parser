@@ -1,0 +1,20 @@
+ligne1
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table one
+  partie commune 3
+    dans la table "a value"
+  ---
+  partie commune 1
+  partie commune 2
+    in the table two
+  partie commune 3
+    in the table "a value"
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table three
+  partie commune 3
+    dans la table "a value"
+ligne2

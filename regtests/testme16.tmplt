@@ -1,0 +1,84 @@
+
+@@IF@@ @_TWO_@ = 2
+   OK 2
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ @_TWO_@ /= 3
+   OK 2
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ not (@_TWO_@ = 3)
+   OK 2
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ @_ONE_@ = 1 or not (@_TWO_@ = 3)
+   OK
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ @_ONE_@ = 2 or not (@_TWO_@ = 3)
+   OK
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ @_ONE_@ = 2 and not (@_TWO_@ = 3)
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@
+
+@@IF@@ @_ONE_@ = 1 and not (@_TWO_@ = 3)
+   OK
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ (not (@_TWO_@ = 3)) and (not (@_ONE_@ = 2))
+   OK
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ not (@_TWO_@ = 3) and (not (@_ONE_@ = 2))
+   OK
+@@ELSE@@
+   NOK
+@@END_IF@@
+
+@@IF@@ (not (@_TWO_@ = 3)) and (not (@_ONE_@ = 1))
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@
+
+@@IF@@ not (@_TWO_@ = 3) and (not (@_ONE_@ = 1))
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@
+
+@@IF@@ not @_COND2_@
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@
+
+@@IF@@ (@_ONE_@ = 1) and (not @_COND2_@)
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@
+
+@@IF@@ (@_ONE_@ = 1) and not @_COND2_@
+   NOK
+@@ELSE@@
+   OK
+@@END_IF@@

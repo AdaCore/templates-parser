@@ -1,0 +1,119 @@
+[INFO] testme26.tmplt
+ -> include.tmplt
+ -> include.tmplt
+ -> include.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] 
+[TEXT] First include:
+[INCLUDE_STMT] include.tmplt
+    $0 = include.tmplt
+    $1 = @_VAR1_@
+  [INFO] include.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] @_$0_@
+  [TEXT] 1> @_$1_@
+  [TEXT] 
+  [TEXT] 2> @_$2_@
+  [TEXT] 
+  [TEXT] 3> @_WEB_NBSP:$2_@
+  [TEXT] 4> @_WEB_NBSP:$1_@
+  [TEXT] 
+  [IF_STMT] (@_$2_@ = toto)
+    [TEXT] 5>   @_$1_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+    [TEXT] 6>   @_$2_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [TABLE_STMT]
+    [BLOCK]
+      [SECTION_STMT]
+        [TEXT] 7> @_VAR3_@
+        [TEXT] 8> @_$1_@
+      [SECTION_STMT]
+        [TEXT] 9> @_$2_@
+    [END_BLOCK]
+  [END_TABLE_STMT]
+  [TEXT] ----------
+[TEXT] 
+[TEXT] 
+[TEXT] Second include:
+[INCLUDE_STMT] include.tmplt
+    $0 = include.tmplt
+    $1 = @_VAR1_@
+    $2 = toto
+  [INFO] include.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] @_$0_@
+  [TEXT] 1> @_$1_@
+  [TEXT] 
+  [TEXT] 2> @_$2_@
+  [TEXT] 
+  [TEXT] 3> @_WEB_NBSP:$2_@
+  [TEXT] 4> @_WEB_NBSP:$1_@
+  [TEXT] 
+  [IF_STMT] (@_$2_@ = toto)
+    [TEXT] 5>   @_$1_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+    [TEXT] 6>   @_$2_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [TABLE_STMT]
+    [BLOCK]
+      [SECTION_STMT]
+        [TEXT] 7> @_VAR3_@
+        [TEXT] 8> @_$1_@
+      [SECTION_STMT]
+        [TEXT] 9> @_$2_@
+    [END_BLOCK]
+  [END_TABLE_STMT]
+  [TEXT] ----------
+[TEXT] 
+[TEXT] Third include:
+[INCLUDE_STMT] include.tmplt
+    $0 = include.tmplt
+    $1 = @_VAR1_@
+    $2 = toto titi
+    $3 = tutu tata
+  [INFO] include.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] @_$0_@
+  [TEXT] 1> @_$1_@
+  [TEXT] 
+  [TEXT] 2> @_$2_@
+  [TEXT] 
+  [TEXT] 3> @_WEB_NBSP:$2_@
+  [TEXT] 4> @_WEB_NBSP:$1_@
+  [TEXT] 
+  [IF_STMT] (@_$2_@ = toto)
+    [TEXT] 5>   @_$1_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+    [TEXT] 6>   @_$2_@
+  [ELSE]
+  [END_IF_STMT]
+  [TEXT] 
+  [TABLE_STMT]
+    [BLOCK]
+      [SECTION_STMT]
+        [TEXT] 7> @_VAR3_@
+        [TEXT] 8> @_$1_@
+      [SECTION_STMT]
+        [TEXT] 9> @_$2_@
+    [END_BLOCK]
+  [END_TABLE_STMT]
+  [TEXT] ----------
+

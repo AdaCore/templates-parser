@@ -1,0 +1,9 @@
+ligne1
+@@TABLE@@
+  @@BEGIN@@
+    dans la table @_VAR3_@
+  @@SECTION@@
+    in the table @_VAR3_@
+  @@END@@
+@@END_TABLE@@
+ligne2

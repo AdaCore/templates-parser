@@ -1,0 +1,66 @@
+
+@@TABLE@@
+   @_VAR_DOES_NOT_EXIST_@
+@@END_TABLE@@
+
+@@TABLE@@
+   @_VAR3_@ @_CAPITALIZE:VAR1_@
+@@END_TABLE@@
+
+@@TABLE@@
+   @_UPPER:VAR3_@ @_VAR4_@
+@@END_TABLE@@
+
+@@TABLE@@
+   @_NO_SPACE:VAR2_@
+@@END_TABLE@@
+
+@@IF@@ @_EXIST:VAR1_@
+  ok, VAR1 exist.
+@@ELSE@@
+  error, VAR1 exist.
+@@END_IF@@
+
+@@IF@@ @_EXIST:VAR1_@ = TRUE
+  ok, VAR1 exist.
+@@ELSE@@
+  error, VAR1 exist.
+@@END_IF@@
+
+@@IF@@ @_EXIST:VARx_@
+  nok, VARx does not exist.
+@@ELSE@@
+  ok, VARx does not exist.
+@@END_IF@@
+
+@@IF@@ @_EXIST:VARx_@ = TRUE
+  nok, VARx does not exist.
+@@ELSE@@
+  ok, VARx does not exist.
+@@END_IF@@
+
+@@IF@@ @_EXIST:VARx_@ = FALSE
+  ok, VARx does not exist.
+@@ELSE@@
+  nok, VARx does not exist.
+@@END_IF@@
+
+@@IF@@ @_IS_EMPTY:VARx_@ = TRUE
+  ok, VARx does not exist.
+@@ELSE@@
+  nok, VARx does not exist.
+@@END_IF@@
+
+@@IF@@ @_IS_EMPTY:VARx_@
+  ok, VARx does not exist.
+@@ELSE@@
+  nok, VARx does not exist.
+@@END_IF@@
+
+@@IF@@ @_IS_EMPTY:VAR1_@
+  nok, VAR1 exist.
+@@ELSE@@
+  ok, VAR1 exist.
+@@END_IF@@
+
+A List : @_VAR3_@

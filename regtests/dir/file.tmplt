@@ -1,0 +1,6 @@
+
+@@INCLUDE@@ header.tmplt
+
+Hello
+
+@@INCLUDE@@ subdir/footer.tmplt

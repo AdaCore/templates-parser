@@ -1,0 +1,31 @@
+
+@@INCLUDE@@ include2.tincl "toto titi" deux three
+
+V: @_VAR_@
+
+----------------------
+@@TABLE@@
+1: @UPPER:_T1_@
+2: @_T2_@
+T: @_T_@
+@@END_TABLE@@
+
+----------------------
+@@TABLE@@
+@@TABLE@@
+1: @_T1_@
+2: @_T2_@
+T: @LOWER:_T_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+----------------------
+@@TABLE@@
+  ---
+  @@BEGIN@@
+    dans la table @_VAR3_@
+  @@SECTION@@
+    in the table @_VAR3_@
+  @@END@@
+  partie commune
+@@END_TABLE@@

@@ -1,0 +1,56 @@
+
+Test for include with parameters with default values
+
+**********************************************************
+
+
+1) one, toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) , six
+7) , sept
+8) , huit
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) one, toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) , huit
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) , toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) eight, eight
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) , this is P1, THIS IS P1
+2) two, this is P2, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) eight, eight
+9) true, true, True
+toujours
+**********************************************************

@@ -1581,7 +1581,7 @@ package body Templates_Parser is
      return Tree
    is
 
-      File   : Text_IO.File_Type;  --  File beeing parsed.
+      File   : Text_IO.File_Type;  --  file beeing parsed.
 
       Buffer : String (1 .. 2048); --  current line content
       Last   : Natural;            --  index of last characters read in buffer
@@ -1592,6 +1592,7 @@ package body Templates_Parser is
       --  Line handling
 
       procedure Fatal_Error (Message : in String);
+      pragma No_Return (Fatal_Error);
       --  raise Template_Error exception with message.
 
       function Get_Next_Line return Boolean;
@@ -1696,6 +1697,13 @@ package body Templates_Parser is
          end if;
 
          Start := Strings.Fixed.Index_Non_Blank (Buffer (Start .. Last));
+
+         if Start = 0 then
+            --  We have only spaces after the first word, there is no
+            --  parameter in this case.
+            return Null_Unbounded_String;
+         end if;
+
          Stop  := Strings.Fixed.Index (Buffer (Start .. Last), Blank);
 
          if Stop = 0 then
@@ -1715,8 +1723,17 @@ package body Templates_Parser is
             return True;
          else
             Line := Line + 1;
+
             Text_IO.Get_Line (File, Buffer, Last);
+
             First := Strings.Fixed.Index_Non_Blank (Buffer (1 .. Last));
+
+            if First = 0 then
+               --  There is only spaces on this line, this is an empty line
+               --  we just have to skip it.
+               Last := 0;
+            end if;
+
             return False;
          end if;
       end Get_Next_Line;

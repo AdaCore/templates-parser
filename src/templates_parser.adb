@@ -44,13 +44,14 @@ package body Templates_Parser is
 
    subtype Buffer_Type is String (1 .. 1_024);
 
-   Table_Token     : constant String := "@@TABLE@@";
-   Section_Token   : constant String := "@@SECTION@@";
-   End_Table_Token : constant String := "@@END_TABLE@@";
-   If_Token        : constant String := "@@IF@@";
-   Else_Token      : constant String := "@@ELSE@@";
-   End_If_Token    : constant String := "@@END_IF@@";
-   Include_Token   : constant String := "@@INCLUDE@@";
+   Table_Token              : constant String := "@@TABLE@@";
+   Terminate_Sections_Token : constant String := "@@TERMINATE_SECTIONS@@";
+   Section_Token            : constant String := "@@SECTION@@";
+   End_Table_Token          : constant String := "@@END_TABLE@@";
+   If_Token                 : constant String := "@@IF@@";
+   Else_Token               : constant String := "@@ELSE@@";
+   End_If_Token             : constant String := "@@END_IF@@";
+   Include_Token            : constant String := "@@INCLUDE@@";
 
    subtype Table_Range     is Positive range Table_Token'Range;
    subtype Section_Range   is Positive range Section_Token'Range;
@@ -234,14 +235,16 @@ package body Templates_Parser is
                        To_String (Translations (K).Value),
                        String'(1 => Translations (K).Separator));
 
-               --  we stop when we reach the maximum number of field
+               --  we stop when we reach (or are over) the maximum number of
+               --  fields
 
-               Stop := (N = Field_Count (CS) or else Field_Count (CS) = 0);
+               Stop := (N >= Field_Count (CS) or else Field_Count (CS) = 0);
 
-               --  if there is no value for the tag, just replace it with an
+               --  if there is no value for the tag or we ask for a value
+               --  that does not exist, just replace it with an
                --  emptry string (i.e. removing it from the template).
 
-               if Field_Count (CS) = 0 then
+               if Field_Count (CS) = 0 or else Field_Count (CS) < N then
                   Replace_Slice
                     (Str,
                      Pos,
@@ -323,7 +326,7 @@ package body Templates_Parser is
          --  been read. When returning the file index is positioned on the
          --  line just after the End_If_Token is ready.
 
-         function Parse_Table return String;
+         function Parse_Table (Terminate_Sections : Boolean) return String;
          --  Parse a table statement (from Table_Token to End_Table_Token). At
          --  the time of this call Table_Token as been read. When returning
          --  the file index is positioned on the line just after the
@@ -334,7 +337,7 @@ package body Templates_Parser is
          --  call Include_Token as been read. When returning the file index is
          --  positioned on the line just after the Include_Token line.
 
-         function Parse_Table return String is
+         function Parse_Table (Terminate_Sections : Boolean) return String is
 
             type Sections is array (Positive range <>) of Unbounded_String;
 
@@ -385,7 +388,10 @@ package body Templates_Parser is
                         (Trimed_Buffer (If_Range'Last + 2 .. Last), Both));
 
                   elsif Trimed_Buffer (Table_Range) = Table_Token then
-                     Lines (Section) := Lines (Section) & Parse_Table;
+                     Lines (Section) := Lines (Section)
+                       & Parse_Table
+                       (Fixed.Index
+                        (Trimed_Buffer, Terminate_Sections_Token) /= 0);
 
                   elsif Trimed_Buffer (Include_Range) = Include_Token then
                      Lines (Section) := Lines (Section) & Parse_Include
@@ -397,23 +403,23 @@ package body Templates_Parser is
                      declare
                         K    : Positive := 1;
                         Stop : Boolean;
+                        SN   : Positive range 1 .. Section; --  section number
                      begin
 
                         Max_Lines := Count_Lines (Lines (1 .. Section));
 
-                        if Max_Lines = 0 then
-
-                           Fatal_Error ("A table does not contain variables");
-
-                        else
+                        if Max_Lines > 0 then
 
                            loop
-                              Str := Lines ((K - 1) mod Section + 1);
+                              SN := (K - 1) mod Section + 1;
+                              Str := Lines (SN);
                               Translate (Str, K, Stop);
 
                               Result := Result & To_String (Str);
 
-                              exit when Stop;
+                              exit when Stop
+                                and then (not Terminate_Sections
+                                          or else SN = Section);
 
                               K := K + 1;
                            end loop;
@@ -472,7 +478,10 @@ package body Templates_Parser is
                      Lines := Lines & ASCII.LF;
                   else
                      if Trimed_Buffer (Table_Range) = Table_Token then
-                        Lines := Lines & Parse_Table;
+                        Lines := Lines
+                          & Parse_Table
+                          (Fixed.Index
+                           (Trimed_Buffer, Terminate_Sections_Token) /= 0);
 
                      elsif Trimed_Buffer (If_Range) = If_Token then
                         Lines := Lines & Parse_If
@@ -625,7 +634,8 @@ package body Templates_Parser is
 
             if Trimed_Buffer (Table_Range) = Table_Token then
 
-               return Parse_Table;
+               return Parse_Table
+                 (Fixed.Index (Trimed_Buffer, Terminate_Sections_Token) /= 0);
 
             elsif Trimed_Buffer (If_Range) = If_Token then
 
@@ -676,8 +686,11 @@ package body Templates_Parser is
 
       return To_String (Result);
    exception
+      when Template_Error =>
+         raise;
+
       when others =>
-            raise Template_Error;
+         raise Template_Error;
    end Parse;
 
 end Templates_Parser;

@@ -85,14 +85,6 @@ package body Templates_Parser is
    Filter_Coma_2_Point_Token  : aliased constant String := "COMA_2_POINT";
    Filter_Point_2_Coma_Token  : aliased constant String := "POINT_2_COMA";
 
-   subtype Table_Range     is Positive range Table_Token'Range;
-   subtype Section_Range   is Positive range Section_Token'Range;
-   subtype End_Table_Range is Positive range End_Table_Token'Range;
-   subtype If_Range        is Positive range If_Token'Range;
-   subtype Else_Range      is Positive range Else_Token'Range;
-   subtype End_If_Range    is Positive range End_If_Token'Range;
-   subtype Include_Range   is Positive range Include_Token'Range;
-
    Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
 
    ----------------------

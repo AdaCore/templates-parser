@@ -1613,6 +1613,10 @@ package body Templates_Parser is
       --  released. This will ensure that a tree marked as obsolete (a new
       --  version being now in the cache) will be released from the memory.
 
+      procedure Release;
+      --  Release the internal cache. This free the memory used for all
+      --  currently loaded template trees.
+
    end Cached_Files;
 
    ---------
@@ -4938,6 +4942,15 @@ package body Templates_Parser is
       Release (T.Info);
    end Print_Tree;
 
+   -------------------
+   -- Release_Cache --
+   -------------------
+
+   procedure Release_Cache is
+   begin
+      Cached_Files.Release;
+   end Release_Cache;
+
    -------------
    -- Release --
    -------------
@@ -4962,7 +4975,7 @@ package body Templates_Parser is
                end loop;
             end;
 
-            Release (T.Next);
+            Release (T.Next, Include);
 
          when C_Info =>
             Release (T.Next, Include);

@@ -1872,7 +1872,7 @@ package body Templates_Parser is
                   Result := P.Value;
                   for K in 2 .. A.Vect_Value.Count loop
                      P := P.Next;
-                     Result := Result & A.Separator & P.Value;
+                     Append (Result, A.Separator & P.Value);
                   end loop;
 
                   return To_String (Result);
@@ -1900,7 +1900,7 @@ package body Templates_Parser is
                   Result := Result & P.Value;
                   for K in 2 .. V.Count loop
                      P := P.Next;
-                     Result := Result & A.Column_Separator & P.Value;
+                     Append (Result, A.Column_Separator & P.Value);
                   end loop;
                end Add_Vector;
 
@@ -1910,7 +1910,7 @@ package body Templates_Parser is
 
                   while P /= null loop
                      Add_Vector (P.Vect);
-                     Result := Result & ASCII.LF;
+                     Append (Result, ASCII.LF);
                      P := P.Next;
                   end loop;
 
@@ -2200,11 +2200,11 @@ package body Templates_Parser is
                   begin
                      Translate (Value);
 
-                     Results := Results & Value & ASCII.LF;
+                     Append (Results, To_String (Value) & ASCII.LF);
                   end;
 
                else
-                  Results := Results & T.Value & ASCII.LF;
+                  Append (Results, To_String (T.Value) & ASCII.LF);
                end if;
 
                Analyze (T.Next, State);

@@ -4132,7 +4132,7 @@ package body Templates_Parser is
 
                --  ??? This part of code handle properly only table with a
                --  single block. What should be done if there is multiple
-               --  blocks ? Should all blocks of the same size ?
+               --  blocks ? Should all blocks be of the same size ?
 
                declare
                   N_Section : constant Natural := T.Blocks.Sections_Count;

@@ -59,6 +59,8 @@ package body Templates_Parser is
    Filter_Capitalize_Token  : aliased constant String := "@@CAPITALIZE";
    Filter_Yes_No_Token      : aliased constant String := "@@YES_NO";
    Filter_Oui_Non_Token     : aliased constant String := "@@OUI_NON";
+   Filter_Exist_Token       : aliased constant String := "@@EXIST";
+   Filter_Is_Empty_Token    : aliased constant String := "@@IS_EMPTY";
 
    subtype Table_Range     is Positive range Table_Token'Range;
    subtype Section_Range   is Positive range Section_Token'Range;
@@ -137,7 +139,9 @@ package body Templates_Parser is
       Capitalize, -- lower case except char before spaces and underscores
       Clean_Text, -- only letter/digits all other chars are changed to spaces.
       Yes_No,     -- if True return Yes, If False returns No, else do nothing.
-      Oui_Non     -- if True return Oui, If False returns Non, else do nothing.
+      Oui_Non,    -- if True return Oui, If False returns Non, else do nothing.
+      Exist,      -- return "TRUE" if var is not empty and "FALSE" otherwise.
+      Is_Empty    -- return "TRUE" if var is empty and "FALSE" otherwise.
       );
 
    type Filter_Function is access function (S : in String) return String;
@@ -158,6 +162,8 @@ package body Templates_Parser is
    function Clean_Text_Filter (S : in String) return String;
    function Yes_No_Filter     (S : in String) return String;
    function Oui_Non_Filter    (S : in String) return String;
+   function Exist_Filter      (S : in String) return String;
+   function Is_Empty_Filter   (S : in String) return String;
 
    function Identity_Filter   (S : in String) return String;
    pragma Inline (Identity_Filter);
@@ -770,6 +776,32 @@ package body Templates_Parser is
       end if;
    end Oui_Non_Filter;
 
+   ------------------
+   -- Exist_Filter --
+   ------------------
+
+   function Exist_Filter (S : in String) return String is
+   begin
+      if S /= "" then
+         return "TRUE";
+      else
+         return "FALSE";
+      end if;
+   end Exist_Filter;
+
+   ---------------------
+   -- Is_Empty_Filter --
+   ---------------------
+
+   function Is_Empty_Filter (S : in String) return String is
+   begin
+      if S = "" then
+         return "TRUE";
+      else
+         return "FALSE";
+      end if;
+   end Is_Empty_Filter;
+
    --  Filter Table
 
    Filter_Table : array (Filters_Mode) of Filter_Record
@@ -788,7 +820,11 @@ package body Templates_Parser is
          Yes_No     =>
            (Filter_Yes_No_Token'Access,     Yes_No_Filter'Access),
          Oui_Non    =>
-           (Filter_Oui_Non_Token'Access,    Oui_Non_Filter'Access));
+           (Filter_Oui_Non_Token'Access,    Oui_Non_Filter'Access),
+         Exist      =>
+           (Filter_Exist_Token'Access,      Exist_Filter'Access),
+         Is_Empty   =>
+           (Filter_Is_Empty_Token'Access,   Is_Empty_Filter'Access));
 
    ------------------
    -- Check_Filter --
@@ -1585,7 +1621,7 @@ package body Templates_Parser is
                -----------
 
                function Check (Str : in String) return Natural is
-                  Smallest : Natural := Natural'Last;
+                  Iteration : Natural := Natural'First;
                begin
                   for K in Translations'Range loop
                      declare
@@ -1601,8 +1637,8 @@ package body Templates_Parser is
                                  --  table statement. The number of iterations
                                  --  for this table statement correspond to
                                  --  the number of item into the vector.
-                                 Smallest :=
-                                   Natural'Min (Smallest,
+                                 Iteration :=
+                                   Natural'Max (Iteration,
                                                 Size (Tk.Vect_Value));
 
                               elsif Tk.Kind = Matrix then
@@ -1613,8 +1649,8 @@ package body Templates_Parser is
                                     --  iterations for this table statement
                                     --  correspond to the number of vector
                                     --  into the table.
-                                    Smallest :=
-                                      Natural'Min (Smallest,
+                                    Iteration :=
+                                      Natural'Max (Iteration,
                                                    Size (Tk.Mat_Value));
                                  else
                                     --  This is Matrix tag into an embbeded
@@ -1628,8 +1664,8 @@ package body Templates_Parser is
                                          := Translations (K).Mat_Value.M.Head;
                                     begin
                                        while not (P = null) loop
-                                          Smallest :=
-                                            Natural'Min (Smallest,
+                                          Iteration :=
+                                            Natural'Max (Iteration,
                                                          Size (P.Vect));
                                           P := P . Next;
                                        end loop;
@@ -1649,8 +1685,9 @@ package body Templates_Parser is
                                  --  statement. This number of iterations
                                  --  correspond to the smallest number of
                                  --  vectors into the table.
-                                 Smallest :=
-                                   Natural'Min (Smallest, Size (Tk.Mat_Value));
+                                 Iteration :=
+                                   Natural'Max (Iteration,
+                                                Size (Tk.Mat_Value));
                               end if;
                            end if;
                         end if;
@@ -1658,38 +1695,38 @@ package body Templates_Parser is
 
                   end loop;
 
-                  return Smallest;
+                  return Iteration;
                end Check;
 
             begin
                if T = null then
-                  return Natural'Last;
+                  return Natural'First;
                end if;
 
                case T.Kind is
                   when Data =>
-                     return Natural'Min (Check (To_String (T.Value)),
+                     return Natural'Max (Check (To_String (T.Value)),
                                          Get_Max_Lines (T.Next, N));
                   when If_Stmt =>
-                     return Natural'Min
-                       (Natural'Min (Get_Max_Lines (T.N_True, N),
+                     return Natural'Max
+                       (Natural'Max (Get_Max_Lines (T.N_True, N),
                                      Get_Max_Lines (T.N_False, N)),
                         Get_Max_Lines (T.Next, N));
 
                   when Table_Stmt =>
                      if N = 1 then
-                        return Natural'Min (Get_Max_Lines (T.Sections, N + 1),
+                        return Natural'Max (Get_Max_Lines (T.Sections, N + 1),
                                             Get_Max_Lines (T.Next, N));
                      else
-                        return Natural'Last;
+                        return Natural'First;
                      end if;
 
                   when Section_Stmt =>
-                     return Natural'Min (Get_Max_Lines (T.Next, N),
+                     return Natural'Max (Get_Max_Lines (T.Next, N),
                                          Get_Max_Lines (T.N_Section, N));
 
                   when Include_Stmt =>
-                     return Natural'Min (Get_Max_Lines (T.File, N),
+                     return Natural'Max (Get_Max_Lines (T.File, N),
                                          Get_Max_Lines (T.Next, N));
                end case;
             end Get_Max_Lines;
@@ -1698,10 +1735,6 @@ package body Templates_Parser is
 
          begin
             pragma Assert (T.Kind = Table_Stmt);
-
-            if Result = Natural'Last then
-               Result := 0;
-            end if;
 
             Max_Lines := Result;
 

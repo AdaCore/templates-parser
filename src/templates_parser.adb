@@ -1299,6 +1299,8 @@ package body Templates_Parser is
       T.Ref_Count         := new Integer'(1);
       T.Data              := new Tag_Data;
       T.Data.Count        := 0;
+      T.Data.Min          := Natural'Last;
+      T.Data.Max          := 0;
       T.Data.Head         := null;
       T.Data.Last         := null;
       T.Data.Position     := (null, new Integer'(1));

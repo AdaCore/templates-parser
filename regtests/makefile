@@ -9,7 +9,7 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	blocks2 blocks5 blocks7 testme43 testme44 testme45 testme46 \
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
 	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
-	testme65 testme66 testme67
+	testme65 testme66 testme67 testme68
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \

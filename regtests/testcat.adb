@@ -40,8 +40,8 @@ procedure Testcat is
 
 begin
    Create (File, Out_File, "testcat.res");
-   Put_Line (File, Parse ("head.tmplt"));
-   Put_Line (File, Parse ("head.tmplt"));
-   Put_Line (File, Parse ("head.tmplt"));
+   Put_Line (File, Parse ("testcat.tmplt"));
+   Put_Line (File, Parse ("testcat.tmplt"));
+   Put_Line (File, Parse ("testcat.tmplt"));
    Close (File);
 end Testcat;

@@ -569,10 +569,21 @@ package body Templates_Parser is
       --  Returns Ops from its string representation. Raises Templates_Error if
       --  the token is not a known operation.
 
+      type U_Ops is (O_Not);
+
+      function Image (O : in U_Ops) return String;
+      --  Returns U_Ops string representation.
+
+      function Value (O : in String) return U_Ops;
+      --  Returns U_Ops from its string representation. Raises Templates_Error
+      --  if the token is not a known operation.
+
       type Node;
       type Tree is access Node;
 
-      type NKind is (Value, Var, Op);
+      type NKind is (Value, Var, Op, U_Op);
+      --  The node is a value, a variable a binary operator or an unary
+      --  operator
 
       type Node (Kind : NKind) is record
          case Kind is
@@ -585,6 +596,10 @@ package body Templates_Parser is
             when Op =>
                O           : Ops;
                Left, Right : Tree;
+
+            when U_Op =>
+               U_O         : U_Ops;
+               Next        : Tree;
          end case;
       end record;
 
@@ -2722,6 +2737,11 @@ package body Templates_Parser is
             function F_Einf (L, R : in String) return String;
             function F_Inf  (L, R : in String) return String;
             function F_Equ  (L, R : in String) return String;
+            function F_Diff (L, R : in String) return String;
+
+            type U_Ops_Fct is access function (N : in String) return String;
+
+            function F_Not (N : in String) return String;
 
             -----------
             -- F_And --
@@ -2822,6 +2842,19 @@ package body Templates_Parser is
                   end if;
             end F_Inf;
 
+            -----------
+            -- F_Not --
+            -----------
+
+            function F_Not (N : in String) return String is
+            begin
+               if Is_True (N) then
+                  return "FALSE";
+               else
+                  return "TRUE";
+               end if;
+            end F_Not;
+
             ----------
             -- F_Or --
             ----------
@@ -2879,6 +2912,9 @@ package body Templates_Parser is
                   Expr.O_Equal => F_Equ'Access,
                   Expr.O_Diff  => F_Diff'Access);
 
+            U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct
+              := (Expr.O_Not   => F_Not'Access);
+
          begin
             case E.Kind is
                when Expr.Value =>
@@ -2889,6 +2925,9 @@ package body Templates_Parser is
 
                when Expr.Op =>
                   return Op_Table (E.O) (Analyze (E.Left), Analyze (E.Right));
+
+               when Expr.U_Op =>
+                  return U_Op_Table (E.U_O) (Analyze (E.Next));
             end case;
          end Analyze;
 

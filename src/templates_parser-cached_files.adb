@@ -72,6 +72,13 @@ package body Cached_Files is
          Old : Tree;
 
       begin
+         --  This could have been already added by another thread while we
+         --  were reading it. In this case just return.
+
+         if Get (Filename) /= 0 then
+            return;
+         end if;
+
          if Files = null or else Index = Files'Last then
             Growth;
          end if;

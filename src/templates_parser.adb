@@ -67,15 +67,17 @@ package body Templates_Parser is
 
    function Assoc (Variable  : in String;
                    Value     : in String;
+                   Is_Vector : in Boolean   := False;
                    Begin_Tag : in String    := Default_Begin_Tag;
                    End_Tag   : in String    := Default_End_Tag;
                    Separator : in Character := Default_Separator)
-                   return Association is
+                  return Association is
    begin
       return Association'
         (To_Unbounded_String (Begin_Tag & Variable & End_Tag),
          To_Unbounded_String (Value),
-         Separator);
+         Separator,
+         Is_Vector);
    end Assoc;
 
    -----------
@@ -89,9 +91,9 @@ package body Templates_Parser is
                    return Association is
    begin
       if Value then
-         return Assoc (Variable, "TRUE", Begin_Tag, End_Tag);
+         return Assoc (Variable, "TRUE", False, Begin_Tag, End_Tag);
       else
-         return Assoc (Variable, "FALSE", Begin_Tag, End_Tag);
+         return Assoc (Variable, "FALSE", False, Begin_Tag, End_Tag);
       end if;
    end Assoc;
 
@@ -214,8 +216,9 @@ package body Templates_Parser is
                            Stop :    out Boolean)
       is
          use Strings_Cutter;
-         Pos   : Natural;
-         CS    : Cutted_String;
+         Pos     : Natural;
+         CS      : Cutted_String;
+         Nb_Item : Natural;
 
       begin
          Stop := False;
@@ -235,27 +238,42 @@ package body Templates_Parser is
                        To_String (Translations (K).Value),
                        String'(1 => Translations (K).Separator));
 
+               Nb_Item := Field_Count (CS);
+
                --  we stop when we reach (or are over) the maximum number of
                --  fields
 
-               Stop := (N >= Field_Count (CS) or else Field_Count (CS) = 0);
+               Stop := Stop
+                 or else (Nb_Item = 0
+                          or else (N >= Nb_Item
+                                   and then Translations (K).Vector));
 
                --  if there is no value for the tag or we ask for a value
                --  that does not exist, just replace it with an
                --  emptry string (i.e. removing it from the template).
 
-               if Field_Count (CS) = 0 or else Field_Count (CS) < N then
+               if Nb_Item = 0
+                 or else (Nb_Item < N and then Translations (K).Vector)
+               then
                   Replace_Slice
                     (Str,
                      Pos,
                      Pos + Length (Translations (K).Variable) - 1,
                      "");
                else
-                  Replace_Slice
-                    (Str,
-                     Pos,
-                     Pos + Length (Translations (K).Variable) - 1,
-                     Field (CS, N));
+                  if Translations (K).Vector then
+                     Replace_Slice
+                       (Str,
+                        Pos,
+                        Pos + Length (Translations (K).Variable) - 1,
+                        Field (CS, N));
+                  else
+                     Replace_Slice
+                       (Str,
+                        Pos,
+                        Pos + Length (Translations (K).Variable) - 1,
+                        Field (CS, 1));
+                  end if;
                end if;
 
                Destroy (CS);
@@ -356,8 +374,10 @@ package body Templates_Parser is
             begin
                for S in Lines'Range loop
                   for T in Translations'Range loop
-                     if Index (Lines (S),
-                               To_String (Translations (T).Variable)) /= 0
+                     if Translations (T).Vector
+                       and then
+                       Index (Lines (S),
+                              To_String (Translations (T).Variable)) /= 0
                      then
                         Create (CS,
                                 To_String (Translations (T).Value),

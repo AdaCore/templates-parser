@@ -1675,36 +1675,29 @@ package body Filter is
         and then Is_Number (Str (Str'First + 1 .. Str'Last))
       then
          --  This is an include parameter
+
          declare
             N  : constant Natural
               := Natural'Value (Str (Str'First + 1 .. Str'Last));
-            NV : constant String := To_String (I_Params (N).Ident);
-            --  NV is either a final value or the name of a variable
          begin
-            if I_Params (N).Kind = Text then
-               --  Final value, return it
-               return NV;
-            else
-               --  A variable, check it into the translation table
-               Pos := Containers.Find (Translations.Set.all, NV);
-            end if;
+            return To_String (I_Params (N));
          end;
 
       else
          Pos := Containers.Find (Translations.Set.all, Str);
-      end if;
 
-      if Containers.Has_Element (Pos) then
-         declare
-            Tk : constant Association := Containers.Element (Pos);
-         begin
-            if Tk.Kind = Std then
-               return To_String (Tk.Value);
-            end if;
-         end;
-      end if;
+         if Containers.Has_Element (Pos) then
+            declare
+               Tk : constant Association := Containers.Element (Pos);
+            begin
+               if Tk.Kind = Std then
+                  return To_String (Tk.Value);
+               end if;
+            end;
+         end if;
 
-      return Str;
+         return Str;
+      end if;
    end Value;
 
 end Filter;

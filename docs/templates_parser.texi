@@ -1072,6 +1072,7 @@ complex Web pages.
 Syntax:
 
 @cindex Command, TERMINATE_SECTIONS
+@cindex Command, REVERSE
 @cartouche
 @smallexample
 @group

@@ -190,6 +190,11 @@ package Templates_Parser is
       Begin_Tag : in String     := Default_Begin_Tag;
       End_Tag   : in String     := Default_End_Tag)
      return Association;
+   --  Build an Association (Variable = Value) to be added to a
+   --  Translate_Table. This is a matrix tag association, value is a
+   --  Matrix_Tag. If the matrix tag is found outside of a 2nd level table tag
+   --  statement, Separator is used to build string representation of the
+   --  matrix tag's vectors.
 
    -----------------------------
    -- Parsing and Translating --

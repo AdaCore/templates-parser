@@ -31,6 +31,8 @@
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
 
+with Strings_Maps;
+
 package Templates_Parser is
 
    use Ada.Strings.Unbounded;
@@ -100,19 +102,15 @@ package Templates_Parser is
    subtype Vector_Tag is Tag;
    subtype Matrix_Tag is Tag;
 
-   -----------------------
-   -- Association table --
-   -----------------------
+   ------------------
+   -- Associations --
+   ------------------
 
    type Association is private;
 
    type Association_Kind is (Std, Composite);
    --  The kind of association which is either Std (a simple value), a vector
    --  tag or a Matrix tag.
-
-   type Translate_Table is array (Positive range <>) of Association;
-
-   No_Translation : constant Translate_Table;
 
    function Assoc
      (Variable : in String;
@@ -153,6 +151,35 @@ package Templates_Parser is
    --  Build an Association (Variable = Value) to be added to Translate_Table.
    --  This is a tag association.
 
+   ---------------------------
+   -- Association table/set --
+   ---------------------------
+
+   type Translate_Table is array (Positive range <>) of Association;
+   --  A table with a set of associations, note that it is better to use
+   --  Translate_Set below as it is more efficient.
+
+   No_Translation : constant Translate_Table;
+
+   type Translate_Set is private;
+   --  This is a set of association like Translate_Table but it is possible to
+   --  insert item into this set more easily, furthermore there is no need to
+   --  know the number of item before hand. This is the object used internally
+   --  by the templates engine as it is far more efficient to retrieve a
+   --  specific item from it.
+
+   procedure Insert (Set : in out Translate_Set; Item : in Association);
+   --  Add Item into the translate set. If an association for this variable
+   --  already exist it just replaces it by the new item.
+
+   function Exists
+     (Set      : in Translate_Set;
+      Variable : in String) return Boolean;
+   --  Returns True if an association for Variable exists into the Set
+
+   function To_Set (Table : in Translate_Table) return Translate_Set;
+   --  Convert a Translate_Table into a Translate_Set
+
    -----------------------------
    -- Parsing and Translating --
    -----------------------------
@@ -179,14 +206,29 @@ package Templates_Parser is
       return Unbounded_String;
    --  Idem as above but returns an Unbounded_String.
 
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Set;
+      Cached            : in Boolean       := False;
+      Keep_Unknown_Tags : in Boolean       := False)
+      return String;
+   --  Idem with a Translation_Set
+
+   function Parse
+     (Filename          : in String;
+      Translations      : in Translate_Set;
+      Cached            : in Boolean       := False;
+      Keep_Unknown_Tags : in Boolean       := False)
+      return Unbounded_String;
+   --  Idem with a Translation_Set
+
    function Translate
      (Template     : in String;
       Translations : in Translate_Table := No_Translation)
       return String;
    --  Just translate the discrete variables in the Template string using the
-   --  Translations table. This function does not parse the command tag
-   --  (TABLE, IF, INCLUDE). All Vector and Matrix tag are replaced by the
-   --  empty string.
+   --  Translations table. This function does not parse the command tag (TABLE,
+   --  IF, INCLUDE). All composite tags are replaced by the empty string.
 
 private
 
@@ -233,6 +275,10 @@ private
    procedure Finalize   (T : in out Tag);
    procedure Adjust     (T : in out Tag);
 
+   type Indices is array (Positive range <>) of Natural;
+   --  Set of indices that reference a specific item into a composite tag.
+   --  Used by the parser.
+
    procedure Field
      (T      : in     Tag;
       N      : in     Positive;
@@ -265,5 +311,27 @@ private
    procedure Print_Tree (Filename : in String);
    --  Use for debugging purpose only, it will output the internal tree
    --  representation.
+
+   --------------------
+   --  Translate_Set --
+   --------------------
+
+   package Association_Set is new Strings_Maps (Association, "=");
+   use Association_Set;
+
+   type Map_Type_Access is access Containers.Map_Type;
+
+   type Translate_Set is new Ada.Finalization.Controlled with record
+      Ref_Count : Integer_Access;
+      Set       : Map_Type_Access;
+   end record;
+
+   procedure Initialize (Set : in out Translate_Set);
+   procedure Finalize   (Set : in out Translate_Set);
+   procedure Adjust     (Set : in out Translate_Set);
+
+   function Image (N : in Integer) return String;
+   pragma Inline (Image);
+   --  Returns N image without leading blank
 
 end Templates_Parser;

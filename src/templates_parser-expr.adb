@@ -34,6 +34,12 @@ separate (Templates_Parser)
 
 package body Expr is
 
+   function Is_Op (O : in String) return Boolean;
+   --  Returns True is O is a binary operator.
+
+   function Is_U_Op (O : in String) return Boolean;
+   --  Returns True is O is an unary operator.
+
    -----------
    -- Image --
    -----------
@@ -52,6 +58,64 @@ package body Expr is
          when O_Diff  => return "/=";
       end case;
    end Image;
+
+   function Image (O : in U_Ops) return String is
+   begin
+      case O is
+         when O_Not   => return "not";
+      end case;
+   end Image;
+
+   -----------
+   -- Is_Op --
+   -----------
+
+   function Is_Op (O : in String) return Boolean is
+   begin
+      if O = "and" then
+         return True;
+
+      elsif O = "or" then
+         return True;
+
+      elsif O = "xor" then
+         return True;
+
+      elsif O = ">" then
+         return True;
+
+      elsif O = "<" then
+         return True;
+
+      elsif O = ">=" then
+         return True;
+
+      elsif O = "<=" then
+         return True;
+
+      elsif O = "=" then
+         return True;
+
+      elsif O = "/=" then
+         return True;
+
+      else
+         return False;
+      end if;
+   end Is_Op;
+
+   -------------
+   -- Is_U_Op --
+   -------------
+
+   function Is_U_Op (O : in String) return Boolean is
+   begin
+      if O = "not" then
+         return True;
+      else
+         return False;
+      end if;
+   end Is_U_Op;
 
    -----------
    -- Parse --
@@ -159,7 +223,30 @@ package body Expr is
       R_Tok : constant String := Get_Token;  -- right operand
 
    begin
-      if O_Tok = "" then
+      if Is_U_Op (L_Tok) then
+
+         if R_Tok = "" then
+            --  This is "not expr"
+            return new Node'
+              (U_Op, Value (L_Tok),
+               Parse (O_Tok & ' ' & R_Tok & ' '
+                        & Expression (Index .. Expression'Last)));
+         else
+            --  This is "not expr op expr", parse again with
+            --  "(not expr) op expr"
+            return Parse ('(' & L_Tok & ' ' & O_Tok & ") "
+                            & R_Tok & ' '
+                            & Expression (Index .. Expression'Last));
+         end if;
+
+      elsif Is_Op (O_Tok) and then Is_U_Op (R_Tok) then
+         --  We have "expr op u_op expr", parse again with
+         --  "expr op (u_op expr)"
+         return Parse (L_Tok & ' ' & O_Tok
+                         & " (" & R_Tok & ' '
+                         & Expression (Index .. Expression'Last) & ')');
+
+      elsif O_Tok = "" then
          --  No more operator, this is a leaf. It is either a variable or a
          --  value.
 
@@ -216,6 +303,12 @@ package body Expr is
             Text_IO.Put (' ' & Image (E.O) & ' ');
             Print_Tree (E.Right);
             Text_IO.Put (')');
+
+         when U_Op =>
+            Text_IO.Put (Image (E.U_O));
+            Text_IO.Put (" (");
+            Print_Tree (E.Next);
+            Text_IO.Put (')');
       end case;
    end Print_Tree;
 
@@ -236,6 +329,9 @@ package body Expr is
          when Op =>
             Release (E.Left);
             Release (E.Right);
+
+         when U_Op =>
+            Release (E.Next);
       end case;
 
       Free (E);
@@ -273,6 +369,17 @@ package body Expr is
 
       elsif O = "/=" then
          return O_Diff;
+
+      else
+         Exceptions.Raise_Exception
+           (Internal_Error'Identity, "condition, unknown operator " & O);
+      end if;
+   end Value;
+
+   function Value (O : in String) return U_Ops is
+   begin
+      if O = "not" then
+         return O_Not;
 
       else
          Exceptions.Raise_Exception

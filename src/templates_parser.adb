@@ -344,22 +344,14 @@ package body Templates_Parser is
       pragma Inline (Release);
       --  Release all memory allocated P
 
-      type I_Kind is (Text, Var);
-      --  Include paramters kind, either a text value or a variable
-
-      type Parameters_Data is record
-         Kind  : I_Kind;
-         Ident : Unbounded_String;
-      end record;
-
       type Include_Parameters is
-        array (0 .. Max_Include_Parameters) of Parameters_Data;
+        array (0 .. Max_Include_Parameters) of Unbounded_String;
       --  Flat representation of the include parameters. Only the name or the
       --  value of the corresponding parameter is set here, we do not handle
       --  full data tree into the filter parameters.
 
       No_Include_Parameters : constant Include_Parameters
-        := (others => (Text, Null_Unbounded_String));
+        := (others => (Null_Unbounded_String));
 
       type Callback is access function
         (S : in String;
@@ -3001,11 +2993,13 @@ package body Templates_Parser is
          begin
             for K in I'Range loop
                if I (K) = null then
-                  F (K) := (Filter.Text, Null_Unbounded_String);
+                  F (K) := Null_Unbounded_String;
                else
                   case I (K).Kind is
-                     when Data.Text => F (K) := (Filter.Text, I (K).Value);
-                     when Data.Var  => F (K) := (Filter.Var, I (K).Var.Name);
+                     when Data.Text =>
+                        F (K) := I (K).Value;
+                     when Data.Var  =>
+                        F (K) := To_Unbounded_String (Translate (I (K).Var));
                   end case;
                end if;
             end loop;
@@ -3038,8 +3032,11 @@ package body Templates_Parser is
                         V : Tag_Var := T.Var;
                      begin
                         --  First thing we want to do is to inherit attributes
-                        --  from the include variable.
-                        V.Attr := Var.Attr;
+                        --  from the include variable if we have no attribute.
+
+                        if V.Attr = Nil then
+                           V.Attr := Var.Attr;
+                        end if;
 
                         return Translate
                           (Var, Translate (V), Translations, State.F_Params);

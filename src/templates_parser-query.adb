@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2003                            --
+--                          Copyright (C) 2003-2004                         --
 --                               Pascal Obry                                --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -64,8 +64,10 @@ package body Templates_Parser.Query is
      (Association : in Templates_Parser.Association)
       return Vector_Tag is
    begin
-      if Association.Kind = Vect then
-         return Association.Vect_Value;
+      if Association.Kind = Composite
+        and then Association.Comp_Value.Nested_Level = 1
+      then
+         return Vector_Tag (Association.Comp_Value);
       else
          Exceptions.Raise_Exception
            (Constraint_Error'Identity,

@@ -188,6 +188,31 @@ package body Expr is
                return Expression (I .. K);
             end if;
 
+         elsif Expression (Index) = '"' then
+            --  This is a string, returns it.
+            K := 0;
+
+            Look_For_String : for I in Index + 1 .. Expression'Last loop
+               if Expression (I) = '"' then
+                  K := I;
+                  exit;
+               end if;
+            end loop Look_For_String;
+
+            if K = 0 then
+               --  No matching closing quote
+
+               Exceptions.Raise_Exception
+                 (Internal_Error'Identity,
+                  "condition, no matching closing quote string at pos "
+                  & Natural'Image (Index));
+
+            else
+               I := Index;
+               Index := K + 1;
+               return Expression (I .. K);
+            end if;
+
          else
             --  We have found the start of a token, look for end of it.
             K := Fixed.Index (Expression (Index .. Expression'Last), Blank);
@@ -292,7 +317,16 @@ package body Expr is
    begin
       case E.Kind is
          when Value =>
-            Text_IO.Put (To_String (E.V));
+            declare
+               Val : constant String := To_String (E.V);
+               K   : constant Natural := Fixed.Index (Val, " ");
+            begin
+               if K = 0 then
+                  Text_IO.Put (Val);
+               else
+                  Text_IO.Put ('"' & Val & '"');
+               end if;
+            end;
 
          when Var =>
             Text_IO.Put (Image (E.Var));
@@ -305,8 +339,8 @@ package body Expr is
             Text_IO.Put (')');
 
          when U_Op =>
-            Text_IO.Put (Image (E.U_O));
-            Text_IO.Put (" (");
+            Text_IO.Put ('(');
+            Text_IO.Put (Image (E.U_O) & ' ');
             Print_Tree (E.Next);
             Text_IO.Put (')');
       end case;

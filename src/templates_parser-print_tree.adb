@@ -105,9 +105,9 @@ begin
 
          if T.Sections /= null then
             Print_Tree (T.Sections, Level + 1);
-            Print_Indent (Level);
          end if;
 
+         Print_Indent (Level);
          Text_IO.Put_Line ("[END_BLOCK]");
          Print_Tree (T.Next, Level);
 

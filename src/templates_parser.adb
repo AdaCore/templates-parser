@@ -1280,7 +1280,11 @@ package body Templates_Parser is
       end if;
    end Item;
 
-   function Item (T : in Tag; N : in Positive) return Tag is
+   ---------------
+   -- Composite --
+   ---------------
+
+   function Composite (T : in Tag; N : in Positive) return Tag is
       Result : Tag;
       Found  : Boolean;
    begin
@@ -1291,7 +1295,7 @@ package body Templates_Parser is
       else
          raise Constraint_Error;
       end if;
-   end Item;
+   end Composite;
 
    -------------------
    -- Set_Separator --

@@ -95,7 +95,7 @@ package Templates_Parser is
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 
-   function Item (T : in Tag; N : in Positive) return Tag;
+   function Composite (T : in Tag; N : in Positive) return Tag;
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 

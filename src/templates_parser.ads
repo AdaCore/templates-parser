@@ -33,6 +33,8 @@ with Ada.Strings.Unbounded;
 
 package Templates_Parser is
 
+   use Ada.Strings.Unbounded;
+
    Template_Error : exception;
 
    Max_Template_Lines : constant := 5_000;
@@ -50,6 +52,18 @@ package Templates_Parser is
    --  a vector tag is a set of string.
 
    function "+" (Value : in String) return Vector_Tag;
+   --  Vector_Tag constructor.
+
+   function "+" (Value : in Character) return Vector_Tag;
+   --  Vector_Tag constructor.
+
+   function "+" (Value : in Boolean) return Vector_Tag;
+   --  Vector_Tag constructor.
+
+   function "+" (Value : in Unbounded_String) return Vector_Tag;
+   --  Vector_Tag constructor.
+
+   function "+" (Value : in Integer) return Vector_Tag;
    --  Vector_Tag constructor.
 
    function "&"
@@ -73,7 +87,7 @@ package Templates_Parser is
 
    function "&"
      (Vect  : in Vector_Tag;
-      Value : in Ada.Strings.Unbounded.Unbounded_String)
+      Value : in Unbounded_String)
      return Vector_Tag;
    --  add Value at the end of the vector tag set.
 
@@ -104,7 +118,7 @@ package Templates_Parser is
 
    function Assoc
      (Variable  : in String;
-      Value     : in Ada.Strings.Unbounded.Unbounded_String;
+      Value     : in Unbounded_String;
       Begin_Tag : in String    := Default_Begin_Tag;
       End_Tag   : in String    := Default_End_Tag)
      return Association;
@@ -180,8 +194,6 @@ package Templates_Parser is
    --  parsed later.
 
 private
-
-   use Ada.Strings.Unbounded;
 
    ------------------
    --  Vector Tags --

@@ -150,6 +150,32 @@ package body Templates_Parser is
          Last      => Item);
    end "+";
 
+   function "+" (Value : in Character) return Vector_Tag is
+   begin
+      return + String'(1 => Value);
+   end "+";
+
+   function "+" (Value : in Boolean) return Vector_Tag is
+   begin
+      return + Boolean'Image (Value);
+   end "+";
+
+   function "+" (Value : in Strings.Unbounded.Unbounded_String)
+     return Vector_Tag is
+   begin
+      return + To_String (Value);
+   end "+";
+
+   function "+" (Value : in Integer) return Vector_Tag is
+      S_Value : constant String := Integer'Image (Value);
+   begin
+      if Value in Natural then
+         return + S_Value (S_Value'First + 1 .. S_Value'Last);
+      else
+         return + S_Value;
+      end if;
+   end "+";
+
    ---------
    -- "&" --
    ---------
@@ -200,7 +226,7 @@ package body Templates_Parser is
 
    function "&"
      (Vect  : in Vector_Tag;
-      Value : in Ada.Strings.Unbounded.Unbounded_String)
+      Value : in Strings.Unbounded.Unbounded_String)
      return Vector_Tag is
    begin
       return Vect & To_String (Value);

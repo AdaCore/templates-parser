@@ -1,6 +1,6 @@
 [INFO] blocks4.tmplt
 [C_INFO]  1 FALSE
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]

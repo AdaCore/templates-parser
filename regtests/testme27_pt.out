@@ -3,7 +3,7 @@
 [C_INFO]  1 FALSE
 [TEXT] 
 [TEXT] 
-[INCLUDE_STMT] include2.tmplt
+[INCLUDE] include2.tmplt
     $0 = include2.tmplt
     $1 = @_VAR1_@
     $2 = @_VAR3_@
@@ -23,8 +23,8 @@
   [TEXT] 
   [TEXT] 5> @_$3'Max_Column_@
   [TEXT] 
-  [IF_STMT] (@_$2'Length_@ > 1)
+  [IF] (@_$2'Length_@ > 1)
     [TEXT] ok
   [ELSE]
     [TEXT] nok
-  [END_IF_STMT]
+  [END_IF]

@@ -1,22 +1,22 @@
 [INFO] blocks6.tmplt
 [C_INFO]  1 FALSE
 [TEXT] 
-[TABLE_STMT] TERMINATE_SECTIONS
+[TABLE] TERMINATE_SECTIONS
   [BLOCK]
     [COMMON]
       [TEXT] ---
       [TEXT] code with @_VAR3_@
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]    red
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]    green
   [END_BLOCK]
   [BLOCK]
     [COMMON]
       [TEXT] end of the text.
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]    1
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]    2
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]

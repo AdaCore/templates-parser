@@ -1,30 +1,30 @@
 [INFO] testme11.tmplt
 [C_INFO]  1 FALSE
 [TEXT] 
-[IF_STMT] @_COND1_@
+[IF] @_COND1_@
   [TEXT]    nok1
 [ELSE]
-  [IF_STMT] false
+  [IF] false
     [TEXT]    nok2
   [ELSE]
-    [IF_STMT] 8
+    [IF] 8
       [TEXT]    nok3
     [ELSE]
-      [IF_STMT] sze
+      [IF] sze
         [TEXT]    nok4
       [ELSE]
-        [IF_STMT] @_COND2_@
+        [IF] @_COND2_@
           [TEXT]    ok1
         [ELSE]
           [TEXT]    else part
-        [END_IF_STMT]
-      [END_IF_STMT]
-    [END_IF_STMT]
-  [END_IF_STMT]
-[END_IF_STMT]
+        [END_IF]
+      [END_IF]
+    [END_IF]
+  [END_IF]
+[END_IF]
 [TEXT] 
-[IF_STMT] @_COND2_@
+[IF] @_COND2_@
   [TEXT]   ok cond2
 [ELSE]
   [TEXT]   nok cond2
-[END_IF_STMT]
+[END_IF]

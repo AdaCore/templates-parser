@@ -14,13 +14,13 @@
 [TEXT] <form action="/ftp" method="post">
 [TEXT] 
 [TEXT] <table width="100%" border="0">
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
-    [SECTION_STMT]
-      [IF_STMT] (@_DEPTH_@ = +1)
+    [SECTION]
+      [IF] (@_DEPTH_@ = +1)
         [TEXT] <table width="90%">begin table
       [ELSE]
-        [IF_STMT] (@_DEPTH_@ = -1)
+        [IF] (@_DEPTH_@ = -1)
           [TEXT] </table>end table
         [ELSE]
           [TEXT] <tr bgcolor="lightblue" border="1">
@@ -28,13 +28,13 @@
           [TEXT] @_ITEM_@ @_DEPTH_@
           [TEXT] </td>
           [TEXT] </tr>
-        [END_IF_STMT]
-      [END_IF_STMT]
-    [SECTION_STMT]
-      [IF_STMT] (@_DEPTH_@ = +1)
+        [END_IF]
+      [END_IF]
+    [SECTION]
+      [IF] (@_DEPTH_@ = +1)
         [TEXT] <table width="90%">begin table
       [ELSE]
-        [IF_STMT] ((@_DEPTH_@ = -1) and (@_DEPTH_@ = -1))
+        [IF] ((@_DEPTH_@ = -1) and (@_DEPTH_@ = -1))
           [TEXT] </table>end table
         [ELSE]
           [TEXT] <tr bgcolor="lightsteelblue" border="1">
@@ -42,10 +42,10 @@
           [TEXT] @_ITEM_@  @_DEPTH_@
           [TEXT] </td>
           [TEXT] </tr>
-        [END_IF_STMT]
-      [END_IF_STMT]
+        [END_IF]
+      [END_IF]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] </table>
 [TEXT] </form>
 [TEXT] 

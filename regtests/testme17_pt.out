@@ -1,32 +1,32 @@
 [INFO] testme17.tmplt
 [C_INFO]  1 FALSE
 [TEXT] 
-[IF_STMT] (@_VAR1_@ = "a value")
+[IF] (@_VAR1_@ = "a value")
   [TEXT]   OK
 [ELSE]
   [TEXT]   NOK
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] (@_VAR1_@ /= value)
+[IF] (@_VAR1_@ /= value)
   [TEXT]   OK
 [ELSE]
   [TEXT]   NOK
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] (@_VAR1_@ /= value)
+[IF] (@_VAR1_@ /= value)
   [TEXT]   OK
 [ELSE]
   [TEXT]   NOK
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] ("a value" = @_VAR1_@)
+[IF] ("a value" = @_VAR1_@)
   [TEXT]   OK
 [ELSE]
   [TEXT]   NOK
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] ("toto value" /= @_VAR1_@)
+[IF] ("toto value" /= @_VAR1_@)
   [TEXT]   OK
 [ELSE]
   [TEXT]   NOK
-[END_IF_STMT]
+[END_IF]

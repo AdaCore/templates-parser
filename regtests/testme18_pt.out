@@ -23,7 +23,7 @@
 [TEXT] 
 [TEXT] Level 1 (no expand var)
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] MAT
@@ -42,11 +42,11 @@
       [TEXT] V6
       [TEXT] @_V6'Length_@
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 1 (with expand var)
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] => @_V6_@
@@ -67,14 +67,14 @@
       [TEXT] V6
       [TEXT] @_V6'Length_@
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 2 (no expand var)
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
-      [TABLE_STMT]
+      [TABLE]
         [BLOCK]
           [COMMON]
             [TEXT] MAT
@@ -93,17 +93,17 @@
             [TEXT] V6
             [TEXT] @_V6'Length_@
         [END_BLOCK]
-      [END_TABLE_STMT]
+      [END_TABLE]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 2 (with expand var) - vector level 1
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] => @_V6_@
-      [TABLE_STMT]
+      [TABLE]
         [BLOCK]
           [COMMON]
             [TEXT] MAT
@@ -122,16 +122,16 @@
             [TEXT] V6
             [TEXT] @_V6'Length_@
         [END_BLOCK]
-      [END_TABLE_STMT]
+      [END_TABLE]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 2 (with expand var) - vector level 2
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
-      [TABLE_STMT]
+      [TABLE]
         [BLOCK]
           [COMMON]
             [TEXT] => @_V6_@
@@ -151,17 +151,17 @@
             [TEXT] V6
             [TEXT] @_V6'Length_@
         [END_BLOCK]
-      [END_TABLE_STMT]
+      [END_TABLE]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 2 (with expand var) - matrix level 1
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] => @_MAT_@
-      [TABLE_STMT]
+      [TABLE]
         [BLOCK]
           [COMMON]
             [TEXT] MAT
@@ -180,16 +180,16 @@
             [TEXT] V6
             [TEXT] @_V6'Length_@
         [END_BLOCK]
-      [END_TABLE_STMT]
+      [END_TABLE]
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] 
 [TEXT] Level 2 (with expand var) - matrix level 2
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
-      [TABLE_STMT]
+      [TABLE]
         [BLOCK]
           [COMMON]
             [TEXT] => @_MAT_@
@@ -209,7 +209,7 @@
             [TEXT] V6
             [TEXT] @_V6'Length_@
         [END_BLOCK]
-      [END_TABLE_STMT]
+      [END_TABLE]
       [TEXT] ----
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]

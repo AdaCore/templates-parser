@@ -8,29 +8,29 @@
 [TEXT] Test for include with parameters with default values
 [TEXT] 
 [TEXT] **********************************************************
-[INCLUDE_STMT] testme59.incl
+[INCLUDE] testme59.incl
     $0 = testme59.incl
     $1 = one
     $2 = two
   [INFO] testme59.incl
   [C_INFO]  1 FALSE
-  [IF_STMT] (not @_$9_@)
-    [SET_STMT] P1 = toto
-    [SET_STMT] P2 = $2 | deux
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
   [ELSE]
-    [SET_STMT] P1 = "this is P1"
-    [SET_STMT] P2 = "this is P2"
-  [END_IF_STMT]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
   [TEXT] 
-  [SET_STMT] P3 = $3 | "trois et trois"
-  [SET_STMT] P4 = $4 | quatre
-  [SET_STMT] P5 = $5 | cinq
-  [SET_STMT] P6 = $6 | six
-  [SET_STMT] P7 = $7 | sept
-  [SET_STMT] P8 = $8 | huit
-  [SET_STMT] P9 = $9 | neuf
-  [SET_STMT] ALIAS = $2
-  [SET_STMT] CST = toujours
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
   [TEXT] 
   [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
   [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
@@ -43,30 +43,30 @@
   [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
   [TEXT] @_CST_@
 [TEXT] **********************************************************
-[INCLUDE_STMT] testme59.incl
+[INCLUDE] testme59.incl
     $0 = testme59.incl
     $1 = one
     $2 = two
     $6 = six
   [INFO] testme59.incl
   [C_INFO]  1 FALSE
-  [IF_STMT] (not @_$9_@)
-    [SET_STMT] P1 = toto
-    [SET_STMT] P2 = $2 | deux
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
   [ELSE]
-    [SET_STMT] P1 = "this is P1"
-    [SET_STMT] P2 = "this is P2"
-  [END_IF_STMT]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
   [TEXT] 
-  [SET_STMT] P3 = $3 | "trois et trois"
-  [SET_STMT] P4 = $4 | quatre
-  [SET_STMT] P5 = $5 | cinq
-  [SET_STMT] P6 = $6 | six
-  [SET_STMT] P7 = $7 | sept
-  [SET_STMT] P8 = $8 | huit
-  [SET_STMT] P9 = $9 | neuf
-  [SET_STMT] ALIAS = $2
-  [SET_STMT] CST = toujours
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
   [TEXT] 
   [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
   [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
@@ -79,30 +79,30 @@
   [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
   [TEXT] @_CST_@
 [TEXT] **********************************************************
-[INCLUDE_STMT] testme59.incl
+[INCLUDE] testme59.incl
     $0 = testme59.incl
     $2 = two
     $6 = six
     $8 = eight
   [INFO] testme59.incl
   [C_INFO]  1 FALSE
-  [IF_STMT] (not @_$9_@)
-    [SET_STMT] P1 = toto
-    [SET_STMT] P2 = $2 | deux
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
   [ELSE]
-    [SET_STMT] P1 = "this is P1"
-    [SET_STMT] P2 = "this is P2"
-  [END_IF_STMT]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
   [TEXT] 
-  [SET_STMT] P3 = $3 | "trois et trois"
-  [SET_STMT] P4 = $4 | quatre
-  [SET_STMT] P5 = $5 | cinq
-  [SET_STMT] P6 = $6 | six
-  [SET_STMT] P7 = $7 | sept
-  [SET_STMT] P8 = $8 | huit
-  [SET_STMT] P9 = $9 | neuf
-  [SET_STMT] ALIAS = $2
-  [SET_STMT] CST = toujours
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
   [TEXT] 
   [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
   [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
@@ -115,7 +115,7 @@
   [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
   [TEXT] @_CST_@
 [TEXT] **********************************************************
-[INCLUDE_STMT] testme59.incl
+[INCLUDE] testme59.incl
     $0 = testme59.incl
     $2 = two
     $6 = six
@@ -123,23 +123,23 @@
     $9 = true
   [INFO] testme59.incl
   [C_INFO]  1 FALSE
-  [IF_STMT] (not @_$9_@)
-    [SET_STMT] P1 = toto
-    [SET_STMT] P2 = $2 | deux
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
   [ELSE]
-    [SET_STMT] P1 = "this is P1"
-    [SET_STMT] P2 = "this is P2"
-  [END_IF_STMT]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
   [TEXT] 
-  [SET_STMT] P3 = $3 | "trois et trois"
-  [SET_STMT] P4 = $4 | quatre
-  [SET_STMT] P5 = $5 | cinq
-  [SET_STMT] P6 = $6 | six
-  [SET_STMT] P7 = $7 | sept
-  [SET_STMT] P8 = $8 | huit
-  [SET_STMT] P9 = $9 | neuf
-  [SET_STMT] ALIAS = $2
-  [SET_STMT] CST = toujours
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
   [TEXT] 
   [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
   [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@

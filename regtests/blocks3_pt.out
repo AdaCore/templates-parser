@@ -1,28 +1,28 @@
 [INFO] blocks3.tmplt
 [C_INFO]  1 FALSE
 [TEXT] ligne1
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT]   ---
       [TEXT]   partie commune 1
       [TEXT]   partie commune 2
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]     dans la table @_VAR3_@
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]     in the table @_VAR3_@
   [END_BLOCK]
   [BLOCK]
     [COMMON]
       [TEXT]   partie commune 3
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]     dans la table "@_VAR2_@"
-    [SECTION_STMT]
+    [SECTION]
       [TEXT]     in the table "@_VAR2_@"
   [END_BLOCK]
   [BLOCK]
     [COMMON]
       [TEXT]   partie commune 4
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]
 [TEXT] ligne2

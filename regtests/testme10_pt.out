@@ -5,34 +5,34 @@
 [TEXT] 
 [TEXT] Unknown @_unknown_@
 [TEXT] 
-[IF_STMT] (@_ONE_@ = 1)
+[IF] (@_ONE_@ = 1)
   [TEXT]   1
 [ELSE]
   [TEXT]   error
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] @_EXIST:unknown_@
+[IF] @_EXIST:unknown_@
   [TEXT]   error
 [ELSE]
   [TEXT]   ok, not EXIST
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] @_IS_EMPTY:unknown_@
+[IF] @_IS_EMPTY:unknown_@
   [TEXT]   error
 [ELSE]
   [TEXT]   ok, not EMPTY
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
-[IF_STMT] (@_unknown_@ = 1)
+[IF] (@_unknown_@ = 1)
   [TEXT]   error, unknown = 1
 [ELSE]
   [TEXT]   ok, @_unknown_@ not equal to 1
-[END_IF_STMT]
+[END_IF]
 [TEXT] 
 [TEXT] 
-[TABLE_STMT]
+[TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] @_VAR3_@ @_unknown_@
   [END_BLOCK]
-[END_TABLE_STMT]
+[END_TABLE]

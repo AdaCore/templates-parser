@@ -6,7 +6,7 @@
 [TEXT] 
 [TEXT] 
 [TEXT] First include:
-[INCLUDE_STMT] include.tmplt
+[INCLUDE] include.tmplt
     $0 = include.tmplt
     $1 = @_VAR1_@
   [INFO] include.tmplt
@@ -20,30 +20,30 @@
   [TEXT] 3> @_WEB_NBSP:$2_@
   [TEXT] 4> @_WEB_NBSP:$1_@
   [TEXT] 
-  [IF_STMT] (@_$2_@ = toto)
+  [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+  [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [TABLE_STMT]
+  [TABLE]
     [BLOCK]
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 7> @_VAR3_@
         [TEXT] 8> @_$1_@
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 9> @_$2_@
     [END_BLOCK]
-  [END_TABLE_STMT]
+  [END_TABLE]
   [TEXT] ----------
 [TEXT] 
 [TEXT] 
 [TEXT] Second include:
-[INCLUDE_STMT] include.tmplt
+[INCLUDE] include.tmplt
     $0 = include.tmplt
     $1 = @_VAR1_@
     $2 = toto
@@ -58,29 +58,29 @@
   [TEXT] 3> @_WEB_NBSP:$2_@
   [TEXT] 4> @_WEB_NBSP:$1_@
   [TEXT] 
-  [IF_STMT] (@_$2_@ = toto)
+  [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+  [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [TABLE_STMT]
+  [TABLE]
     [BLOCK]
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 7> @_VAR3_@
         [TEXT] 8> @_$1_@
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 9> @_$2_@
     [END_BLOCK]
-  [END_TABLE_STMT]
+  [END_TABLE]
   [TEXT] ----------
 [TEXT] 
 [TEXT] Third include:
-[INCLUDE_STMT] include.tmplt
+[INCLUDE] include.tmplt
     $0 = include.tmplt
     $1 = @_VAR1_@
     $2 = toto titi
@@ -96,24 +96,24 @@
   [TEXT] 3> @_WEB_NBSP:$2_@
   [TEXT] 4> @_WEB_NBSP:$1_@
   [TEXT] 
-  [IF_STMT] (@_$2_@ = toto)
+  [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [IF_STMT] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
+  [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
   [ELSE]
-  [END_IF_STMT]
+  [END_IF]
   [TEXT] 
-  [TABLE_STMT]
+  [TABLE]
     [BLOCK]
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 7> @_VAR3_@
         [TEXT] 8> @_$1_@
-      [SECTION_STMT]
+      [SECTION]
         [TEXT] 9> @_$2_@
     [END_BLOCK]
-  [END_TABLE_STMT]
+  [END_TABLE]
   [TEXT] ----------
 

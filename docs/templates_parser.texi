@@ -608,6 +608,12 @@ Removes leading and trailing spaces.
 
 Put all characters in the variable in upper-case.
 
+@item WEB_ENCODE
+@cindex Filter, WEB_ENCODE
+
+As WEB_ESCAPE and also encodes all non 7-bit characters and non
+printable characters using @b{&#xxx;} HTML encoding.
+
 @item WEB_ESCAPE
 @cindex Filter, WEB_ESCAPE
 

@@ -115,7 +115,7 @@ package body Expr is
             else
                I := Index;
                Index := K + 1;
-               return Expression (I + 1 .. K - 1);
+               return Expression (I .. K);
             end if;
 
          else
@@ -135,16 +135,20 @@ package body Expr is
          end if;
       end Get_Token;
 
-      L_Tok : constant String := Get_Token;
-      O_Tok : constant String := Get_Token;
-      R_Tok : constant String := Get_Token;
+      L_Tok : constant String := Get_Token;  -- left operand
+      O_Tok : constant String := Get_Token;  -- operator
+      R_Tok : constant String := Get_Token;  -- right operand
 
    begin
       if O_Tok = "" then
          --  No more operator, this is a leaf. It is either a variable or a
          --  value.
 
-         if Strings.Fixed.Index (L_Tok, To_String (Begin_Tag)) = 0 then
+         if L_Tok (L_Tok'First) = '(' then
+            --  an expression
+            return Parse (L_Tok (L_Tok'First + 1 .. L_Tok'Last - 1));
+
+         elsif Strings.Fixed.Index (L_Tok, To_String (Begin_Tag)) = 0 then
             --  a value
             return new Node'(Value, To_Unbounded_String (L_Tok));
 

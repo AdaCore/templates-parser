@@ -8,7 +8,7 @@ MODE	= RELEASE
 VERSION	= 10.0
 
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
-		GNATMAKE="gnatmake"
+		TP_XMLADA="$(TP_XMLADA)" GNATMAKE="gnatmake"
 
 all:
 	echo ""

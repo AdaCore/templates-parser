@@ -1569,7 +1569,9 @@ package body Templates_Parser is
             I_Params : Include_Parameters;
 
          when Inline_Stmt =>
+            Before  : Unbounded_String;
             Sep     : Unbounded_String;
+            After   : Unbounded_String;
             I_Block : Tree;
       end case;
    end record;
@@ -2401,12 +2403,11 @@ package body Templates_Parser is
       function Count_Tag_Attributes return Natural;
       --  Returns the number of tag attributes present
 
-      function Get_Tag_Attribute (K : in Positive) return String;
+      function Get_Tag_Attribute (N : in Positive) return String;
       --  Returns the Nth tag attribute
 
-      function Get_Tag_Parameter (Default : in String) return String;
-      --  Returns the tag parameter found between parenthesis or Default
-      --  if not found.
+      function Get_Tag_Parameter (N : in Positive) return String;
+      --  Returns the Nth tag parameter found between parenthesis
 
       function Is_Stmt
         (Stmt : in String; Extended : in Boolean := False) return Boolean;
@@ -2625,13 +2626,13 @@ package body Templates_Parser is
       -- Get_Tag_Attribute --
       -----------------------
 
-      function Get_Tag_Attribute (K : in Positive) return String is
+      function Get_Tag_Attribute (N : in Positive) return String is
          S : Positive := First + 2;
          L : constant Natural :=
                Strings.Fixed.Index (Buffer (S .. Last), "@@");
          E : Natural;
       begin
-         for I in 1 .. K loop
+         for I in 1 .. N loop
             S := Strings.Fixed.Index (Buffer (S .. L), "'");
          end loop;
 
@@ -2650,24 +2651,79 @@ package body Templates_Parser is
       -- Get_Tag_Parameter --
       -----------------------
 
-      function Get_Tag_Parameter (Default : in String) return String is
-         L : constant Natural :=
-               Strings.Fixed.Index (Buffer (First .. Last), ")@@");
-         I : Natural;
+      function Get_Tag_Parameter (N : in Positive) return String is
+         I_Last : constant Natural :=
+                    Strings.Fixed.Index (Buffer (First .. Last), ")@@");
+         F, L   : Natural;
+         Level  : Natural;
       begin
          if L = 0 then
-            return Default;
+            Fatal_Error ("No tag parameter");
 
          else
-            I := Strings.Fixed.Index (Buffer (First .. L), "(");
+            F := First;
+            L := First - 1;
 
-            if I = 0 then
-               Fatal_Error ("Missing parenthesis in tag command");
-            else
-               return Buffer (I + 1 .. L - 1);
-            end if;
+            for K in 1 .. N loop
+               F := Strings.Fixed.Index (Buffer (L + 1 .. I_Last), "(");
+
+               if F = 0 then
+                  Fatal_Error ("Missing parenthesis in tag command");
+
+               else
+                  --  Look for matching closing parenthesis
+                  Level := 0;
+                  L     := F + 1;
+
+                  while L < I_Last loop
+                     if Buffer (L) = '(' then
+                        Level := Level + 1;
+                     elsif Buffer (L) = ')' then
+                        exit when Level = 0;
+                        Level := Level - 1;
+                     end if;
+
+                     L := L + 1;
+                  end loop;
+
+                  if Buffer (L) /= ')' then
+                     Fatal_Error
+                       ("Missing closing parenthesis in tag command");
+                  end if;
+               end if;
+            end loop;
+
+            return Buffer (F + 1 .. L - 1);
          end if;
       end Get_Tag_Parameter;
+
+      -----------------------------
+      -- Get_Tag_Parameter_Count --
+      -----------------------------
+
+      function Get_Tag_Parameter_Count return Natural is
+         I_Last : constant Natural :=
+                    Strings.Fixed.Index (Buffer (First .. Last), ")@@");
+         Count  : Natural := 0;
+         Level  : Natural := 0;
+      begin
+         if I_Last = 0 then
+            return 0;
+         else
+            for K in First .. I_Last loop
+               if Buffer (K) = '(' then
+                  if Level = 0 then
+                     Count := Count + 1;
+                  end if;
+                  Level := Level + 1;
+               elsif Buffer (K) = ')' then
+                  Level := Level - 1;
+               end if;
+            end loop;
+
+            return Count;
+         end if;
+      end Get_Tag_Parameter_Count;
 
       -------------
       -- Is_Stmt --
@@ -3384,7 +3440,21 @@ package body Templates_Parser is
          elsif Is_Stmt (Inline_Token, Extended => True) then
             T := new Node (Inline_Stmt);
 
-            T.Sep     := To_Unbounded_String (Get_Tag_Parameter (" "));
+            case Get_Tag_Parameter_Count is
+               when 0 =>
+                  T.Sep    := To_Unbounded_String (" ");
+               when 1 =>
+                  T.Sep    := To_Unbounded_String (Get_Tag_Parameter (1));
+               when 3 =>
+                  T.Before := To_Unbounded_String (Get_Tag_Parameter (1));
+                  T.Sep    := To_Unbounded_String (Get_Tag_Parameter (2));
+                  T.After  := To_Unbounded_String (Get_Tag_Parameter (3));
+               when others =>
+                  Fatal_Error
+                    ("Wrong number of tag parameters for INLINE "
+                     & "command (0, 1 or 3)");
+            end case;
+
             T.I_Block := Parse (Parse_Inline);
 
             --  Now we have parsed the full tree to inline. Rewrite this tree
@@ -4814,6 +4884,7 @@ package body Templates_Parser is
                Analyze (T.Next, State);
 
             when Inline_Stmt =>
+               Add (To_String (T.Before));
                Analyze (T.I_Block,
                         Parse_State'(State.Cursor,
                                      State.Max_Lines, State.Max_Expand,
@@ -4825,6 +4896,7 @@ package body Templates_Parser is
                                      State.F_Params,
                                      State.Block,
                                      L_State'Unchecked_Access));
+               Add (To_String (T.After));
                Analyze (T.Next, State);
          end case;
       end Analyze;

@@ -112,6 +112,32 @@ package body Templates_Parser is
       --  maximum number if lines in the table. This variable is always set to
       --  0 outside of a table.
 
+      procedure Fatal_Error (Message : in String);
+      --  raise Template_Error exception with message.
+
+      function Exist (Translations : in Translate_Table;
+                      Tag          : in String;
+                      Value        : in String)
+                     return Boolean;
+      --  check that Tag exist in the translation table and that its value is
+      --  set to Value.
+
+      procedure Translate (Str : in out Unbounded_String;
+                           Tag : in     String;
+                           To  : in     String);
+      --  Translate all tags named Tag in Str by To
+
+      procedure Translate (Str : in out Unbounded_String);
+      --  Translate all tags in the translations table and the specials tags
+      --  in Str by their corresponding value.
+
+      procedure Translate (Str  : in out Unbounded_String;
+                           N    : in     Positive;
+                           Stop :    out Boolean);
+      --  Translate all tags in Str with the Nth Tag's value. This procedure
+      --  is used to build the tables. Tags used in a table are a set of
+      --  values separated by a special character.
+
       -----------------
       -- Fatal_Error --
       -----------------
@@ -127,9 +153,6 @@ package body Templates_Parser is
       -----------
       -- Exist --
       -----------
-
-      --  check that Tag exist in the translation table and that its value is
-      --  set to Value.
 
       function Exist (Translations : in Translate_Table;
                       Tag          : in String;
@@ -148,22 +171,6 @@ package body Templates_Parser is
       ---------------
       -- Translate --
       ---------------
-
-      procedure Translate (Str : in out Unbounded_String;
-                           Tag : in     String;
-                           To  : in     String);
-      --  Translate all tags named Tag in Str by To
-
-      procedure Translate (Str : in out Unbounded_String);
-      --  Translate all tags in the translations table and the specials tags
-      --  in Str by their corresponding value.
-
-      procedure Translate (Str  : in out Unbounded_String;
-                           N    : in     Positive;
-                           Stop :    out Boolean);
-      --  Translate all tags in Str with the Nth Tag's value. This procedure
-      --  is used to build the tables. Tags used in a table are a set of
-      --  values separated by a special character.
 
       procedure Translate (Str : in out Unbounded_String;
                            Tag : in     String;

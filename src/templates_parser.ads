@@ -149,7 +149,8 @@ package Templates_Parser is
       Separator : in String := Default_Separator)
       return Association;
    --  Build an Association (Variable = Value) to be added to Translate_Table.
-   --  This is a tag association.
+   --  This is a tag association. Separator will be used when outputting the
+   --  a flat representation of the Tag (outside a table statement).
 
    ---------------------------
    -- Association table/set --

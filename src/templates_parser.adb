@@ -247,9 +247,8 @@ package body Templates_Parser is
                --  fields
 
                Stop := Stop
-                 or else (Nb_Item = 0
-                          or else (N >= Nb_Item
-                                   and then Translations (K).Vector));
+                 or else ((Nb_Item = 0 or else N >= Nb_Item)
+                          and then Translations (K).Vector);
 
                --  if there is no value for the tag or we ask for a value
                --  that does not exist, just replace it with an

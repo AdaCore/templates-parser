@@ -2651,7 +2651,7 @@ package body Templates_Parser is
             Print_Tree (T.Next, Level);
 
          when Section_Stmt =>
-            Text_IO.Put_Line ("[SECION_STMT]");
+            Text_IO.Put_Line ("[SECTION_STMT]");
             Print_Tree (T.Next, Level + 1);
             Print_Tree (T.N_Section, Level);
 

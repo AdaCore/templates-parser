@@ -347,6 +347,14 @@ package body Templates_Parser is
                Exceptions.Raise_Exception
                  (Template_Error'Identity,
                   "unbalanced parenthesis """ & Filter & '"');
+
+            elsif P2 /= 0
+              and then P2 < Filter'Last
+              and then Filter (P2 + 1) /= ':'
+            then
+               Exceptions.Raise_Exception
+                 (Template_Error'Identity,
+                  "unexpected character after parenthesis """ & Filter & '"');
             end if;
 
             if P1 = 0 then
@@ -2577,7 +2585,7 @@ package body Templates_Parser is
       return T;
 
    exception
-      when E : others =>
+      when E : Internal_Error =>
          Fatal_Error (Exceptions.Exception_Message (E));
    end Load;
 

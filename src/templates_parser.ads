@@ -203,7 +203,7 @@ package Templates_Parser is
          Quit : in out Boolean);
    procedure For_Every_Association (Set : in Translate_Set);
    --  Iterates through all associations in the set, call Action for each one.
-   --  Set Quite to True to stop the iteration.
+   --  Set Quit to True to stop the iteration.
 
    function To_Set (Table : in Translate_Table) return Translate_Set;
    --  Convert a Translate_Table into a Translate_Set
@@ -288,6 +288,10 @@ package Templates_Parser is
       Translations : in Translate_Set)
       return String;
    --  Idem with a Translation_Set
+
+   procedure Release_Cache;
+   --  Release the internal cache. This free the memory used for all currently
+   --  loaded template trees.
 
 private
 

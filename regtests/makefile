@@ -115,8 +115,8 @@ test:  init testme print_tree $(STANDALONE_TESTS) $(STD_TESTS) $(EXP_TESTS) \
 	$(TESTS_RUN) $(TESTS_TREE_RUN)
 ifeq ($(TP_XMLADA), Installed)
 	-rm -f ts.f.xml tsr.f.xml
-	filter < ts.xml | sort > ts.f.xml
-	filter < tsr.xml | sort > tsr.f.xml
+	./filter < ts.xml | sort > ts.f.xml
+	./filter < tsr.xml | sort > tsr.f.xml
 	-diff -c ts.f.xml tsr.f.xml >> alldiffs
 endif
 	echo "### Any line displayed after this line indicate a problem in Templates_Parser"

@@ -46,6 +46,7 @@ package Templates_Parser is
 
    function Assoc (Variable  : in String;
                    Value     : in String;
+                   Is_Vector : in Boolean   := False;
                    Begin_Tag : in String    := Default_Begin_Tag;
                    End_Tag   : in String    := Default_End_Tag;
                    Separator : in Character := Default_Separator)
@@ -75,11 +76,13 @@ private
          Variable  : Unbounded_String;
          Value     : Unbounded_String;
          Separator : Character;
+         Vector    : Boolean := False;
       end record;
 
    No_Translation : constant Translate_Table
      := (2 .. 1 => Association'(Null_Unbounded_String,
                                 Null_Unbounded_String,
-                                ASCII.Nul));
+                                ASCII.Nul,
+                                False));
 
 end Templates_Parser;

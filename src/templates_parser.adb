@@ -159,7 +159,7 @@ package body Templates_Parser is
    -----------
 
    function Image (T : in Tag) return String is
-      R     : Unbounded_String;
+      R : Unbounded_String;
    begin
       R := Begin_Tag;
 
@@ -787,7 +787,8 @@ package body Templates_Parser is
         (Filename : in String;
          T        : in Tree)
       is
-         L_Filename : Unbounded_String := To_Unbounded_String (Filename);
+         L_Filename : constant Unbounded_String
+           := To_Unbounded_String (Filename);
          Place      : Positive;
       begin
          if Files = null or else Index = Files'Last then
@@ -850,7 +851,6 @@ package body Templates_Parser is
 
          procedure Free is
             new Ada.Unchecked_Deallocation (File_Array, File_Array_Access);
-
 
       begin
          if Files = null then
@@ -1018,10 +1018,7 @@ package body Templates_Parser is
 
       function Parse (Expression : in String) return Tree is
 
-         Open_Par  : constant String := String'(1 => '(');
-         Close_Par : constant String := String'(1 => ')');
-
-         Index     : Natural := Expression'First;
+         Index : Natural := Expression'First;
 
          function Get_Token return String;
          --  Returns next token. Set Index to the last analysed position in
@@ -1250,7 +1247,7 @@ package body Templates_Parser is
 
       Result : String (S'Range);
 
-      Clean_Set : Strings.Maps.Character_Set
+      Clean_Set : constant Strings.Maps.Character_Set
         := Strings.Maps.Constants.Letter_Set
         or Strings.Maps.Constants.Decimal_Digit_Set
         or Strings.Maps.To_Set (" йикопафз");
@@ -1400,7 +1397,7 @@ package body Templates_Parser is
 
    --  Filter Table
 
-   Filter_Table : array (Filters_Mode) of Filter_Record
+   Filter_Table : constant array (Filters_Mode) of Filter_Record
      := (Lower      =>
            (Filter_Lower_Token'Access,      Lower_Filter'Access),
          Upper      =>
@@ -1584,8 +1581,7 @@ package body Templates_Parser is
      return Tree
    is
 
-      File : Text_IO.File_Type;
-      --  File beeing parsed.
+      File   : Text_IO.File_Type;  --  File beeing parsed.
 
       Buffer : String (1 .. 2048); --  current line content
       Last   : Natural;            --  index of last characters read in buffer
@@ -1613,6 +1609,14 @@ package body Templates_Parser is
       --  Returns True is Stmt is found at the begining of the current line
       --  ignoring leading blank characters.
 
+      function Build_Include_Pathname
+        (Include_Filename : in Unbounded_String)
+        return Unbounded_String;
+      --  Returns the full pathname to the include file (Include_Filename). It
+      --  returns Include_Filename if there is a pathname specified, or the
+      --  pathname of the main template file as a prefix of the include
+      --  filename.
+
       type Parse_Mode is
         (Parse_Std,              --  in standard line
          Parse_If,               --  in a if statement
@@ -1624,6 +1628,36 @@ package body Templates_Parser is
 
       function Parse (Mode : in Parse_Mode) return Tree;
       --  Get a line in File and returns the Tree.
+
+      ----------------------------
+      -- Build_Include_Pathname --
+      ----------------------------
+
+      function Build_Include_Pathname
+        (Include_Filename : in Unbounded_String)
+        return Unbounded_String
+      is
+         K : constant Natural
+           := Index (Include_Filename, Maps.To_Set ("/\"),
+                     Going => Strings.Backward);
+      begin
+         if K = 0 then
+            declare
+               K : constant Natural
+                 := Fixed.Index (Filename, Maps.To_Set ("/\"),
+                                 Going => Strings.Backward);
+            begin
+               if K = 0 then
+                  return Include_Filename;
+               else
+                  return To_Unbounded_String (Filename (Filename'First .. K))
+                    & Include_Filename;
+               end if;
+            end;
+         else
+            return Include_Filename;
+         end if;
+      end Build_Include_Pathname;
 
       -----------------
       -- Fatal_Error --
@@ -1801,7 +1835,7 @@ package body Templates_Parser is
          elsif Is_Stmt (Include_Token) then
             T := new Node (Include_Stmt);
 
-            T.Filename := Get_First_Parameter;
+            T.Filename := Build_Include_Pathname (Get_First_Parameter);
             T.File     := Load (To_String (T.Filename), Cached);
 
             T.Next     := Parse (Mode);

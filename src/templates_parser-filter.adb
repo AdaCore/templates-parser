@@ -31,10 +31,62 @@
 separate (Templates_Parser)
 package body Filter is
 
-   --  Filter Table
+   --  Filter tokens
+
+   Multiply_Token      : aliased constant String := """*""";
+   Plus_Token          : aliased constant String := """+""";
+   Minus_Token         : aliased constant String := """-""";
+   Divide_Token        : aliased constant String := """/""";
+   Add_Token           : aliased constant String := "ADD";
+   BR_2_LF_Token       : aliased constant String := "BR_2_LF";
+   Capitalize_Token    : aliased constant String := "CAPITALIZE";
+   Clean_Text_Token    : aliased constant String := "CLEAN_TEXT";
+   Coma_2_Point_Token  : aliased constant String := "COMA_2_POINT";
+   Contract_Token      : aliased constant String := "CONTRACT";
+   Div_Token           : aliased constant String := "DIV";
+   Exist_Token         : aliased constant String := "EXIST";
+   Format_Number_Token : aliased constant String := "FORMAT_NUMBER";
+   Is_Empty_Token      : aliased constant String := "IS_EMPTY";
+   LF_2_BR_Token       : aliased constant String := "LF_2_BR";
+   Lower_Token         : aliased constant String := "LOWER";
+   Match_Token         : aliased constant String := "MATCH";
+   Modulo_Token        : aliased constant String := "MOD";
+   Mult_Token          : aliased constant String := "MULT";
+   No_Digit_Token      : aliased constant String := "NO_DIGIT";
+   No_Letter_Token     : aliased constant String := "NO_LETTER";
+   No_Space_Token      : aliased constant String := "NO_SPACE";
+   Oui_Non_Token       : aliased constant String := "OUI_NON";
+   Point_2_Coma_Token  : aliased constant String := "POINT_2_COMA";
+   Repeat_Token        : aliased constant String := "REPEAT";
+   Reverse_Token       : aliased constant String := "REVERSE";
+   Size_Token          : aliased constant String := "SIZE";
+   Slice_Token         : aliased constant String := "SLICE";
+   Sub_Token           : aliased constant String := "SUB";
+   Trim_Token          : aliased constant String := "TRIM";
+   Upper_Token         : aliased constant String := "UPPER";
+   Web_Escape_Token    : aliased constant String := "WEB_ESCAPE";
+   Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
+   Yes_No_Token        : aliased constant String := "YES_NO";
+
+   --  Filters Table
 
    Table : constant array (Mode) of Filter_Record
-     := (BR_2_LF        =>
+     := (Multiply       =>
+           (Multiply_Token'Access,       Multiply'Access),
+
+         Plus           =>
+           (Plus_Token'Access,           Plus'Access),
+
+         Minus          =>
+           (Minus_Token'Access,          Minus'Access),
+
+         Divide         =>
+           (Divide_Token'Access,         Divide'Access),
+
+         Add            =>
+           (Add_Token'Access,            Plus'Access),
+
+         BR_2_LF        =>
            (BR_2_LF_Token'Access,        BR_2_LF'Access),
 
          Capitalize     =>
@@ -49,14 +101,14 @@ package body Filter is
          Contract       =>
            (Contract_Token'Access,       Contract'Access),
 
+         Div            =>
+           (Div_Token'Access,            Divide'Access),
+
          Exist          =>
            (Exist_Token'Access,          Exist'Access),
 
          Format_Number  =>
            (Format_Number_Token'Access,  Format_Number'Access),
-
-         Invert        =>
-           (Reverse_Token'Access,        Reverse_Data'Access),
 
          Is_Empty       =>
            (Is_Empty_Token'Access,       Is_Empty'Access),
@@ -69,6 +121,12 @@ package body Filter is
 
          Match          =>
            (Match_Token'Access,          Match'Access),
+
+         Modulo         =>
+           (Modulo_Token'Access,         Modulo'Access),
+
+         Mult           =>
+           (Mult_Token'Access,           Multiply'Access),
 
          No_Digit       =>
            (No_Digit_Token'Access,       No_Digit'Access),
@@ -88,8 +146,17 @@ package body Filter is
          Repeat         =>
            (Repeat_Token'Access,         Repeat'Access),
 
+         Invert        =>
+           (Reverse_Token'Access,        Reverse_Data'Access),
+
          Size           =>
            (Size_Token'Access,           Size'Access),
+
+         Slice          =>
+           (Slice_Token'Access,          Slice'Access),
+
+         Sub            =>
+           (Sub_Token'Access,            Minus'Access),
 
          Trim           =>
            (Trim_Token'Access,           Trim'Access),
@@ -104,34 +171,7 @@ package body Filter is
            (Web_NBSP_Token'Access,       Web_NBSP'Access),
 
          Yes_No         =>
-           (Yes_No_Token'Access,         Yes_No'Access),
-
-         Plus           =>
-           (Plus_Token'Access,           Plus'Access),
-
-         Add            =>
-           (Add_Token'Access,            Plus'Access),
-
-         Minus          =>
-           (Minus_Token'Access,          Minus'Access),
-
-         Sub            =>
-           (Sub_Token'Access,            Minus'Access),
-
-         Multiply       =>
-           (Multiply_Token'Access,       Multiply'Access),
-
-         Mult           =>
-           (Mult_Token'Access,           Multiply'Access),
-
-         Divide         =>
-           (Divide_Token'Access,         Divide'Access),
-
-         Div            =>
-           (Div_Token'Access,            Divide'Access),
-
-         Modulo         =>
-           (Modulo_Token'Access,         Modulo'Access)
+           (Yes_No_Token'Access,         Yes_No'Access)
          );
 
    --------------------------
@@ -146,18 +186,18 @@ package body Filter is
       end if;
    end Check_Null_Parameter;
 
-   -------------
-   -- Filters --
-   -------------
+   ---------------
+   -- Parameter --
+   ---------------
 
-   function Expect_Regexp (Mode : in Filter.Mode) return Boolean is
+   function Parameter (Mode : in Filter.Mode) return Parameter_Mode is
    begin
-      if Mode = Match then
-         return True;
-      else
-         return False;
-      end if;
-   end Expect_Regexp;
+      case Mode is
+         when Match  => return Regexp;
+         when Slice  => return Slice;
+         when others => return Str;
+      end case;
+   end Parameter;
 
    ------------
    -- Handle --
@@ -184,6 +224,8 @@ package body Filter is
          when Void   => return "";
          when Str    => return '(' & To_String (P.S) & ')';
          when Regexp => return '(' & To_String (P.R_Str) & ')';
+         when Slice  => return '(' & Image (P.First)
+                                 & " .. " & Image (P.Last) & ')';
       end case;
    end Image;
 
@@ -192,11 +234,32 @@ package body Filter is
    ----------
 
    function Mode_Value (Name : in String) return Mode is
+      F, L, K : Mode;
    begin
-      for K in Table'Range loop
+      F := Mode'First;
+      L := Mode'Last;
+
+      loop
+         K := Mode'Val ((Mode'Pos (F) + Mode'Pos (L)) / 2);
+
          if Table (K).Name.all = Name then
             return K;
+
+         elsif Table (K).Name.all < Name then
+            F := K;
+            if F /= Mode'Last then
+               F := Mode'Succ (F);
+            end if;
+
+         else
+            L := K;
+            if L /= Mode'First then
+               L := Mode'Pred (L);
+            end if;
          end if;
+
+         exit when F = L and then F = K;
+
       end loop;
 
       Exceptions.Raise_Exception
@@ -747,6 +810,23 @@ package body Filter is
 
       return Image (S'Length);
    end Size;
+
+   -----------
+   -- Slice --
+   -----------
+
+   function Slice
+     (S : in String;
+      P : in Parameter_Data := No_Parameter)
+      return String
+   is
+      First, Last : Natural;
+   begin
+      First := Natural'Min (P.First, S'Length + 1);
+      Last  := Natural'Min (P.Last, S'Length);
+
+      return S (S'First + First - 1 .. S'First + Last - 1);
+   end Slice;
 
    ----------
    -- Trim --

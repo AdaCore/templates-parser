@@ -77,9 +77,6 @@ package body Cached_Files is
             Growth;
          end if;
 
-         Old := T.Next;
-         --  Old point to the current C_Info tree.
-
          loop
             exit when S > E;
 
@@ -104,12 +101,18 @@ package body Cached_Files is
                if Old.Used = 0 then
                   --  File is not currently used, we can release it safely.
                   Release (Old);
+                  Old := T.Next;
 
                else
                   --  Tree is used, mark it as obsoleted, it will be removed
                   --  when no more used by the Prot.Release call.
                   Old.Used     := Old.Used + 1;
                   Old.Obsolete := True;
+
+                  --  But current tree is not used, it has been posted here
+                  --  for futur used. But if replaced right away it should be
+                  --  freed.
+                  Files (N).Next.Used := 0;
                end if;
 
                --  Nothing more to do in this case.
@@ -131,21 +134,24 @@ package body Cached_Files is
          Index := Index + 1;
 
          Files (S) := T;
+
+         Old := T.Next;
+         --  Old point to the current C_Info tree.
       end Add;
 
       ---------
       -- Get --
       ---------
 
-      function Get
-        (Filename : in String;
-         Load     : in Boolean)
-        return Static_Tree
+      procedure Get
+        (Filename : in     String;
+         Load     : in     Boolean;
+         Result   :    out Static_Tree)
       is
          N : constant Natural := Get (Filename);
       begin
          if N = 0 then
-            return (null, null);
+            Result := (null, null);
 
          else
             if Load then
@@ -153,7 +159,8 @@ package body Cached_Files is
             end if;
 
             Files (N).Next.Used := Files (N).Next.Used + 1;
-            return (Files (N), Files (N).Next);
+
+            Result := (Files (N), Files (N).Next);
          end if;
       end Get;
 
@@ -163,12 +170,13 @@ package body Cached_Files is
 
       procedure Release (T : in out Static_Tree) is
       begin
-         if T.C_Info /= null then
-            T.C_Info.Used := T.C_Info.Used - 1;
+         pragma Assert (T.C_Info /= null);
 
-            if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
-               Release (T.C_Info);
-            end if;
+         T.C_Info.Used := T.C_Info.Used - 1;
+
+         if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
+            pragma Assert (T.Info.Next /= T.C_Info);
+            Release (T.C_Info);
          end if;
       end Release;
 

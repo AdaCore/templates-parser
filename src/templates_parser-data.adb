@@ -107,20 +107,32 @@ package body Data is
    ----------------
 
    procedure Print_Tree (D : in Tree) is
+      N  : Tree := D;
+      NL : Boolean := False;
    begin
-      if D = null then
-         return;
+      while N /= null loop
+         case N.Kind is
+            when Text =>
+               declare
+                  Value : constant String := To_String (N.Value);
+               begin
+                  Text_IO.Put (Value);
+                  if Value'Length > 0 then
+                     NL := Value (Value'Last) = ASCII.LF;
+                  else
+                     NL := False;
+                  end if;
+               end;
+            when Var =>
+               Text_IO.Put (Image (N.Var));
+               NL := False;
+         end case;
+         N := N.Next;
+      end loop;
+
+      if not NL then
+         Text_IO.New_Line;
       end if;
-
-      case D.Kind is
-         when Text =>
-            Text_IO.Put (To_String (D.Value));
-
-         when Var =>
-            Text_IO.Put (Image (D.Var));
-      end case;
-
-      Print_Tree (D.Next);
    end Print_Tree;
 
    -------------

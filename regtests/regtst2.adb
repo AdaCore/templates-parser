@@ -35,7 +35,6 @@ with Ada.Strings.Fixed;
 with Ada.Task_Identification;
 
 with Ada.Exceptions;
-with GNAT.Traceback.Symbolic;
 
 procedure Regtst2 is
 
@@ -84,8 +83,7 @@ procedure Regtst2 is
                      ), Cached => True);
    exception
       when E : others =>
-         Put_Line (Ada.Exceptions.Exception_Information (E) & ASCII.LF &
-                   GNAT.Traceback.Symbolic.Symbolic_Traceback (E));
+         Put_Line (Ada.Exceptions.Exception_Information (E));
    end;
 
    Parsers : array (1 .. 20) of Parser;

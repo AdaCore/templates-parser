@@ -1,5 +1,8 @@
 2005-04-07  Pascal Obry  <pascal@obry.net>
 
+	* templates_parser-data.adb:
+	Minor reformatting.
+
 	* templates_parser-filter.adb:
 	(Web_Escape): Fix Max_Escape_Sequence constant.
 	Fix for E406-003, checked-in for Florian Villoing.

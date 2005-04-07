@@ -133,6 +133,7 @@ procedure Testme is
          TP.Assoc ("FILE", "/home/user"),
          TP.Assoc ("FILE2", "testme56.out"),
          TP.Assoc ("S1", S1),
+         TP.Assoc ("QUOTE", """"""),
          TP.Assoc ("ACCENTS", "<été ça être paramètre à paraître> & """)
         );
 

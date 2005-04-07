@@ -1,3 +1,9 @@
+2005-04-07  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-filter.adb:
+	(Web_Escape): Fix Max_Escape_Sequence constant.
+	Fix for E406-003, checked-in for Florian Villoing.
+
 2005-04-06  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-cached_files.adb:

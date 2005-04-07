@@ -90,8 +90,7 @@ package body Data is
                      return new Node'
                        (Text,
                         Build (Line (Start .. Line'Last)),
-                        To_Unbounded_String
-                          (Line (Line'First .. Start - 1)));
+                        To_Unbounded_String (Line (Line'First .. Start - 1)));
                   end if;
                end if;
             end if;

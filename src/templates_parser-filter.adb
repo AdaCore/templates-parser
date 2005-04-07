@@ -1538,7 +1538,7 @@ package body Filter is
       return String
    is
       pragma Unreferenced (T, I);
-      Max_Escape_Sequence : constant Positive := 5;
+      Max_Escape_Sequence : constant Positive := 6;
       Result              : String (1 .. S'Length * Max_Escape_Sequence);
       Last                : Natural := 0;
    begin

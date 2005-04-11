@@ -2493,7 +2493,7 @@ package body Templates_Parser is
       function Count_Tag_Attributes return Natural is
          K : constant Natural :=
                Strings.Fixed.Index
-                 (Buffer (First + 2 .. Buffer'Last), "@@");
+                 (Buffer (First + 2 .. Last), "@@");
       begin
          return Strings.Fixed.Count (Buffer (First + 2 .. K), "'");
       end Count_Tag_Attributes;

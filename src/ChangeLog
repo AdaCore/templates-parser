@@ -1,3 +1,10 @@
+2005-04-11  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.adb:
+	(Count_Tag_Attributes): Fix code to avoid reading uninitialized
+	 data.
+        Checked-in for Dmitriy Anisimkov.
+
 2005-04-07  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-data.adb:

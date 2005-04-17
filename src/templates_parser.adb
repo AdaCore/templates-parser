@@ -1597,7 +1597,7 @@ package body Templates_Parser is
          T        : in     Tree;
          Old      :    out Tree);
       --  Add Filename/T to the list of cached files. If Filename is
-      --  already in the list, replace the current tree with T. Furthemore
+      --  already in the list, replace the current tree with T. Furthermore
       --  if Filename tree is already in use, Old will be set with the
       --  previous C_Info node otherwise Old will be T.Next (C_Info node
       --  for current tree).

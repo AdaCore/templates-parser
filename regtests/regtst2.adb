@@ -28,8 +28,8 @@
 
 --  $Id$
 
-with Templates_Parser; use Templates_Parser;
-with Ada.Text_IO; use Ada.Text_IO;
+with Templates_Parser;
+with Ada.Text_IO;
 with Ada.Strings.Unbounded;
 with Ada.Strings.Fixed;
 with Ada.Task_Identification;
@@ -39,6 +39,8 @@ with Ada.Exceptions;
 procedure Regtst2 is
 
    use Ada.Strings.Unbounded;
+   use Ada.Text_IO;
+   use Templates_Parser;
 
    task type parser;
 
@@ -64,7 +66,6 @@ procedure Regtst2 is
    end Start_Line;
 
    task body parser is
-      use Ada.Strings.Unbounded;
       use Ada.Strings.Fixed;
       use Ada.Task_Identification;
 
@@ -76,11 +77,11 @@ procedure Regtst2 is
       Error_Message       : String := 140 * (Short_Error_Message & ASCII.LF);
    begin
       Start_Line.Wait;
-      Result := Parse ("error.tmplt", (
-                       1 => Assoc ("CODE",    Last_Error_Code),
-                       2 => Assoc ("MESSAGE", Short_Error_Message),
-                       3 => Assoc ("DETAIL",  Error_Message)
-                     ), Cached => True);
+      Result := Parse
+        ("error.tmplt",
+         (1 => Assoc ("CODE",    Last_Error_Code),
+          2 => Assoc ("MESSAGE", Short_Error_Message),
+          3 => Assoc ("DETAIL",  Error_Message)), Cached => True);
    exception
       when E : others =>
          Put_Line (Ada.Exceptions.Exception_Information (E));
@@ -92,12 +93,6 @@ procedure Regtst2 is
 
 begin
    delay 1.0;
-
-   Result
-     := Parse ("error.tmplt",
-               (1 => Assoc ("CODE",    1),
-                2 => Assoc ("MESSAGE", 2),
-                3 => Assoc ("DETAIL",  4)), Cached => True);
 
    Start_Line.Start;
    Put_Line ("OK");

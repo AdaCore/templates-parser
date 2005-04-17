@@ -129,8 +129,9 @@ package body Cached_Files is
 
             else
                --  Tree is used, mark it as obsoleted, it will be removed
-               --  when no more used by the Prot.Release call.
+               --  when no more used by the Release call.
                Old.Obsolete := True;
+               Old.Used     := Old.Used + 1;
 
                --  But current tree is not used, it has been posted here
                --  for futur use. But if replaced right away it should be

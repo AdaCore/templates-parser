@@ -1,3 +1,12 @@
+2005-04-17  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-cached_files.adb:
+	(Add): Properly update the used counter of the obsolete tree. This
+	 fix a rare problem of deallocated memory usage.
+
+	* templates_parser.adb:
+	Fix typo in comment.
+
 2005-04-11  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

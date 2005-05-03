@@ -1,5 +1,18 @@
 2005-05-03  Pascal Obry  <pascal@obry.net>
 
+	* templates_parser-data.adb:
+	(Release): Properly set the tree to null on return.
+	Found while working on DA25-015.
+
+	* templates_parser.adb:
+	(Load): Properly release the include filename data tree if not
+	 needed (in the case of static filename).
+	(Parse): Improve test for non static include file to properly
+	 handle the cache.
+	Continued work for DA25-015.
+
+2005-05-03  Pascal Obry  <pascal@obry.net>
+
 	* templates_parser-print_tree.adb:
 	Adjust the Include_Stmt case to cover the case of deferred include
 	 filename.

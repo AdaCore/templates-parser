@@ -3447,6 +3447,10 @@ package body Templates_Parser is
                      Free (T);
                      return null;
                end;
+
+               --  We do not need to keep reference to the include file in this
+               --  case. The filename is static and already loaded.
+               Data.Release (T.I_Filename);
             end if;
 
             T.I_Params := Load_Include_Parameters (Get_All_Parameters);
@@ -3739,6 +3743,7 @@ package body Templates_Parser is
          State : in Parse_State)
       is
          use type Containers.Cursor;
+         use type Data.Tree;
 
          function Analyze (E : in Expr.Tree) return String;
          --  Analyse the expression tree and returns the result as a boolean
@@ -4907,7 +4912,7 @@ package body Templates_Parser is
                                L_State'Unchecked_Access));
 
             when Include_Stmt =>
-               if T.File = Null_Static_Tree then
+               if T.I_Filename /= null then
                   --  This is a deferred include file load as the name of the
                   --  include file was not a static string.
                   Flush;
@@ -4922,7 +4927,12 @@ package body Templates_Parser is
                        := Load (Build_Include_Pathname
                                   (To_String (State.Filename), Filename),
                                 Cached, True);
-                     Release (T.File.Info);
+
+                     if Cached then
+                        Cached_Files.Release (T.File);
+                     else
+                        Release (T.File.Info);
+                     end if;
                      T.File := S_File;
                   end;
                end if;

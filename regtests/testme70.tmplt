@@ -1,0 +1,30 @@
+
+-- 1
+
+@@SET@@ FILENAME = ./toto/incl.tmplt
+
+@@IF@@ @_FILE_EXISTS:FILENAME_@
+   @@INCLUDE@@ ./toto/incl.tmplt
+@@ELSE@@
+   Error1: File @_FILENAME_@ does not exist!
+@@END_IF@@
+
+-- 2
+
+@@SET@@ FILENAME = ./incl.tmplt
+
+@@IF@@ @_FILE_EXISTS:FILENAME_@
+   @@INCLUDE@@ @_FILENAME_@
+@@ELSE@@
+   Error2: File @_FILENAME_@ does not exist!
+@@END_IF@@
+
+-- 3
+
+@@SET@@ FILENAME = ./incl.tmplt
+
+@@IF@@ @_FILE_EXISTS:FILENAME_@
+   @@INCLUDE@@ ./@_LOWER:FILENAME_@
+@@ELSE@@
+   Error2: File @_FILENAME_@ does not exist!
+@@END_IF@@

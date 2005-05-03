@@ -1,3 +1,24 @@
+2005-05-03  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-print_tree.adb:
+	Adjust the Include_Stmt case to cover the case of deferred include
+	 filename.
+
+	* templates_parser.adb:
+	(Build_Include_Pathname): Move to library level as it is shared by
+	 Load and Parse routines.
+	(Load): Load include file if the name is static (set definitions
+	 or string) otherwise the load is deferred at parse time. This
+	 make it possible to pass the filename into a tag variable. So we
+	 raise an exception for missing include file only for static
+	 filename here. We have also a special case for include tag
+	 command in if tag statement where we defer the exception
+	 propagation at parsing time. It could be the case that this path
+	 is not taken at parse time.
+	(Parse): Load the include file here if not done at load time. This
+	 is called a deferred load and happen when the include filename is
+	 not static (tag variable).
+
 2005-04-17  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-cached_files.adb:

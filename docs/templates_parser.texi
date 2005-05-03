@@ -879,7 +879,7 @@ have the same header and/or footer in all your HTML pages. For example:
 
 @noindent
 It is also possible to pass arguments to the include file. These parameters
-are put after the include filename. It is possible to reference these
+are given after the include filename. It is possible to reference these
 parameters into the included file with the special variable names
 @code{@@_$<n>_@@}, where @i{n} is the include's parameter indice (0 is
 the include filename, 1 the first parameter and so on).

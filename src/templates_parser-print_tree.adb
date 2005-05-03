@@ -59,7 +59,11 @@ begin
          begin
             while I /= null loop
                Text_IO.Put (" -> ");
-               Text_IO.Put_Line (To_String (I.File.Info.Filename));
+               if I.File = Null_Static_Tree then
+                  Data.Print_Tree (I.I_Filename);
+               else
+                  Text_IO.Put_Line (To_String (I.File.Info.Filename));
+               end if;
                I := I.Next;
             end loop;
          end;
@@ -136,8 +140,13 @@ begin
          Print_Tree (T.N_Section, Level);
 
       when Include_Stmt =>
-         Text_IO.Put_Line
-           ("[INCLUDE] " & To_String (T.File.Info.Filename));
+         Text_IO.Put ("[INCLUDE] ");
+
+         if T.File = Null_Static_Tree then
+            Data.Print_Tree (T.I_Filename);
+         else
+            Text_IO.Put_Line (To_String (T.File.Info.Filename));
+         end if;
 
          declare
             use type Data.Tree;

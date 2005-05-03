@@ -156,6 +156,8 @@ package body Data is
 
          Free (P);
       end loop;
+
+      D := null;
    end Release;
 
 end Data;

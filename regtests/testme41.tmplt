@@ -11,3 +11,9 @@
 @_DYNAMIC_@
 
 @_X_@
+
+Dynamic vector:
+
+@@TABLE@@
+@_DYN_VECT_@
+@@END_TABLE@@

@@ -1,0 +1,12 @@
+
+Table level: @_TABLE_LEVEL_@
+
+@_NAME_@
+
+@@IF@@ @_EXIST:VAR_@
+   @_VAR_@
+@@END_IF@@
+
+@@IF@@ @_EXIST:NO_DYNAMIC:VAR_@
+   @_VAR_@
+@@END_IF@@

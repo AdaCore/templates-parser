@@ -27,7 +27,7 @@ b~test_templates_if.ads
 check_mem.res
 check_mem.run1
 check_mem.run2
-context.res
+dynamic.res
 foot.tmplt
 ftp.res
 gmem.out

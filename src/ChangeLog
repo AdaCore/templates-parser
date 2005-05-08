@@ -1,3 +1,51 @@
+2005-05-08  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-dynamic.adb:
+	Initial revision.
+	Implementation which supports Lazy_Tags default callback.
+	Part of work for E423-002.
+
+	* templates_parser-filter.adb:
+	(No_Context_Token): Removed.
+	(No_Dynamic_Token): Added.
+	(No_Context): Removed filter routine.
+	(No_Dynamic): Added filter routine.
+	Part of work for E423-002.
+
+	* templates_parser.adb:
+	(No_Context): Filter removed and replaced by No_Dynamic.
+	(No_Dynamic): Renamig on No_Context.
+	(Internal_Tag): New enumeration that contains all the internal tag
+	 name. This is used at load time to detect internal tags. It
+	 should speed up parsing of cached files using internal tags.
+	(Get_Var_Name): Returns a String now (avoid on convertion between
+	 Unbounded_String and String.
+	(Build) [Tag_Var]: Properly set new Internal field.
+	(Callback): Routine removed.
+	(Parse) [*]: Replace Context parameter by Lazy_Tag.
+	(Get_Association): New routine used to get an association either
+	 from the translate set or the Lazy_Tag set. Better code
+	 sharing. This new routine is also in charge of calling the
+	 Lazy_Tag callback if necessary.
+	(Translate): Use Get_Association. Use new Internal field that
+	 speed up the internal tag handling. Remove handling of the
+	 Context type.
+	(Check): Use Get_Association so the Lazy_Tag are properly loaded
+	 at the time of the analyze of the table ranges.
+	(Filter.Is_No_Context): Removed routine.
+	(Filter.Is_No_Dynamic): Added routine.
+	Part of work for E423-002.
+	(Analyze): Add some comments for previous check-in.
+	Minor reformatting.
+
+	* templates_parser.ads:
+	(Context): Removed. This is now longer supported and as been
+	 replaced by Lazy_Tag (a more general solution).
+	(Callback): Routine removed.
+	(Dynamic): New package. Implements Lazy_Tag support for now.
+	(Parse) [*]: Replace Context parameter by Lazy_Tag.
+	Part of work for E423-002.
+
 2005-05-03  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-data.adb:

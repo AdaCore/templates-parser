@@ -517,12 +517,12 @@ discrete tag variable whose value is a number.
 
 Change the sign of the value.
 
-@item NO_CONTEXT
-@cindex Filter, NO_CONTEXT
+@item NO_DYNAMIC
+@cindex Filter, NO_DYNAMIC
 
 This is a special command filter which indicates that the tag must not
-be searched in the context. See @pxref{Context}. @code{NO_CONTEXT} must be
-the first filter. This filter returns the value as-is.
+be searched in the dynamic tags. See @pxref{Lazy_Tag}. @code{NO_DYNAMIC} must
+be the first filter. This filter returns the value as-is.
 
 @item NO_DIGIT
 @cindex Filter, NO_DIGIT
@@ -1433,20 +1433,28 @@ We get the following result:
 @chapter Other services
 
 @menu
-* Context::
+* Dynamic tags::
 * Tag utils::
 * XML representation::
 * Debug::
 @end menu
 
-@node Context
-@section Context
-@cindex Context
+@node Dynamic tags
+@section Dynamic tags
+@cindex Dynamic tags
+
+@menu
+* Lazy_Tag::
+@end menu
+
+@node Lazy_Tag
+@subsection Lazy_Tag
+@cindex Lazy_Tag
 
 @noindent
-The context object can be used to dynamically handle tags. Such
-context can be passed to the @code{Parse} routines. If a template's tag
-is not found in the @code{Translate_Table} the context callback method
+The Lazy_Tag object can be used to dynamically handle tags. Such
+object can be passed to the @code{Parse} routines. If a template's tag
+is not found in the @code{Translate_Set} the Lazy_Tag's Value callback method
 is called by the parser. The default callback method does nothing, it
 is up to the user to define it. The callback procedure is defined as
 follow:
@@ -1454,18 +1462,31 @@ follow:
 @cartouche
 @smallexample
 @group
-@b{procedure} Callback
-  (Context  : @b{access} Templates_Parser.Context;
-   Variable : @b{in}     String;
-   Result   :    @b{out} Unbounded_String;
-   Found    :    @b{out} Boolean);
+@b{procedure} Value
+  (Lazy_Tag     : @b{in out} Dynamic.Lazy_Tag;
+   Var_Name     : @b{in}     String;
+   Translations : @b{in out} Translate_Set);
+@i{--  Value is called by the Parse routines below if a tag variable was not}
+@i{--  found in the set of translations. This routine must then add the}
+@i{--  association for variable Name. It is possible to add other}
+@i{--  associations in the translation table but a check is done to see if}
+@i{--  the variable Name as been set or not. The default implementation does}
+@i{--  nothing.}
 @end group
 @end smallexample
 @end cartouche
 
-@code{Result} must be set with the value for the tag @code{Variable}
-and @code{Found} set to @code{True}, otherwise @code{Found} can be set
-to @code{False}.
+@noindent
+One common usage is to handles tag variables that can be shared by
+many templates are not always used (because a conditional is False for
+example). If computing the corresponding value (or values for a ...)
+is somewhat expensive it is better to delay building such tag at the
+point it is needed. Using a Lazy_Tag object it is possible to do
+so. The @code{Value} procedure will be called if the tag value is
+needed. At this point, one can just add the corresponding association
+into the @code{Translate_Set}. Note that it is possible to add more
+than one association. If the association for @code{Var_Name} is not
+given this tag has no value.
 
 @node Tag utils
 @section Tag utils

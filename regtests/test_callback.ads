@@ -28,34 +28,27 @@
 
 --  $Id$
 
-with Ada.Strings.Unbounded;
 with Templates_Parser;
 
 package Test_Callback is
 
-   use Ada.Strings.Unbounded;
+   type Lazy_Tag is new Templates_Parser.Dynamic.Lazy_Tag with private;
 
-   type Context is new Templates_Parser.Context with private;
+   procedure Value
+     (L   : in out Lazy_Tag;
+      Var : in     String;
+      S   : in out Templates_Parser.Translate_Set);
 
-   procedure Callback
-     (C      : access Context;
-      Var    : in     String;
-      Result :    out Unbounded_String;
-      Found  :    out Boolean);
+   type Log_Context is new Templates_Parser.Dynamic.Lazy_Tag with null record;
 
-   type Log_Context is new Templates_Parser.Context with null record;
-
-   procedure Callback
-     (C      : access Log_Context;
-      Var    : in     String;
-      Result :    out Unbounded_String;
-      Found  :    out Boolean);
+   procedure Value
+     (L   : in out Log_Context;
+      Var : in     String;
+      S   : in out Templates_Parser.Translate_Set);
 
 private
 
-   type Context_Access is access all Context;
-
-   type Context is new Templates_Parser.Context with record
+   type Lazy_Tag is new Templates_Parser.Dynamic.Lazy_Tag with record
       N : Natural := 0;
    end record;
 

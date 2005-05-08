@@ -36,37 +36,33 @@ package body Test_Callback is
    -- Callback --
    --------------
 
-   procedure Callback
-     (C      : access Context;
-      Var    : in     String;
-      Result :    out Unbounded_String;
-      Found  :    out Boolean) is
-   begin
-      Found := True;
-
-      if Var = "VAR1" then
-         Result := To_Unbounded_String ("Callback value");
-      elsif Var = "DYNAMIC" then
-         Result := To_Unbounded_String ("This is a dynamic tag");
-      elsif Var = "N" then
-         Result := To_Unbounded_String (Integer'Image (C.N));
-         C.N := C.N + 1;
-      else
-         Found := False;
-      end if;
-   end Callback;
-
-   procedure Callback
-     (C      : access Log_Context;
-      Var    : in     String;
-      Result :    out Unbounded_String;
-      Found  :    out Boolean)
+   procedure Value
+     (L   : in out Lazy_Tag;
+      Var : in     String;
+      S   : in out Templates_Parser.Translate_Set)
    is
-      pragma Unreferenced (Result);
+      use Templates_Parser;
    begin
-      Found := False;
+      if Var = "VAR1" then
+         Insert (S, Assoc ("VAR1", "Callback value"));
+      elsif Var = "DYNAMIC" then
+         Insert (S, Assoc ("DYNAMIC", "This is a dynamic tag"));
+      elsif Var = "N" then
+         Insert (S, Assoc ("N", Integer'Image (L.N)));
+         L.N := L.N + 1;
+      elsif Var = "DYN_VECT" then
+         Insert (S, Assoc ("DYN_VECT", +"12" & "89" & "90" & "2"));
+      end if;
+   end Value;
 
+   procedure Value
+     (L   : in out Log_Context;
+      Var : in     String;
+      S   : in out Templates_Parser.Translate_Set)
+   is
+      pragma Unreferenced (L, S);
+   begin
       Ada.Text_IO.Put_Line ("Tag " & Var & " missing.");
-   end Callback;
+   end Value;
 
 end Test_Callback;

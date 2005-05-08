@@ -44,7 +44,7 @@ procedure Testme is
    use type TP.Vector_Tag;
    use type TP.Matrix_Tag;
 
-   Context : aliased Test_Callback.Context;
+   L_Tag : aliased Test_Callback.Lazy_Tag;
 
    KUT : Boolean := False;
    --  Keep Unknown Tags
@@ -148,7 +148,7 @@ begin
       Result : constant String :=
         TP.Parse (Command_Line.Argument (1), Translations,
                   Keep_Unknown_Tags => KUT,
-                  Context           => Context'Unchecked_Access);
+                  Lazy_Tag          => L_Tag'Unchecked_Access);
    begin
       Text_IO.Put (Result);
    end;

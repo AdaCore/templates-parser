@@ -63,8 +63,8 @@ package body Filter is
    Modulo_Token        : aliased constant String := "MOD";
    Mult_Token          : aliased constant String := "MULT";
    Neg_Token           : aliased constant String := "NEG";
-   No_Context_Token    : aliased constant String := "NO_CONTEXT";
    No_Digit_Token      : aliased constant String := "NO_DIGIT";
+   No_Dynamic_Token    : aliased constant String := "NO_DYNAMIC";
    No_Letter_Token     : aliased constant String := "NO_LETTER";
    No_Space_Token      : aliased constant String := "NO_SPACE";
    Oui_Non_Token       : aliased constant String := "OUI_NON";
@@ -168,11 +168,11 @@ package body Filter is
          Neg            =>
            (Neg_Token'Access,            Neg'Access),
 
-         No_Context     =>
-           (No_Context_Token'Access,     No_Context'Access),
-
          No_Digit       =>
            (No_Digit_Token'Access,       No_Digit'Access),
+
+         No_Dynamic     =>
+           (No_Dynamic_Token'Access,     No_Dynamic'Access),
 
          No_Letter      =>
            (No_Letter_Token'Access,      No_Letter'Access),
@@ -866,14 +866,14 @@ package body Filter is
    end Is_Empty;
 
    -------------------
-   -- Is_No_Context --
+   -- Is_No_Dynamic --
    -------------------
 
-   function Is_No_Context (Filters : in Set_Access) return Boolean is
+   function Is_No_Dynamic (Filters : in Set_Access) return Boolean is
    begin
       return Filters /= null
-        and then Filters (Filters'First).Handle = No_Context'Access;
-   end Is_No_Context;
+        and then Filters (Filters'First).Handle = No_Dynamic'Access;
+   end Is_No_Dynamic;
 
    -------------
    -- LF_2_BR --
@@ -1027,23 +1027,6 @@ package body Filter is
       end if;
    end Neg;
 
-   ----------------
-   -- No_Context --
-   ----------------
-
-   function No_Context
-     (S : in String;
-      P : in Parameter_Data     := No_Parameter;
-      T : in Translate_Set      := Null_Set;
-      I : in Include_Parameters := No_Include_Parameters)
-      return String
-   is
-      pragma Unreferenced (T, I);
-   begin
-      Check_Null_Parameter (P);
-      return S;
-   end No_Context;
-
    --------------
    -- No_Digit --
    --------------
@@ -1070,6 +1053,23 @@ package body Filter is
 
       return Result;
    end No_Digit;
+
+   ----------------
+   -- No_Dynamic --
+   ----------------
+
+   function No_Dynamic
+     (S : in String;
+      P : in Parameter_Data     := No_Parameter;
+      T : in Translate_Set      := Null_Set;
+      I : in Include_Parameters := No_Include_Parameters)
+      return String
+   is
+      pragma Unreferenced (T, I);
+   begin
+      Check_Null_Parameter (P);
+      return S;
+   end No_Dynamic;
 
    ---------------
    -- No_Letter --

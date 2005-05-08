@@ -309,14 +309,14 @@ package body Templates_Parser is
          Neg,
          --  Change the size of the value
 
-         No_Context,
-         --  This is a command filter, it indicates that the variable even
-         --  if not found in the translation table will not be looked up into
-         --  the context. See spec for a description about Context feature.
-         --  This filter just returns the string as-is.
-
          No_Digit,
          --  Replace all digits by spaces
+
+         No_Dynamic,
+         --  This is a command filter, it indicates that the variable even if
+         --  not found in the translation table will not be looked up into the
+         --  dynamic context (Lazy_Tag). This filter just returns the string
+         --  as-is.
 
          No_Letter,
          --  Removes all letters by spaces
@@ -592,14 +592,14 @@ package body Templates_Parser is
          I : in Include_Parameters := No_Include_Parameters)
          return String;
 
-      function No_Context
+      function No_Digit
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
          I : in Include_Parameters := No_Include_Parameters)
          return String;
 
-      function No_Digit
+      function No_Dynamic
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
@@ -773,7 +773,7 @@ package body Templates_Parser is
       function Name (Handle : in Callback) return String;
       --  Returns the filter name for the given filter function
 
-      function Is_No_Context (Filters : in Set_Access) return Boolean;
+      function Is_No_Dynamic (Filters : in Set_Access) return Boolean;
       --  Returns True if Filters contains NO_CONTEXT
 
    end Filter;
@@ -784,6 +784,10 @@ package body Templates_Parser is
 
    type Attribute is (Nil, Length, Line, Min_Column, Max_Column, Up_Level);
 
+   type Internal_Tag
+     is (No, Now, Year, Month, Month_Name, Day, Day_Name, Hour, Minute, Second,
+         Number_Line, Table_Line, Table_Level, Up_Table_Line);
+
    type Attribute_Data is record
       Attr  : Attribute := Nil;
       Value : Integer;
@@ -793,7 +797,8 @@ package body Templates_Parser is
       Name      : Unbounded_String;
       Filters   : Filter.Set_Access;
       Attribute : Attribute_Data;
-      N         : Integer;         -- include variable index
+      N         : Integer;           -- Include variable index
+      Internal  : Internal_Tag;      -- True if an internal variable
    end record;
 
    function Is_Include_Variable (T : in Tag_Var) return Boolean;
@@ -877,7 +882,7 @@ package body Templates_Parser is
 
    function Build (Str : in String) return Tag_Var is
 
-      function Get_Var_Name (Tag : in String) return Unbounded_String;
+      function Get_Var_Name (Tag : in String) return String;
       --  Given a Tag name, it returns the variable name only. It removes
       --  the tag separator and the filters.
 
@@ -886,7 +891,10 @@ package body Templates_Parser is
       --  variable when translated.
 
       function Get_Attribute (Tag : in String) return Attribute_Data;
-      --  Returns attribute for the given tag.
+      --  Returns attribute for the given tag
+
+      function Is_Internal (Name : in String) return Internal_Tag;
+      --  Returns True if Name is an internal tag
 
       F_Sep : constant Natural
         := Strings.Fixed.Index (Str, ":", Strings.Backward);
@@ -1237,15 +1245,15 @@ package body Templates_Parser is
                FS (K) := Name_Parameter (Tag (Start + 1 .. Stop - 1));
             end if;
 
-            --  Specific check for the NO_CONTEXT filter which must appear
+            --  Specific check for the NO_DYNAMIC filter which must appear
             --  first.
 
-            if FS (K).Handle = Filter.No_Context'Access
+            if FS (K).Handle = Filter.No_Dynamic'Access
               and then K /= FS'First
             then
                Exceptions.Raise_Exception
                  (Template_Error'Identity,
-                  "NO_CONTEXT must be the first filter");
+                  "NO_DYNAMIC must be the first filter");
             end if;
 
             K := K + 1;
@@ -1260,7 +1268,7 @@ package body Templates_Parser is
       -- Get_Var_Name --
       ------------------
 
-      function Get_Var_Name (Tag : in String) return Unbounded_String is
+      function Get_Var_Name (Tag : in String) return String is
          Start, Stop : Natural;
       begin
          if A_Sep = 0 then
@@ -1277,8 +1285,86 @@ package body Templates_Parser is
             Start := F_Sep + 1;
          end if;
 
-         return To_Unbounded_String (Tag (Start .. Stop));
+         return Tag (Start .. Stop);
       end Get_Var_Name;
+
+      -----------------
+      -- Is_Internal --
+      -----------------
+
+      function Is_Internal (Name : in String) return Internal_Tag is
+      begin
+         case Name (Name'First) is
+            when 'D' =>
+               if Name = "DAY" then
+                  return Day;
+               elsif Name = "DAY_NAME" then
+                  return Day_Name;
+               else
+                  return No;
+               end if;
+
+            when 'H' =>
+               if Name = "HOUR" then
+                  return Hour;
+               else
+                  return No;
+               end if;
+
+            when 'M' =>
+               if Name = "MONTH" then
+                  return Month;
+               elsif Name = "MONTH_NAME" then
+                  return Month_Name;
+               elsif Name = "MINUTE" then
+                  return Minute;
+               else
+                  return No;
+               end if;
+
+            when 'N' =>
+               if Name = "NOW" then
+                  return Now;
+               elsif Name = "NUMBER_LINE" then
+                  return Number_Line;
+               else
+                  return No;
+               end if;
+
+            when 'S' =>
+               if Name = "SECOND" then
+                  return Second;
+               else
+                  return No;
+               end if;
+
+            when 'T' =>
+               if Name = "TABLE_LINE" then
+                  return Table_Line;
+               elsif Name = "TABLE_LEVEL" then
+                  return Table_Level;
+               else
+                  return No;
+               end if;
+
+            when 'U' =>
+               if Name = "UP_TABLE_LINE" then
+                  return Up_Table_Line;
+               else
+                  return No;
+               end if;
+
+            when 'Y' =>
+               if Name = "YEAR" then
+                  return Year;
+               else
+                  return No;
+               end if;
+
+            when others =>
+               return No;
+         end case;
+      end Is_Internal;
 
       Result : Tag_Var;
 
@@ -1289,13 +1375,15 @@ package body Templates_Parser is
          A_Sep := 0;
       end if;
 
-      Result.Name      := Get_Var_Name (Str);
       Result.Filters   := Get_Filter_Set (Str);
       Result.Attribute := Get_Attribute (Str);
 
       declare
-         Name : constant String := To_String (Result.Name);
+         Name : constant String := Get_Var_Name (Str);
       begin
+         Result.Name     := To_Unbounded_String (Name);
+         Result.Internal := Is_Internal (Name);
+
          if Name (Name'First) = '$'
            and then Strings.Fixed.Count
              (Name, Strings.Maps.Constants.Decimal_Digit_Set) = Name'Length - 1
@@ -2053,6 +2141,12 @@ package body Templates_Parser is
    -----------------
 
    package body Definitions is separate;
+
+   -------------
+   -- Dynamic --
+   -------------
+
+   package body Dynamic is separate;
 
    ----------
    -- Expr --
@@ -3622,66 +3716,52 @@ package body Templates_Parser is
          Fatal_Error (Exceptions.Exception_Message (E));
    end Load;
 
-   --------------
-   -- Callback --
-   --------------
-
-   procedure Callback
-     (Context  : access Templates_Parser.Context;
-      Variable : in     String;
-      Result   :    out Unbounded_String;
-      Found    :    out Boolean) is
-   begin
-      Result := Null_Unbounded_String;
-      Found  := False;
-   end Callback;
-
    -----------
    -- Parse --
    -----------
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table := No_Translation;
-      Cached            : in Boolean         := False;
-      Keep_Unknown_Tags : in Boolean         := False;
-      Context           : in Context_Access  := Null_Context)
+      Translations      : in Translate_Table         := No_Translation;
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return String is
    begin
       return To_String
-        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Context));
+        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Lazy_Tag));
    end Parse;
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table := No_Translation;
-      Cached            : in Boolean         := False;
-      Keep_Unknown_Tags : in Boolean         := False;
-      Context           : in Context_Access  := Null_Context)
+      Translations      : in Translate_Table         := No_Translation;
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return Unbounded_String is
    begin
       return Parse
-        (Filename, To_Set (Translations), Cached, Keep_Unknown_Tags, Context);
+        (Filename, To_Set (Translations), Cached, Keep_Unknown_Tags, Lazy_Tag);
    end Parse;
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean        := False;
-      Keep_Unknown_Tags : in Boolean        := False;
-      Context           : in Context_Access := Null_Context)
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return String is
    begin
       return To_String
-        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Context));
+        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Lazy_Tag));
    end Parse;
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean        := False;
-      Keep_Unknown_Tags : in Boolean        := False;
-      Context           : in Context_Access := Null_Context)
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return Unbounded_String
    is
 
@@ -3696,18 +3776,18 @@ package body Templates_Parser is
       type Parse_State_Access is access constant Parse_State;
 
       type Parse_State is record
-         Cursor         : Indices (1 .. 10);
-         Max_Lines      : Natural;
-         Max_Expand     : Natural;
-         Reverse_Index  : Boolean;
-         Table_Level    : Natural;
-         Inline_Sep     : Unbounded_String;
-         Filename       : Unbounded_String;
-         Blocks_Count   : Natural;
-         I_Params       : Include_Parameters;
-         F_Params       : Filter.Include_Parameters;
-         Block          : Block_State;
-         Parent         : Parse_State_Access;
+         Cursor        : Indices (1 .. 10);
+         Max_Lines     : Natural;
+         Max_Expand    : Natural;
+         Reverse_Index : Boolean;
+         Table_Level   : Natural;
+         Inline_Sep    : Unbounded_String;
+         Filename      : Unbounded_String;
+         Blocks_Count  : Natural;
+         I_Params      : Include_Parameters;
+         F_Params      : Filter.Include_Parameters;
+         Block         : Block_State;
+         Parent        : Parse_State_Access;
       end record;
 
       Empty_State : constant Parse_State
@@ -3725,14 +3805,20 @@ package body Templates_Parser is
       Last_Was_Sep : Boolean := False;
       --  Used to avoid two consecutive separators
 
-      Now     : Calendar.Time;
-      D_Map   : Definitions.Map;
+      Now      : Calendar.Time;
+      D_Map    : Definitions.Map;
+      Lazy_Set : Translate_Set;
 
       procedure Analyze
         (T     : in Tree;
          State : in Parse_State);
       --  Parse T and build results file. State is needed for Vector_Tag and
       --  Matrix_Tag expansion.
+
+      function Get_Association (Var : in Tag_Var) return Association;
+      --  Returns association for Name or Null_Association if not found. This
+      --  routine also handles lazy tags by calling the appropriate callback
+      --  routine. Lazy tag values are then recorded into Lazy_Set.
 
       -------------
       -- Analyze --
@@ -3985,13 +4071,10 @@ package body Templates_Parser is
                end;
             end if;
 
-            Pos := Containers.Find
-              (Translations.Set.all, To_String (Var.Name));
-
-            if Containers.Has_Element (Pos) then
-               declare
-                  Tk : constant Association := Containers.Element (Pos);
-               begin
+            declare
+               Tk : constant Association := Get_Association (Var);
+            begin
+               if Tk /= Null_Association then
                   case Tk.Kind is
 
                      when Std =>
@@ -4071,19 +4154,14 @@ package body Templates_Parser is
                               Translations, State.F_Params);
                         end;
                   end case;
-               end;
-            end if;
+               end if;
+            end;
 
-            declare
-               T_Name : constant String := To_String (Var.Name);
-               Found  : Boolean;
-               Result : Unbounded_String;
-            begin
-               --  Check now for an internal tag
-
-               if T_Name = "UP_TABLE_LINE" then
+            case Var.Internal is
+               when Up_Table_Line =>
                   if State.Table_Level < 2 then
-                     return Translate (Var, "0", Translations, State.F_Params);
+                     return Translate
+                       (Var, "0", Translations, State.F_Params);
                   else
                      return Translate
                        (Var,
@@ -4091,9 +4169,10 @@ package body Templates_Parser is
                         Translations, State.F_Params);
                   end if;
 
-               elsif T_Name = "TABLE_LINE" then
+               when Table_Line =>
                   if State.Table_Level = 0 then
-                     return Translate (Var, "0", Translations, State.F_Params);
+                     return Translate
+                       (Var, "0", Translations, State.F_Params);
                   else
                      return Translate
                        (Var,
@@ -4101,87 +4180,73 @@ package body Templates_Parser is
                         Translations, State.F_Params);
                   end if;
 
-               elsif T_Name = "NUMBER_LINE" then
+               when Number_Line =>
                   return Translate
                     (Var, Image (State.Max_Lines),
                      Translations, State.F_Params);
 
-               elsif T_Name = "TABLE_LEVEL" then
+               when Table_Level =>
                   return Translate
                     (Var, Image (State.Table_Level),
                      Translations, State.F_Params);
 
-               elsif T_Name = "NOW" then
+               when Templates_Parser.Now =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%Y-%m-%d %H:%M:%S"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "YEAR" then
+               when Year =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%Y"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "MONTH" then
+               when Month =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%m"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "DAY" then
+               when Day =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%d"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "HOUR" then
+               when Hour =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%H"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "MINUTE" then
+               when Minute =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%M"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "SECOND" then
+               when Second =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%S"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "MONTH_NAME" then
+               when Month_Name =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%B"),
                      Translations, State.F_Params);
 
-               elsif T_Name = "DAY_NAME" then
+               when Day_Name =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%A"),
                      Translations, State.F_Params);
-               end if;
 
-               --  Check now if the variable is known in the current user's
-               --  context.
-
-               if Context = Null_Context
-                 or else Filter.Is_No_Context (Var.Filters)
-               then
-                  Found := False;
-               else
-                  Callback (Context, T_Name, Result, Found);
-               end if;
-
-               if Found then
-                  return Translate
-                    (Var, To_String (Result), Translations, State.F_Params);
-               end if;
-            end;
+               when No =>
+                  null;
+            end case;
 
             --  The tag was not found in the Translation_Table, we either
             --  returns the empty string or we keep the tag as is.
@@ -4528,16 +4593,14 @@ package body Templates_Parser is
                      return Result;
                   end Max;
 
-                  Pos : Containers.Cursor;
-
                begin
-                  Pos := Containers.Find
-                    (Translations.Set.all, To_String (T.Name));
+                  declare
+                     Tk : constant Association := Get_Association (T);
+                  begin
+                     if Tk = Null_Association then
+                        return 0;
 
-                  if Containers.Has_Element (Pos) then
-                     declare
-                        Tk : constant Association := Containers.Element (Pos);
-                     begin
+                     else
                         if Tk.Kind = Composite then
                            if N > Tk.Comp_Value.Data.Nested_Level then
                               --  Ignore this variable as it is deeper than
@@ -4581,13 +4644,12 @@ package body Templates_Parser is
                                  end if;
                               end;
                            end if;
+
+                        else
+                           return 0;
                         end if;
-                     end;
-                  end if;
-
-                  --  Tag not found
-
-                  return Natural'First;
+                     end if;
+                  end;
                end Check;
 
                function Check (T : in Data.Tree) return Natural is
@@ -4699,7 +4761,6 @@ package body Templates_Parser is
 
             if T.Terminate_Sections then
                --  ??? This part of code handle properly only table with a
-
                --  single block. What should be done if there is multiple
                --  blocks ? Should all blocks be of the same size ?
 
@@ -4922,7 +4983,8 @@ package body Templates_Parser is
                      Filename : constant String := Buffer (1 .. Last);
                      S_File   : Static_Tree;
                   begin
-                     Last := 0;
+                     Last := 0; --  Removes include filename from the buffer
+
                      S_File
                        := Load (Build_Include_Pathname
                                   (To_String (State.Filename), Filename),
@@ -4969,6 +5031,35 @@ package body Templates_Parser is
                Analyze (T.Next, State);
          end case;
       end Analyze;
+
+      ---------------------
+      -- Get_Association --
+      ---------------------
+
+      function Get_Association (Var : in Tag_Var) return Association is
+         use type Dynamic.Lazy_Tag_Access;
+         Name : constant String := To_String (Var.Name);
+         Pos  : Containers.Cursor;
+      begin
+         Pos := Containers.Find (Translations.Set.all, Name);
+
+         if Containers.Has_Element (Pos) then
+            return  Containers.Element (Pos);
+
+         elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
+           and then not Filter.Is_No_Dynamic (Var.Filters)
+           and then Var.Internal = No
+         then
+            --  Check for Lazy tag
+
+            Dynamic.Value (Lazy_Tag.all, Name, Lazy_Set);
+
+            return Get (Lazy_Set, Name);
+
+         else
+            return Null_Association;
+         end if;
+      end Get_Association;
 
       T : Static_Tree;
 

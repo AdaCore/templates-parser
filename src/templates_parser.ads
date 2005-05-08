@@ -208,26 +208,39 @@ package Templates_Parser is
    function To_Set (Table : in Translate_Table) return Translate_Set;
    --  Convert a Translate_Table into a Translate_Set
 
-   ---------------
-   -- Callbacks --
-   ---------------
+   -------------
+   -- Dynamic --
+   -------------
 
-   type Context is tagged private;
-   type Context_Access is access all Context'Class;
+   package Dynamic is
 
-   procedure Callback
-     (Context  : access Templates_Parser.Context;
-      Variable : in     String;
-      Result   :    out Unbounded_String;
-      Found    :    out Boolean);
-   --  Callback is called by the Parse routines below if a tag variable was not
-   --  found in the set of translations. This routine must then set Result with
-   --  the value to use for Variable (name of the variable tag) and in this
-   --  case Found must be set to True. If Variable is not handled in this
-   --  callback, Found must be set to False. This default implementation will
-   --  always return with Found set to False.
+      --------------
+      -- Lazy_Tag --
+      --------------
 
-   Null_Context : constant Context_Access;
+      type Lazy_Tag is tagged private;
+      type Lazy_Tag_Access is access all Lazy_Tag'Class;
+
+      procedure Value
+        (Lazy_Tag     : in out Dynamic.Lazy_Tag;
+         Var_Name     : in     String;
+         Translations : in out Translate_Set);
+      --  Value is called by the Parse routines below if a tag variable was not
+      --  found in the set of translations. This routine must then add the
+      --  association for variable Name. It is possible to add other
+      --  associations in the translation table but a check is done to see if
+      --  the variable Name as been set or not. The default implementation does
+      --  nothing.
+
+      Null_Lazy_Tag : constant Lazy_Tag_Access;
+
+   private
+
+      type Lazy_Tag is tagged null record;
+
+      Null_Lazy_Tag : constant Lazy_Tag_Access := null;
+
+   end Dynamic;
 
    -----------------------------
    -- Parsing and Translating --
@@ -235,10 +248,10 @@ package Templates_Parser is
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table := No_Translation;
-      Cached            : in Boolean         := False;
-      Keep_Unknown_Tags : in Boolean         := False;
-      Context           : in Context_Access  := Null_Context)
+      Translations      : in Translate_Table         := No_Translation;
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return String;
    --  Parse the Template_File replacing variables' occurrences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
@@ -250,43 +263,41 @@ package Templates_Parser is
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table := No_Translation;
-      Cached            : in Boolean         := False;
-      Keep_Unknown_Tags : in Boolean         := False;
-      Context           : in Context_Access  := Null_Context)
+      Translations      : in Translate_Table         := No_Translation;
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return Unbounded_String;
    --  Idem but returns an Unbounded_String
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean        := False;
-      Keep_Unknown_Tags : in Boolean        := False;
-      Context           : in Context_Access := Null_Context)
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return String;
    --  Idem with a Translation_Set
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean        := False;
-      Keep_Unknown_Tags : in Boolean        := False;
-      Context           : in Context_Access := Null_Context)
+      Cached            : in Boolean                 := False;
+      Keep_Unknown_Tags : in Boolean                 := False;
+      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
       return Unbounded_String;
    --  Idem with a Translation_Set
 
    function Translate
      (Template     : in String;
-      Translations : in Translate_Table := No_Translation)
-      return String;
+      Translations : in Translate_Table := No_Translation) return String;
    --  Just translate the discrete variables in the Template string using the
    --  Translations table. This function does not parse the command tag (TABLE,
    --  IF, INCLUDE). All composite tags are replaced by the empty string.
 
    function Translate
      (Template     : in String;
-      Translations : in Translate_Set)
-      return String;
+      Translations : in Translate_Set) return String;
    --  Idem with a Translation_Set
 
    procedure Release_Cache;
@@ -402,13 +413,5 @@ private
    function Image (N : in Integer) return String;
    pragma Inline (Image);
    --  Returns N image without leading blank
-
-   ---------------
-   -- Callbacks --
-   ---------------
-
-   type Context is tagged null record;
-
-   Null_Context : constant Context_Access := null;
 
 end Templates_Parser;

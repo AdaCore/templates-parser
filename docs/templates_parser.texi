@@ -574,7 +574,9 @@ the first match. @i{STR} is an optional parameter, its default value
 is @b{\1}. It is possible to espace characters in @i{STR} to avoid
 parsing confusions. This is required if you need to have @b{@@_} or
 @b{_@@} or a parenthesis in @i{STR} for example. @i{STR} can be a tag
-variable name.
+variable name. @i{STR} can contain the following escaped characters :
+@b{\n} Carriage Return, @b{\r} Line Feed and @b{\t} for Horizontal
+Tabulation.
 
 @item REPLACE_ALL(@i{REGEXP}[/@i{STR}])
 @cindex Filter, REPLACE_ALL

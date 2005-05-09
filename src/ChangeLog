@@ -1,3 +1,10 @@
+2005-05-09  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.adb:
+	(Unescape): Handle some special characters like \n \t and \r.
+	Part of this patch has been contributed by Henrik Sundberg.
+	Minor reformatting.
+
 2005-05-08  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-dynamic.adb:

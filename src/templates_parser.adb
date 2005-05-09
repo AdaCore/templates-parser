@@ -1110,16 +1110,28 @@ package body Templates_Parser is
                loop
                   exit when K > Str'Last;
 
+                  I := I + 1;
+
                   if Str (K) = '\'
                     and then K < Str'Last
                     and then not (Str (K + 1) in '0' .. '9')
                   then
-                     --  An escaped character, skip it first backslash
+                     --  An escaped character, skip the backslash
                      K := K + 1;
+
+                     --  Handled some special escaped characters \n \r \t
+
+                     case Str (K) is
+                        when 'n'    => S (I) := ASCII.LF;
+                        when 'r'    => S (I) := ASCII.CR;
+                        when 't'    => S (I) := ASCII.HT;
+                        when others => S (I) := Str (K);
+                     end case;
+
+                  else
+                     S (I) := Str (K);
                   end if;
 
-                  I := I + 1;
-                  S (I) := Str (K);
                   K := K + 1;
                end loop;
 
@@ -1128,6 +1140,7 @@ package body Templates_Parser is
 
             P1 : constant Natural := Fixed.Index (Filter, "(");
             P2 : constant Natural := Fixed.Index (Filter, ")", Backward);
+
          begin
             if (P1 = 0 and then P2 /= 0) or else (P1 /= 0 and then P2 = 0) then
                Exceptions.Raise_Exception

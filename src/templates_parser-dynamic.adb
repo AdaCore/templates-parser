@@ -32,18 +32,55 @@ separate (Templates_Parser)
 
 package body Dynamic is
 
+   ---------------
+   -- Dimention --
+   ---------------
+
+   function Dimention
+     (Cursor_Tag : access Dynamic.Cursor_Tag;
+      Var_Name   : in     String) return Natural
+   is
+      pragma Unreferenced (Cursor_Tag, Var_Name);
+   begin
+      return 0;
+   end Dimention;
+
+   ------------
+   -- Length --
+   ------------
+
+   function Length
+     (Cursor_Tag : access Dynamic.Cursor_Tag;
+      Var_Name   : in     String;
+      Path       : in     Dynamic.Path) return Natural
+   is
+      pragma Unreferenced (Cursor_Tag, Var_Name, Path);
+   begin
+      return 0;
+   end Length;
+
    -----------
    -- Value --
    -----------
 
    procedure Value
-     (Lazy_Tag     : in out Dynamic.Lazy_Tag;
+     (Lazy_Tag     : access Dynamic.Lazy_Tag;
       Var_Name     : in     String;
       Translations : in out Translate_Set)
    is
       pragma Unreferenced (Lazy_Tag, Var_Name, Translations);
    begin
       null;
+   end Value;
+
+   function Value
+     (Cursor_Tag : access Dynamic.Cursor_Tag;
+      Var_Name   : in     String;
+      Path       : in     Dynamic.Path) return String
+   is
+      pragma Unreferenced (Cursor_Tag, Var_Name, Path);
+   begin
+      return "";
    end Value;
 
 end Dynamic;

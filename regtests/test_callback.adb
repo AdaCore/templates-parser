@@ -32,12 +32,63 @@ with Ada.Text_IO;
 
 package body Test_Callback is
 
+   ---------------
+   -- Dimention --
+   ---------------
+
+   function Dimention
+     (C   : access Cursor_Tag;
+      Var : in     String) return Natural is
+   begin
+      if Var = "CURSOR" then
+         return 2;
+      elsif Var = "C_MAT3" then
+         return 3;
+      else
+         return 0;
+      end if;
+   end Dimention;
+
+   ------------
+   -- Length --
+   ------------
+
+   function Length
+     (C    : access Cursor_Tag;
+      Var  : in     String;
+      Path : in     Templates_Parser.Dynamic.Path) return Natural is
+   begin
+      if Var = "CURSOR" then
+         if Path'Length = 1 then
+            return 3;
+         elsif Path'Length /= 2 then
+            raise Constraint_Error;
+         else
+            return Path (Path'Last);
+         end if;
+
+      elsif Var = "C_MAT3" then
+         if Path'Length = 1 then
+            return 3;
+         elsif Path'Length = 2 then
+            return 2;
+         elsif Path'Length /= 3 then
+            raise Constraint_Error;
+         else
+            return Path (Path'Last) + 2;
+         end if;
+
+      else
+         return 0;
+      end if;
+   end Length;
+
    --------------
    -- Callback --
    --------------
 
    procedure Value
-     (L   : in out Lazy_Tag;
+     (L   : access Lazy_Tag;
       Var : in     String;
       S   : in out Templates_Parser.Translate_Set)
    is
@@ -56,13 +107,40 @@ package body Test_Callback is
    end Value;
 
    procedure Value
-     (L   : in out Log_Context;
+     (L   : access Log_Context;
       Var : in     String;
       S   : in out Templates_Parser.Translate_Set)
    is
       pragma Unreferenced (L, S);
    begin
       Ada.Text_IO.Put_Line ("Tag " & Var & " missing.");
+   end Value;
+
+   function Value
+     (C    : access Cursor_Tag;
+      Var  : in     String;
+      Path : in     Templates_Parser.Dynamic.Path) return String is
+   begin
+      if Var = "CURSOR" then
+         if Path'Length = 2 then
+            return "CT" & Path (Path'First)'Img & Path (Path'First + 1)'Img;
+         else
+            raise Constraint_Error;
+         end if;
+
+      elsif Var = "C_MAT3" then
+         if Path'Length = 3 then
+            return "CMAT"
+              & Path (Path'First)'Img
+              & Path (Path'First + 1)'Img
+              & Path (Path'First + 2)'Img;
+         else
+            raise Constraint_Error;
+         end if;
+
+      else
+         raise Constraint_Error;
+      end if;
    end Value;
 
 end Test_Callback;

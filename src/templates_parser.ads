@@ -222,7 +222,7 @@ package Templates_Parser is
       type Lazy_Tag_Access is access all Lazy_Tag'Class;
 
       procedure Value
-        (Lazy_Tag     : in out Dynamic.Lazy_Tag;
+        (Lazy_Tag     : access Dynamic.Lazy_Tag;
          Var_Name     : in     String;
          Translations : in out Translate_Set);
       --  Value is called by the Parse routines below if a tag variable was not
@@ -234,13 +234,58 @@ package Templates_Parser is
 
       Null_Lazy_Tag : constant Lazy_Tag_Access;
 
+      ----------------
+      -- Cursor_Tag --
+      ----------------
+
+      type Cursor_Tag is tagged private;
+      type Cursor_Tag_Access is access all Cursor_Tag'Class;
+      --  In some cases it is difficult and not efficient to have to map all
+      --  Ada data into a template Tag. A Cursor_Tag object gives the ability
+      --  to iterate through a data structure which is living on the Ada side
+      --  only.
+
+      function Dimention
+        (Cursor_Tag : access Dynamic.Cursor_Tag;
+         Var_Name   : in     String) return Natural;
+      --  Must return the number of dimentions for the given variable name. For
+      --  a matrix this routine should return 2 for example.
+
+      type Path is array (Positive range <>) of Natural;
+      --  A Path gives the full position of a given element in the cursor tag
+
+      function Length
+        (Cursor_Tag : access Dynamic.Cursor_Tag;
+         Var_Name   : in     String;
+         Path       : in     Dynamic.Path) return Natural;
+      --  Must return the number of item for the given path. The first
+      --  dimention is given by the Path (1), for the second column the Path is
+      --  (1, 2). Note that each dimention can have a different length. For
+      --  example a Matrix is not necessary square.
+
+      function Value
+        (Cursor_Tag : access Dynamic.Cursor_Tag;
+         Var_Name   : in     String;
+         Path       : in     Dynamic.Path) return String;
+      --  Must return the value for the variable at the given Path. Note that
+      --  this routine will be called only for valid items as given by the
+      --  Dimention and Length above.
+
+      Null_Cursor_Tag : constant Cursor_Tag_Access;
+
    private
 
       type Lazy_Tag is tagged null record;
 
       Null_Lazy_Tag : constant Lazy_Tag_Access := null;
 
+      type Cursor_Tag is tagged null record;
+
+      Null_Cursor_Tag : constant Cursor_Tag_Access := null;
+
    end Dynamic;
+
+   package Dyn renames Dynamic;
 
    -----------------------------
    -- Parsing and Translating --
@@ -248,10 +293,11 @@ package Templates_Parser is
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table         := No_Translation;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Translations      : in Translate_Table       := No_Translation;
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String;
    --  Parse the Template_File replacing variables' occurrences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
@@ -263,28 +309,31 @@ package Templates_Parser is
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table         := No_Translation;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Translations      : in Translate_Table       := No_Translation;
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String;
    --  Idem but returns an Unbounded_String
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String;
    --  Idem with a Translation_Set
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String;
    --  Idem with a Translation_Set
 
@@ -355,7 +404,7 @@ private
    procedure Finalize   (T : in out Tag);
    procedure Adjust     (T : in out Tag);
 
-   type Indices is array (Positive range <>) of Natural;
+   subtype Indices is Dynamic.Path;
    --  Set of indices that reference a specific item into a composite tag.
    --  Used by the parser.
 

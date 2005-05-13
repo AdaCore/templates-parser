@@ -1,0 +1,118 @@
+
+-----------------------------------
+
+1a> CT 1 1 CT 2 1 CT 2 2 CT 3 1 CT 3 2 CT 3 3
+
+1b> CMAT 1 1 1 CMAT 1 1 2 CMAT 1 1 3 CMAT 1 2 1 CMAT 1 2 2 CMAT 1 2 3 CMAT 1 2 4 CMAT 2 1 1 CMAT 2 1 2 CMAT 2 1 3 CMAT 2 2 1 CMAT 2 2 2 CMAT 2 2 3 CMAT 2 2 4 CMAT 3 1 1 CMAT 3 1 2 CMAT 3 1 3 CMAT 3 2 1 CMAT 3 2 2 CMAT 3 2 3 CMAT 3 2 4
+
+1c> M 1 1 1, M 1 1 2, M 1 1 3
+M 1 2 1, M 1 2 2, M 1 2 3, M 1 2 4
+M 2 1 1, M 2 1 2, M 2 1 3
+M 2 2 1, M 2 2 2, M 2 2 3, M 2 2 4
+M 3 1 1, M 3 1 2, M 3 1 3
+M 3 2 1, M 3 2 2, M 3 2 3, M 3 2 4
+
+-----------------------------------
+
+2a> CT 1 1
+2a> CT 2 1 CT 2 2
+2a> CT 3 1 CT 3 2 CT 3 3
+
+2b> CMAT 1 1 1 CMAT 1 1 2 CMAT 1 1 3 CMAT 1 2 1 CMAT 1 2 2 CMAT 1 2 3 CMAT 1 2 4
+2b> CMAT 2 1 1 CMAT 2 1 2 CMAT 2 1 3 CMAT 2 2 1 CMAT 2 2 2 CMAT 2 2 3 CMAT 2 2 4
+2b> CMAT 3 1 1 CMAT 3 1 2 CMAT 3 1 3 CMAT 3 2 1 CMAT 3 2 2 CMAT 3 2 3 CMAT 3 2 4
+
+2c> M 1 1 1, M 1 1 2, M 1 1 3
+M 1 2 1, M 1 2 2, M 1 2 3, M 1 2 4
+2c> M 2 1 1, M 2 1 2, M 2 1 3
+M 2 2 1, M 2 2 2, M 2 2 3, M 2 2 4
+2c> M 3 1 1, M 3 1 2, M 3 1 3
+M 3 2 1, M 3 2 2, M 3 2 3, M 3 2 4
+
+--  Cursor
+
+.
+3> CT 1 1
+3> 
+3> 
+.
+3> CT 2 1
+3> CT 2 2
+3> 
+.
+3> CT 3 1
+3> CT 3 2
+3> CT 3 3
+
+--  Cursor C_MAT3
+
+.
+..
+4a> CMAT 1 1 1
+4a> CMAT 1 1 2
+4a> CMAT 1 1 3
+4a> 
+..
+4a> CMAT 1 2 1
+4a> CMAT 1 2 2
+4a> CMAT 1 2 3
+4a> CMAT 1 2 4
+.
+..
+4a> CMAT 2 1 1
+4a> CMAT 2 1 2
+4a> CMAT 2 1 3
+4a> 
+..
+4a> CMAT 2 2 1
+4a> CMAT 2 2 2
+4a> CMAT 2 2 3
+4a> CMAT 2 2 4
+.
+..
+4a> CMAT 3 1 1
+4a> CMAT 3 1 2
+4a> CMAT 3 1 3
+4a> 
+..
+4a> CMAT 3 2 1
+4a> CMAT 3 2 2
+4a> CMAT 3 2 3
+4a> CMAT 3 2 4
+
+-----------------------------------
+
+.
+..
+4b> M 1 1 1
+4b> M 1 1 2
+4b> M 1 1 3
+4b> 
+..
+4b> M 1 2 1
+4b> M 1 2 2
+4b> M 1 2 3
+4b> M 1 2 4
+.
+..
+4b> M 2 1 1
+4b> M 2 1 2
+4b> M 2 1 3
+4b> 
+..
+4b> M 2 2 1
+4b> M 2 2 2
+4b> M 2 2 3
+4b> M 2 2 4
+.
+..
+4b> M 3 1 1
+4b> M 3 1 2
+4b> M 3 1 3
+4b> 
+..
+4b> M 3 2 1
+4b> M 3 2 2
+4b> M 3 2 3
+4b> M 3 2 4
+

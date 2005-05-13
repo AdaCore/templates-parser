@@ -1,0 +1,55 @@
+
+-----------------------------------
+
+1a> @_CURSOR_@
+
+1b> @_C_MAT3_@
+
+1c> @_MAT3_@
+
+-----------------------------------
+
+@@TABLE@@
+2a> @_CURSOR_@
+@@END_TABLE@@
+
+@@TABLE@@
+2b> @_C_MAT3_@
+@@END_TABLE@@
+
+@@TABLE@@
+2c> @_MAT3_@
+@@END_TABLE@@
+
+--  Cursor
+
+@@TABLE@@
+.
+@@TABLE@@
+3> @_CURSOR_@
+@@END_TABLE@@
+@@END_TABLE@@
+
+--  Cursor C_MAT3
+
+@@TABLE@@
+.
+@@TABLE@@
+..
+@@TABLE@@
+4a> @_C_MAT3_@
+@@END_TABLE@@
+@@END_TABLE@@
+@@END_TABLE@@
+
+-----------------------------------
+
+@@TABLE@@
+.
+@@TABLE@@
+..
+@@TABLE@@
+4b> @_MAT3_@
+@@END_TABLE@@
+@@END_TABLE@@
+@@END_TABLE@@

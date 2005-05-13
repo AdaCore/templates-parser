@@ -1,3 +1,30 @@
+2005-05-13  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-dynamic.adb:
+	(Dimention): New routine.
+	(Length): Idem.
+	(Value) [Cursor_Tag]: Idem.
+	These routines are used to implement the new Cursor_Tag object.
+	Continued work for E423-002.
+
+	* templates_parser.adb:
+	(Tag_Var): Minor comment update.
+	(Parse) [*]: Add parameter Cursor_Tag.
+	Continued work for E423-002.
+
+	* templates_parser.ads:
+	(Value) [Lazy_Tag]: Lazy_Tag has now an access mode (was in out).
+	(Dynamic.Cursor_Tag): New tag object that support a tag that can
+	 be iterated by the parser. This make it possible to iterate
+	 through complex data that live on the Ada side only.
+	(Parse) [*]: Add parameter Cursor_Tag.
+	(Parse): Add support for the new Cursor_Tag object. The main
+	 changes are in the nested Translate and Check routines.
+	(Get_Max_Lines.Check) [Expr.Tree]: Cleaner implementation.
+	(Get_Association): Fix call to Value as now Lazy_Tag parameter has
+	 an access mode.
+	Continued work for E423-002.
+
 2005-05-09  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

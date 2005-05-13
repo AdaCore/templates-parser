@@ -45,6 +45,7 @@ procedure Testme is
    use type TP.Matrix_Tag;
 
    L_Tag : aliased Test_Callback.Lazy_Tag;
+   C_Tag : aliased Test_Callback.Cursor_Tag;
 
    KUT : Boolean := False;
    --  Keep Unknown Tags
@@ -77,10 +78,22 @@ procedure Testme is
 
    Nested_3 : constant TP.Tag := +M & MB;
 
-   C  : constant TP.Tag := +"Class1" & "Class2";
-   Mx : constant TP.Tag := +"Member1.1" & "Member1.2";
-   My : constant TP.Tag := +"Member2.1" & "Member2.2" & "Member2.3";
-   MF : constant TP.Tag := +Mx & My;
+   C   : constant TP.Tag := +"Class1" & "Class2";
+   Mx  : constant TP.Tag := +"Member1.1" & "Member1.2";
+   My  : constant TP.Tag := +"Member2.1" & "Member2.2" & "Member2.3";
+   MF  : constant TP.Tag := +Mx & My;
+
+   M11 : constant TP.Tag := +"M 1 1 1" & "M 1 1 2" & "M 1 1 3";
+   M12 : constant TP.Tag := +"M 1 2 1" & "M 1 2 2" & "M 1 2 3" & "M 1 2 4";
+   M21 : constant TP.Tag := +"M 2 1 1" & "M 2 1 2" & "M 2 1 3";
+   M22 : constant TP.Tag := +"M 2 2 1" & "M 2 2 2" & "M 2 2 3" & "M 2 2 4";
+   M31 : constant TP.Tag := +"M 3 1 1" & "M 3 1 2" & "M 3 1 3";
+   M32 : constant TP.Tag := +"M 3 2 1" & "M 3 2 2" & "M 3 2 3" & "M 3 2 4";
+
+   MC1 : constant TP.Tag := +M11 & M12;
+   MC2 : constant TP.Tag := +M21 & M22;
+   MC3 : constant TP.Tag := +M31 & M32;
+   CM3 : constant TP.Tag := +MC1 & MC2 & MC3;
 
    Translations : TP.Translate_Table
      := (TP.Assoc ("VAR1", "a value"),
@@ -134,6 +147,7 @@ procedure Testme is
          TP.Assoc ("FILE2", "testme56.out"),
          TP.Assoc ("S1", S1),
          TP.Assoc ("QUOTE", """"""),
+         TP.Assoc ("MAT3", CM3),
          TP.Assoc ("ACCENTS", "<été ça être paramètre à paraître> & """)
         );
 
@@ -148,7 +162,8 @@ begin
       Result : constant String :=
         TP.Parse (Command_Line.Argument (1), Translations,
                   Keep_Unknown_Tags => KUT,
-                  Lazy_Tag          => L_Tag'Unchecked_Access);
+                  Lazy_Tag          => L_Tag'Unchecked_Access,
+                  Cursor_Tag        => C_Tag'Unchecked_Access);
    begin
       Text_IO.Put (Result);
    end;

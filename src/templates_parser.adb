@@ -798,7 +798,7 @@ package body Templates_Parser is
       Filters   : Filter.Set_Access;
       Attribute : Attribute_Data;
       N         : Integer;           -- Include variable index
-      Internal  : Internal_Tag;      -- True if an internal variable
+      Internal  : Internal_Tag;      -- Set to No if not an internal variable
    end record;
 
    function Is_Include_Variable (T : in Tag_Var) return Boolean;
@@ -3735,48 +3735,57 @@ package body Templates_Parser is
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table         := No_Translation;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Translations      : in Translate_Table       := No_Translation;
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String is
    begin
       return To_String
-        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Lazy_Tag));
+        (Parse (Filename, Translations, Cached,
+                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag));
    end Parse;
 
    function Parse
      (Filename          : in String;
-      Translations      : in Translate_Table         := No_Translation;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Translations      : in Translate_Table       := No_Translation;
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String is
    begin
       return Parse
-        (Filename, To_Set (Translations), Cached, Keep_Unknown_Tags, Lazy_Tag);
+        (Filename, To_Set (Translations), Cached,
+         Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag);
    end Parse;
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String is
    begin
       return To_String
-        (Parse (Filename, Translations, Cached, Keep_Unknown_Tags, Lazy_Tag));
+        (Parse (Filename, Translations, Cached,
+                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag));
    end Parse;
 
    function Parse
      (Filename          : in String;
       Translations      : in Translate_Set;
-      Cached            : in Boolean                 := False;
-      Keep_Unknown_Tags : in Boolean                 := False;
-      Lazy_Tag          : in Dynamic.Lazy_Tag_Access := Dynamic.Null_Lazy_Tag)
+      Cached            : in Boolean               := False;
+      Keep_Unknown_Tags : in Boolean               := False;
+      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String
    is
+      Max_Nested_Levels : constant := 10;
+      --  The maximum number of table nested levels
 
       type Block_State is record
          Section_Number : Positive;
@@ -3789,7 +3798,7 @@ package body Templates_Parser is
       type Parse_State_Access is access constant Parse_State;
 
       type Parse_State is record
-         Cursor        : Indices (1 .. 10);
+         Cursor        : Indices (1 .. Max_Nested_Levels);
          Max_Lines     : Natural;
          Max_Expand    : Natural;
          Reverse_Index : Boolean;
@@ -3804,7 +3813,7 @@ package body Templates_Parser is
       end record;
 
       Empty_State : constant Parse_State
-        := ((1 .. 10 => 0), 0, 0, False, 0,
+        := ((1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
             Null_Unbounded_String, Null_Unbounded_String, 0,
             No_Parameter, Filter.No_Include_Parameters,
             Empty_Block_State, null);
@@ -3896,6 +3905,14 @@ package body Templates_Parser is
          --  Returns a flat representation of the include parameters, only the
          --  name or the value are kept. The tree are replaced by an empty
          --  value.
+
+         function Inline_Cursor_Tag
+           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
+            Var_Name   : in String;
+            Dim        : in Positive;
+            Path       : in Dynamic.Path) return Unbounded_String;
+         --  Returns the Cursor_Tag Var_Name inlined for all dimentions
+         --  starting from Path.
 
          L_State : aliased constant Parse_State := State;
 
@@ -4035,6 +4052,42 @@ package body Templates_Parser is
             end if;
          end I_Translate;
 
+         -----------------------
+         -- Inline_Cursor_Tag --
+         -----------------------
+
+         function Inline_Cursor_Tag
+           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
+            Var_Name   : in String;
+            Dim        : in Positive;
+            Path       : in Dynamic.Path) return Unbounded_String
+         is
+            use type Dynamic.Path;
+            Result : Unbounded_String;
+            L      : Natural;
+         begin
+            L := Dynamic.Length (Cursor_Tag, Var_Name, 1 & Path);
+
+            for K in 1 .. L loop
+               if Result /= Null_Unbounded_String then
+                  Append (Result, ' ');
+               end if;
+
+               if Dim = Path'Length + 1 then
+                  Append
+                    (Result,
+                     Dynamic.Value (Cursor_Tag, Var_Name, Path & K));
+               else
+                  Append
+                    (Result,
+                     Inline_Cursor_Tag
+                       (Cursor_Tag, Var_Name, Dim, Path & K));
+               end if;
+            end loop;
+
+            return Result;
+         end Inline_Cursor_Tag;
+
          ---------------
          -- Translate --
          ---------------
@@ -4085,9 +4138,84 @@ package body Templates_Parser is
             end if;
 
             declare
+               use type Dynamic.Cursor_Tag_Access;
+               use type Dynamic.Path;
                Tk : constant Association := Get_Association (Var);
             begin
-               if Tk /= Null_Association then
+               if Tk = Null_Association then
+
+                  if Cursor_Tag /= Dynamic.Null_Cursor_Tag then
+                     --  Check the Cursor_Tag
+                     declare
+                        Name         : constant String := To_String (Var.Name);
+                        D, L         : Natural;
+                        Valid_Cursor : Boolean := True;
+                     begin
+                        D := Dynamic.Dimention (Cursor_Tag, Name);
+
+                        if D /= 0 then
+                           if Var.Attribute.Attr /= Nil then
+                              --  ??? Would be nice to remove this restriction
+                              Exceptions.Raise_Exception
+                                (Template_Error'Identity,
+                                 "Attributes not supported for Cursor_Tag.");
+                           end if;
+
+                           --  This is a Cursor_Tag, check that the current
+                           --  table cursor is valid for it.
+
+                           for K in 1 .. D loop
+                              if State.Cursor (K) >
+                                Dynamic.Length
+                                  (Cursor_Tag, Name,
+                                   1 & State.Cursor (1 .. K - 1))
+                              then
+                                 Valid_Cursor := False;
+                              end if;
+                           end loop;
+
+                           if Valid_Cursor then
+
+                              L := Dynamic.Length
+                                (Cursor_Tag, Name,
+                                 1 & State.Cursor
+                                   (1 .. State.Table_Level - 1));
+
+                              if D = 1 and then L = 1 then
+                                 --  A standard tag (single value)
+                                 return Translate
+                                   (Var,
+                                    Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
+                                    Translations, State.F_Params);
+
+                              else
+                                 --  A composite tag, check that the dimention
+                                 --  of the tag correspond to the current table
+                                 --  nested level.
+
+                                 if D = State.Table_Level then
+                                    return Translate
+                                      (Var,
+                                       Dynamic.Value
+                                         (Cursor_Tag, Name,
+                                          State.Cursor (1 .. D)),
+                                       Translations, State.F_Params);
+
+                                 else
+                                    --  Otherwise we inline the structure
+                                    return To_String
+                                      (Inline_Cursor_Tag
+                                         (Cursor_Tag, Name, D,
+                                          State.Cursor
+                                            (1 .. State.Table_Level)));
+                                 end if;
+                              end if;
+                           end if;
+                        end if;
+                     end;
+                  end if;
+
+               else
                   case Tk.Kind is
 
                      when Std =>
@@ -4536,8 +4664,7 @@ package body Templates_Parser is
          is
 
             function Get_Max_Lines
-              (T : in Tree;
-               N : in Positive) return Natural;
+              (T : in Tree; N : in Positive) return Natural;
             --  Recursivelly descends the tree and compute the max lines that
             --  will be displayed into the table. N is the variable embedded
             --  level regarding the table statement. N=1 means that the
@@ -4549,9 +4676,7 @@ package body Templates_Parser is
             -------------------
 
             function Get_Max_Lines
-              (T : in Tree;
-               N : in Positive)
-               return Natural
+              (T : in Tree; N : in Positive) return Natural
             is
 
                function Check (T : in Data.Tree) return Natural;
@@ -4573,12 +4698,22 @@ package body Templates_Parser is
                -----------
 
                function Check (T : in Tag_Var) return Natural is
+
                   Table_Level : constant Positive := State.Table_Level + 1;
                   --  This is the current table level, State.Table_Level is
-                  --  not yet updated when calling this routine.
+                  --  not yet updated when calling this routine hence the +1.
+
+                  Var_Level   : constant Natural := State.Table_Level + N;
+                  --  This is the variable nested table level. O means that the
+                  --  variable is not inside a table statement.
 
                   function Max (T : in Tag; N : in Natural) return Natural;
-                  --  ???
+                  --  Returns the maximum number of items for the Nth Tag level
+
+                  function Max
+                    (Name : in String; N : in Natural; Path : in Dynamic.Path)
+                     return Natural;
+                  --  Idem for a Cursor_Tag
 
                   ---------
                   -- Max --
@@ -4586,32 +4721,100 @@ package body Templates_Parser is
 
                   function Max (T : in Tag; N : in Natural) return Natural is
                      Result : Natural := 0;
+                     P      : Tag_Node_Access := T.Data.Head;
                   begin
-                     declare
-                        P : Tag_Node_Access := T.Data.Head;
-                     begin
-                        while P /= null loop
-                           if P.Kind = Value_Set then
-                              if N = 1 then
-                                 Result :=
-                                   Natural'Max (Result, P.VS.Data.Count);
-                              else
-                                 Result := Natural'Max
-                                   (Result, Max (P.VS.all, N - 1));
-                              end if;
+                     while P /= null loop
+                        if P.Kind = Value_Set then
+                           if N = 1 then
+                              Result :=
+                                Natural'Max (Result, P.VS.Data.Count);
+                           else
+                              Result := Natural'Max
+                                (Result, Max (P.VS.all, N - 1));
                            end if;
-                           P := P.Next;
-                        end loop;
-                     end;
+                        end if;
+                        P := P.Next;
+                     end loop;
+                     return Result;
+                  end Max;
+
+                  function Max
+                    (Name : in String; N : in Natural; Path : in Dynamic.Path)
+                     return Natural
+                  is
+                     use type Dynamic.Path;
+                     Result : Natural := 0;
+                     L : Natural;
+                  begin
+                     L := Dynamic.Length (Cursor_Tag, Name, Path);
+
+                     for K in 1 .. L loop
+                        if Path'Length = N then
+                           Result := Natural'Max
+                             (Result,
+                              Dynamic.Length (Cursor_Tag, Name, Path & K));
+                        else
+                           Result := Natural'Max
+                             (Result, Max (Name, N, Path & K));
+                        end if;
+                     end loop;
+
                      return Result;
                   end Max;
 
                begin
                   declare
+                     use type Dynamic.Cursor_Tag_Access;
                      Tk : constant Association := Get_Association (T);
                   begin
                      if Tk = Null_Association then
-                        return 0;
+
+                        if Cursor_Tag /= Dynamic.Null_Cursor_Tag then
+                           --  Check the Cursor_Tag
+                           declare
+                              Name : constant String := To_String (T.Name);
+                              D, K : Natural;
+                              L1   : Natural;
+                           begin
+                              D := Dynamic.Dimention (Cursor_Tag, Name);
+
+                              if N > D then
+                                 --  Ignore this variable as it is deeper than
+                                 --  its dimention.
+                                 return 0;
+
+                              elsif D /= 0 then
+                                 --  This is a Cursor_Tag
+
+                                 K := D - N + 1;
+                                 --  K is the variable indice for which
+                                 --  the number of items is looked for.
+
+                                 if D > Table_Level then
+                                    --  The variable dimentions is bigger than
+                                    --  the current table level. This means
+                                    --  that the index needs to be updated so
+                                    --  that the outer table tag statement will
+                                    --  be the first var index.
+                                    K := K - (D - Var_Level);
+                                 end if;
+
+                                 L1 := Dynamic.Length
+                                   (Cursor_Tag, Name, Path => (1 => 1));
+
+                                 if D = 1 and then L1 = 1 then
+                                    --  Not a composite tag
+                                    return 0;
+
+                                 elsif K = 1 then
+                                    return L1;
+
+                                 else
+                                    return Max (Name, K - 1, (1 => 1));
+                                 end if;
+                              end if;
+                           end;
+                        end if;
 
                      else
                         if Tk.Kind = Composite then
@@ -4623,7 +4826,7 @@ package body Templates_Parser is
 
                            --  We look first at two common cases to handle
                            --  more efficiently tag into a single or two
-                           --  table statement.
+                           --  table statements.
 
                            if Table_Level = 1
                              or else Tk.Comp_Value.Data.Nested_Level = 1
@@ -4657,12 +4860,11 @@ package body Templates_Parser is
                                  end if;
                               end;
                            end if;
-
-                        else
-                           return 0;
                         end if;
                      end if;
                   end;
+
+                  return 0;
                end Check;
 
                function Check (T : in Data.Tree) return Natural is
@@ -4685,19 +4887,17 @@ package body Templates_Parser is
                end Check;
 
                function Check (T : in Expr.Tree) return Natural is
-                  Iteration : Natural := Natural'First;
                begin
                   case T.Kind is
                      when Expr.Var   =>
-                        Iteration := Natural'Max (Iteration, Check (T.Var));
+                        return Natural'Max (0, Check (T.Var));
                      when Expr.Op    =>
                         return Natural'Max (Check (T.Left), Check (T.Right));
                      when Expr.U_Op  =>
-                        return Natural'Max (Iteration, Check (T.Next));
+                        return Natural'Max (0, Check (T.Next));
                      when Expr.Value =>
-                        null;
+                        return 0;
                   end case;
-                  return Iteration;
                end Check;
 
                function Check (I : in Include_Parameters) return Natural is
@@ -5065,7 +5265,7 @@ package body Templates_Parser is
          then
             --  Check for Lazy tag
 
-            Dynamic.Value (Lazy_Tag.all, Name, Lazy_Set);
+            Dynamic.Value (Lazy_Tag, Name, Lazy_Set);
 
             return Get (Lazy_Set, Name);
 

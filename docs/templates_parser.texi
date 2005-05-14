@@ -1445,8 +1445,12 @@ We get the following result:
 @section Dynamic tags
 @cindex Dynamic tags
 
+Dynamic tags are handled through abstract interfaces and gives the
+opportunity to create tags dynamically while the template is parsed.
+
 @menu
 * Lazy_Tag::
+* Cursor_Tag::
 @end menu
 
 @node Lazy_Tag
@@ -1454,20 +1458,20 @@ We get the following result:
 @cindex Lazy_Tag
 
 @noindent
-The Lazy_Tag object can be used to dynamically handle tags. Such
+The @code{Lazy_Tag} object can be used to dynamically handle tags. Such
 object can be passed to the @code{Parse} routines. If a template's tag
-is not found in the @code{Translate_Set} the Lazy_Tag's Value callback method
-is called by the parser. The default callback method does nothing, it
-is up to the user to define it. The callback procedure is defined as
-follow:
+is not found in the @code{Translate_Set} the @code{Lazy_Tag}'s Value
+callback method is called by the parser. The default callback method
+does nothing, it is up to the user to define it. The callback
+procedure is defined as follow:
 
 @cartouche
 @smallexample
 @group
 @b{procedure} Value
-  (Lazy_Tag     : @b{in out} Dynamic.Lazy_Tag;
+  (Lazy_Tag     : @b{access} Dynamic.Lazy_Tag;
    Var_Name     : @b{in}     String;
-   Translations : @b{in out} Translate_Set);
+   Translations : @b{in out} Translate_Set) @b{is abstract};
 @i{--  Value is called by the Parse routines below if a tag variable was not}
 @i{--  found in the set of translations. This routine must then add the}
 @i{--  association for variable Name. It is possible to add other}
@@ -1483,12 +1487,57 @@ One common usage is to handles tag variables that can be shared by
 many templates are not always used (because a conditional is False for
 example). If computing the corresponding value (or values for a ...)
 is somewhat expensive it is better to delay building such tag at the
-point it is needed. Using a Lazy_Tag object it is possible to do
+point it is needed. Using a @code{Lazy_Tag} object it is possible to do
 so. The @code{Value} procedure will be called if the tag value is
 needed. At this point, one can just add the corresponding association
 into the @code{Translate_Set}. Note that it is possible to add more
 than one association. If the association for @code{Var_Name} is not
 given this tag has no value.
+
+@node Cursor_Tag
+@subsection Cursor_Tag
+@cindex Cursor_Tag
+
+@noindent
+In some cases, data structure on the Ada side can be so complex that it is
+difficult to map it into a variable tag. The @code{Cursor_Tag} object has
+been designed to work around such problem. Using a @code{Cursor_Tag}
+it is possible to create an iterator through a data structure without
+mapping it into a variable tag. The data stays on the Ada side.
+To create @code{Cursor_Tag} it is necessary to implement the following
+abstract routines:
+
+@cartouche
+@smallexample
+@group
+@b{function} Dimention
+  (Cursor_Tag : @b{access} Dynamic.Cursor_Tag;
+   Var_Name   : @b{in}     String) @b{return} Natural @b{is abstract};
+@i{--  Must return the number of dimentions for the given variable name. For}
+@i{--  a matrix this routine should return 2 for example.}
+
+@b{type} Path @b{is array} (Positive @b{range} <>) @b{of} Natural;
+@i{--  A Path gives the full position of a given element in the cursor tag}
+
+@b{function} Length
+  (Cursor_Tag : @b{access} Dynamic.Cursor_Tag;
+   Var_Name   : @b{in}     String;
+   Path       : @b{in}     Dynamic.Path) @b{return} Natural @b{is abstract};
+@i{--  Must return the number of item for the given path. The first}
+@i{--  dimention is given by the Path (1), for the second column the Path is}
+@i{--  (1, 2). Note that each dimention can have a different length. For}
+@i{--  example a Matrix is not necessary square.}
+
+@b{function} Value
+  (Cursor_Tag : @b{access} Dynamic.Cursor_Tag;
+   Var_Name   : @b{in}     String;
+   Path       : @b{in}     Dynamic.Path) @b{return} String @b{is abstract};
+@i{--  Must return the value for the variable at the given Path. Note that}
+@i{--  this routine will be called only for valid items as given by the}
+@i{--  Dimention and Length above.}
+@end group
+@end smallexample
+@end cartouche
 
 @node Tag utils
 @section Tag utils

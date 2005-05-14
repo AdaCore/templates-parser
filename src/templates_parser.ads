@@ -218,13 +218,13 @@ package Templates_Parser is
       -- Lazy_Tag --
       --------------
 
-      type Lazy_Tag is tagged private;
+      type Lazy_Tag is abstract tagged private;
       type Lazy_Tag_Access is access all Lazy_Tag'Class;
 
       procedure Value
         (Lazy_Tag     : access Dynamic.Lazy_Tag;
          Var_Name     : in     String;
-         Translations : in out Translate_Set);
+         Translations : in out Translate_Set) is abstract;
       --  Value is called by the Parse routines below if a tag variable was not
       --  found in the set of translations. This routine must then add the
       --  association for variable Name. It is possible to add other
@@ -238,7 +238,7 @@ package Templates_Parser is
       -- Cursor_Tag --
       ----------------
 
-      type Cursor_Tag is tagged private;
+      type Cursor_Tag is abstract tagged private;
       type Cursor_Tag_Access is access all Cursor_Tag'Class;
       --  In some cases it is difficult and not efficient to have to map all
       --  Ada data into a template Tag. A Cursor_Tag object gives the ability
@@ -247,7 +247,7 @@ package Templates_Parser is
 
       function Dimention
         (Cursor_Tag : access Dynamic.Cursor_Tag;
-         Var_Name   : in     String) return Natural;
+         Var_Name   : in     String) return Natural is abstract;
       --  Must return the number of dimentions for the given variable name. For
       --  a matrix this routine should return 2 for example.
 
@@ -257,7 +257,7 @@ package Templates_Parser is
       function Length
         (Cursor_Tag : access Dynamic.Cursor_Tag;
          Var_Name   : in     String;
-         Path       : in     Dynamic.Path) return Natural;
+         Path       : in     Dynamic.Path) return Natural is abstract;
       --  Must return the number of item for the given path. The first
       --  dimention is given by the Path (1), for the second column the Path is
       --  (1, 2). Note that each dimention can have a different length. For
@@ -266,7 +266,7 @@ package Templates_Parser is
       function Value
         (Cursor_Tag : access Dynamic.Cursor_Tag;
          Var_Name   : in     String;
-         Path       : in     Dynamic.Path) return String;
+         Path       : in     Dynamic.Path) return String is abstract;
       --  Must return the value for the variable at the given Path. Note that
       --  this routine will be called only for valid items as given by the
       --  Dimention and Length above.
@@ -275,11 +275,11 @@ package Templates_Parser is
 
    private
 
-      type Lazy_Tag is tagged null record;
+      type Lazy_Tag is abstract tagged null record;
 
       Null_Lazy_Tag : constant Lazy_Tag_Access := null;
 
-      type Cursor_Tag is tagged null record;
+      type Cursor_Tag is abstract tagged null record;
 
       Null_Cursor_Tag : constant Cursor_Tag_Access := null;
 

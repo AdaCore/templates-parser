@@ -2155,12 +2155,6 @@ package body Templates_Parser is
 
    package body Definitions is separate;
 
-   -------------
-   -- Dynamic --
-   -------------
-
-   package body Dynamic is separate;
-
    ----------
    -- Expr --
    ----------

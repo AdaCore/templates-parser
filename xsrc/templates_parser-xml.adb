@@ -258,6 +258,7 @@ package body Templates_Parser.XML is
               (T   : in Tag;
                Pos : in Indices := Null_Indice)
             is
+               use type Indices;
 
                procedure Output_Value (Pos : in Indices; Value : in String);
                --  Output value whose Tag indices is given by Pos

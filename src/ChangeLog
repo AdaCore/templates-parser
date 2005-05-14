@@ -1,3 +1,19 @@
+2005-05-14  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.ads:
+	(Lazy_Tag): Is now an abstract type.
+	(Cursor_Tag): Idem.
+	Continued work for E423-002.
+
+	* templates_parser.adb:
+	(Dynamic): Remove separate body declaration. Not needed now.
+	Continued work for E423-002.
+
+	* templates_parser-dynamic.adb:
+	Removed, this is not needed now as the Lazy_Tag and Cursor_Tag are
+	 now abstract types.
+	Continued work for E423-002.
+
 2005-05-13  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-dynamic.adb:

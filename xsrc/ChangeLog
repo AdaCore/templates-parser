@@ -1,3 +1,9 @@
+2005-05-14  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-xml.adb:
+	(Output_Tag): Add use type clause for Indices to fix build failure
+         when building in XML/Ada mode.
+
 2005-02-12  Pascal Obry  <pascal@obry.org>
 
 	* templates_parser-xml.ads templates_parser-xml.adb:

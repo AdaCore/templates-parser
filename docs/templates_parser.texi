@@ -114,9 +114,9 @@ code you don't have to handle all the specific HTML output. And you do
 not risk to break the design.
 
 @item It is easier to work on the design and the program at the same time
-using the right peoples for the job.
+using the right people for the job.
 
-@item It reduce the number of @i{edit/build/test} cycles. Writing HTML
+@item It reduces the number of @i{edit/build/test} cycles. Writing HTML
 code from a program is error prone.
 
 @item It is possible to use standard tools to produce the HTML.
@@ -128,14 +128,14 @@ code from a program is error prone.
 @end itemize
 
 @noindent
-In fact, now the Ada program just compute some values, get some data
-from a database or whatever and then call the templates parser to output
+In fact, the Ada program now simply computes some values, gets some data
+from a database or whatever and then calls the templates parser to output
 a page with the data displayed. To the templates parser you just pass
 the template filename and an associative table. 
 
 @noindent
-It is even more convenient to have different display with the same set
-of data. You just have to provides as many templates as you like.
+It is even more convenient to have different displays with the same set
+of data. You just have to provide as many templates as you like.
 
 @c ----------------------------------------------------------------------
 

@@ -1,3 +1,10 @@
+2005-05-26  name  <villoing@adacorecom>
+
+	* templates_parser.adb:
+	(Get_Tag_Parser): Properly handle the case where the end of the tag is
+         not found.
+        Fixes E526-012.
+
 2005-05-14  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.ads:

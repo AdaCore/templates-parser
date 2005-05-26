@@ -2765,7 +2765,7 @@ package body Templates_Parser is
          F, L   : Natural;
          Level  : Natural;
       begin
-         if L = 0 then
+         if I_Last = 0 then
             Fatal_Error ("No tag parameter");
 
          else

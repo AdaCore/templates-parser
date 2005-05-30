@@ -913,7 +913,7 @@ tag is kept as-is.
 @noindent
 Note that it is possible to pass the include parameters using names,
 a set of positional parameters can be pass first, so all following
-include command are identical:
+include commands are identical:
 
 @cartouche
 @smallexample
@@ -1025,7 +1025,7 @@ following @b{Templates_Parser} function:
 @b{function} Assoc (Variable  : @b{in} String;
                 Value     : @b{in} Boolean;
                 @b{return} Association;
-@i{--  build an Association (Variable = Value) to be added to a}
+@i{--  Build an Association (Variable = Value) to be added to a}
 @i{--  Translate_Table. It set the variable to TRUE or FALSE depending on}
 @i{--  Value.}
 @end group
@@ -1063,12 +1063,13 @@ Will display:
 @cindex Command, TABLE
 
 @noindent
-A table tag is useful to generate @code{HTML} table for example. Basically the
-code between the @code{@@@@TABLE@@@@} and @code{@@@@END_TABLE@@@@} will
-be repeated as many time as the vector tag will have of values. If many
-vector tags are specified in a table statement, the code between the
-table will be repeated a number of time equal to the maximum length of
-all vector tags in the @code{TABLE} tag statement.
+Table tags are useful to generate @code{HTML} tables for example. 
+Basically the code between the @code{@@@@TABLE@@@@} and
+@code{@@@@END_TABLE@@@@} will be repeated as many times as the vector
+tag has values. If many vector tags are specified in a table
+statement, the code between the table will be repeated a number of
+times equal to the maximum length of all vector tags in the
+@code{TABLE} tag statement.
 
 @noindent
 A @code{TABLE} tag statement is a kind of implicit iterator. This is a very
@@ -1144,7 +1145,7 @@ want to alternate the line background color for a better readability
 when working on HTML pages.
 
 @noindent
-A table with sections can have attribute:
+A table with sections can have attributes:
 
 @table @code
 
@@ -1177,7 +1178,7 @@ The following output will be generated:
 It is important to note that it is possible to avoid code
 duplication by using the @code{@@@@BEGIN@@@@} and @code{@@@@END@@@@}
 block statements. In this case only the code inside the block is part
-of the section, code outside is common text to all sections. Here is
+of the section, the code outside is common to all sections. Here is
 an example to generate an HTML table with different colors for each line:
 
 @noindent
@@ -1217,7 +1218,7 @@ has a level value of 2.  It will be replaced by 0 outside a table statement.
 
 @noindent
 Let's have a look at a more complex example with mixed IF and TABLE tag
-statement.
+statements.
 
 @noindent
 Here is the template:
@@ -1236,13 +1237,13 @@ The following output will be generated:
 
 @noindent
 Table tag statements can also be used with matrix tag or more nested
-tag variables. In this case, for a tag variable with N nested level,
+tag variables. In this case, for a tag variable with N nested levels,
 the Nth closest enclosing @code{TABLE} tag statement will be used for
 the corresponding indices. If there is not enough indices, the last
 axis are just streamed as a single text value.
 
 @noindent
-Let's see what happen for a matrix tag:
+Let's see what happens for a matrix tag:
 
 @enumerate
 
@@ -1252,15 +1253,15 @@ statement).
 @noindent
 In this case the first @code{TABLE} iterates through the matrix lines.
 First iteration will use the first matrix's vector, second
-iteration will use second matrix's vector and so on. And the second
-@code{TABLE} will be use to iterate through the vector's values.
+iteration will use the second matrix's vector and so on. And the second
+@code{TABLE} will be used to iterate through the vector's values.
 
 @item Inside a table of level 1.
 
 @noindent
 In this case the @code{TABLE} iterates through the matrix lines. First
 iteration will use the first matrix's vector, second iteration will
-use second matrix's vector and so on. Each vector is then converted to
+use the second matrix's vector and so on. Each vector is then converted to
 a string by concatenating all values using the specified separator
 (see Assoc constructor for Tag or @code{Set_Separator} routine).
 
@@ -1268,7 +1269,7 @@ a string by concatenating all values using the specified separator
 
 @noindent
 In this case the matrix is converted to a string. Each line represents
-a vector converted as a string using the supplied separator (see point
+a vector converted to a string using the supplied separator (see point
 2 above), and each vector is separated by an ASCII.LF character. The
 separators to use for each level can be specified using @code{Set_Separator}.
 
@@ -1445,8 +1446,8 @@ We get the following result:
 @section Dynamic tags
 @cindex Dynamic tags
 
-Dynamic tags are handled through abstract interfaces and gives the
-opportunity to create tags dynamically while the template is parsed.
+Dynamic tags are handled through abstract interfaces and give the
+opportunity to create tags dynamically while the template is being parsed.
 
 @menu
 * Lazy_Tag::
@@ -1483,7 +1484,7 @@ procedure is defined as follow:
 @end cartouche
 
 @noindent
-One common usage is to handles tag variables that can be shared by
+One common usage is to handle tag variables that can be shared by
 many templates are not always used (because a conditional is False for
 example). If computing the corresponding value (or values for a ...)
 is somewhat expensive it is better to delay building such tag at the
@@ -1504,7 +1505,7 @@ difficult to map it into a variable tag. The @code{Cursor_Tag} object has
 been designed to work around such problem. Using a @code{Cursor_Tag}
 it is possible to create an iterator through a data structure without
 mapping it into a variable tag. The data stays on the Ada side.
-To create @code{Cursor_Tag} it is necessary to implement the following
+To create a @code{Cursor_Tag} it is necessary to implement the following
 abstract routines:
 
 @cartouche
@@ -1547,8 +1548,8 @@ abstract routines:
 The child package @code{Utils}, @pxref{Templates_Parser.Utils}
 contains a routine to encode a Tag variable into a string and the
 inverse routine that build a Tag given it's string
-representation. This is usefuln for example, in the context of AWS to
-store a Tag into a session variable. See AWS project.
+representation. This is useful for example, in the context of AWS to
+store a Tag into a session variable. See the AWS project.
 
 @node XML representation
 @section XML representation
@@ -1558,14 +1559,14 @@ store a Tag into a session variable. See AWS project.
 The child package @code{XML}, @pxref{Templates_Parser.XML} contains
 routines to save a @code{Translation_Set} into an XML document or to
 create a @code{Translation_Set} by loading an XML document. The XML
-document must conforms to a specific @code{DTD} (see Ada spec file).
+document must conform to a specific @code{DTD} (see the Ada spec file).
 
 @node Debug
 @section Debug
 @cindex Debug
 
 @noindent
-A set of routine to help debug the @code{Templates_Parser} engine,
+A set of routines to help to debug the @code{Templates_Parser} engine,
 @pxref{Templates_Parser.Debug}. For example, @code{Debug.Print_Tree}
 will display, to the standard output, a representation of the internal
 semantic tree for a template file.
@@ -1576,8 +1577,8 @@ semantic tree for a template file.
 @chapter Last notes
 
 @noindent
-The templates parser has be written to parse @code{HTML} page but it is usable
-with any king of files. There is nothing hard coded for @code{HTML}, it is then
+The templates parser has be written to parse @code{HTML} pages but it is usable
+with any kind of files. There is nothing hard coded for @code{HTML}. It is then
 possible to use it with plain text files, @code{XML} files, @code{SGML} files
 or whatever as long as it is not a binary file.
 

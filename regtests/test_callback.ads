@@ -48,7 +48,7 @@ package Test_Callback is
 
    type Cursor_Tag is new Templates_Parser.Dynamic.Cursor_Tag with null record;
 
-   function Dimention
+   function Dimension
      (C   : access Cursor_Tag;
       Var : in     String) return Natural;
 

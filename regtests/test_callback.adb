@@ -33,10 +33,10 @@ with Ada.Text_IO;
 package body Test_Callback is
 
    ---------------
-   -- Dimention --
+   -- Dimension --
    ---------------
 
-   function Dimention
+   function Dimension
      (C   : access Cursor_Tag;
       Var : in     String) return Natural is
    begin
@@ -47,7 +47,7 @@ package body Test_Callback is
       else
          return 0;
       end if;
-   end Dimention;
+   end Dimension;
 
    ------------
    -- Length --

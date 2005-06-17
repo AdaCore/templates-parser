@@ -74,7 +74,7 @@ The templates parser package has been designed to parse files and to
 replace some specific tags into these files by some specified values.
 
 @noindent
-The main goal was to ease the development of Web servers. In CGI 
+The main goal was to ease the development of Web servers. In CGI
 (@i{Common Gateway Interface}) mode you have to write the HTML page in
 the program (in Ada or whatever other languages) by using some specific
 libraries or by using only basic output functions like Ada @code{Put_Line} for
@@ -131,7 +131,7 @@ code from a program is error prone.
 In fact, the Ada program now simply computes some values, gets some data
 from a database or whatever and then calls the templates parser to output
 a page with the data displayed. To the templates parser you just pass
-the template filename and an associative table. 
+the template filename and an associative table.
 
 @noindent
 It is even more convenient to have different displays with the same set
@@ -211,7 +211,7 @@ statement.
 @item composite (Tag)
 @cindex Tag, composite
 A composite tag is a variable which contains a set of values. These kind of
-variables will be used with the @code{TABLE} tag statement 
+variables will be used with the @code{TABLE} tag statement
 @pxref{TABLE tag statement}. Outside a table statement it will be
 replaced by all values concatenated with a specified separator. See
 @code{Set_Separator} routine. Such tag are variables declared on the
@@ -385,11 +385,11 @@ patterns as also implemented in @code{GNAT.Calendar.Time_IO}.
 @item Characters:
 
 @table @b
-@item % 
+@item %
 a literal %
-@item n 
+@item n
 a newline
-@item t 
+@item t
 a horizontal tab
 @end table
 
@@ -460,7 +460,7 @@ year (1970...)
 @table @b
 @item -    (hyphen)
 do not pad the field
-@item _    (underscore) 
+@item _    (underscore)
 pad the field with spaces
 @end table
 @end table
@@ -586,7 +586,7 @@ Idem as above but replaces all occurences.
 @item REPLACE_PARAM(@i{NAME[=VALUE]})
 @cindex Filter, REPLACE_PARAM
 
-This is filter is equivalent to 
+This is filter is equivalent to
 ADD_PARAM(@i{NAME[=VALUE]}):DEL_PARAM(@i{NAME}). @i{VALUE} can be a
 tag variable name.
 
@@ -626,7 +626,7 @@ printable characters using @b{&#xxx;} HTML encoding.
 @cindex Filter, WEB_ESCAPE
 
 Replaces characters '<', '>', '"' and '&' by corresponding HTML
-sequences: &lt; &gt; &quot; and &amp; 
+sequences: &lt; &gt; &quot; and &amp;
 
 @item WEB_NBSP
 @cindex Filter, WEB_NBSP
@@ -1063,7 +1063,7 @@ Will display:
 @cindex Command, TABLE
 
 @noindent
-Table tags are useful to generate @code{HTML} tables for example. 
+Table tags are useful to generate @code{HTML} tables for example.
 Basically the code between the @code{@@@@TABLE@@@@} and
 @code{@@@@END_TABLE@@@@} will be repeated as many times as the vector
 tag has values. If many vector tags are specified in a table
@@ -1085,7 +1085,7 @@ Syntax:
 @cartouche
 @smallexample
 @group
-@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@ 
+@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@
       ...
    [@@@@BEGIN@@@@]
       ...
@@ -1511,10 +1511,10 @@ abstract routines:
 @cartouche
 @smallexample
 @group
-@b{function} Dimention
+@b{function} Dimension
   (Cursor_Tag : @b{access} Dynamic.Cursor_Tag;
    Var_Name   : @b{in}     String) @b{return} Natural @b{is abstract};
-@i{--  Must return the number of dimentions for the given variable name. For}
+@i{--  Must return the number of dimensions for the given variable name. For}
 @i{--  a matrix this routine should return 2 for example.}
 
 @b{type} Path @b{is array} (Positive @b{range} <>) @b{of} Natural;
@@ -1525,8 +1525,8 @@ abstract routines:
    Var_Name   : @b{in}     String;
    Path       : @b{in}     Dynamic.Path) @b{return} Natural @b{is abstract};
 @i{--  Must return the number of item for the given path. The first}
-@i{--  dimention is given by the Path (1), for the second column the Path is}
-@i{--  (1, 2). Note that each dimention can have a different length. For}
+@i{--  dimension is given by the Path (1), for the second column the Path is}
+@i{--  (1, 2). Note that each dimension can have a different length. For}
 @i{--  example a Matrix is not necessary square.}
 
 @b{function} Value
@@ -1535,7 +1535,7 @@ abstract routines:
    Path       : @b{in}     Dynamic.Path) @b{return} String @b{is abstract};
 @i{--  Must return the value for the variable at the given Path. Note that}
 @i{--  this routine will be called only for valid items as given by the}
-@i{--  Dimention and Length above.}
+@i{--  dimension and Length above.}
 @end group
 @end smallexample
 @end cartouche

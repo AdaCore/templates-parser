@@ -245,10 +245,10 @@ package Templates_Parser is
       --  to iterate through a data structure which is living on the Ada side
       --  only.
 
-      function Dimention
+      function Dimension
         (Cursor_Tag : access Dynamic.Cursor_Tag;
          Var_Name   : in     String) return Natural is abstract;
-      --  Must return the number of dimentions for the given variable name. For
+      --  Must return the number of dimensions for the given variable name. For
       --  a matrix this routine should return 2 for example.
 
       type Path is array (Positive range <>) of Natural;
@@ -259,8 +259,8 @@ package Templates_Parser is
          Var_Name   : in     String;
          Path       : in     Dynamic.Path) return Natural is abstract;
       --  Must return the number of item for the given path. The first
-      --  dimention is given by the Path (1), for the second column the Path is
-      --  (1, 2). Note that each dimention can have a different length. For
+      --  dimension is given by the Path (1), for the second column the Path is
+      --  (1, 2). Note that each dimension can have a different length. For
       --  example a Matrix is not necessary square.
 
       function Value
@@ -269,7 +269,7 @@ package Templates_Parser is
          Path       : in     Dynamic.Path) return String is abstract;
       --  Must return the value for the variable at the given Path. Note that
       --  this routine will be called only for valid items as given by the
-      --  Dimention and Length above.
+      --  Dimension and Length above.
 
       Null_Cursor_Tag : constant Cursor_Tag_Access;
 

@@ -2312,7 +2312,7 @@ package body Templates_Parser is
                Result := Null_Unbounded_String;
 
             else
-               --  Look into next dimention
+               --  Look into next dimension
                Field
                  (R.VS.all,
                   Cursor (C + 1 .. Cursor'Last), Up_Value,
@@ -3905,7 +3905,7 @@ package body Templates_Parser is
             Var_Name   : in String;
             Dim        : in Positive;
             Path       : in Dynamic.Path) return Unbounded_String;
-         --  Returns the Cursor_Tag Var_Name inlined for all dimentions
+         --  Returns the Cursor_Tag Var_Name inlined for all dimensions
          --  starting from Path.
 
          L_State : aliased constant Parse_State := State;
@@ -4145,7 +4145,7 @@ package body Templates_Parser is
                         D, L         : Natural;
                         Valid_Cursor : Boolean := True;
                      begin
-                        D := Dynamic.Dimention (Cursor_Tag, Name);
+                        D := Dynamic.Dimension (Cursor_Tag, Name);
 
                         if D /= 0 then
                            if Var.Attribute.Attr /= Nil then
@@ -4183,7 +4183,7 @@ package body Templates_Parser is
                                     Translations, State.F_Params);
 
                               else
-                                 --  A composite tag, check that the dimention
+                                 --  A composite tag, check that the dimension
                                  --  of the tag correspond to the current table
                                  --  nested level.
 
@@ -4770,11 +4770,11 @@ package body Templates_Parser is
                               D, K : Natural;
                               L1   : Natural;
                            begin
-                              D := Dynamic.Dimention (Cursor_Tag, Name);
+                              D := Dynamic.Dimension (Cursor_Tag, Name);
 
                               if N > D then
                                  --  Ignore this variable as it is deeper than
-                                 --  its dimention.
+                                 --  its dimension.
                                  return 0;
 
                               elsif D /= 0 then
@@ -4785,7 +4785,7 @@ package body Templates_Parser is
                                  --  the number of items is looked for.
 
                                  if D > Table_Level then
-                                    --  The variable dimentions is bigger than
+                                    --  The variable dimensions is bigger than
                                     --  the current table level. This means
                                     --  that the index needs to be updated so
                                     --  that the outer table tag statement will

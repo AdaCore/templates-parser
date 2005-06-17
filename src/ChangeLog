@@ -1,4 +1,10 @@
-2005-05-26  name  <villoing@adacorecom>
+2005-06-17  Florian Villoing <villoing@adacore.com>
+
+	* templates_parser.ads, templates_parser.adb:
+	(Dimension): Renames dimention.
+        Fix other typos.
+
+2005-05-26  Florian Villoing <villoing@adacorecom>
 
 	* templates_parser.adb:
 	(Get_Tag_Parser): Properly handle the case where the end of the tag is

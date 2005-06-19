@@ -72,7 +72,7 @@ testcat: force
 
 testme9_run:
 	echo $@
-	-./testme testme9.tmplt | tail +6 > testme9.res 2>&1
+	-./testme testme9.tmplt | tail -n +6 > testme9.res 2>&1
 	-./print_tree testme9.tmplt > testme9_pt.res 2>&1
 	-diff $(DIFF_ARGS) testme9.out testme9.res >> alldiffs
 	-diff $(DIFF_ARGS) testme9_pt.out testme9_pt.res >> alldiffs

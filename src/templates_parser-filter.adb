@@ -43,6 +43,7 @@ package body Filter is
    Abs_Token           : aliased constant String := "ABS";
    Add_Token           : aliased constant String := "ADD";
    Add_Param_Token     : aliased constant String := "ADD_PARAM";
+   BR_2_EOL_Token      : aliased constant String := "BR_2_EOL";
    BR_2_LF_Token       : aliased constant String := "BR_2_LF";
    Capitalize_Token    : aliased constant String := "CAPITALIZE";
    Clean_Text_Token    : aliased constant String := "CLEAN_TEXT";
@@ -107,6 +108,9 @@ package body Filter is
 
          Add_Param      =>
            (Add_Param_Token'Access,      Add_Param'Access),
+
+         BR_2_EOL       =>
+           (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
 
          BR_2_LF        =>
            (BR_2_LF_Token'Access,        BR_2_LF'Access),
@@ -246,6 +250,13 @@ package body Filter is
       return String;
    --  Returns the value for Str, or if Str is a tag, returns it's value
 
+   function BR_2_EOL
+     (S   : in String;
+      EOL : in String)
+      return String;
+   --  Returns a string where all occurences of <BR> HTML tag have been
+   --  replaced by EOL, assuming EOL is "LF", "CR", "LFCR" or "CRLF".
+
    --------------------------
    -- Check_Null_Parameter --
    --------------------------
@@ -304,9 +315,9 @@ package body Filter is
       end case;
    end Image;
 
-   ----------
-   -- Mode --
-   ----------
+   ----------------
+   -- Mode_Value --
+   ----------------
 
    function Mode_Value (Name : in String) return Mode is
       F, L, K : Mode;
@@ -433,6 +444,70 @@ package body Filter is
       end if;
    end Add_Param;
 
+   --------------
+   -- BR_2_EOL --
+   --------------
+
+   function BR_2_EOL
+     (S   : in String;
+      EOL : in String)
+      return String
+   is
+      Result : String (S'Range);
+      K      : Positive := Result'First;
+      J      : Positive := S'First;
+   begin
+      if S = "" then
+         return "";
+      end if;
+
+      loop
+         if S (J) = '<'
+           and then J + 3 <= S'Last
+           and then Characters.Handling.To_Lower (S (J .. J + 3)) = "<br>"
+         then
+            Result (K .. K + EOL'Length - 1) := EOL;
+            K := K + EOL'Length;
+            J := J + 4;
+         else
+            Result (K) := S (J);
+            K := K + 1;
+            J := J + 1;
+         end if;
+
+         exit when J > S'Last;
+      end loop;
+
+      return Result (Result'First .. K - 1);
+   end BR_2_EOL;
+
+   function BR_2_EOL
+     (S : in String;
+      P : in Parameter_Data     := No_Parameter;
+      T : in Translate_Set      := Null_Set;
+      I : in Include_Parameters := No_Include_Parameters)
+      return String
+   is
+      pragma Unreferenced (T, I);
+      V_Str : constant String := To_String (P.S);
+      EOL   : String (1 .. V_Str'Length / 2);
+   begin
+      if V_Str = "LF" then
+         EOL (EOL'First) := ASCII.LF;
+      elsif V_Str = "CRLF" then
+         EOL := ASCII.CR & ASCII.LF;
+      elsif V_Str = "CR" then
+         EOL (EOL'First) := ASCII.CR;
+      elsif V_Str = "LFCR" then
+         EOL := ASCII.LF & ASCII.CR;
+      else
+         Exceptions.Raise_Exception
+           (Template_Error'Identity, "unknown parameter for BR_2_EOL filter");
+      end if;
+
+      return BR_2_EOL (S, EOL);
+   end BR_2_EOL;
+
    -------------
    -- BR_2_LF --
    -------------
@@ -445,34 +520,10 @@ package body Filter is
       return String
    is
       pragma Unreferenced (T, I);
-      Result : String (S'Range);
-      K      : Positive := Result'First;
-      J      : Positive := S'First;
    begin
       Check_Null_Parameter (P);
 
-      if S = "" then
-         return "";
-      end if;
-
-      loop
-         if S (J) = '<'
-           and then J + 3 <= S'Last
-           and then Characters.Handling.To_Lower (S (J .. J + 3)) = "<br>"
-         then
-            Result (K) := ASCII.LF;
-            K := K + 1;
-            J := J + 4;
-         else
-            Result (K) := S (J);
-            K := K + 1;
-            J := J + 1;
-         end if;
-
-         exit when J > S'Last;
-      end loop;
-
-      return Result (Result'First .. K - 1);
+      return BR_2_EOL (S, String'(1 => ASCII.LF));
    end BR_2_LF;
 
    ----------------

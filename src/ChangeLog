@@ -1,3 +1,17 @@
+2005-06-22  name  <villoing@adacore.com>
+
+	* templates_parser-filter.adb:
+	(BR_2_EOL_Token): New constant.
+        (Table): Add entry for BR_2_EOL.
+        (BR_2_EOL): New subprograms.
+        (BR_2_LF): Rewrite using the above subprogram.
+        (Mode_Value): Update subprogram box.
+
+	* templates_parser.adb:
+	(Filter.Mode): Add BR_2_EOL.
+        (Filter.BR_2_EOL): New subprogram.
+
+
 2005-06-17  Florian Villoing <villoing@adacore.com>
 
 	* templates_parser.ads, templates_parser.adb:

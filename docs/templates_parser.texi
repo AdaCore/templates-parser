@@ -327,8 +327,8 @@ character if needed. @i{VALUE} can be a tag variable name.
 
 Replaces all occurrences of the @code{<br>} HTML tag by a line terminator
 determined by EOL. EOL must be either CR (Carriage-Return), LF (Line-Feed),
-LFCR (Line-Feed followed by Carriage-Return) or CRLF (Line-Feed followed
-by Carriage-Return).
+LFCR (Line-Feed followed by Carriage-Return) or CRLF (Carriage-Return
+followed by Line-Feed).
 
 @item BR_2_LF
 @cindex Filter, BR_2_LF

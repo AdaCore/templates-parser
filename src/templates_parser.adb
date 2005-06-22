@@ -240,8 +240,11 @@ package body Templates_Parser is
          --  Add an HTTP parameter to the string, add the '&' parameter
          --  separator if needed.
 
+         BR_2_EOL,
+         --  Replaces all <BR> HTML tags by a given end-of-line sequence
+
          BR_2_LF,
-         --  Replaces all <BR> HTML tag by a LF character
+         --  Replaces all <BR> HTML tags by LF characters
 
          Capitalize,
          --  Lower case except char before spaces and underscores
@@ -472,6 +475,13 @@ package body Templates_Parser is
          T : in Translate_Set      := Null_Set;
          I : in Include_Parameters := No_Include_Parameters)
          return String;
+
+      function BR_2_EOL
+        (S : in String;
+         P : in Parameter_Data     := No_Parameter;
+         T : in Translate_Set      := Null_Set;
+         I : in Include_Parameters := No_Include_Parameters)
+        return String;
 
       function BR_2_LF
         (S : in String;

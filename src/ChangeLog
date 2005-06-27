@@ -1,3 +1,12 @@
+2005-06-27  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.adb:
+	(Release): Do not recurse for the Text nodes. We can have lot of
+	 them contiguous so it is more efficient to just iterate through
+	 them. This is already done for the Analyze routine.
+	Fixes regression found on FreeBSD.
+	Part of work for E527-017.
+
 2005-06-22  name  <villoing@adacore.com>
 
 	* templates_parser-filter.adb:
@@ -10,7 +19,6 @@
 	* templates_parser.adb:
 	(Filter.Mode): Add BR_2_EOL.
         (Filter.BR_2_EOL): New subprogram.
-
 
 2005-06-17  Florian Villoing <villoing@adacore.com>
 

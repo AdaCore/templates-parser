@@ -5355,17 +5355,24 @@ package body Templates_Parser is
 
          when Text =>
             declare
-               N : Tree := T;
+               N   : Tree := T;
+               Tmp : Tree;
             begin
                --  Handles all consecutive Text nodes
 
                while N /= null and then N.Kind = Text loop
                   Data.Release (N.Text);
+                  Tmp := N;
                   N := N.Next;
+                  Free (Tmp);
                end loop;
 
                Release (N, Include);
             end;
+
+            T := null;
+            --  T has been freed, we set the pointer to null to avoid double
+            --  deallocation by the call to Free at the end of this routine.
 
          when Set_Stmt =>
             Definitions.Release (T.Def);

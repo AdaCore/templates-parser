@@ -5354,8 +5354,18 @@ package body Templates_Parser is
             Release (T.Next, Include);
 
          when Text =>
-            Data.Release (T.Text);
-            Release (T.Next, Include);
+            declare
+               N : Tree := T;
+            begin
+               --  Handles all consecutive Text nodes
+
+               while N /= null and then N.Kind = Text loop
+                  Data.Release (N.Text);
+                  N := N.Next;
+               end loop;
+
+               Release (N, Include);
+            end;
 
          when Set_Stmt =>
             Definitions.Release (T.Def);

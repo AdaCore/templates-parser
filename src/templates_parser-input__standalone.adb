@@ -62,13 +62,17 @@ package body Templates_Parser.Input is
    begin
       if File = null then
          raise Stream_IO.Status_Error;
+
       else
-         Stream_IO.Close (File.File);
+         begin
+            Stream_IO.Close (File.File);
+            Free (File);
+         exception
+            when others =>
+               Free (File);
+               raise;
+         end;
       end if;
-      Free (File);
-   exception
-      when others =>
-         Free (File);
    end Close;
 
    -----------------

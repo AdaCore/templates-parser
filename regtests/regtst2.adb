@@ -42,7 +42,9 @@ procedure Regtst2 is
    use Ada.Text_IO;
    use Templates_Parser;
 
-   task type parser;
+   task type Parser is
+      pragma Storage_Size (100_000);
+   end Parser;
 
    protected Start_Line is
       procedure Start;

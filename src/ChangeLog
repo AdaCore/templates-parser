@@ -1,5 +1,14 @@
 2005-06-27  Pascal Obry  <pascal@obry.net>
 
+	* templates_parser-input__standalone.adb:
+	(Close): Fix implementation to properly propagate Status_Error.
+
+	* templates_parser.adb:
+	(Release): Fix previous check-in to avoid memory leak.
+	Continued work for E527-017.
+	
+2005-06-27  Pascal Obry  <pascal@obry.net>
+
 	* templates_parser.adb:
 	(Release): Do not recurse for the Text nodes. We can have lot of
 	 them contiguous so it is more efficient to just iterate through

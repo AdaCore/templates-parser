@@ -1,8 +1,16 @@
 2005-09-14  Pascal Obry  <pascal@obry.net>
 
+	* templates_parser.adb:
+	(Insert) [Association]: Use Containers.Include as this is supposed
+         to insert or replace the item.
+        Fix regression test.
+
+2005-09-14  Pascal Obry  <pascal@obry.net>
+
 	* templates_parser.adb, templates_parser-filter.adb:
 	Use Ada.Containers instead of internal AI302.
 	Update copyright notice.
+
 
 2005-06-27  Pascal Obry  <pascal@obry.net>
 

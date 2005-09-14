@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003 - 2005                        --
+--                         Copyright (C) 2003-2005                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -1908,7 +1908,7 @@ package body Filter is
       I_Params     : in Include_Parameters)
       return String
    is
-      Pos : Containers.Cursor;
+      Pos : Association_Set.Containers.Cursor;
    begin
       if Str'Length > 0
         and then Str (Str'First) = '$'
@@ -1924,11 +1924,12 @@ package body Filter is
          end;
 
       else
-         Pos := Containers.Find (Translations.Set.all, Str);
+         Pos := Association_Set.Containers.Find (Translations.Set.all, Str);
 
-         if Containers.Has_Element (Pos) then
+         if Association_Set.Containers.Has_Element (Pos) then
             declare
-               Tk : constant Association := Containers.Element (Pos);
+               Tk : constant Association :=
+                      Association_Set.Containers.Element (Pos);
             begin
                if Tk.Kind = Std then
                   return To_String (Tk.Value);

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004 - 2005                        --
+--                         Copyright (C) 2004-2005                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -61,7 +61,7 @@ package body Templates_Parser.XML is
    function Image (Translations : in Translate_Set) return Unbounded_String is
       Result : Unbounded_String;
 
-      procedure Process (Cursor : in Containers.Cursor);
+      procedure Process (Cursor : in Association_Set.Containers.Cursor);
       --  Iterator
 
       procedure Add (Str : in String);
@@ -84,9 +84,10 @@ package body Templates_Parser.XML is
       -- Process --
       -------------
 
-      procedure Process (Cursor : in Containers.Cursor) is
+      procedure Process (Cursor : in Association_Set.Containers.Cursor) is
 
-         Item : constant Association := Containers.Element (Cursor);
+         Item : constant Association :=
+                  Association_Set.Containers.Element (Cursor);
          --  Current item
 
          Var  : constant String := To_Utf8 (Item.Variable);
@@ -114,11 +115,13 @@ package body Templates_Parser.XML is
          procedure Add_Description (Var : in String) is
             Var_Description : constant String := Var & Description_Suffix;
          begin
-            if Containers.Is_In (Var_Description, Translations.Set.all) then
+            if Association_Set.Containers.Contains
+              (Translations.Set.all, Var_Description)
+            then
                --  There is probably a label encoded into this set
                declare
                   Description : constant Association
-                    := Containers.Element
+                    := Association_Set.Containers.Element
                         (Translations.Set.all, Var_Description);
                begin
                   if Description.Kind = Std
@@ -143,9 +146,9 @@ package body Templates_Parser.XML is
               and then
                 Var (Var'Last - Description_Suffix'Length + 1 .. Var'Last)
                   = Description_Suffix
-              and then Containers.Is_In
-                (Var (Var'First .. Var'Last - Description_Suffix'Length),
-                 Translations.Set.all)
+              and then Association_Set.Containers.Contains
+                (Translations.Set.all,
+                 Var (Var'First .. Var'Last - Description_Suffix'Length))
             then
                return True;
             end if;
@@ -172,8 +175,8 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Description_Suffix
-                 and then Containers.Is_In
-                   (Var (Var'First .. L), Translations.Set.all);
+                 and then Association_Set.Containers.Contains
+                   (Translations.Set.all, Var (Var'First .. L));
             end if;
          end Is_Description;
 
@@ -204,8 +207,8 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Labels_Suffix
-                 and then Containers.Is_In
-                   (Var (Var'First .. L), Translations.Set.all);
+                 and then Association_Set.Containers.Contains
+                   (Translations.Set.all, Var (Var'First .. L));
             end if;
          end Is_Labels;
 
@@ -313,10 +316,12 @@ package body Templates_Parser.XML is
                   Label_Var : constant String
                     := Var & "_DIM" & Image (K) & Labels_Suffix;
                begin
-                  if Containers.Is_In (Label_Var, Translations.Set.all) then
+                  if Association_Set.Containers.Contains
+                    (Translations.Set.all, Label_Var)
+                  then
                      declare
                         Item : constant Association
-                          := Containers.Element
+                          := Association_Set.Containers.Element
                             (Translations.Set.all, Label_Var);
                      begin
                         if Item.Kind = Composite
@@ -373,19 +378,14 @@ package body Templates_Parser.XML is
          return Utf8.From_Utf32 (Basic_8bit.To_Utf32 (To_String (Str)));
       end To_Utf8;
 
-      -------------
-      -- Iterate --
-      -------------
-
-      procedure Iterate is new Containers.Generic_Iteration (Process);
-
    begin
       --  XML header
 
       Add ("<?xml version=""1.0"" encoding=""UTF-8"" ?>");
       Add ("<Tagged xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">");
 
-      Iterate (Translations.Set.all);
+      Association_Set.Containers.Iterate
+        (Translations.Set.all, Process'Access);
 
       --  XML footer
 

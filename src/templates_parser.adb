@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                        Copyright (C) 1999-2005                           --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -172,7 +172,7 @@ package body Templates_Parser is
    procedure Initialize (Set : in out Translate_Set) is
    begin
       Set.Ref_Count := new Integer'(1);
-      Set.Set       := new Containers.Map;
+      Set.Set       := new Association_Set.Containers.Map;
    end Initialize;
 
    --------------
@@ -180,8 +180,8 @@ package body Templates_Parser is
    --------------
 
    procedure Finalize (Set : in out Translate_Set) is
-      procedure Free is
-        new Unchecked_Deallocation (Containers.Map, Map_Access);
+      procedure Free is new Unchecked_Deallocation
+        (Association_Set.Containers.Map, Map_Access);
    begin
       Set.Ref_Count.all := Set.Ref_Count.all - 1;
 
@@ -2354,7 +2354,7 @@ package body Templates_Parser is
       Variable : in String)
       return Boolean is
    begin
-      return Association_Set.Containers.Is_In (Variable, Set.Set.all);
+      return Association_Set.Containers.Contains (Set.Set.all, Variable);
    end Exists;
 
    ---------
@@ -2365,12 +2365,12 @@ package body Templates_Parser is
      (Set  : in Translate_Set;
       Name : in String) return Association
    is
-      Pos : Containers.Cursor;
+      Pos : Association_Set.Containers.Cursor;
    begin
-      Pos := Containers.Find (Set.Set.all, Name);
+      Pos := Association_Set.Containers.Find (Set.Set.all, Name);
 
-      if Containers.Has_Element (Pos) then
-         return Containers.Element (Pos);
+      if Association_Set.Containers.Has_Element (Pos) then
+         return Association_Set.Containers.Element (Pos);
       else
          return Null_Association;
       end if;
@@ -2382,18 +2382,18 @@ package body Templates_Parser is
 
    procedure Insert (Set : in out Translate_Set; Item : in Association) is
    begin
-      Containers.Replace
+      Association_Set.Containers.Replace
         (Set.Set.all, To_String (Item.Variable), Item);
    end Insert;
 
    procedure Insert (Set : in out Translate_Set; Items : in Translate_Set) is
-      Pos : Containers.Cursor;
+      Pos : Association_Set.Containers.Cursor;
    begin
-      Pos := Containers.First (Items.Set.all);
+      Pos := Association_Set.Containers.First (Items.Set.all);
 
-      while Containers.Has_Element (Pos) loop
-         Insert (Set, Containers.Element (Pos));
-         Pos := Containers.Next (Pos);
+      while Association_Set.Containers.Has_Element (Pos) loop
+         Insert (Set, Association_Set.Containers.Element (Pos));
+         Pos := Association_Set.Containers.Next (Pos);
       end loop;
    end Insert;
 
@@ -2403,8 +2403,8 @@ package body Templates_Parser is
 
    procedure Remove (Set : in out Translate_Set; Name : in String) is
    begin
-      if Containers.Is_In (Name, Set.Set.all) then
-         Containers.Delete (Set.Set.all, Name);
+      if Association_Set.Containers.Contains (Set.Set.all, Name) then
+         Association_Set.Containers.Delete (Set.Set.all, Name);
       end if;
    end Remove;
 
@@ -2413,15 +2413,15 @@ package body Templates_Parser is
    ---------------------------
 
    procedure For_Every_Association (Set : in Translate_Set) is
-      Pos  : Containers.Cursor;
+      Pos  : Association_Set.Containers.Cursor;
       Quit : Boolean := False;
    begin
-      Pos := Containers.First (Set.Set.all);
+      Pos := Association_Set.Containers.First (Set.Set.all);
 
-      while Containers.Has_Element (Pos) loop
-         Action (Containers.Element (Pos), Quit);
+      while Association_Set.Containers.Has_Element (Pos) loop
+         Action (Association_Set.Containers.Element (Pos), Quit);
          exit when Quit;
-         Pos := Containers.Next (Pos);
+         Pos := Association_Set.Containers.Next (Pos);
       end loop;
    end For_Every_Association;
 
@@ -3854,7 +3854,7 @@ package body Templates_Parser is
         (T     : in Tree;
          State : in Parse_State)
       is
-         use type Containers.Cursor;
+         use type Association_Set.Containers.Cursor;
          use type Data.Tree;
 
          function Analyze (E : in Expr.Tree) return String;
@@ -4101,7 +4101,7 @@ package body Templates_Parser is
          is
             use type Data.Tree;
             D_Pos    : Definitions.Def_Map.Containers.Cursor;
-            Pos      : Containers.Cursor;
+            Pos      : Association_Set.Containers.Cursor;
             Up_Value : Natural := 0;
          begin
             D_Pos := Definitions.Def_Map.Containers.Find
@@ -5256,12 +5256,12 @@ package body Templates_Parser is
       function Get_Association (Var : in Tag_Var) return Association is
          use type Dynamic.Lazy_Tag_Access;
          Name : constant String := To_String (Var.Name);
-         Pos  : Containers.Cursor;
+         Pos  : Association_Set.Containers.Cursor;
       begin
-         Pos := Containers.Find (Translations.Set.all, Name);
+         Pos := Association_Set.Containers.Find (Translations.Set.all, Name);
 
-         if Containers.Has_Element (Pos) then
-            return  Containers.Element (Pos);
+         if Association_Set.Containers.Has_Element (Pos) then
+            return  Association_Set.Containers.Element (Pos);
 
          elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
            and then not Filter.Is_No_Dynamic (Var.Filters)

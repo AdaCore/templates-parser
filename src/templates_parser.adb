@@ -2382,7 +2382,7 @@ package body Templates_Parser is
 
    procedure Insert (Set : in out Translate_Set; Item : in Association) is
    begin
-      Association_Set.Containers.Replace
+      Association_Set.Containers.Include
         (Set.Set.all, To_String (Item.Variable), Item);
    end Insert;
 

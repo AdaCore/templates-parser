@@ -28,8 +28,8 @@
 
 --  $Id$
 
-with AI302.Containers.Indefinite_Hashed_Maps;
-with AI302.Strings.Hash;
+with Ada.Containers.Indefinite_Hashed_Maps;
+with Ada.Strings.Hash;
 
 generic
 
@@ -41,7 +41,7 @@ generic
 package Strings_Maps is
 
    package Containers is
-     new AI302.Containers.Indefinite_Hashed_Maps
-       (String, Element_Type, AI302.Strings.Hash, "=", "=");
+     new Ada.Containers.Indefinite_Hashed_Maps
+       (String, Element_Type, Ada.Strings.Hash, "=", "=");
 
 end Strings_Maps;

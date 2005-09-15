@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2004                            --
+--                         Copyright (C) 2004-2005                          --
 --                               Pascal Obry                                --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -35,8 +35,7 @@ generic
 
    type Element_Type is private;
 
-   with function "=" (Left, Right : Element_Type)
-      return Boolean is <>;
+   with function "=" (Left, Right : Element_Type) return Boolean is <>;
 
 package Strings_Maps is
 

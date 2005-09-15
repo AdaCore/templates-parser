@@ -5039,19 +5039,10 @@ package body Templates_Parser is
 
             when Set_Stmt =>
                declare
-                  Name    : constant String := To_String (T.Def.Name);
-                  Pos     : Definitions.Def_Map.Containers.Cursor;
-                  Success : Boolean;
+                  Name : constant String := To_String (T.Def.Name);
                begin
-                  Pos := Definitions.Def_Map.Containers.Find (D_Map, Name);
-
-                  if Definitions.Def_Map.Containers.Has_Element (Pos) then
-                     Definitions.Def_Map.Containers.Replace_Element
-                       (Pos, By => T.Def.N);
-                  else
-                     Definitions.Def_Map.Containers.Insert
-                       (D_Map, Name, T.Def.N, Pos, Success);
-                  end if;
+                  Definitions.Def_Map.Containers.Include
+                    (D_Map, Name, T.Def.N);
                end;
 
                Analyze (T.Next, State);

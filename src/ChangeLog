@@ -1,3 +1,9 @@
+2005-09-15  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.adb:
+	(Analyze): Clean-up code by using Ada.Containers Include instead
+	 of Find/Has_Element/Replace_Element/Insert.
+
 2005-09-14  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

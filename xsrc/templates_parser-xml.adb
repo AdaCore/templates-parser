@@ -769,8 +769,7 @@ package body Templates_Parser.XML is
                  (Map, Key, To_Unbounded_String (Value), Cursor, Success);
 
                if not Success then
-                  Error
-                    (C, "Duplicate attribute found for n " & Key);
+                  Error (C, "Duplicate attribute found for n " & Key);
                end if;
 
                --  Set Max
@@ -784,7 +783,7 @@ package body Templates_Parser.XML is
                            (To_String (Str_Maps.Containers.Element (Cursor)));
                   begin
                      Str_Maps.Containers.Replace_Element
-                       (Cursor,
+                       (Data, Cursor,
                         To_Unbounded_String
                           (Image (Natural'Max (Item, Natural'Value (Value)))));
                   end;

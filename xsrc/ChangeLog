@@ -1,3 +1,10 @@
+2005-09-16  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-xml.adb:
+	Fix call to Replace_Element to conform to the latest spec.
+	Fix build failure with recent GNAT versions.
+	Minor reformatting.
+
 2005-09-14  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-xml.adb:

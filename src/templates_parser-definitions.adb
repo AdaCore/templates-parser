@@ -35,8 +35,6 @@ separate (Templates_Parser)
 
 package body Definitions is
 
-   use Strings;
-
    -----------
    -- Parse --
    -----------
@@ -102,7 +100,6 @@ package body Definitions is
    ----------------
 
    procedure Print_Tree (D : in Tree) is
-      use Ada;
       N : constant Node := D.N;
    begin
       Text_IO.Put (To_String (D.Name) & " = ");

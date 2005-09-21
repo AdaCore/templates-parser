@@ -33,7 +33,6 @@ with Ada.Characters.Handling;
 with Ada.Calendar;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
-with Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with GNAT.Calendar.Time_IO;
@@ -47,11 +46,10 @@ package body Templates_Parser is
    use Ada;
    use Ada.Exceptions;
    use Ada.Strings;
-   use Ada.Strings.Unbounded;
 
    Internal_Error : exception;
 
-   Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
+   Blank : constant Ada.Strings.Maps.Character_Set := Ada.Strings.Maps.To_Set (' ' & ASCII.HT);
 
    Max_Include_Parameters : constant := 20;
    --  Maximum number of include parameters handled by this implementation
@@ -1100,8 +1098,6 @@ package body Templates_Parser is
          function Name_Parameter
            (Filter : in String) return Templates_Parser.Filter.Routine
          is
-            use Strings;
-
             package F renames Templates_Parser.Filter;
 
             function Unescape (Str : in String) return String;

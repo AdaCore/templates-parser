@@ -1,3 +1,11 @@
+2005-09-21  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-expr.adb:
+	(Next_Token): Removes redundant with clauses found by -gnatwr.
+
+	* templates_parser.adb, templates_parser-definitions.adb:
+	Removes redundant with clauses found by -gnatwr.
+
 2005-09-15  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

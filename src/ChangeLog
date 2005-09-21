@@ -1,5 +1,8 @@
 2005-09-21  Pascal Obry  <pascal@obry.net>
 
+	* templates_parser.adb:
+	Fix obvious error in previous check-in.
+
 	* templates_parser-expr.adb:
 	(Next_Token): Removes redundant with clauses found by -gnatwr.
 

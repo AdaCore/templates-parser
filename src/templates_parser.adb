@@ -49,7 +49,7 @@ package body Templates_Parser is
 
    Internal_Error : exception;
 
-   Blank : constant Ada.Strings.Maps.Character_Set := Ada.Strings.Maps.To_Set (' ' & ASCII.HT);
+   Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
 
    Max_Include_Parameters : constant := 20;
    --  Maximum number of include parameters handled by this implementation

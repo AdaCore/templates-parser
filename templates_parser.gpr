@@ -19,8 +19,7 @@ project Templates_Parser is
       when "Installed" =>
          for Source_Dirs use project'Source_Dirs & ("xsrc");
       when "Disabled" =>
-         --  Should be replaced by null as supported by GNAT 5.03
-         for Source_Dirs use project'Source_Dirs;
+         null;
    end case;
 
    ------------

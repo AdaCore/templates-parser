@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2005                          --
+--                            Copyright (C) 2004                            --
 --                               Pascal Obry                                --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -28,19 +28,20 @@
 
 --  $Id$
 
-with Ada.Containers.Indefinite_Hashed_Maps;
-with Ada.Strings.Hash;
+with AI302.Containers.Indefinite_Hashed_Maps;
+with AI302.Strings.Hash;
 
 generic
 
    type Element_Type is private;
 
-   with function "=" (Left, Right : Element_Type) return Boolean is <>;
+   with function "=" (Left, Right : Element_Type)
+      return Boolean is <>;
 
 package Strings_Maps is
 
    package Containers is
-     new Ada.Containers.Indefinite_Hashed_Maps
-       (String, Element_Type, Ada.Strings.Hash, "=", "=");
+     new AI302.Containers.Indefinite_Hashed_Maps
+       (String, Element_Type, AI302.Strings.Hash, "=", "=");
 
 end Strings_Maps;

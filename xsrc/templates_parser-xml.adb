@@ -115,8 +115,8 @@ package body Templates_Parser.XML is
          procedure Add_Description (Var : in String) is
             Var_Description : constant String := Var & Description_Suffix;
          begin
-            if Association_Set.Containers.Contains
-              (Translations.Set.all, Var_Description)
+            if Association_Set.Containers.Is_In
+              (Var_Description, Translations.Set.all)
             then
                --  There is probably a label encoded into this set
                declare
@@ -146,9 +146,9 @@ package body Templates_Parser.XML is
               and then
                 Var (Var'Last - Description_Suffix'Length + 1 .. Var'Last)
                   = Description_Suffix
-              and then Association_Set.Containers.Contains
-                (Translations.Set.all,
-                 Var (Var'First .. Var'Last - Description_Suffix'Length))
+              and then Association_Set.Containers.Is_In
+              (Var (Var'First .. Var'Last - Description_Suffix'Length),
+               Translations.Set.all)
             then
                return True;
             end if;
@@ -175,8 +175,8 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Description_Suffix
-                 and then Association_Set.Containers.Contains
-                   (Translations.Set.all, Var (Var'First .. L));
+                 and then Association_Set.Containers.Is_In
+                   (Var (Var'First .. L), Translations.Set.all);
             end if;
          end Is_Description;
 
@@ -207,8 +207,8 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Labels_Suffix
-                 and then Association_Set.Containers.Contains
-                   (Translations.Set.all, Var (Var'First .. L));
+                 and then Association_Set.Containers.Is_In
+                   (Var (Var'First .. L), Translations.Set.all);
             end if;
          end Is_Labels;
 
@@ -316,8 +316,8 @@ package body Templates_Parser.XML is
                   Label_Var : constant String
                     := Var & "_DIM" & Image (K) & Labels_Suffix;
                begin
-                  if Association_Set.Containers.Contains
-                    (Translations.Set.all, Label_Var)
+                  if Association_Set.Containers.Is_In
+                    (Label_Var, Translations.Set.all)
                   then
                      declare
                         Item : constant Association
@@ -378,14 +378,19 @@ package body Templates_Parser.XML is
          return Utf8.From_Utf32 (Basic_8bit.To_Utf32 (To_String (Str)));
       end To_Utf8;
 
+      -------------
+      -- Iterate --
+      -------------
+
+      procedure Iterate is new Containers.Generic_Iteration (Process);
+
    begin
       --  XML header
 
       Add ("<?xml version=""1.0"" encoding=""UTF-8"" ?>");
       Add ("<Tagged xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">");
 
-      Association_Set.Containers.Iterate
-        (Translations.Set.all, Process'Access);
+      Iterate (Translations.Set.all);
 
       --  XML footer
 
@@ -783,7 +788,7 @@ package body Templates_Parser.XML is
                            (To_String (Str_Maps.Containers.Element (Cursor)));
                   begin
                      Str_Maps.Containers.Replace_Element
-                       (Data, Cursor,
+                       (Cursor,
                         To_Unbounded_String
                           (Image (Natural'Max (Item, Natural'Value (Value)))));
                   end;

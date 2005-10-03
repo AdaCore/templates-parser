@@ -2350,7 +2350,7 @@ package body Templates_Parser is
       Variable : in String)
       return Boolean is
    begin
-      return Association_Set.Containers.Contains (Set.Set.all, Variable);
+      return Association_Set.Containers.Is_In (Variable, Set.Set.all);
    end Exists;
 
    ---------
@@ -2378,7 +2378,7 @@ package body Templates_Parser is
 
    procedure Insert (Set : in out Translate_Set; Item : in Association) is
    begin
-      Association_Set.Containers.Include
+      Association_Set.Containers.Replace
         (Set.Set.all, To_String (Item.Variable), Item);
    end Insert;
 
@@ -2399,7 +2399,7 @@ package body Templates_Parser is
 
    procedure Remove (Set : in out Translate_Set; Name : in String) is
    begin
-      if Association_Set.Containers.Contains (Set.Set.all, Name) then
+      if Association_Set.Containers.Is_In (Name, Set.Set.all) then
          Association_Set.Containers.Delete (Set.Set.all, Name);
       end if;
    end Remove;
@@ -5035,10 +5035,19 @@ package body Templates_Parser is
 
             when Set_Stmt =>
                declare
-                  Name : constant String := To_String (T.Def.Name);
+                  Name    : constant String := To_String (T.Def.Name);
+                  Pos     : Definitions.Def_Map.Containers.Cursor;
+                  Success : Boolean;
                begin
-                  Definitions.Def_Map.Containers.Include
-                    (D_Map, Name, T.Def.N);
+                  Pos := Definitions.Def_Map.Containers.Find (D_Map, Name);
+
+                  if Definitions.Def_Map.Containers.Has_Element (Pos) then
+                     Definitions.Def_Map.Containers.Replace_Element
+                       (Pos, By => T.Def.N);
+                  else
+                     Definitions.Def_Map.Containers.Insert
+                       (D_Map, Name, T.Def.N, Pos, Success);
+                  end if;
                end;
 
                Analyze (T.Next, State);

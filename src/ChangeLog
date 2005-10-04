@@ -1,3 +1,10 @@
+2005-10-04  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser.adb:
+	Add a with/use clause for Ada.Strings.Unbounded to be able to
+	 build using GNAT GPL and GNAT 5.03a1. This is to work around a
+	 visibility problem on these version of GNAT.
+
 2005-09-21  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

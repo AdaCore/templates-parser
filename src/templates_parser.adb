@@ -34,6 +34,7 @@ with Ada.Calendar;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Unchecked_Deallocation;
+with Ada.Strings.Unbounded;
 
 with GNAT.Calendar.Time_IO;
 with GNAT.Regpat;
@@ -46,6 +47,12 @@ package body Templates_Parser is
    use Ada;
    use Ada.Exceptions;
    use Ada.Strings;
+
+   pragma Warnings (Off);
+   use Ada.Strings.Unbounded;
+   --  Work around a visibility bug in GNAT 5.03a1, the with/use clauses for
+   --  Ada.Strings.Unbounded can be removed for later version.
+   pragma Warnings (On);
 
    Internal_Error : exception;
 

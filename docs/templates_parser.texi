@@ -10,17 +10,55 @@
 @afourpaper
 @end iftex
 
+@c ----------------------------------------- MACRO
+
+@c Macro used for all Templates_Parser examples
+@c No cartouche on HTML as this is part of the css
+@macro TPEXP{TXT}
+@ifhtml
+@smallexample
+@group
+\TXT\
+@end group
+@end smallexample
+@end ifhtml
+@ifnothtml
+@cartouche
+@smallexample
+@group
+\TXT\
+@end group
+@end smallexample
+@end cartouche
+@end ifnothtml
+@end macro
+
+@c ----------------------------------------- END MACRO
+
 @titlepage
 
 @title Templates Parser User's Guide
-@subtitle $Revision$
+@subtitle Document revision level $Revision$
 @subtitle Date: @today{}
-@author Pascal Obry (pascal@@obry.net)
+@author AdaCore
 
 @sp 1
-@url{http://www.obry.net}
+@url{http://libre.act-europe.fr/aws}
 
 @vskip 0pt plus 1filll
+
+@page
+
+Copyright @copyright{} 1999-2004, Pascal Obry
+
+Copyright @copyright{} 2005, AdaCore
+
+@*
+
+This document may be copied, in whole or in part, in any form or by any
+means, as is or with alterations, provided that (1) alterations are clearly
+marked as alterations and (2) this copyright notice is included
+unmodified in any copy.
 
 @end titlepage
 
@@ -28,13 +66,13 @@
 @c title page for the HTML documentation
 @html
 <font size="+2">
-<p>$Revision$
+<p>Document revision level $Revision$
 <p>Date: @today{}
-<p>Pascal Obry (pascal@@obry.net)
+<p>AdaCore
 </font>
 
 <font size="+1">
-<p>@url{http://www.obry.net}
+<p>@url{http://libre.act-europe.fr/aws}
 </font>
 
 @page
@@ -199,14 +237,12 @@ We have already seen the discrete variable tag. This is a variable which
 has only one value. This value will replace the tag in the template
 file. Discrete variable constructors are provided for String,
 Unbounded_String and Integer (see Assoc routines).
-@sp 1
 
 @item boolean
 @cindex Tag, boolean
 A boolean tag as a value of TRUE or FALSE. This value will replace the
 tag in the template file. These tags can also be used with the @code{IF} tag
 statement.
-@sp 1
 
 @item composite (Tag)
 @cindex Tag, composite
@@ -217,33 +253,28 @@ replaced by all values concatenated with a specified separator. See
 @code{Set_Separator} routine. Such tag are variables declared on the
 Ada program a @code{Templates_Parser.Tag} type.
 
-@sp 1
 @noindent
 There is many overloaded constructors to build a composite tags (see "+"
 operators).  The "+" operators are used to build a Tag item from
 standard types like String, Unbounded_String, Character, Integer and
 Boolean.
 
-@sp 1
 @noindent
 To add items to a Tag many overloaded operators are provided (see
 "&" operators). The "&" operators add one item at the start or the end
 of the tag, it is possible to add directly String, Unbounded_String,
 Character, Integer and Boolean items using one of the overloaded operator.
 
-@sp 1
 @noindent
 A tag composed of only boolean values TRUE or FALSE is called a
 Boolean composite tag. This tag is to be used with a @code{IF} tag statement
 inside a @code{TABLE} tag statement.
 
-@sp 1
 @noindent
 It is possible to build a composite tag having any number of nested
 level. A vector is a composite tag with only one level, a matrix is a
 composite tag with two level (a Tag with a set of vector tag).
 
-@sp 1
 @noindent
 Two aliases exists for composite tags with one or two nested level,
 they are named @code{Vector_Tag} and @code{Matrix_Tag}. In the suite
@@ -384,8 +415,6 @@ format (YYYY-MM-DD) eventually followed by a space and the time with
 the format HH:MM:SS. If the date is not given in the right format it
 returns the date as-is. The format is using the GNU/date description
 patterns as also implemented in @code{GNAT.Calendar.Time_IO}.
-
-@sp 2
 
 @table @i
 
@@ -652,10 +681,7 @@ capitalized (all upper, all lower or first letter capital).
 @noindent
 For example:
 
-@cartouche
-@smallexample
-@group
-If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
+@TPEXP{If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
 
 
 @@_VAR_@@                                   ->  vector_tag
@@ -666,12 +692,9 @@ If VAR is set to "@i{vector_tag}", ONE to "1" and TWO to "2" then:
 @@_MATCH(VEC.*):UPPER:VAR_@@                ->  TRUE
 @@_SLICE(1..6):VAR_@@                       ->  vector
 @@_REPLACE(([^_]+)):VAR_@@                  ->  vector
-@@_REPLACE(([a-z]+)_([a-z]+)/\2_\1):VAR_@@  ->  tag_vector
+@@_REPLACE(([a-z]+)_([a-z]+)/\\2_\\1):VAR_@@  ->  tag_vector
 @@_"+"(TWO):ONE_@@                          ->  3
-@@_"-"(TWO):ONE_@@                          ->  -1
-@end group
-@end smallexample
-@end cartouche
+@@_"-"(TWO):ONE_@@                          ->  -1}
 
 @node Attributes
 @subsection Attributes
@@ -719,21 +742,14 @@ can be applied only to a composite tag having two nested level - a matrix.
 @noindent
 For example:
 
-@cartouche
-@smallexample
-@group
-If VEC is set to "@i{<1 , 2>}" and MAT to "@i{<a, b, c> ; <2, 3, 5, 7>}" then:
+@TPEXP{If VEC is set to "@i{<1 , 2>}" and MAT to "@i{<a, b, c> ; <2, 3, 5, 7>}" then:
 
 
 @@_VEC'Length_@@              ->  2
 @@_ADD(3):VEC'Length_@@       ->  5
 @@_MAT'Line_@@                ->  2
 @@_MAT'Min_Column_@@          ->  3
-@@_MAT'Max_Column_@@          ->  4
-
-@end group
-@end smallexample
-@end cartouche
+@@_MAT'Max_Column_@@          ->  4}
 
 @node Other variable tags
 @section Other variable tags
@@ -850,10 +866,7 @@ Every line starting with @b{@@@@--} are comments and are completly
 ignored by the parser. The resulting page will have the exact same
 format and number of lines with or without the comments.
 
-@cartouche
-@smallexample
-@group
-@@@@-- This template is used to display the client's data
+@TPEXP{@@@@-- This template is used to display the client's data
 @@@@-- It uses the following tags:
 @@@@--
 @@@@--    @@_CID_@@       Client ID
@@ -861,10 +874,7 @@ format and number of lines with or without the comments.
 
 <P>Client @@_CID_@@
 
-...
-@end group
-@end smallexample
-@end cartouche
+...}
 
 @node INCLUDE tag statement
 @section INCLUDE tag statement
@@ -874,17 +884,11 @@ format and number of lines with or without the comments.
 This tag is used to include another template file. This is useful if you
 have the same header and/or footer in all your HTML pages. For example:
 
-@cartouche
-@smallexample
-@group
-@@@@INCLUDE@@@@ header.tmplt
+@TPEXP{@@@@INCLUDE@@@@ header.tmplt
 
 <P>This is by Web page
 
-@@@@INCLUDE@@@@ footer.tmplt
-@end group
-@end smallexample
-@end cartouche
+@@@@INCLUDE@@@@ footer.tmplt}
 
 @noindent
 It is also possible to pass arguments to the include file. These parameters
@@ -893,13 +897,7 @@ parameters into the included file with the special variable names
 @code{@@_$<n>_@@}, where @i{n} is the include's parameter indice (0 is
 the include filename, 1 the first parameter and so on).
 
-@cartouche
-@smallexample
-@group
-@@@@INCLUDE@@@@ another.tmplt @@_VAR_@@ azerty
-@end group
-@end smallexample
-@end cartouche
+@TPEXP{@@@@INCLUDE@@@@ another.tmplt @@_VAR_@@ azerty}
 
 @noindent
 In file @file{another.tmplt}
@@ -922,15 +920,9 @@ Note that it is possible to pass the include parameters using names,
 a set of positional parameters can be pass first, so all following
 include commands are identical:
 
-@cartouche
-@smallexample
-@group
-@@@@INCLUDE@@@@ another.tmplt one two three four "a text"
+@TPEXP{@@@@INCLUDE@@@@ another.tmplt one two three four "a text"
 @@@@INCLUDE@@@@ another.tmplt (one, two, 3 => three, 4 => four, 5 => "a text")
-@@@@INCLUDE@@@@ another.tmplt (one, 5 => "a text", 3 => three, 2 => two, 4 => four)
-@end group
-@end smallexample
-@end cartouche
+@@@@INCLUDE@@@@ another.tmplt (one, 5 => "a text", 3 => three, 2 => two, 4 => four)}
 
 @node IF tag statement
 @section IF tag statement
@@ -939,19 +931,13 @@ include commands are identical:
 @noindent
 This is the conditional tag statement. The complete form is:
 
-@cartouche
-@smallexample
-@group
-@@@@IF@@@@ <expression1>
+@TPEXP{@@@@IF@@@@ <expression1>
    part1
 @@@@ELSIF@@@@ <expression2>
    part2
 @@@@ELSE@@@@
    part3
-@@@@END_IF@@@@
-@end group
-@end smallexample
-@end cartouche
+@@@@END_IF@@@@}
 
 @noindent
 The part1 one will be parsed if expression1 evaluate to "TRUE", part2
@@ -1004,19 +990,13 @@ having the same precedence. To build an expression it is possible to
 use the parentheses to change the evaluation order. A value with
 spaces must be quoted as a string. So valid expressions could be:
 
-@cartouche
-@smallexample
-@group
-@@@@IF@@@@ (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
+@TPEXP{@@@@IF@@@@ (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
 
 @@@@IF@@@@ not (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)
 
 @@@@IF@@@@ (@@_VAR1_@@ > 3) and not @@_COND1_@@
 
-@@@@IF@@@@ @@_VAR1_@@ = "a value"
-@end group
-@end smallexample
-@end cartouche
+@@@@IF@@@@ @@_VAR1_@@ = "a value"}
 
 @noindent
 Note also that variables and values can be surrounded by quotes if needed.
@@ -1026,18 +1006,12 @@ Quotes are needed if a value contain spaces.
 To generate a conditional variable tag it is possible to use the
 following @b{Templates_Parser} function:
 
-@cartouche
-@smallexample
-@group
-@b{function} Assoc (Variable  : @b{in} String;
-                Value     : @b{in} Boolean;
+@TPEXP{@b{function} Assoc (Variable  : @b{in} String;
+                Value     : @b{in} Boolean)
                 @b{return} Association;
 @i{--  Build an Association (Variable = Value) to be added to a}
 @i{--  Translate_Table. It set the variable to TRUE or FALSE depending on}
-@i{--  Value.}
-@end group
-@end smallexample
-@end cartouche
+@i{--  Value.}}
 
 @noindent
 Let's see an example using an @code{IF} tag statement. With the following
@@ -1089,10 +1063,7 @@ Syntax:
 
 @cindex Command, TERMINATE_SECTIONS
 @cindex Command, REVERSE
-@cartouche
-@smallexample
-@group
-@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@
+@TPEXP{@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@
       ...
    [@@@@BEGIN@@@@]
       ...
@@ -1100,10 +1071,7 @@ Syntax:
       ...
    [@@@@END@@@@]
       ...
-@@@@END_TABLE@@@@
-@end group
-@end smallexample
-@end cartouche
+@@@@END_TABLE@@@@}
 
 @noindent
 Let's have an example. With the following template:
@@ -1130,19 +1098,13 @@ space ", ".
 @noindent
 The complete prototype for the @code{Tag} Assoc function is:
 
-@cartouche
-@smallexample
-@group
-@b{function} Assoc (Variable  : @b{in} String;
+@TPEXP{@b{function} Assoc (Variable  : @b{in} String;
                 Value     : @b{in} Tag;
-                Separator : @b{in} String    := Default_Separator;
+                Separator : @b{in} String    := Default_Separator)
                 @b{return} Association;
 @i{--  Build an Association (Variable = Value) to be added to Translate_Table.}
 @i{--  This is a tag association. Separator will be used when outputting the}
-@i{--  a flat representation of the Tag (outside a table statement).}
-@end group
-@end smallexample
-@end cartouche
+@i{--  a flat representation of the Tag (outside a table statement).}}
 
 @noindent
 A table can contain many sections. The section to use will be selected
@@ -1313,24 +1275,12 @@ everywhere. It is then easier to change the color afterward.
 The first form, to define a simple constant that can be used as any
 other variable in a template file, is:
 
-@cartouche
-@smallexample
-@group
-@@@@SET@@@@ <name> = <value>
-@end group
-@end smallexample
-@end cartouche
+@TPEXP{@@@@SET@@@@ <name> = <value>}
 
 @noindent
 The second form, to define an alias for a template file parameter, is:
 
-@cartouche
-@smallexample
-@group
-@@@@SET@@@@ <name> = $n [| <default_value>]
-@end group
-@end smallexample
-@end cartouche
+@TPEXP{@@@@SET@@@@ <name> = $n [| <default_value>]}
 
 @noindent
 In this case <name> is an alias for the Nth include parameter. In this
@@ -1339,17 +1289,11 @@ if the Nth include parameter is not specified.
 
 Some examples:
 
-@cartouche
-@smallexample
-@group
-@@@@SET@@@@ COLOR = red
+@TPEXP{@@@@SET@@@@ COLOR = red
 
 @@@@SET@@@@ SIZE = $1
 
-@@@@SET@@@@ COLOR = $4 | green
-@end group
-@end smallexample
-@end cartouche
+@@@@SET@@@@ COLOR = $4 | green}
 
 @noindent
 It is important to note that a variable is set global to a template
@@ -1378,15 +1322,9 @@ specify texts to output before and after the block.
 @noindent
 Syntax:
 
-@cartouche
-@smallexample
-@group
-@@@@INLINE[(<before>)(<separator>)(<after>)]@@@@
+@TPEXP{@@@@INLINE[(<before>)(<separator>)(<after>)]@@@@
       ...
-@@@@END_INLINE@@@@
-@end group
-@end smallexample
-@end cartouche
+@@@@END_INLINE@@@@}
 
 @noindent
 There is three supported usages:
@@ -1473,10 +1411,7 @@ callback method is called by the parser. The default callback method
 does nothing, it is up to the user to define it. The callback
 procedure is defined as follow:
 
-@cartouche
-@smallexample
-@group
-@b{procedure} Value
+@TPEXP{@b{procedure} Value
   (Lazy_Tag     : @b{access} Dynamic.Lazy_Tag;
    Var_Name     : @b{in}     String;
    Translations : @b{in out} Translate_Set) @b{is abstract};
@@ -1485,10 +1420,7 @@ procedure is defined as follow:
 @i{--  association for variable Name. It is possible to add other}
 @i{--  associations in the translation table but a check is done to see if}
 @i{--  the variable Name as been set or not. The default implementation does}
-@i{--  nothing.}
-@end group
-@end smallexample
-@end cartouche
+@i{--  nothing.}}
 
 @noindent
 One common usage is to handle tag variables that can be shared by
@@ -1515,10 +1447,7 @@ mapping it into a variable tag. The data stays on the Ada side.
 To create a @code{Cursor_Tag} it is necessary to implement the following
 abstract routines:
 
-@cartouche
-@smallexample
-@group
-@b{function} Dimension
+@TPEXP{@b{function} Dimension
   (Cursor_Tag : @b{access} Dynamic.Cursor_Tag;
    Var_Name   : @b{in}     String) @b{return} Natural @b{is abstract};
 @i{--  Must return the number of dimensions for the given variable name. For}
@@ -1542,10 +1471,7 @@ abstract routines:
    Path       : @b{in}     Dynamic.Path) @b{return} String @b{is abstract};
 @i{--  Must return the value for the variable at the given Path. Note that}
 @i{--  this routine will be called only for valid items as given by the}
-@i{--  dimension and Length above.}
-@end group
-@end smallexample
-@end cartouche
+@i{--  dimension and Length above.}}
 
 @node Tag utils
 @section Tag utils
@@ -1589,17 +1515,12 @@ with any kind of files. There is nothing hard coded for @code{HTML}. It is then
 possible to use it with plain text files, @code{XML} files, @code{SGML} files
 or whatever as long as it is not a binary file.
 
-@sp 2
-
 @noindent
 All tag statements can be mixed together. A @code{TABLE} tag statement can be
 put in an @code{IF} tag statement. An @code{IF} tag statement can be put
 in a @code{TABLE} tag statement. Idem for the @code{INCLUDE} tag statement.
 
-@noindent
-Download page is @url{http://www.obry.net/}.
-
-@sp 3
+@sp 1
 
 @c ----------------------------------------------------------------------
 

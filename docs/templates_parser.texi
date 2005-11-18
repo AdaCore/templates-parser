@@ -669,6 +669,11 @@ sequences: &lt; &gt; &quot; and &amp;
 
 Replaces all spaces by an HTML non breaking space.
 
+@item WRAP(@i{N})
+@cindex Filter, WRAP
+
+Wraps lines having more N characters.
+
 @item YES_NO
 @cindex Filter, YES_NO
 

@@ -83,6 +83,7 @@ package body Filter is
    Web_Encode_Token    : aliased constant String := "WEB_ENCODE";
    Web_Escape_Token    : aliased constant String := "WEB_ESCAPE";
    Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
+   Wrap_Token          : aliased constant String := "WRAP";
    Yes_No_Token        : aliased constant String := "YES_NO";
 
    --  Filters Table
@@ -202,7 +203,7 @@ package body Filter is
          Replace_Param  =>
            (Replace_Param_Token'Access,  Replace_Param'Access),
 
-         Invert        =>
+         Invert         =>
            (Reverse_Token'Access,        Reverse_Data'Access),
 
          Size           =>
@@ -226,8 +227,11 @@ package body Filter is
          Web_Escape     =>
            (Web_Escape_Token'Access,     Web_Escape'Access),
 
-         Web_NBSP =>
+         Web_NBSP       =>
            (Web_NBSP_Token'Access,       Web_NBSP'Access),
+
+         Wrap           =>
+           (Wrap_Token'Access,           Wrap'Access),
 
          Yes_No         =>
            (Yes_No_Token'Access,         Yes_No'Access)
@@ -1657,6 +1661,44 @@ package body Filter is
 
       return Result (1 .. Last);
    end Web_NBSP;
+
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (S : in String;
+      P : in Parameter_Data     := No_Parameter;
+      T : in Translate_Set      := Null_Set;
+      I : in Include_Parameters := No_Include_Parameters)
+      return String
+   is
+      Max_Line_Length : constant Positive := Positive'Value (To_String (P.S));
+      Last            : Natural := S'First;
+      First           : Natural := S'First;
+      Result          : Unbounded_String;
+   begin
+      while Last < S'Last loop
+         if S (Last) = ASCII.LF then
+            Append (Result, S (First .. Last));
+            First := Last + 1;
+            Last  := First;
+         elsif Last - First >= Max_Line_Length then
+            Append (Result, S (First .. Last - 1) & ASCII.LF);
+            First := Last;
+         else
+            Last := Last + 1;
+         end if;
+      end loop;
+
+      Append (Result, S (First .. S'Last));
+
+      return To_String (Result);
+   exception
+      when Constraint_Error =>
+         Exceptions.Raise_Exception
+           (Template_Error'Identity, "wrap filter parameter error");
+   end Wrap;
 
    ------------
    -- Yes_No --

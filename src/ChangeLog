@@ -1,3 +1,16 @@
+2005-11-18  Florian Villoing  <villoing@adacore.com>
+
+	* templates_parser-filter.adb:
+	(Wrap_Token): New constant.
+        (Table): Add an entry for Wrap. Minor reformating.
+        (Wrap): First implementation of the filter.
+        For E614-006.
+
+	* templates_parser.adb:
+	(Filter.Mode): Add Wrap.
+        (Wrap): New filter subprogram.
+        For E614-006.
+
 2005-10-04  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser.adb:

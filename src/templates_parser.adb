@@ -383,6 +383,9 @@ package body Templates_Parser is
          Web_NBSP,
          --  Convert spaces to HTML &nbsp; - non breaking spaces
 
+         Wrap,
+         --  Wrap lines longer than a given number of characters
+
          Yes_No
          --  If True return Yes, If False returns No, else do nothing
         );
@@ -727,6 +730,13 @@ package body Templates_Parser is
          return String;
 
       function Web_NBSP
+        (S : in String;
+         P : in Parameter_Data     := No_Parameter;
+         T : in Translate_Set      := Null_Set;
+         I : in Include_Parameters := No_Include_Parameters)
+         return String;
+
+      function Wrap
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;

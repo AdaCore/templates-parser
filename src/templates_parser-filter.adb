@@ -1673,6 +1673,7 @@ package body Filter is
       I : in Include_Parameters := No_Include_Parameters)
       return String
    is
+      pragma Unreferenced (T, I);
       Max_Line_Length : constant Positive := Positive'Value (To_String (P.S));
       Last            : Natural := S'First;
       First           : Natural := S'First;

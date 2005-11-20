@@ -1,3 +1,9 @@
+2005-11-20  Pascal Obry  <pascal@obry.net>
+
+	* templates_parser-filter.adb:
+	(Wap): Add missing unreferenced pragma for T and I.
+        Continued work for E614-006.
+
 2005-11-18  Florian Villoing  <villoing@adacore.com>
 
 	* templates_parser-filter.adb:

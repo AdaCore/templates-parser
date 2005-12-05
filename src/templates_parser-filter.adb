@@ -1677,17 +1677,44 @@ package body Filter is
       Max_Line_Length : constant Positive := Positive'Value (To_String (P.S));
       Last            : Natural := S'First;
       First           : Natural := S'First;
+      Last_Space_Init : constant Integer := S'First - 1;
+      Last_Space      : Integer := Last_Space_Init;
       Result          : Unbounded_String;
    begin
-      while Last < S'Last loop
+      while Last <= S'Last loop
+         if S (Last) = ' ' then
+            Last_Space := Last;
+         end if;
+
          if S (Last) = ASCII.LF then
+            --  End of the line
+
             Append (Result, S (First .. Last));
             First := Last + 1;
             Last  := First;
+            Last_Space := Last_Space_Init;
+
          elsif Last - First >= Max_Line_Length then
-            Append (Result, S (First .. Last - 1) & ASCII.LF);
-            First := Last;
+            --  The line must be wrapped
+
+            if Last_Space in First .. Last then
+               --  Split the line before the last word
+
+               Append (Result, S (First .. Last_Space - 1) & ASCII.LF);
+               First := Last_Space + 1;
+               Last := First;
+            else
+               --  There is only one word on the line: cut it
+
+                  Append (Result, S (First .. Last - 1) & ASCII.LF);
+                  First := Last;
+            end if;
+
+            Last_Space := Last_Space_Init;
+
          else
+            --  Go to the next character
+
             Last := Last + 1;
          end if;
       end loop;

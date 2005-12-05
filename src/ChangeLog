@@ -1,3 +1,9 @@
+2005-12-05  name  <villoing@adacore.com>
+
+	* templates_parser-filter.adb:
+	(Wrap): If possible, do not split a line in the middle of a word.
+        For E614-006.
+
 2005-11-20  Pascal Obry  <pascal@obry.net>
 
 	* templates_parser-filter.adb:

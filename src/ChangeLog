@@ -1,4 +1,4 @@
-2005-12-05  name  <villoing@adacore.com>
+2005-12-05  Florian Villoing  <villoing@adacore.com>
 
 	* templates_parser-filter.adb:
 	(Wrap): If possible, do not split a line in the middle of a word.

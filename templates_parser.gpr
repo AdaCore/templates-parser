@@ -1,6 +1,4 @@
 
---  $Id$
-
 -- To build with XML/Ada you need to uncomment the following line
 -- with "xmlada";
 

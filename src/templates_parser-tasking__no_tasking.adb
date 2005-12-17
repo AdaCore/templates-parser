@@ -26,9 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $RCSfile$
---  $Revision$ $Date$ $Author$
-
 package body Templates_Parser.Tasking is
 
    ----------

@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 package Templates_Parser.Query is
 
    function Kind

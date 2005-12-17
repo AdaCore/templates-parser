@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 package Templates_Parser.Utils is
 
    function Image (T : in Tag) return String;

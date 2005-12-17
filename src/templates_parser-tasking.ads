@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 package Templates_Parser.Tasking is
 
    --  Implements a simple semaphore. There is two implementations for this

@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 with Ada.Exceptions;
 
 package body Templates_Parser.Query is

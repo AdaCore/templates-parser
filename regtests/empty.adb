@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 --  procedure to test the template_parser
 
 with Ada.Text_IO;

@@ -26,9 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $RCSfile$
---  $Revision$ $Date$ $Author$
-
 with Templates_Parser.Tasking;
 
 separate (Templates_Parser)

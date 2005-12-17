@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 --  Program that tests the <<if ... elsif ... else ... end if>> templates
 
 with Ada.Text_IO; use Ada.Text_IO;

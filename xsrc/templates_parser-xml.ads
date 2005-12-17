@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 --  This API provides a way to save a Translate_Set as an XML document.
 --  There is special rules to know about composite tags.
 --

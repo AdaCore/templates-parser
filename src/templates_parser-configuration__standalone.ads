@@ -26,9 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $RCSfile$
---  $Revision$ $Date$ $Author$
-
 with GNAT.OS_Lib;
 
 package Templates_Parser.Configuration is

@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 with Ada.Text_Io; use Ada.Text_Io;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Templates_Parser; use Templates_Parser;

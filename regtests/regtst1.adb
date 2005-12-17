@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
---  $Id$
-
 with Templates_Parser; use Templates_Parser;
 with Ada.Text_IO; use Ada.Text_IO;
 

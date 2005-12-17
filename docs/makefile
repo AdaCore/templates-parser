@@ -1,6 +1,4 @@
 
-# $Id$
-
 .SILENT: ada.sed doc clean
 
 MAKEINFO        = $(shell which makeinfo 2> /dev/null)

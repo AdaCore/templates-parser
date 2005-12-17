@@ -1,6 +1,4 @@
 
-# $Id$
-
 .SILENT:
 
 TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\

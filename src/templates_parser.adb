@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999-2005                           --
+--                         Copyright (C) 1999-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -32,7 +32,6 @@ with Ada.Calendar;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Unchecked_Deallocation;
-with Ada.Strings.Unbounded;
 
 with GNAT.Calendar.Time_IO;
 with GNAT.Regpat;

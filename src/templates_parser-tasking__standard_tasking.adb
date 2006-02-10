@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                 AdaCore                                  --
+--                          Copyright (C) 2005-2006                         --
+--                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -26,7 +26,11 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Task_Identification;
+
 package body Templates_Parser.Tasking is
+
+   use Ada.Task_Identification;
 
    --  Simple semaphore
 
@@ -34,7 +38,8 @@ package body Templates_Parser.Tasking is
       entry Lock;
       entry Unlock;
    private
-      Locked : Boolean := False;
+      TID        : Task_Id := Null_Task_Id;
+      Lock_Count : Natural := 0;
    end Semaphore;
 
    ----------
@@ -56,18 +61,23 @@ package body Templates_Parser.Tasking is
       -- Lock --
       ----------
 
-      entry Lock when not Locked is
+      entry Lock when Lock_Count = 0 or else TID = Current_Task is
       begin
-         Locked := True;
+         Lock_Count := Lock_Count + 1;
+         TID := Lock'Caller;
       end Lock;
 
       ------------
       -- Unlock --
       ------------
 
-      entry Unlock when Locked is
+      entry Unlock when Lock_Count > 0 is
       begin
-         Locked := False;
+         if TID = Unlock'Caller then
+            Lock_Count := Lock_Count - 1;
+         else
+            raise Tasking_Error;
+         end if;
       end Unlock;
 
    end Semaphore;

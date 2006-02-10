@@ -38,6 +38,7 @@ with GNAT.Regpat;
 
 with Templates_Parser.Input;
 with Templates_Parser.Configuration;
+with Templates_Parser.Tasking;
 
 package body Templates_Parser is
 
@@ -185,12 +186,14 @@ package body Templates_Parser is
       procedure Free is new Unchecked_Deallocation
         (Association_Set.Containers.Map, Map_Access);
    begin
+      Tasking.Lock;
       Set.Ref_Count.all := Set.Ref_Count.all - 1;
 
       if Set.Ref_Count.all = 0 then
          Free (Set.Ref_Count);
          Free (Set.Set);
       end if;
+      Tasking.Unlock;
    end Finalize;
 
    ------------
@@ -199,7 +202,9 @@ package body Templates_Parser is
 
    procedure Adjust (Set : in out Translate_Set) is
    begin
+      Tasking.Lock;
       Set.Ref_Count.all := Set.Ref_Count.all + 1;
+      Tasking.Unlock;
    end Adjust;
 
    Null_Set : Translate_Set;
@@ -1895,9 +1900,13 @@ package body Templates_Parser is
 
    procedure Finalize (T : in out Tag) is
    begin
+      Tasking.Lock;
+
       T.Ref_Count.all := T.Ref_Count.all - 1;
 
       if T.Ref_Count.all = 0 then
+         Tasking.Unlock;
+
          declare
             procedure Free is new Ada.Unchecked_Deallocation
               (Tag_Node, Tag_Node_Access);
@@ -1934,6 +1943,9 @@ package body Templates_Parser is
             Free (T.Data.Tag_Nodes);
             Free (T.Data);
          end;
+
+      else
+         Tasking.Unlock;
       end if;
    end Finalize;
 
@@ -1943,7 +1955,9 @@ package body Templates_Parser is
 
    procedure Adjust (T : in out Tag) is
    begin
+      Tasking.Lock;
       T.Ref_Count.all := T.Ref_Count.all + 1;
+      Tasking.Unlock;
    end Adjust;
 
    ---------

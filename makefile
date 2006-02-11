@@ -28,6 +28,7 @@ test: build
 
 doc:
 	make -C docs $(ALL_OPTIONS) doc
+	echo Templates_Parser Documentation built with success.
 
 clean:
 	gnatclean -Ptemplates_parser

@@ -15,7 +15,7 @@ TMPLTTEXI = $(TMPLT:=.texi)
 ADBFILES  = demo.adb user1.adb user2.adb table.adb table_section.adb \
 	    table_if.adb matrix.adb table_inline.adb if_inline.adb
 
-EXEFILES  = $(ADBFILES:.adb=.exe)
+EXEFILES  = $(ADBFILES:.adb=)
 ADAFILES  = $(ADBFILES)
 ALIFILES  = $(ADSFILES:.ads=.ali) $(ADBFILES:.adb=.ali)
 RESFILES  = $(ADBFILES:=.res)
@@ -39,7 +39,7 @@ APIFILES    = ../src/templates_parser.ads.texi \
 ALLDEPS = $(ADBFILES) $(ADSFILES) $(EXEFILES) $(TEXIFILES) $(TMPLTTEXI) \
 	$(RESFILES) $(APIFILES)
 
-doc: $(ALLDEPS) $(DOCS)
+doc: $(ALLDEPS) $(DOCS) clean-tmp
 
 %.dvi: %.texi
 ifneq (${TEXI2DVI},)
@@ -112,16 +112,15 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	gnatchop -w sources.ada
 	rm sources.ada
 
-%.exe: %.adb all_sources.ada
-	$(GNATMAKE) -q -Pdocs $<
-	touch $@
+$(EXEFILES): $(ADBFILES) $(ADSFILES)
+	$(GNATMAKE) -q -Pdocs $(EXEFILES)
 
-%.adb.res: %.adb %.exe
+%.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res
 	./`basename $@ .adb.res` >> $<.res
 	echo "}"		 >> $<.res
 
-%.adb.html: %.adb %.exe
+%.adb.html: %.adb
 	`basename $@ .adb.html` >> $<.html
 
 %.ads.texi: %.ads  ada.sed gentexifile
@@ -150,10 +149,12 @@ ada.sed: makefile
 
 force:
 
-clean:
+clean-tmp:
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
-		templates_parser*.ads.texi ada.sed \
-		templates_parser.html templates_parser.pdf \
-		templates_parser.info* \
-		templates_parser.txt templates_parser.tar.gz
+		*.exe templates_parser*.ads.texi ada.sed \
+		templates_parser.tar.gz
+
+clean: clean-tmp
+	-rm -f templates_parser.html templates_parser.pdf \
+		templates_parser.info* templates_parser.txt

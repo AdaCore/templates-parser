@@ -3928,8 +3928,7 @@ package body Templates_Parser is
          --  Flush buffer to Results
 
          function Flatten_Parameters
-           (I : in Include_Parameters)
-            return Filter.Include_Parameters;
+           (I : in Include_Parameters) return Filter.Include_Parameters;
          --  Returns a flat representation of the include parameters, only the
          --  name or the value are kept. The tree are replaced by an empty
          --  value.
@@ -3942,6 +3941,14 @@ package body Templates_Parser is
          --  Returns the Cursor_Tag Var_Name inlined for all dimensions
          --  starting from Path.
 
+         procedure Push_Sep (State : in Parse_State);
+         pragma Inline (Push_Sep);
+         --  Append a separator into the current buffer
+
+         procedure Pop_Sep (State : in Parse_State);
+         pragma Inline (Pop_Sep);
+         --  Remove the separator if it is the last input into the buffer
+
          L_State : aliased constant Parse_State := State;
 
          ---------
@@ -3950,10 +3957,6 @@ package body Templates_Parser is
 
          procedure Add (S : in String; Sep : in Boolean := False) is
          begin
-            if Sep and Last_Was_Sep then
-               return;
-            end if;
-
             if Last + S'Length > Buffer'Last then
                --  Not enough cache space, flush buffer
                Flush;
@@ -3974,8 +3977,7 @@ package body Templates_Parser is
          ------------------------
 
          function Flatten_Parameters
-           (I : in Include_Parameters)
-            return Filter.Include_Parameters
+           (I : in Include_Parameters) return Filter.Include_Parameters
          is
             use type Data.Tree;
             F : Filter.Include_Parameters;
@@ -4115,6 +4117,29 @@ package body Templates_Parser is
 
             return Result;
          end Inline_Cursor_Tag;
+
+         -------------
+         -- Pop_Sep --
+         -------------
+
+         procedure Pop_Sep (State : in Parse_State) is
+         begin
+            if Last_Was_Sep then
+               Last := Last - Length (State.Inline_Sep);
+               Last_Was_Sep := False;
+            end if;
+         end Pop_Sep;
+
+         --------------
+         -- Push_Sep --
+         --------------
+
+         procedure Push_Sep (State : in Parse_State) is
+         begin
+            if State.Inline_Sep /= Null_Unbounded_String then
+               Add (To_String (State.Inline_Sep), Sep => True);
+            end if;
+         end Push_Sep;
 
          ---------------
          -- Translate --
@@ -5109,13 +5134,11 @@ package body Templates_Parser is
                                         L_State'Unchecked_Access));
                end;
 
-               if State.Inline_Sep /= Null_Unbounded_String
-                 and then T.Next /= null
-               then
-                  Add (To_String (State.Inline_Sep), Sep => True);
-               end if;
+               Push_Sep (State);
 
                Analyze (T.Next, State);
+
+               Pop_Sep (State);
 
             when Section_Block =>
                declare
@@ -5163,11 +5186,9 @@ package body Templates_Parser is
                                            Empty_Block_State,
                                            L_State'Unchecked_Access));
 
-                           if State.Inline_Sep /= Null_Unbounded_String
-                             and then Block.Common /= null
-                             and then Block.Sections /= null
-                           then
-                              Add (To_String (State.Inline_Sep), Sep => True);
+                           if Block.Common /= null then
+                              Pop_Sep (State);
+                              Push_Sep (State);
                            end if;
 
                            Analyze
@@ -5184,18 +5205,16 @@ package body Templates_Parser is
                                            B_State (B),
                                            L_State'Unchecked_Access));
 
-                           if State.Inline_Sep /= Null_Unbounded_String
-                             and then (K /= State.Max_Expand
-                                       or else Block.Next /= null)
-                           then
-                              Add (To_String (State.Inline_Sep), Sep => True);
-                           end if;
+                           Pop_Sep (State);
+
+                           Push_Sep (State);
 
                            Block := Block.Next;
                            B := B + 1;
                         end loop;
                      end;
                   end loop;
+                  Pop_Sep (State);
                end;
 
             when Section_Stmt =>

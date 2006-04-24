@@ -1820,21 +1820,11 @@ package body Templates_Parser is
    -----------
 
    procedure Clear (T : in out Tag) is
+      NT : Tag;
    begin
-      --  Here we just separate current vector from the new one. The memory
-      --  used by the current one will be collected by the Finalize
-      --  routine. We just want a new independant Vector_Tag here.
+      --  Here we just separate current vector from the new one
 
-      Finalize (T);
-
-      T.Ref_Count         := new Integer'(1);
-      T.Data              := new Tag_Data;
-      T.Data.Count        := 0;
-      T.Data.Min          := Natural'Last;
-      T.Data.Max          := 0;
-      T.Data.Head         := null;
-      T.Data.Last         := null;
-      T.Data.Nested_Level := 1;
+      T := NT;
    end Clear;
 
    ----------
@@ -2467,9 +2457,8 @@ package body Templates_Parser is
    -----------
 
    function Assoc
-     (Variable  : in String;
-      Value     : in String)
-      return Association is
+     (Variable : in String;
+      Value    : in String) return Association is
    begin
       return Association'
         (Std,
@@ -2478,17 +2467,16 @@ package body Templates_Parser is
    end Assoc;
 
    function Assoc
-     (Variable  : in String;
-      Value     : in Ada.Strings.Unbounded.Unbounded_String)
+     (Variable : in String;
+      Value    : in Ada.Strings.Unbounded.Unbounded_String)
       return Association is
    begin
       return Assoc (Variable, To_String (Value));
    end Assoc;
 
    function Assoc
-     (Variable  : in String;
-      Value     : in Integer)
-      return Association
+     (Variable : in String;
+      Value    : in Integer) return Association
    is
       S_Value : constant String := Integer'Image (Value);
    begin
@@ -2496,9 +2484,8 @@ package body Templates_Parser is
    end Assoc;
 
    function Assoc
-     (Variable  : in String;
-      Value     : in Boolean)
-      return Association is
+     (Variable : in String;
+      Value    : in Boolean) return Association is
    begin
       if Value then
          return Assoc (Variable, "TRUE");
@@ -2510,8 +2497,7 @@ package body Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in Tag;
-      Separator : in String := Default_Separator)
-      return Association
+      Separator : in String := Default_Separator) return Association
    is
       T : Tag := Value;
    begin
@@ -2519,10 +2505,7 @@ package body Templates_Parser is
          Set_Separator  (T, Separator);
       end if;
 
-      return Association'
-        (Composite,
-         To_Unbounded_String (Variable),
-         T);
+      return Association'(Composite, To_Unbounded_String (Variable), T);
    end Assoc;
 
    ---------

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                        Copyright (C) 1999 - 2006                         --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -115,31 +115,27 @@ package Templates_Parser is
 
    function Assoc
      (Variable : in String;
-      Value    : in String)
-      return Association;
+      Value    : in String) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Table. This is a standard association, value is a string.
 
    function Assoc
      (Variable : in String;
-      Value    : in Unbounded_String)
-      return Association;
+      Value    : in Unbounded_String) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Table. This is a standard association, value is an
    --  Unbounded_String.
 
    function Assoc
      (Variable : in String;
-      Value    : in Integer)
-      return Association;
+      Value    : in Integer) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Table. This is a standard association, value is an Integer.
    --  It will be displayed without leading space if positive.
 
    function Assoc
      (Variable : in String;
-      Value    : in Boolean)
-      return Association;
+      Value    : in Boolean) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Table. It set the variable to TRUE or FALSE depending on
    --  value.
@@ -147,8 +143,7 @@ package Templates_Parser is
    function Assoc
      (Variable  : in String;
       Value     : in Tag;
-      Separator : in String := Default_Separator)
-      return Association;
+      Separator : in String := Default_Separator) return Association;
    --  Build an Association (Variable = Value) to be added to Translate_Table.
    --  This is a tag association. Separator will be used when outputting the
    --  a flat representation of the Tag (outside a table statement).
@@ -419,7 +414,7 @@ private
    ------------------
 
    type Association (Kind : Association_Kind := Std) is record
-      Variable  : Unbounded_String;
+      Variable : Unbounded_String;
 
       case Kind is
          when Std =>
@@ -430,7 +425,7 @@ private
       end case;
    end record;
 
-   Null_Association  : constant Association
+   Null_Association : constant Association
      := (Std, Null_Unbounded_String, Null_Unbounded_String);
 
    No_Translation : constant Translate_Table := (2 .. 1 => Null_Association);

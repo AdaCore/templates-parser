@@ -1547,36 +1547,54 @@ package body Filter is
       C_And  : constant Natural := Character'Pos ('&');
       C_Quo  : constant Natural := Character'Pos ('"');
 
-      Result : String (1 .. S'Length * 6);
-      N      : Natural := 0;
+      Result : Unbounded_String;
+      Last   : Integer := S'First;
       Code   : Natural;
+
+      procedure Append_To_Result
+        (Str  : String;
+         From : Integer;
+         To   : Integer);
+      --  Append S (From .. To) to Result if not empty concatenated with Str
+      --  and update Last.
+
+      procedure Append_To_Result
+        (Str  : String;
+         From : Integer;
+         To   : Integer) is
+      begin
+         if From <= To then
+            Append (Result, S (From .. To) & Str);
+         else
+            Append (Result, Str);
+         end if;
+
+         Last := To + 2;
+      end Append_To_Result;
+
    begin
       Check_Null_Parameter (P);
 
       for K in S'Range loop
          Code := Character'Pos (S (K));
 
-         if Code in 32 .. 127
-           and then Code /= C_Inf and then Code /= C_Sup
-           and then Code /= C_And and then Code /= C_Quo
+         if Code not in 32 .. 127
+           or else Code = C_Inf or else Code = C_Sup
+           or else Code = C_And or else Code = C_Quo
          then
-            N := N + 1;
-            Result (N) := S (K);
-
-         else
             declare
                I_Code : constant String := Image (Code);
             begin
-               N := N + 1;
-               Result (N .. N + 1) := "&#";
-               Result (N + 2 .. N + I_Code'Length + 1) := I_Code;
-               Result (N + I_Code'Length + 2) := ';';
-               N := N + I_Code'Length + 2;
+               Append_To_Result ("&#" & I_Code & ";", Last, K - 1);
             end;
          end if;
       end loop;
 
-      return Result (1 .. N);
+      if Last <= S'Last then
+         Append (Result, S (Last .. S'Last));
+      end if;
+
+      return To_String (Result);
    end Web_Encode;
 
    ----------------
@@ -1591,39 +1609,57 @@ package body Filter is
       return String
    is
       pragma Unreferenced (T, I);
-      Max_Escape_Sequence : constant Positive := 6;
-      Result              : String (1 .. S'Length * Max_Escape_Sequence);
-      Last                : Natural := 0;
+      Result : Unbounded_String;
+      Last   : Integer := S'First;
+
+      procedure Append_To_Result
+        (Str  : String;
+         From : Integer;
+         To   : Integer);
+      --  Append S (From .. To) to Result if not empty concatenated with Str
+      --  and update Last.
+
+      procedure Append_To_Result
+        (Str  : String;
+         From : Integer;
+         To   : Integer) is
+      begin
+         if From <= To then
+            Append (Result, S (From .. To) & Str);
+         else
+            Append (Result, Str);
+         end if;
+
+         Last := To + 2;
+      end Append_To_Result;
+
    begin
       Check_Null_Parameter (P);
 
       for I in S'Range loop
-         Last := Last + 1;
-
          case S (I) is
             when '&' =>
-               Result (Last .. Last + 4) := "&amp;";
-               Last := Last + 4;
+               Append_To_Result ("&amp;", Last, I - 1);
 
             when '>' =>
-               Result (Last .. Last + 3) := "&gt;";
-               Last := Last + 3;
+               Append_To_Result ("&gt;", Last, I - 1);
 
             when '<' =>
-               Result (Last .. Last + 3) := "&lt;";
-               Last := Last + 3;
+               Append_To_Result ("&lt;", Last, I - 1);
 
             when '"' =>
-               Result (Last .. Last + 5) := "&quot;";
-               Last := Last + 5;
+               Append_To_Result ("&quot;", Last, I - 1);
 
             when others =>
-               Result (Last) := S (I);
+               null;
          end case;
-
       end loop;
 
-      return Result (1 .. Last);
+      if Last <= S'Last then
+         Append (Result, S (Last .. S'Last));
+      end if;
+
+      return To_String (Result);
    end Web_Escape;
 
    --------------

@@ -1,0 +1,12 @@
+
+@_STAG_@
+
+@_F1:STAG_@
+
+@@TABLE@@
+> @_F1:VTAG_@
+@@END_TABLE@@
+
+@@TABLE@@
+> @_F2(azerty):VTAG_@
+@@END_TABLE@@

@@ -1,0 +1,13 @@
+
+tag_value
+
+[F1=tag_value]
+
+> [F1=v1]
+> [F1=v2]
+> [F1=v3]
+
+> [F2=v1/azerty+tag_value]
+> [F2=v2/azerty+tag_value]
+> [F2=v3/azerty+tag_value]
+

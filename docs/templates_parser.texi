@@ -303,6 +303,7 @@ the result is passed-through the filters.
 
 @menu
 * Filters::
+* User defined filters::
 * Attributes::
 @end menu
 
@@ -700,6 +701,36 @@ For example:
 @@_REPLACE(([a-z]+)_([a-z]+)/\\2_\\1):VAR_@@  ->  tag_vector
 @@_"+"(TWO):ONE_@@                          ->  3
 @@_"-"(TWO):ONE_@@                          ->  -1}
+
+@node User defined filters
+@subsection User defined filters
+
+@noindent
+It is also possible to define a new filter by registering a callback
+routine associated with the filter name. Here is the corresponding API:
+
+@TPEXP{   type Callback is access function
+     (Value        : in String;
+      Parameters   : in String;
+      Translations : in Translate_Set) return String;
+   --  User's filter callback
+
+   type Callback_No_Param is access function
+     (Value        : in String;
+      Translations : in Translate_Set) return String;
+   --  User's filter callback
+   
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback);
+   --  Register user's filter Name using the specified Handler
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback_No_Param);
+   --  Register user's filter Name using the specified Handler}
+
+Filters with and without parameter are supported.
 
 @node Attributes
 @subsection Attributes

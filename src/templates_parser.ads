@@ -152,6 +152,13 @@ package Templates_Parser is
    --  Returns the Tag in Assoc, raise Constraint_Error if Assoc is not
    --  containing a Tag (Association_Kind is Std).
 
+   function Get (Assoc : in Association) return String;
+   --  Returns the value in Assoc, raise Constraint_Error if Assoc is not
+   --  containing a simple value (Association_Kind is Composite).
+
+   function Variable (Assoc : in Association) return String;
+   --  Returns the association name (variable name)
+
    ---------------------------
    -- Association table/set --
    ---------------------------
@@ -168,6 +175,8 @@ package Templates_Parser is
    --  know the number of item before hand. This is the object used internally
    --  by the templates engine as it is far more efficient to retrieve a
    --  specific item from it.
+
+   Null_Set : constant Translate_Set;
 
    procedure Insert (Set : in out Translate_Set; Item : in Association);
    --  Add Item into the translate set. If an association for this variable
@@ -279,6 +288,31 @@ package Templates_Parser is
    end Dynamic;
 
    package Dyn renames Dynamic;
+
+   --------------------
+   -- User's Filters --
+   --------------------
+
+   type Callback is access function
+     (Value        : in String;
+      Parameters   : in String;
+      Translations : in Translate_Set) return String;
+   --  User's filter callback
+
+   type Callback_No_Param is access function
+     (Value        : in String;
+      Translations : in Translate_Set) return String;
+   --  User's filter callback
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback);
+   --  Register user's filter Name using the specified Handler
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback_No_Param);
+   --  Register user's filter Name using the specified Handler
 
    -----------------------------
    -- Parsing and Translating --
@@ -455,5 +489,8 @@ private
    function Image (N : in Integer) return String;
    pragma Inline (Image);
    --  Returns N image without leading blank
+
+   Null_Set : constant Translate_Set :=
+                (Ada.Finalization.Controlled with null, null);
 
 end Templates_Parser;

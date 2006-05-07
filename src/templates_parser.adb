@@ -186,14 +186,16 @@ package body Templates_Parser is
       procedure Free is new Unchecked_Deallocation
         (Association_Set.Containers.Map, Map_Access);
    begin
-      Tasking.Lock;
-      Set.Ref_Count.all := Set.Ref_Count.all - 1;
+      if Set.Ref_Count /= null then
+         Tasking.Lock;
+         Set.Ref_Count.all := Set.Ref_Count.all - 1;
 
-      if Set.Ref_Count.all = 0 then
-         Free (Set.Ref_Count);
-         Free (Set.Set);
+         if Set.Ref_Count.all = 0 then
+            Free (Set.Ref_Count);
+            Free (Set.Set);
+         end if;
+         Tasking.Unlock;
       end if;
-      Tasking.Unlock;
    end Finalize;
 
    ------------
@@ -206,9 +208,6 @@ package body Templates_Parser is
       Set.Ref_Count.all := Set.Ref_Count.all + 1;
       Tasking.Unlock;
    end Adjust;
-
-   Null_Set : Translate_Set;
-   --  This is used as default parameter in some local calls
 
    ------------
    -- Filter --
@@ -374,6 +373,9 @@ package body Templates_Parser is
          Upper,
          --  Upper case
 
+         User_Defined,
+         --  A user's defined filter
+
          Web_Encode,
          --  Idem as Web_Escape and also encode non 7-bit ASCII characters as
          --  &#xxx;.
@@ -392,7 +394,14 @@ package body Templates_Parser is
          --  If True return Yes, If False returns No, else do nothing
         );
 
-      type Parameter_Mode is (Void, Str, Regexp, Regpat, Slice);
+      type User_CB (Parameter : Boolean := True) is record
+         case Parameter is
+            when True  => CBP : Callback;
+            when False => CB  : Callback_No_Param;
+         end case;
+      end record;
+
+      type Parameter_Mode is (Void, Str, Regexp, Regpat, Slice, User_Callback);
 
       function Parameter (Mode : in Filter.Mode) return Parameter_Mode;
       --  Returns the parameter mode for the given filter.
@@ -408,17 +417,21 @@ package body Templates_Parser is
                S : Unbounded_String;
 
             when Regexp =>
-               R_Str  : Unbounded_String;
-               Regexp : Pattern_Matcher_Access;
+               R_Str   : Unbounded_String;
+               Regexp  : Pattern_Matcher_Access;
 
             when Regpat =>
-               P_Str  : Unbounded_String;
-               Regpat : Pattern_Matcher_Access;
-               Param  : Unbounded_String;
+               P_Str   : Unbounded_String;
+               Regpat  : Pattern_Matcher_Access;
+               Param   : Unbounded_String;
 
             when Slice =>
-               First : Natural;
-               Last  : Natural;
+               First   : Natural;
+               Last    : Natural;
+
+            when User_Callback =>
+               Handler : User_CB;
+               P       : Unbounded_String;
          end case;
       end record;
 
@@ -444,8 +457,7 @@ package body Templates_Parser is
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
       --  P is the filter parameter, no parameter by default. Parameter are
       --  untyped and will be parsed by the filter function if needed.
 
@@ -467,325 +479,299 @@ package body Templates_Parser is
          Handle : Callback;
       end record;
 
+      --  User's filter
+
+      procedure Register
+        (Name    : in String;
+         Handler : in Templates_Parser.Callback);
+
+      procedure Register
+        (Name    : in String;
+         Handler : in Callback_No_Param);
+
+      function User_Handle (Name : in String) return User_CB;
+      --  Returns the registered user's callback for the given filter name
+
       --  filter functions, see above.
 
       procedure Check_Null_Parameter (P : in Parameter_Data);
-      --  Raises Template_Error if P is not equal to Null_Parameter.
+      --  Raises Template_Error if P is not equal to Null_Parameter
 
       function Absolute
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Add_Param
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function BR_2_EOL
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-        return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function BR_2_LF
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Capitalize
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Clean_Text
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Coma_2_Point
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Contract
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Del_Param
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Exist
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function File_Exists
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Format_Date
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Format_Number
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Is_Empty
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function LF_2_BR
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Lower
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Match
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Max
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Min
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Neg
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function No_Digit
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function No_Dynamic
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function No_Letter
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function No_Space
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Oui_Non
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Point_2_Coma
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Repeat
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Replace
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Replace_All
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Replace_Param
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Reverse_Data
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Size
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Slice
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Trim
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Upper
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
+
+      function User_Defined
+        (S : in String;
+         P : in Parameter_Data     := No_Parameter;
+         T : in Translate_Set      := Null_Set;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Web_Encode
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Web_Escape
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Web_NBSP
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Wrap
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Yes_No
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Plus
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Minus
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Divide
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Multiply
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Modulo
         (S : in String;
          P : in Parameter_Data     := No_Parameter;
          T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters)
-         return String;
+         I : in Include_Parameters := No_Include_Parameters) return String;
 
       function Handle (Name : in String) return Callback;
       --  Returns the filter function for the given filter name
@@ -1119,6 +1105,8 @@ package body Templates_Parser is
          is
             package F renames Templates_Parser.Filter;
 
+            use type F.Mode;
+
             function Unescape (Str : in String) return String;
             --  Unespace characters Str, to be used with regpat replacement
             --  pattern.
@@ -1183,8 +1171,17 @@ package body Templates_Parser is
 
             if P1 = 0 then
                --  No parenthesis, so there is no parameter to parse
-               return (F.Handle (Filter),
-                       F.Parameter_Data'(Mode => F.Void));
+
+               if F.Mode_Value (Filter) = F.User_Defined then
+                  return
+                    (F.Handle (Filter),
+                     F.Parameter_Data'(Mode    => F.User_Callback,
+                                       Handler => F.User_Handle (Filter),
+                                       P       => Null_Unbounded_String));
+               else
+                  return (F.Handle (Filter),
+                          F.Parameter_Data'(Mode => F.Void));
+               end if;
 
             else
                declare
@@ -1251,6 +1248,13 @@ package body Templates_Parser is
                         return (F.Handle (Mode),
                                 F.Parameter_Data'
                                   (F.Str,
+                                   To_Unbounded_String (Parameter)));
+
+                     when F.User_Callback =>
+                        return (F.Handle (Mode),
+                                F.Parameter_Data'
+                                  (F.User_Callback,
+                                   F.User_Handle (Name),
                                    To_Unbounded_String (Parameter)));
 
                      when F.Void =>
@@ -2520,6 +2524,24 @@ package body Templates_Parser is
          raise Constraint_Error;
       end if;
    end Get;
+
+   function Get (Assoc : in Association) return String is
+   begin
+      if Assoc.Kind = Std then
+         return To_String (Assoc.Value);
+      else
+         raise Constraint_Error;
+      end if;
+   end Get;
+
+   --------------
+   -- Variable --
+   --------------
+
+   function Variable (Assoc : in Association) return String is
+   begin
+      return To_String (Assoc.Variable);
+   end Variable;
 
    ----------
    -- Load --
@@ -5521,5 +5543,23 @@ package body Templates_Parser is
 
       return To_String (Results);
    end Translate;
+
+   ---------------------
+   -- Register_Filter --
+   ---------------------
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback) is
+   begin
+      Filter.Register (Name, Handler);
+   end Register_Filter;
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback_No_Param) is
+   begin
+      Filter.Register (Name, Handler);
+   end Register_Filter;
 
 end Templates_Parser;

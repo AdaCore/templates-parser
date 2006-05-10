@@ -1516,10 +1516,10 @@ package body Filter is
    end Upper;
 
    ------------------
-   -- User_defined --
+   -- User_Defined --
    ------------------
 
-   function User_defined
+   function User_Defined
      (S : in String;
       P : in Parameter_Data     := No_Parameter;
       T : in Translate_Set      := Null_Set;
@@ -1538,7 +1538,7 @@ package body Filter is
             return P.Handler.CB (S, T);
          end if;
       end if;
-   end User_defined;
+   end User_Defined;
 
    ----------------
    -- Web_Encode --

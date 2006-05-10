@@ -156,9 +156,6 @@ package Templates_Parser is
    --  Returns the value in Assoc, raise Constraint_Error if Assoc is not
    --  containing a simple value (Association_Kind is Composite).
 
-   function Variable (Assoc : in Association) return String;
-   --  Returns the association name (variable name)
-
    ---------------------------
    -- Association table/set --
    ---------------------------

@@ -2534,15 +2534,6 @@ package body Templates_Parser is
       end if;
    end Get;
 
-   --------------
-   -- Variable --
-   --------------
-
-   function Variable (Assoc : in Association) return String is
-   begin
-      return To_String (Assoc.Variable);
-   end Variable;
-
    ----------
    -- Load --
    ----------

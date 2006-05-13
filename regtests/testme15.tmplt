@@ -1,4 +1,5 @@
 
 @@IF@@ @_TWO_@ > 0     
+  @@-- this is a comment
   here
 @@END_IF@@

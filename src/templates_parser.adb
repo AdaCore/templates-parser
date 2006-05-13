@@ -1827,7 +1827,6 @@ package body Templates_Parser is
       NT : Tag;
    begin
       --  Here we just separate current vector from the new one
-
       T := NT;
    end Clear;
 
@@ -2722,8 +2721,8 @@ package body Templates_Parser is
       function Get_Next_Line return Boolean is
          use type Maps.Character_Set;
 
-         Skip_End : constant Maps.Character_Set
-           := Blank or Maps.To_Set (ASCII.CR);
+         Skip_End : constant Maps.Character_Set :=
+                      Blank or Maps.To_Set (ASCII.CR);
       begin
          if Input.End_Of_File (File) then
             Last := 0;
@@ -2734,8 +2733,12 @@ package body Templates_Parser is
                Line := Line + 1;
 
                Input.Get_Line (File, Buffer, Last);
-               exit when Last < 4
-                 or else Buffer (Buffer'First .. Buffer'First + 3) /= "@@--";
+
+               First := Strings.Fixed.Index
+                 (Buffer (1 .. Last), Blank, Outside);
+
+               exit when First + 3 > Last
+                 or else Buffer (First .. First + 3) /= "@@--";
 
                if Input.End_Of_File (File) then
                   --  We have reached the end of file, exit now.
@@ -2744,8 +2747,6 @@ package body Templates_Parser is
                end if;
             end loop;
 
-            First := Strings.Fixed.Index (Buffer (1 .. Last), Blank, Outside);
-
             if First = 0 then
                --  There is only spaces on this line, this is an empty line
                --  we just have to skip it.
@@ -2753,8 +2754,20 @@ package body Templates_Parser is
                return False;
             end if;
 
+            --  Skip ending comments
+
+            declare
+               C : Natural;
+            begin
+               C := Strings.Fixed.Index (Buffer (First .. Last), "@@--");
+
+               if C /= 0 then
+                  Last := C - 1;
+               end if;
+            end;
+
             Last := Strings.Fixed.Index
-              (Buffer (1 .. Last), Skip_End, Outside, Strings.Backward);
+              (Buffer (First .. Last), Skip_End, Outside, Strings.Backward);
 
             return False;
          end if;

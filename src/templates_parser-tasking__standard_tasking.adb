@@ -36,8 +36,9 @@ package body Templates_Parser.Tasking is
 
    protected Semaphore is
       entry Lock;
-      entry Unlock;
+      procedure Unlock;
    private
+      entry Lock_Internal;
       TID        : Task_Id := Null_Task_Id;
       Lock_Count : Natural := 0;
    end Semaphore;
@@ -61,19 +62,32 @@ package body Templates_Parser.Tasking is
       -- Lock --
       ----------
 
-      entry Lock when Lock_Count = 0 or else TID = Current_Task is
+      entry Lock when True is
       begin
-         Lock_Count := Lock_Count + 1;
-         TID := Lock'Caller;
+         if TID = Lock'Caller then
+            Lock_Count := Lock_Count + 1;
+         else
+            requeue Lock_Internal;
+         end if;
       end Lock;
+
+      -------------------
+      -- Lock_Internal --
+      -------------------
+
+      entry Lock_Internal when Lock_Count = 0 is
+      begin
+         TID := Lock_Internal'Caller;
+         Lock_Count := 1;
+      end Lock_Internal;
 
       ------------
       -- Unlock --
       ------------
 
-      entry Unlock when Lock_Count > 0 is
+      procedure Unlock is
       begin
-         if TID = Unlock'Caller then
+         if TID = Current_Task then
             Lock_Count := Lock_Count - 1;
          else
             raise Tasking_Error;

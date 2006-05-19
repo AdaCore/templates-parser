@@ -2060,6 +2060,9 @@ package body Filter is
             return To_String (I_Params (N));
          end;
 
+      elsif Translations = Null_Set then
+         return Str;
+
       else
          Pos := Association_Set.Containers.Find (Translations.Set.all, Str);
 

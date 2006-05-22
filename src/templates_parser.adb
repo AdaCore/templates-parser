@@ -2738,7 +2738,8 @@ package body Templates_Parser is
                  (Buffer (1 .. Last), Blank, Outside);
 
                exit when First + 3 > Last
-                 or else Buffer (First .. First + 3) /= "@@--";
+                 or else (First >= Buffer'First
+                          and then Buffer (First .. First + 3) /= "@@--");
 
                if Input.End_Of_File (File) then
                   --  We have reached the end of file, exit now.

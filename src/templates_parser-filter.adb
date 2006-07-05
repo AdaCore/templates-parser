@@ -376,7 +376,7 @@ package body Filter is
 
       --  Not found in the table of built-in filters, look for a user's one
 
-      if Filter_Map.Containers.Is_In (Name, User_Filters) then
+      if Filter_Map.Containers.Contains (User_Filters, Name) then
          return User_Defined;
       end if;
 

@@ -1,6 +1,7 @@
 
 -- To build with XML/Ada you need to uncomment the following line
--- with "xmlada";
+with "aws_xmlada";  -- when part of AWS
+-- with "xmlada";      -- in stand-alone mode
 
 project Templates_Parser is
 
@@ -41,6 +42,18 @@ project Templates_Parser is
       end case;
 
    end Naming;
+
+   --------------
+   -- Compiler --
+   --------------
+
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05", "-g");
+   end Compiler;
+
+   package Binder is
+      for Default_Switches ("Ada") use ("-E");
+   end Binder;
 
    ---------
    -- Ide --

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                         Copyright (C) 1999-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -121,9 +121,8 @@ package body Expr is
 
       procedure Error (Mess : String) is
       begin
-         Exceptions.Raise_Exception
-           (Internal_Error'Identity,
-            "col" & Integer'Image (Start_Index) & " condition, " & Mess);
+         raise Internal_Error
+           with "col" & Integer'Image (Start_Index) & " condition, " & Mess;
       end Error;
 
       procedure Next_Token;
@@ -500,8 +499,7 @@ package body Expr is
          return O_Diff;
 
       else
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "unknown operator " & O);
+         raise Template_Error with "unknown operator " & O;
       end if;
    end Value;
 
@@ -511,8 +509,7 @@ package body Expr is
          return O_Not;
 
       else
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "unknown operator " & O);
+         raise Template_Error with "unknown operator " & O;
       end if;
    end Value;
 

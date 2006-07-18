@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2005                          --
+--                         Copyright (C) 2004-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -26,7 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-with Ada.Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
 
@@ -473,8 +472,7 @@ package body Templates_Parser.XML is
       procedure Error (Node : in DOM.Core.Node; Message : in String) is
          Name : constant String := Local_Name (Node);
       begin
-         Exceptions.Raise_Exception
-           (Constraint_Error'Identity, Name & " - " & Message);
+         raise Constraint_Error with Name & " - " & Message;
       end Error;
 
       -----------------

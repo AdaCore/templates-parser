@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003 - 2005                        --
+--                         Copyright (C) 2003-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -26,8 +26,6 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-with Ada.Exceptions;
-
 package body Templates_Parser.Query is
 
    use Ada;
@@ -43,9 +41,8 @@ package body Templates_Parser.Query is
       if Association.Kind = Composite then
          return Association.Comp_Value;
       else
-         Exceptions.Raise_Exception
-           (Constraint_Error'Identity,
-            Variable (Association) & " is not a composite tag.");
+         raise Constraint_Error
+           with Variable (Association) & " is not a composite tag.";
       end if;
    end Composite;
 

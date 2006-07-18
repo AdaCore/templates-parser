@@ -965,9 +965,8 @@ package body Templates_Parser is
                      then
                         N := Integer'Value (V (V'First + 1 .. V'Last - 1));
                      else
-                        Exceptions.Raise_Exception
-                          (Template_Error'Identity,
-                           "Wrong value for attribute Up_Level");
+                        raise Template_Error
+                          with "Wrong value for attribute Up_Level";
                      end if;
                      return (Up_Level, N);
                   end;
@@ -976,9 +975,8 @@ package body Templates_Parser is
                end if;
 
             else
-               Exceptions.Raise_Exception
-                 (Template_Error'Identity,
-                  "Unknown attribute name """ & A_Name & '"');
+               raise Template_Error
+                 with "Unknown attribute name """ & A_Name & '"';
             end if;
          end;
       end Get_Attribute;
@@ -1087,8 +1085,7 @@ package body Templates_Parser is
             Last  := 0;
 
             if P1 = 0 then
-               Exceptions.Raise_Exception
-                 (Template_Error'Identity, "slice expected """ & Slice & '"');
+               raise Template_Error with "slice expected """ & Slice & '"';
 
             else
                First := Natural'Value (Slice (Slice'First .. P1 - 1));
@@ -1156,17 +1153,15 @@ package body Templates_Parser is
 
          begin
             if (P1 = 0 and then P2 /= 0) or else (P1 /= 0 and then P2 = 0) then
-               Exceptions.Raise_Exception
-                 (Template_Error'Identity,
-                  "unbalanced parenthesis """ & Filter & '"');
+               raise Template_Error
+                 with "unbalanced parenthesis """ & Filter & '"';
 
             elsif P2 /= 0
               and then P2 < Filter'Last
               and then Filter (P2 + 1) /= ':'
             then
-               Exceptions.Raise_Exception
-                 (Template_Error'Identity,
-                  "unexpected character after parenthesis """ & Filter & '"');
+               raise Template_Error with
+                 "unexpected character after parenthesis """ & Filter & '"';
             end if;
 
             if P1 = 0 then
@@ -1293,9 +1288,7 @@ package body Templates_Parser is
             if FS (K).Handle = Filter.No_Dynamic'Access
               and then K /= FS'First
             then
-               Exceptions.Raise_Exception
-                 (Template_Error'Identity,
-                  "NO_DYNAMIC must be the first filter");
+               raise Template_Error with "NO_DYNAMIC must be the first filter";
             end if;
 
             K := K + 1;
@@ -2647,15 +2640,13 @@ package body Templates_Parser is
       procedure Fatal_Error (Message : in String) is
       begin
          if Message (Message'Last) /= '.' then
-            Exceptions.Raise_Exception
-              (Template_Error'Identity,
-               "In " & Filename
-                 & " at line" & Natural'Image (Line) & ' ' & Message & '.');
+            raise Template_Error
+              with "In " & Filename
+                & " at line" & Natural'Image (Line) & ' ' & Message & '.';
          else
-            Exceptions.Raise_Exception
-              (Template_Error'Identity,
-               "Included from " & Filename
-                 & " at line" & Natural'Image (Line) & ", " & Message);
+            raise Template_Error
+              with "Included from " & Filename
+                & " at line" & Natural'Image (Line) & ", " & Message;
          end if;
       end Fatal_Error;
 
@@ -4064,7 +4055,6 @@ package body Templates_Parser is
                         end if;
                      end;
 
-
                   else
                      --  Here we flush the buffer and then we analyse the
                      --  include parameter. The result is contained into
@@ -4219,9 +4209,8 @@ package body Templates_Parser is
                         if D /= 0 then
                            if Var.Attribute.Attr /= Nil then
                               --  ??? Would be nice to remove this restriction
-                              Exceptions.Raise_Exception
-                                (Template_Error'Identity,
-                                 "Attributes not supported for Cursor_Tag.");
+                              raise Template_Error with
+                                "Attributes not supported for Cursor_Tag.";
                            end if;
 
                            --  This is a Cursor_Tag, check that the current
@@ -4287,10 +4276,9 @@ package body Templates_Parser is
                              (Var, To_String (Tk.Value),
                               Translations, State.F_Params);
                         else
-                           Exceptions.Raise_Exception
-                             (Template_Error'Identity,
-                              "Attribute not valid on a discrete tag ("
-                              & Image (Var) & ')');
+                           raise Template_Error
+                             with "Attribute not valid on a discrete tag ("
+                               & Image (Var) & ')';
                         end if;
 
                      when Composite =>
@@ -4307,10 +4295,9 @@ package body Templates_Parser is
                               Up_Value := Var.Attribute.Value;
 
                            elsif Var.Attribute.Attr /= Nil then
-                              Exceptions.Raise_Exception
-                                (Template_Error'Identity,
-                                 "This attribute is not valid for a "
-                                 & "vector tag (" & Image (Var) & ')');
+                              raise Template_Error
+                                with "This attribute is not valid for a "
+                                  & "vector tag (" & Image (Var) & ')';
                            end if;
 
                         elsif Tk.Comp_Value.Data.Nested_Level = 2 then
@@ -4336,10 +4323,9 @@ package body Templates_Parser is
                                  Translations, State.F_Params);
 
                            elsif Var.Attribute.Attr /= Nil then
-                              Exceptions.Raise_Exception
-                                (Template_Error'Identity,
-                                 "This attribute is not valid for a "
-                                 & "matrix tag (" & Image (Var) & ')');
+                              raise Template_Error
+                                with "This attribute is not valid for a "
+                                  & "matrix tag (" & Image (Var) & ')';
                            end if;
                         end if;
 
@@ -5086,11 +5072,10 @@ package body Templates_Parser is
 
                   exception
                      when E : others =>
-                        Exceptions.Raise_Exception
-                          (Template_Error'Identity,
-                           "In " & Filename
-                             & " at line" & Natural'Image (N.Line) & ", "
-                             & Exceptions.Exception_Message (E) & '.');
+                        raise Template_Error
+                          with "In " & Filename
+                            & " at line" & Natural'Image (N.Line) & ", "
+                            & Exceptions.Exception_Message (E) & '.';
                   end;
 
                   Analyze (N, State);

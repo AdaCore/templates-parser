@@ -273,8 +273,7 @@ package body Filter is
    procedure Check_Null_Parameter (P : in Parameter_Data) is
    begin
       if P.Mode /= Void then
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "no parameter allowed in this filter");
+         raise Template_Error with "no parameter allowed in this filter";
       end if;
    end Check_Null_Parameter;
 
@@ -380,8 +379,7 @@ package body Filter is
          return User_Defined;
       end if;
 
-      Exceptions.Raise_Exception
-        (Internal_Error'Identity, "Unknown filter " & Name);
+      raise Internal_Error with "Unknown filter " & Name;
    end Mode_Value;
 
    ----------
@@ -396,8 +394,7 @@ package body Filter is
          end if;
       end loop;
 
-      Exceptions.Raise_Exception
-        (Internal_Error'Identity, "Unknown filter handle");
+      raise Internal_Error with "Unknown filter handle";
    end Name;
 
    --
@@ -521,8 +518,7 @@ package body Filter is
       elsif V_Str = "LFCR" then
          EOL := ASCII.LF & ASCII.CR;
       else
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "unknown parameter for BR_2_EOL filter");
+         raise Template_Error with "unknown parameter for BR_2_EOL filter";
       end if;
 
       return BR_2_EOL (S, EOL);
@@ -1007,8 +1003,7 @@ package body Filter is
       Matches : GNAT.Regpat.Match_Array (0 .. 0);
    begin
       if P = No_Parameter then
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "missing parameter for MATCH filter");
+         raise Template_Error with "missing parameter for MATCH filter";
       end if;
 
       GNAT.Regpat.Match (P.Regexp.all, S, Matches);
@@ -1284,8 +1279,7 @@ package body Filter is
       end;
    exception
       when Constraint_Error =>
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "repeat filter parameter error");
+         raise Template_Error with "repeat filter parameter error";
    end Repeat;
 
    -------------
@@ -1391,8 +1385,7 @@ package body Filter is
       end if;
    exception
       when Constraint_Error =>
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "replace filter parameter error");
+         raise Template_Error with "replace filter parameter error";
    end Replace_One_Or_All;
 
    -------------------
@@ -1410,8 +1403,7 @@ package body Filter is
 
    begin
       if Pos = 0 then
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "Replace_Param error");
+         raise Template_Error with "Replace_Param error";
 
       else
          declare
@@ -1532,8 +1524,7 @@ package body Filter is
 
       else
          if P.P /= Null_Unbounded_String then
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, "no parameter allowed in this filter");
+            raise Template_Error with "no parameter allowed in this filter";
          else
             return P.Handler.CB (S, T);
          end if;
@@ -1772,8 +1763,7 @@ package body Filter is
       return To_String (Result);
    exception
       when Constraint_Error =>
-         Exceptions.Raise_Exception
-           (Template_Error'Identity, "wrap filter parameter error");
+         raise Template_Error with "wrap filter parameter error";
    end Wrap;
 
    ------------
@@ -1835,8 +1825,7 @@ package body Filter is
          end if;
       exception
          when Constraint_Error =>
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, """+"" filter parameter error");
+            raise Template_Error with """+"" filter parameter error";
       end;
 
       begin
@@ -1870,8 +1859,7 @@ package body Filter is
          end if;
       exception
          when Constraint_Error =>
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, """-"" filter parameter error");
+            raise Template_Error with """-"" filter parameter error";
       end;
 
       begin
@@ -1905,8 +1893,7 @@ package body Filter is
          end if;
       exception
          when Constraint_Error =>
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, """/"" filter parameter error");
+            raise Template_Error with """/"" filter parameter error";
       end;
 
       begin
@@ -1940,8 +1927,7 @@ package body Filter is
          end if;
       exception
          when Constraint_Error =>
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, """*"" filter parameter error");
+            raise Template_Error with """*"" filter parameter error";
       end;
 
       begin
@@ -1975,8 +1961,7 @@ package body Filter is
          end if;
       exception
          when Constraint_Error =>
-            Exceptions.Raise_Exception
-              (Template_Error'Identity, "modulo filter parameter error");
+            raise Template_Error with "modulo filter parameter error";
       end;
 
       begin

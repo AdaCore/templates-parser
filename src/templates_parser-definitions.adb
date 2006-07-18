@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004 - 2005                        --
+--                         Copyright (C) 2004-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -46,9 +46,8 @@ package body Definitions is
       K := Strings.Fixed.Index (Line, "=");
 
       if K = 0 then
-         Exceptions.Raise_Exception
-           (Internal_Error'Identity,
-            "SET wrong definition, missing name or value");
+         raise Internal_Error
+           with "SET wrong definition, missing name or value";
       end if;
 
       Name := To_Unbounded_String
@@ -78,9 +77,8 @@ package body Definitions is
          else
             --  Multiple data, the first one must be a ref, the second a value
             if Data (Data'First) /= '$' then
-               Exceptions.Raise_Exception
-                 (Internal_Error'Identity,
-                  "SET, reference expected found a value");
+               raise Internal_Error
+                  with "SET, reference expected found a value";
             end if;
 
             Ref   := Positive'Value (Data (Data'First + 1 .. L - 1));

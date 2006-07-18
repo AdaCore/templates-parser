@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                         Copyright (C) 1999-2006                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -69,9 +69,8 @@ package body Data is
                Stop := Strings.Fixed.Index (Line, End_Tag);
 
                if Stop = 0 then
-                  Exceptions.Raise_Exception
-                    (Internal_Error'Identity,
-                     "Tag variable not terminated (missing " & End_Tag & ")");
+                  raise Internal_Error with
+                    "Tag variable not terminated (missing " & End_Tag & ")";
 
                else
                   Stop := Stop + End_Tag'Length - 1;

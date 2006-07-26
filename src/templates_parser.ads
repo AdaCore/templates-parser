@@ -221,8 +221,8 @@ package Templates_Parser is
       type Lazy_Tag_Access is access all Lazy_Tag'Class;
 
       procedure Value
-        (Lazy_Tag     : access Dynamic.Lazy_Tag;
-         Var_Name     : in     String;
+        (Lazy_Tag     : not null access Dynamic.Lazy_Tag;
+         Var_Name     : in String;
          Translations : in out Translate_Set) is abstract;
       --  Value is called by the Parse routines below if a tag variable was not
       --  found in the set of translations. This routine must then add the
@@ -245,8 +245,8 @@ package Templates_Parser is
       --  only.
 
       function Dimension
-        (Cursor_Tag : access Dynamic.Cursor_Tag;
-         Var_Name   : in     String) return Natural is abstract;
+        (Cursor_Tag : not null access Dynamic.Cursor_Tag;
+         Var_Name   : in String) return Natural is abstract;
       --  Must return the number of dimensions for the given variable name. For
       --  a matrix this routine should return 2 for example.
 
@@ -254,18 +254,18 @@ package Templates_Parser is
       --  A Path gives the full position of a given element in the cursor tag
 
       function Length
-        (Cursor_Tag : access Dynamic.Cursor_Tag;
-         Var_Name   : in     String;
-         Path       : in     Dynamic.Path) return Natural is abstract;
+        (Cursor_Tag : not null access Dynamic.Cursor_Tag;
+         Var_Name   : in String;
+         Path       : in Dynamic.Path) return Natural is abstract;
       --  Must return the number of item for the given path. The first
       --  dimension is given by the Path (1), for the second column the Path is
       --  (1, 2). Note that each dimension can have a different length. For
       --  example a Matrix is not necessary square.
 
       function Value
-        (Cursor_Tag : access Dynamic.Cursor_Tag;
-         Var_Name   : in     String;
-         Path       : in     Dynamic.Path) return String is abstract;
+        (Cursor_Tag : not null access Dynamic.Cursor_Tag;
+         Var_Name   : in String;
+         Path       : in Dynamic.Path) return String is abstract;
       --  Must return the value for the variable at the given Path. Note that
       --  this routine will be called only for valid items as given by the
       --  Dimension and Length above.

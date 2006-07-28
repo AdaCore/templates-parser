@@ -1,6 +1,6 @@
 
 -- To build with XML/Ada you need to uncomment the following line
-with "aws_xmlada";  -- when part of AWS
+-- with "aws_xmlada";  -- when part of AWS
 -- with "xmlada";      -- in stand-alone mode
 
 project Templates_Parser is

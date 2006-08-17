@@ -2,9 +2,9 @@
 <Tagged xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <SimpleTag>
       <Tag>
-         <Name>ONE</Name>
+         <Name>TWO</Name>
       </Tag>
-      <V>1</V>
+      <V>2</V>
    </SimpleTag>
    <CompositeTag>
       <Tag>
@@ -42,9 +42,9 @@
    </SimpleTag>
    <SimpleTag>
       <Tag>
-         <Name>TWO</Name>
+         <Name>ONE</Name>
       </Tag>
-      <V>2</V>
+      <V>1</V>
    </SimpleTag>
 </Tagged>
 

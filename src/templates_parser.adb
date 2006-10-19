@@ -5305,11 +5305,20 @@ package body Templates_Parser is
            and then not Filter.Is_No_Dynamic (Var.Filters)
            and then Var.Internal = No
          then
-            --  Check for Lazy tag
+            --  Look into the Lazy_Set for the cached value
 
-            Dynamic.Value (Lazy_Tag, Name, Lazy_Set);
+            Pos := Association_Set.Containers.Find (Lazy_Set.Set.all, Name);
 
-            return Get (Lazy_Set, Name);
+            if Association_Set.Containers.Has_Element (Pos) then
+               return  Association_Set.Containers.Element (Pos);
+
+            else
+               --  Check for Lazy tag
+
+               Dynamic.Value (Lazy_Tag, Name, Lazy_Set);
+
+               return Get (Lazy_Set, Name);
+            end if;
 
          else
             return Null_Association;

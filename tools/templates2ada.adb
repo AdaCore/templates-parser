@@ -124,6 +124,72 @@ procedure Templates2Ada is
    --  Search the first occurrence of Pattern after Index. Return Integer'First
    --  if not found
 
+   ----------------------
+   -- Foreach_Template --
+   ----------------------
+
+   procedure Foreach_Template (Relative_Directory : in String) is
+      use type Directories.File_Kind;
+      Search  : Directories.Search_Type;
+      Dir_Ent : Directories.Directory_Entry_Type;
+   begin
+      Directories.Start_Search (Search, Relative_Directory, "");
+
+      while Directories.More_Entries (Search) loop
+         Directories.Get_Next_Entry (Search, Dir_Ent);
+
+         if Directories.Kind (Dir_Ent) = Directories.Directory then
+            if Opt_Recursive
+              and then Directories.Simple_Name (Dir_Ent) /= "."
+              and then Directories.Simple_Name (Dir_Ent) /= ".."
+            then
+               Foreach_Template
+                 (Directories.Compose
+                    (Relative_Directory,
+                     Directories.Simple_Name (Dir_Ent)));
+            end if;
+
+         elsif Directories.Kind (Dir_Ent) = Directories.Ordinary_File then
+            declare
+               Simple : constant String := Directories.Simple_Name (Dir_Ent);
+            begin
+               if Simple'Length > Length (Opt_Templates_Ext)
+                 and then Simple
+                   (Simple'Last - Length (Opt_Templates_Ext) + 1
+                    .. Simple'Last) = To_String (Opt_Templates_Ext)
+               then
+                  Process_Template
+                    (Directories.Compose
+                       (Relative_Directory,
+                        Directories.Simple_Name (Dir_Ent)));
+               end if;
+            end;
+         end if;
+      end loop;
+
+      Directories.End_Search (Search);
+
+   exception
+      when Text_IO.Name_Error =>
+         Text_IO.Put_Line
+           ("Can't find template directory " & Relative_Directory);
+   end Foreach_Template;
+
+   ---------------
+   -- Next_Line --
+   ---------------
+
+   function Next_Line (Str : in String; Index : in Integer) return Integer is
+      Result : Integer := Index;
+   begin
+      while Result <= Str'Last
+        and then Str (Result) /= ASCII.LF
+      loop
+         Result := Result + 1;
+      end loop;
+      return Result + 1;
+   end Next_Line;
+
    ---------------
    -- Next_Word --
    ---------------
@@ -155,54 +221,59 @@ procedure Templates2Ada is
       Ends_At := Ends_At - 1;
    end Next_Word;
 
-   ---------------
-   -- Next_Line --
-   ---------------
+   -----------------
+   -- Output_File --
+   -----------------
 
-   function Next_Line (Str : in String; Index : in Integer) return Integer is
-      Result : Integer := Index;
+   procedure Output_File is
+      use Maps, Sets;
+      Output         : Text_IO.File_Type;
+      T              : Translate_Set;
+      C              : Maps.Cursor := First (All_Templates);
+      C2             : Sets.Cursor := First (All_Variables);
+      Variables      : Tag;
+      Filenames      : Tag;
+      Bases          : Tag;
+      Variables_List : Tag;
+      Includes       : Tag;
+      HTTPS          : Tag;
+      URLs           : Tag;
+      From_Get       : Tag;
    begin
-      while Result <= Str'Last
-        and then Str (Result) /= ASCII.LF
-      loop
-         Result := Result + 1;
+      while Has_Element (C) loop
+         Variables := Variables & Element (C).Variables;
+         Filenames := Filenames & Element (C).Filename;
+         Bases     := Bases     & Key (C);
+         Includes  := Includes  & Element (C).Included;
+         HTTPS     := HTTPS     & Element (C).HTTP;
+         From_Get  := From_Get  & Element (C).From_Get;
+         URLs      := URLs      & Element (C).URL;
+         Next (C);
       end loop;
-      return Result + 1;
-   end Next_Line;
 
-   ------------
-   -- Search --
-   ------------
+      while Has_Element (C2) loop
+         Variables_List := Variables_List & Element (C2);
+         Next (C2);
+      end loop;
 
-   function Search
-     (Str     : in String;
-      Index   : in Integer;
-      Pattern : in String;
-      Forward : in Boolean := True) return Integer
-   is
-      Result : Integer;
-   begin
-      if Forward then
-         Result := Index;
-         while Result <= Str'Last - Pattern'Length + 1 loop
-            if Str (Result .. Result + Pattern'Length - 1) = Pattern then
-               return Result;
-            end if;
+      Insert (T, Assoc ("VARIABLE",      Variables));
+      Insert (T, Assoc ("FILENAME",      Filenames));
+      Insert (T, Assoc ("BASENAME",      Bases));
+      Insert (T, Assoc ("VARIABLE_LIST", Variables_List));
+      Insert (T, Assoc ("INCLUDE",       Includes));
+      Insert (T, Assoc ("HTTP",          HTTPS));
+      Insert (T, Assoc ("FROM_GET",      From_Get));
+      Insert (T, Assoc ("URL",           URLs));
 
-            Result := Result + 1;
-         end loop;
-      else
-         Result := Index - Pattern'Length + 1;
-         while Result >= Str'First loop
-            if Str (Result .. Result + Pattern'Length - 1) = Pattern then
-               return Result;
-            end if;
+      Text_IO.Create (Output, Text_IO.Out_File, To_String (Opt_Output));
+      Text_IO.Put (Output, Parse (To_String (Opt_Template), T));
+      Text_IO.Close (Output);
 
-            Result := Result - 1;
-         end loop;
-      end if;
-      return Integer'First;
-   end Search;
+   exception
+      when Text_IO.Name_Error =>
+         Text_IO.Put_Line
+           ("Can't find template file : " & To_String (Opt_Template));
+   end Output_File;
 
    ----------------------
    -- Process_Template --
@@ -367,7 +438,7 @@ procedure Templates2Ada is
                end loop;
 
                if Opt_Verbose and then Last - First < 0 then
-                  Text_Io.Put_Line
+                  Text_IO.Put_Line
                     ("Can't process HTTP parameter: "
                      & Str (S + 6 .. Last_Save)
                      & " in template " & Relative_Name);
@@ -442,110 +513,39 @@ procedure Templates2Ada is
          Text_IO.Put_Line ("Can't open template file : " & Relative_Name);
    end Process_Template;
 
-   ----------------------
-   -- Foreach_Template --
-   ----------------------
+   ------------
+   -- Search --
+   ------------
 
-   procedure Foreach_Template (Relative_Directory : in String) is
-      use type Directories.File_Kind;
-      Search  : Directories.Search_Type;
-      Dir_Ent : Directories.Directory_Entry_Type;
+   function Search
+     (Str     : in String;
+      Index   : in Integer;
+      Pattern : in String;
+      Forward : in Boolean := True) return Integer
+   is
+      Result : Integer;
    begin
-      Directories.Start_Search (Search, Relative_Directory, "");
-
-      while Directories.More_Entries (Search) loop
-         Directories.Get_Next_Entry (Search, Dir_Ent);
-
-         if Directories.Kind (Dir_Ent) = Directories.Directory then
-            if Opt_Recursive
-              and then Directories.Simple_Name (Dir_Ent) /= "."
-              and then Directories.Simple_Name (Dir_Ent) /= ".."
-            then
-               Foreach_Template
-                 (Directories.Compose
-                    (Relative_Directory,
-                     Directories.Simple_Name (Dir_Ent)));
+      if Forward then
+         Result := Index;
+         while Result <= Str'Last - Pattern'Length + 1 loop
+            if Str (Result .. Result + Pattern'Length - 1) = Pattern then
+               return Result;
             end if;
 
-         elsif Directories.Kind (Dir_Ent) = Directories.Ordinary_File then
-            declare
-               Simple : constant String := Directories.Simple_Name (Dir_Ent);
-            begin
-               if Simple'Length > Length (Opt_Templates_Ext)
-                 and then Simple
-                   (Simple'Last - Length (Opt_Templates_Ext) + 1
-                    .. Simple'Last) = To_String (Opt_Templates_Ext)
-               then
-                  Process_Template
-                    (Directories.Compose
-                       (Relative_Directory,
-                        Directories.Simple_Name (Dir_Ent)));
-               end if;
-            end;
-         end if;
-      end loop;
+            Result := Result + 1;
+         end loop;
+      else
+         Result := Index - Pattern'Length + 1;
+         while Result >= Str'First loop
+            if Str (Result .. Result + Pattern'Length - 1) = Pattern then
+               return Result;
+            end if;
 
-      Directories.End_Search (Search);
-
-   exception
-      when Text_IO.Name_Error =>
-         Text_IO.Put_Line
-           ("Can't find template directory " & Relative_Directory);
-   end Foreach_Template;
-
-   -----------------
-   -- Output_File --
-   -----------------
-
-   procedure Output_File is
-      use Maps, Sets;
-      Output         : Text_IO.File_Type;
-      T              : Translate_Set;
-      C              : Maps.Cursor := First (All_Templates);
-      C2             : Sets.Cursor := First (All_Variables);
-      Variables      : Tag;
-      Filenames      : Tag;
-      Bases          : Tag;
-      Variables_List : Tag;
-      Includes       : Tag;
-      HTTPS          : Tag;
-      URLs           : Tag;
-      From_Get       : Tag;
-   begin
-      while Has_Element (C) loop
-         Variables := Variables & Element (C).Variables;
-         Filenames := Filenames & Element (C).Filename;
-         Bases     := Bases     & Key (C);
-         Includes  := Includes  & Element (C).Included;
-         HTTPS     := HTTPS     & Element (C).HTTP;
-         From_Get  := From_Get  & Element (C).From_Get;
-         URLs      := URLs      & Element (C).URL;
-         Next (C);
-      end loop;
-
-      while Has_Element (C2) loop
-         Variables_List := Variables_List & Element (C2);
-         Next (C2);
-      end loop;
-
-      Insert (T, Assoc ("VARIABLE",      Variables));
-      Insert (T, Assoc ("FILENAME",      Filenames));
-      Insert (T, Assoc ("BASENAME",      Bases));
-      Insert (T, Assoc ("VARIABLE_LIST", Variables_List));
-      Insert (T, Assoc ("INCLUDE",       Includes));
-      Insert (T, Assoc ("HTTP",          HTTPS));
-      Insert (T, Assoc ("FROM_GET",      From_Get));
-      Insert (T, Assoc ("URL",           URLs));
-
-      Text_IO.Create (Output, Text_IO.Out_File, To_String (Opt_Output));
-      Text_IO.Put (Output, Parse (To_String (Opt_Template), T));
-      Text_IO.Close (Output);
-
-   exception
-      when Text_IO.Name_Error =>
-         Text_IO.Put_Line
-           ("Can't find template file : " & To_String (Opt_Template));
-   end Output_File;
+            Result := Result - 1;
+         end loop;
+      end if;
+      return Integer'First;
+   end Search;
 
 begin
    loop

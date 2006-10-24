@@ -1420,6 +1420,7 @@ We get the following result:
 * Dynamic tags::
 * Tag utils::
 * XML representation::
+* Templates2Ada::
 * Debug::
 @end menu
 
@@ -1529,6 +1530,26 @@ The child package @code{XML}, @pxref{Templates_Parser.XML} contains
 routines to save a @code{Translation_Set} into an XML document or to
 create a @code{Translation_Set} by loading an XML document. The XML
 document must conform to a specific @code{DTD} (see the Ada spec file).
+
+@node Templates2Ada
+@section Templates2Ada
+@cindex templates2ada
+
+@noindent
+@code{templates2ada} is a tool that will generate a set of Ada
+packages from a templates file. These Ada packages can then be used in
+your application to avoid hard-coded strings, and help maintain the
+templates and the code to parse them synchronized.
+
+@noindent
+@code{templates2ada} use a template file to generate the Ada packages
+(see the default @code{templates.tads}). Detailed documentation can be
+found in this template file. This file can also be tailored to fit
+your needs.
+
+@noindent
+All templates with a specific extension (default .thtml) are parsed
+and used by the generator.
 
 @node Debug
 @section Debug

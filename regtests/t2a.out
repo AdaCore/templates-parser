@@ -1,0 +1,37 @@
+--  DO NOT EDIT, THIS FILE HAS BEEN GENERATED
+package Templates is
+   pragma Style_Checks (Off);
+
+   package Lazy is
+      Lazy_Block : constant String := "LAZY_BLOCK";
+   end Lazy;
+
+end Templates;
+
+--  DO NOT EDIT, THIS FILE HAS BEEN GENERATED
+package Templates.Tpl1 is
+   pragma Style_Checks (Off);
+
+   Template : constant String := "./tpl1.tmpl";
+
+   This_Is_A_Tag : constant String := "THIS_IS_A_TAG";
+
+end Templates.Tpl1;
+--  DO NOT EDIT, THIS FILE HAS BEEN GENERATED
+package Templates.Tpl2 is
+   pragma Style_Checks (Off);
+
+   Template : constant String := "./tpl2.tmpl";
+
+   N1 : constant String := "N1";
+   Name : constant String := "NAME";
+   Todo : constant String := "TODO";
+
+   package HTTP is
+      Hpar : constant String := "HPAR";
+      N2 : constant String := "N2";
+      Pn : constant String := "PN";
+   end HTTP;
+
+end Templates.Tpl2;
+

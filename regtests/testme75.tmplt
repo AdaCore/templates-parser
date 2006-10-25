@@ -1,0 +1,7 @@
+
+
+@@INLINE(           return )( and )(;)@@
+   @@TABLE@@
+      @_CAPITALIZE:FOREIGN_ATTRS_@ (Self) = T_@_CAPITALIZE:REFERENCED_TABLES_@.@_CAPITALIZE:REFERENCED_ATTRS_@ (T_@_CAPITALIZE:REFERENCED_TABLES_@.Table (Foreign))
+   @@END_TABLE@@
+@@END_INLINE@@

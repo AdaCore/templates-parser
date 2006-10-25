@@ -3187,13 +3187,23 @@ package body Templates_Parser is
                      when Text =>
                         D := N.Text;
 
+                        --  Trim leading blanks
+
+                        if D /= null and then D.Kind = Data.Text then
+                           Trim (D.Value, Side => Left);
+                        end if;
+
                         while D /= null loop
                            case D.Kind is
                               when Data.Text =>
                                  declare
                                     Len : constant Natural := Length (D.Value);
+                                    --  Len can be 0 here because of the
+                                    --  trimming above.
                                  begin
-                                    if Element (D.Value, Len) = ASCII.LF
+                                    if Len /= 0
+                                      and then
+                                        Element (D.Value, Len) = ASCII.LF
                                       and then
                                         (not Last
                                          or else N.Next /= null
@@ -3201,7 +3211,7 @@ package body Templates_Parser is
                                          or else In_Table)
                                     then
                                        Delete (D.Value, Len, Len);
-                                       Trim (D.Value, Blank, Blank);
+
                                        if not In_Table then
                                           --  Inside a table we do no want to
                                           --  add the separator, this must be
@@ -3210,9 +3220,6 @@ package body Templates_Parser is
                                           --  values.
                                           Append (D.Value, Sep);
                                        end if;
-
-                                    else
-                                       Trim (D.Value, Blank, Blank);
                                     end if;
                                  end;
 

@@ -8,7 +8,7 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
 	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
 	testme65 testme66 testme67 testme68 testme69 testme70 testme71 \
-	testme72 testme73 testme74
+	testme72 testme73 testme74 testme75
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \
@@ -62,7 +62,8 @@ $(EXP_TESTS): force
 
 tt2a: force
 	echo $@
-	$(T2A) -e tmpl -d . -t ../tools/templates.tads -o t2a.res
+	$(T2A) -e tmpl -d . -t ../tools/templates.tads -o t2a.tmp
+	-sed -e 's,\\,/,g' t2a.tmp > t2a.res
 	-diff $(DIFF_ARGS) t2a.out t2a.res >> alldiffs
 
 print_tree: force

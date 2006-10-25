@@ -93,6 +93,10 @@ procedure Testme is
    MC3 : constant TP.Tag := +M31 & M32;
    CM3 : constant TP.Tag := +MC1 & MC2 & MC3;
 
+   FA  : constant TP.Tag := +"FA1" & "FA2" & "FA3";
+   RT  : constant TP.Tag := +"RT1" & "RT2" & "RT3";
+   RA  : constant TP.Tag := +"RA1" & "RA2" & "RA3";
+
    Translations : TP.Translate_Table
      := (TP.Assoc ("VAR1", "a value"),
          TP.Assoc ("VAR2",
@@ -146,7 +150,10 @@ procedure Testme is
          TP.Assoc ("S1", S1),
          TP.Assoc ("QUOTE", """"""),
          TP.Assoc ("MAT3", CM3),
-         TP.Assoc ("ACCENTS", "<été ça être paramètre à paraître> & """)
+         TP.Assoc ("ACCENTS", "<été ça être paramètre à paraître> & """),
+         TP.Assoc ("FOREIGN_ATTRS", FA),
+         TP.Assoc ("REFERENCED_TABLES", RT),
+         TP.Assoc ("REFERENCED_ATTRS", RA)
         );
 
 begin

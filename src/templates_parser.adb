@@ -3618,20 +3618,70 @@ package body Templates_Parser is
          elsif Is_Stmt (Inline_Token, Extended => True) then
             T := new Node (Inline_Stmt);
 
-            case Get_Tag_Parameter_Count is
-               when 0 =>
-                  T.Sep    := To_Unbounded_String (" ");
-               when 1 =>
-                  T.Sep    := To_Unbounded_String (Get_Tag_Parameter (1));
-               when 3 =>
-                  T.Before := To_Unbounded_String (Get_Tag_Parameter (1));
-                  T.Sep    := To_Unbounded_String (Get_Tag_Parameter (2));
-                  T.After  := To_Unbounded_String (Get_Tag_Parameter (3));
-               when others =>
-                  Fatal_Error
-                    ("Wrong number of tag parameters for INLINE "
-                     & "command (0, 1 or 3)");
-            end case;
+            declare
+               function Inline_Parameter
+                 (Index : in Positive) return Unbounded_String;
+               --  Returns Inline_Parameter with the given index
+
+               ----------------------
+               -- Inline_Parameter --
+               ----------------------
+
+               function Inline_Parameter
+                 (Index : in Positive) return Unbounded_String
+               is
+                  P : constant String := Get_Tag_Parameter (Index);
+                  N : Natural := P'First;
+                  R : String (P'Range);
+                  K : Natural := R'First - 1;
+               begin
+                  while N <= P'Last loop
+                     if P (N) = '\' and then N < P'Last then
+                        case P (N + 1) is
+                           when '\' =>
+                              K := K + 1;
+                              R (K) := '\';
+                              N := N + 1;
+                           when 'n' =>
+                              K := K + 2;
+                              R (K - 1 .. K) := (ASCII.CR, ASCII.LF);
+                              N := N + 1;
+                           when 'r' =>
+                              K := K + 1;
+                              R (K) := ASCII.LF;
+                              N := N + 1;
+                           when others =>
+                              K := K + 1;
+                              R (K) := P (N);
+                        end case;
+
+                     else
+                        K := K + 1;
+                        R (K) := P (N);
+                     end if;
+
+                     N := N + 1;
+                  end loop;
+
+                  return To_Unbounded_String (R (R'First .. K));
+               end Inline_Parameter;
+
+            begin
+               case Get_Tag_Parameter_Count is
+                  when 0 =>
+                     T.Sep    := To_Unbounded_String (" ");
+                  when 1 =>
+                     T.Sep    := Inline_Parameter (1);
+                  when 3 =>
+                     T.Before := Inline_Parameter (1);
+                     T.Sep    := Inline_Parameter (2);
+                     T.After  := Inline_Parameter (3);
+                  when others =>
+                     Fatal_Error
+                       ("Wrong number of tag parameters for INLINE "
+                        & "command (0, 1 or 3)");
+               end case;
+            end;
 
             T.I_Block := Parse (Parse_Inline, In_If);
 

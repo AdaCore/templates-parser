@@ -1382,6 +1382,20 @@ In this case all three values are explicitly given.
 @end table
 
 @noindent
+@i{<before>}, @i{<separator>} and @i{<after>} may contain control characters:
+
+@table @code
+@item \n
+To insert a new-line (CR+LF or LF depending on the Operation System)
+
+@item \r
+To insert a line-feed
+
+@item \\
+To insert a single backslash
+@end table
+
+@noindent
 Let's look at an example, with the following template:
 
 @include table_inline.tmplt.texi

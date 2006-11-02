@@ -707,7 +707,27 @@ For example:
 
 @noindent
 It is also possible to define a new filter by registering a callback
-routine associated with the filter name. Here is the corresponding API:
+routine associated with the filter name.
+
+You can define two kinds of filters: filters that take no argument, and are
+therefore simply used as in @@_FILTER:TAG_@@, and filters that take one
+or more arguments, used as in @@_FILTER(param1,param2):TAG_@@.
+
+The templates parser will not try to interpret the paremters for you, and
+will simply return the string representation of the list of parameters,
+for instance @code{"param1,param2"} in the example above. This provides
+enhanced flexibility, since you are free to use any parameter-separator
+you want, and to interpret parameters as integer, strings, references to
+other tags,@dots{}
+
+The templates parser doesn't support tag substitution within the parameter
+list, but this is trivial to implement in your own code. For instance,
+if the user has used @@_FILTER(REFTAG):TAG_@@, you are free to either
+take @code{REFTAG} as a constant string, or as a reference to another tag,
+to be looked up in a translation table. You should of course properly
+document the behavior of your filter.
+
+Here is the templates parser API for defining your own custom filters:
 
 @TPEXP{   type Callback is access function
      (Value        : in String;
@@ -730,7 +750,50 @@ routine associated with the filter name. Here is the corresponding API:
       Handler : in Callback_No_Param);
    --  Register user's filter Name using the specified Handler}
 
-Filters with and without parameter are supported.
+In the above calls, Value is the value of the tag on which the filter
+applies. In the examples above, that would be the value of @code{TAG}
+as looked up in the translation table. Translations in the translation
+table you can use if you need to look up other tags.
+
+Here is a simple example of a custom filter, which can be used to
+generate HTML forms. In such a form, it is common to have some @code{<input>}
+tags that need a @code{selected='selected'} attribute if the toggle
+button should be selected. This can be done without the use of a filter,
+of course, using a simple @code{@@@@IF@@@@} statement, but that makes the
+template less readable. The custom filter below behaves as such: it takes
+one argument, and compares the value of the tag on which the filter is
+applied to that argument. If they are equal, the string
+@code{selected='selected'} will be substituted. As a special case, if the
+argument to the filter starts with a @code{'@@'} character, the argument
+is interpreted as the name of a tag to look up first.
+
+@TPEXP{
+   function Custom_Select_Filter
+     (Value        : String;
+      Parameters   : String;
+      Translations : Translate_Set) return String is
+   begin
+      if Parameters /= "" and then Parameters (Parameters'First) = '@@' then
+         if Get (Get (Translations,
+                      Parameters (Parameters'First + 1 .. Parameters'Last))) =
+           Value
+         then
+            return "selected='selected'";
+         end if;
+      elsif Value = Parameters then
+         return "selected='selected'";
+      end if;
+
+      return "";
+   end Custom_Select_Filter;
+
+   Register_Filter ("SELECTED", Custom_Select_Filter'Access);
+}
+
+and a template would look like:
+
+@TPEXP{
+   <option value="foo" @@_SELECTED(@@SELECTED_STATUS):STATUS_@@ />}
 
 @node Attributes
 @subsection Attributes

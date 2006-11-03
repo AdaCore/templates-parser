@@ -29,6 +29,7 @@
 with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;
+with Ada.Directories;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Unchecked_Deallocation;
@@ -58,6 +59,10 @@ package body Templates_Parser is
 
    Max_Include_Parameters : constant := 20;
    --  Maximum number of include parameters handled by this implementation
+
+   Windows_OS : constant Boolean :=
+                  Fixed.Index (Directories.Current_Directory, "/") = 0;
+   --  Simple Windows OS detection based on the current directory
 
    function No_Quote (Str : in String) return String;
    --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
@@ -3642,14 +3647,22 @@ package body Templates_Parser is
                               K := K + 1;
                               R (K) := '\';
                               N := N + 1;
+
                            when 'n' =>
-                              K := K + 2;
-                              R (K - 1 .. K) := (ASCII.CR, ASCII.LF);
+                              if Windows_OS then
+                                 K := K + 2;
+                                 R (K - 1 .. K) := (ASCII.CR, ASCII.LF);
+                              else
+                                 K := K + 1;
+                                 R (K) := ASCII.LF;
+                              end if;
                               N := N + 1;
+
                            when 'r' =>
                               K := K + 1;
                               R (K) := ASCII.LF;
                               N := N + 1;
+
                            when others =>
                               K := K + 1;
                               R (K) := P (N);

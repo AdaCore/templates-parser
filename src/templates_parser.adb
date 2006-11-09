@@ -5631,4 +5631,22 @@ package body Templates_Parser is
       Filter.Register (Name, Handler);
    end Register_Filter;
 
+   --------------
+   -- Get_Kind --
+   --------------
+
+   function Get_Kind (Assoc : in Association) return Association_Kind is
+   begin
+      return Assoc.Kind;
+   end Get_Kind;
+
+   ------------------
+   -- Get_Variable --
+   ------------------
+
+   function Get_Variable (Assoc : in Association) return Unbounded_String is
+   begin
+      return Assoc.Variable;
+   end Get_Variable;
+
 end Templates_Parser;

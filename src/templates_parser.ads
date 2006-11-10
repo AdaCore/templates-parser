@@ -151,16 +151,14 @@ package Templates_Parser is
    function Get (Assoc : in Association) return Tag;
    --  Returns the Tag in Assoc, raise Constraint_Error if Assoc is not
    --  containing a Tag (Association_Kind is Std).
+   --  See also the Templates_Parser.Query package for other functions to
+   --  manipulate associations.
 
    function Get (Assoc : in Association) return String;
    --  Returns the value in Assoc, raise Constraint_Error if Assoc is not
    --  containing a simple value (Association_Kind is Composite).
-
-   function Get_Kind (Assoc : in Association) return Association_Kind;
-   --  Return the kind of association
-
-   function Get_Variable (Assoc : in Association) return Unbounded_String;
-   --  Return the name of the variable to which association is bound
+   --  See also the Templates_Parser.Query package for other functions to
+   --  manipulate associations.
 
    ---------------------------
    -- Association table/set --

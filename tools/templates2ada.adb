@@ -33,6 +33,8 @@ with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Directories;
 with Ada.Streams.Stream_IO;
 with Ada.Strings.Unbounded;                  use Ada.Strings.Unbounded;
+with Ada.Strings.Fixed;                      use Ada.Strings.Fixed;
+with Ada.Strings.Maps;                       use Ada.Strings.Maps;
 with Ada.Text_IO;
 
 with GNAT.Command_Line;                      use GNAT.Command_Line;
@@ -77,14 +79,19 @@ procedure Templates2Ada is
    Help : Boolean := False;
    --  Set to true if -h option used
 
+   N_Word_Set : constant Strings.Maps.Character_Set :=
+                To_Set (ASCII.HT & ASCII.LF & " ,()");
+
    type Template_Description is record
-      Filename  : Unbounded_String;
-      Variables : Tag;
-      Included  : Tag;
-      HTTP      : Tag;
-      From_Get  : Tag;  --  Boolean to indicate if the corresponding entry in
+      Filename    : Unbounded_String;
+      Variables   : Tag;
+      Included    : Tag;
+      HTTP        : Tag;
+      From_Get    : Tag;  --  Boolean to indicate if the corresponding entry in
                         --  HTTP is from a HTTP_GET parameter
-      URL       : Tag;
+      URL         : Tag;
+      Ajax_Event  : Tag;
+      Ajax_Action : Tag;
    end record;
 
    package Sets is new Ada.Containers.Indefinite_Ordered_Sets (String);
@@ -200,25 +207,13 @@ procedure Templates2Ada is
       Starts_At :    out Integer;
       Ends_At   :    out Integer) is
    begin
-      Starts_At := Index;
-      while Starts_At <= Str'Last
-        and then (Str (Starts_At) = ' '
-                  or else Str (Starts_At) = ASCII.HT
-                  or else Str (Starts_At) = ASCII.LF)
-      loop
-         Starts_At := Starts_At + 1;
-      end loop;
+      Find_Token
+        (Str (Index .. Str'Last),
+         N_Word_Set, Strings.Outside, Starts_At, Ends_At);
 
-      Ends_At := Starts_At + 1;
-      while Ends_At <= Str'Last
-        and then Str (Ends_At) /= ' '
-        and then Str (Ends_At) /= ASCII.HT
-        and then Str (Ends_At) /= ASCII.LF
-        and then Str (Ends_At) /= ')'
-      loop
-         Ends_At := Ends_At + 1;
-      end loop;
-      Ends_At := Ends_At - 1;
+      if Ends_At = 0 then
+         Ends_At := Str'Last;
+      end if;
    end Next_Word;
 
    -----------------
@@ -239,15 +234,19 @@ procedure Templates2Ada is
       HTTPS          : Tag;
       URLs           : Tag;
       From_Get       : Tag;
+      Ajax_Event     : Tag;
+      Ajax_Action    : Tag;
    begin
       while Has_Element (C) loop
-         Variables := Variables & Element (C).Variables;
-         Filenames := Filenames & Element (C).Filename;
-         Bases     := Bases     & Key (C);
-         Includes  := Includes  & Element (C).Included;
-         HTTPS     := HTTPS     & Element (C).HTTP;
-         From_Get  := From_Get  & Element (C).From_Get;
-         URLs      := URLs      & Element (C).URL;
+         Variables   := Variables   & Element (C).Variables;
+         Filenames   := Filenames   & Element (C).Filename;
+         Bases       := Bases       & Key (C);
+         Includes    := Includes    & Element (C).Included;
+         HTTPS       := HTTPS       & Element (C).HTTP;
+         From_Get    := From_Get    & Element (C).From_Get;
+         URLs        := URLs        & Element (C).URL;
+         Ajax_Event  := Ajax_Event  & Element (C).Ajax_Event;
+         Ajax_Action := Ajax_Action & Element (C).Ajax_Action;
          Next (C);
       end loop;
 
@@ -264,6 +263,8 @@ procedure Templates2Ada is
       Insert (T, Assoc ("HTTP",          HTTPS));
       Insert (T, Assoc ("FROM_GET",      From_Get));
       Insert (T, Assoc ("URL",           URLs));
+      Insert (T, Assoc ("AJAX_EVENT",    Ajax_Event));
+      Insert (T, Assoc ("AJAX_ACTION",   Ajax_Action));
 
       Text_IO.Create (Output, Text_IO.Out_File, To_String (Opt_Output));
       Text_IO.Put (Output, Parse (To_String (Opt_Template), T));
@@ -288,6 +289,7 @@ procedure Templates2Ada is
       To_Ignore                   : Sets.Set;
       Variables, Includes, HTTPS  : Tag;
       URLs, From_Get              : Tag;
+      Ajax_Event, Ajax_Action     : Tag;
       C                           : Sets.Cursor;
       Inserted                    : Boolean;
       pragma Unreferenced (Result);
@@ -376,6 +378,24 @@ procedure Templates2Ada is
                  (Include,
                   Directories.Base_Name (Str (First .. Last)), C, Inserted);
                S := Last + 2;
+
+               --  Check for AWS/Ajax actions. AWS/Ajax is based on include
+               --  files whose name is starting with "aws_action_". The first
+               --  parameter being the event and the second the action. We use
+               --  this naming scheme here.
+               --
+               --  @@INCLUDE@@ aws_action_xml.tjs (onclick, form_enter ...)
+
+               if Index (Str (First .. Last), "aws_action_") /= 0 then
+                  --  First parameter is the event
+                  Next_Word (Str, S, First, Last);
+                  Ajax_Event := Ajax_Event & Str (First .. Last);
+                  S := Last + 1;
+                  --  Second parameter is the action
+                  Next_Word (Str, S, First, Last);
+                  Ajax_Action := Ajax_Action & Str (First .. Last);
+                  S := Last + 1;
+               end if;
 
             elsif S + 8 < Str'Last
               and then Str (S .. S + 8) = "<a name="""
@@ -506,7 +526,8 @@ procedure Templates2Ada is
 
       Maps.Insert
         (All_Templates, Directories.Base_Name (Relative_Name),
-         (+Relative_Name, Variables, Includes, HTTPS, From_Get, URLs));
+         (+Relative_Name, Variables, Includes, HTTPS, From_Get, URLs,
+          Ajax_Event, Ajax_Action));
 
    exception
       when Text_IO.Name_Error =>

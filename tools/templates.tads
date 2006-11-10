@@ -95,24 +95,28 @@
 @@--  through appropriate grep commands.
 @@--
 @@--  The following tags are available in this template:
-@@--     @_VARIABLE_@:  Matrix of variable names for the current template,
-@@--                    sorted alphabetically
-@@--     @_FILENAME_@:  Vector of template file names. The name contains
-@@--                    directories relative to the directory given to
-@@--                    templates2ada
-@@--     @_BASENAME_@:  Same as @_FILENAME_@, but contains only the base names
-@@--                    of files, with no extension.
+@@--     @_VARIABLE_@:      Matrix of variable names for the current template,
+@@--                        sorted alphabetically
+@@--     @_FILENAME_@:      Vector of template file names. The name contains
+@@--                        directories relative to the directory given to
+@@--                        templates2ada
+@@--     @_BASENAME_@:      Same as @_FILENAME_@, but contains only the base
+@@--                        names of files, with no extension.
 @@--     @_VARIABLE_LIST_@: List of all variables defined in all templates,
-@@--                    sorted alphabetically
-@@--     @_INCLUDE_@:   List of templates included by the current template.
-@@--                    Names are the base name.
-@@--     @_HTTP_@:      List of http parameters that can be returned by the
-@@--                    current template, sorted alphabetically.
-@@--     @_FROM_GET_@:  For each of the HTTP parameters above, this boolean
-@@--                    indicates whether it was defined in a HTTP_GET comment
-@@--                    as explained above.
-@@--     @_URL_@:       List of urls that are associated with the current
-@@--                    template, sorted alphabetically.
+@@--                        sorted alphabetically
+@@--     @_INCLUDE_@:       List of templates included by the current template.
+@@--                        Names are the base name.
+@@--     @_HTTP_@:          List of http parameters that can be returned by the
+@@--                        current template, sorted alphabetically.
+@@--     @_FROM_GET_@:      For each of the HTTP parameters above, this boolean
+@@--                        indicates whether it was defined in a HTTP_GET
+@@--                        comment as explained above.
+@@--     @_URL_@:           List of urls that are associated with the current
+@@--                        template, sorted alphabetically.
+@@--     @_AJAX_EVENT_@:    Event name (onclick, onchange...), corresponding
+@@--                        action in AJAX_ACTION.
+@@--     @_AJAX_ACTION_@    Action for the given AJAX_EVENT above.
+@@--
 @@--  This templates is processed through the tool templates2ada
 @@--
 @@--  Possible enhancements:
@@ -169,6 +173,16 @@ package @_PACKAGE_@ is
    @@END_TABLE@@
        end HTTP;
 @@END_IF@@
+@@IF@@ @_EXIST:AJAX_EVENT_@
+
+   package Ajax is
+      @@TABLE@@
+      @@IF@@ not @_IS_EMPTY:AJAX_EVENT_@
+      @_CAPITALIZE:AJAX_EVENT_@_@_CAPITALIZE:AJAX_ACTION_@ : constant String := "/@_AJAX_EVENT_@$@_AJAX_ACTION_@";
+      @@END_IF@@
+      @@END_TABLE@@
+   end Ajax;
+@@END_IF@@
 
    end @_CAPITALIZE:REPLACE_ALL(\./_):BASENAME_@;
 
@@ -212,6 +226,16 @@ package @_PACKAGE_@.@_CAPITALIZE:REPLACE_ALL(\./_):BASENAME_@ is
       @@END_IF@@
    @@END_TABLE@@
    end HTTP;
+@@END_IF@@
+@@IF@@ @_EXIST:AJAX_EVENT_@
+
+   package Ajax is
+      @@TABLE@@
+      @@IF@@ not @_IS_EMPTY:AJAX_EVENT_@
+      @_CAPITALIZE:AJAX_EVENT_@_@_CAPITALIZE:AJAX_ACTION_@ : constant String := "/@_AJAX_EVENT_@$@_AJAX_ACTION_@";
+      @@END_IF@@
+      @@END_TABLE@@
+   end Ajax;
 @@END_IF@@
 
 end @_PACKAGE_@.@_CAPITALIZE:REPLACE_ALL(\./_):BASENAME_@;

@@ -80,7 +80,7 @@ procedure Templates2Ada is
    --  Set to true if -h option used
 
    N_Word_Set : constant Strings.Maps.Character_Set :=
-                To_Set (ASCII.HT & ASCII.LF & " ,()");
+                  To_Set (ASCII.HT & ASCII.LF & " ,()");
 
    type Template_Description is record
       Filename    : Unbounded_String;

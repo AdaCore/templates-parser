@@ -209,9 +209,11 @@ package body Templates_Parser is
 
    procedure Adjust (Set : in out Translate_Set) is
    begin
-      Tasking.Lock;
-      Set.Ref_Count.all := Set.Ref_Count.all + 1;
-      Tasking.Unlock;
+      if Set.Ref_Count /= null then
+         Tasking.Lock;
+         Set.Ref_Count.all := Set.Ref_Count.all + 1;
+         Tasking.Unlock;
+      end if;
    end Adjust;
 
    ------------

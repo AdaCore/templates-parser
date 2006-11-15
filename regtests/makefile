@@ -28,7 +28,8 @@ TESTS_RUN      = ${TESTS:%=%_run}
 TESTS_TREE_RUN = ${TESTS_TREE:%=%_run}
 
 STD_TESTS      = tag_demo tcache regtst1 include tess test_templates_if \
-		ts_assoc not_initialized include2 regtst4 dynamic user_filter
+		ts_assoc not_initialized include2 regtst4 dynamic \
+		user_filter nullset
 EXP_TESTS      = regtst2 regtst3 $(XTESTS)
 
 MAIN_TESTS     = testme print_tree filter

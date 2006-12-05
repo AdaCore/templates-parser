@@ -116,7 +116,9 @@
 @@--     @_AJAX_EVENT_@:    Event name (onclick, onchange...), corresponding
 @@--                        action in AJAX_ACTION.
 @@--     @_AJAX_ACTION_@    Action for the given AJAX_EVENT above.
-@@--     @_SET_@            Constants set in the template with prefix SET_
+@@--     @_SET_VAR_@        Name of SET constants in the template
+@@--                        Only variables with prefix SET_ are exported.
+@@--     @_SET_VAL@         Values of the above constants.
 @@--
 @@--  This templates is processed through the tool templates2ada
 @@--

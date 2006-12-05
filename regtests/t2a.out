@@ -25,6 +25,7 @@ package Templates.Tpl2 is
 
    N1 : constant String := "N1";
    Name : constant String := "NAME";
+   Set_Var : constant String := "SET_VAR";
    Todo : constant String := "TODO";
 
    package HTTP is
@@ -32,6 +33,10 @@ package Templates.Tpl2 is
       N2 : constant String := "N2";
       Pn : constant String := "PN";
    end HTTP;
+
+   package Set is
+      Set_Var : constant String := "azerty";
+   end Set;
 
 end Templates.Tpl2;
 

@@ -83,15 +83,16 @@ procedure Templates2Ada is
                   To_Set (ASCII.HT & ASCII.LF & " ,()");
 
    type Template_Description is record
-      Filename    : Unbounded_String;
-      Variables   : Tag;
-      Included    : Tag;
-      HTTP        : Tag;
-      From_Get    : Tag;  --  Boolean to indicate if the corresponding entry in
-                        --  HTTP is from a HTTP_GET parameter
-      URL         : Tag;
-      Ajax_Event  : Tag;
-      Ajax_Action : Tag;
+      Filename         : Unbounded_String;
+      Variables        : Tag;
+      Included         : Tag;
+      HTTP             : Tag;
+      From_Get         : Tag;  --  Boolean to indicate if the corresponding
+                               --  entry in HTTP is from a HTTP_GET parameter
+      URL              : Tag;
+      Ajax_Event       : Tag;
+      Ajax_Action      : Tag;
+      Set_Var, Set_Val : Tag;
    end record;
 
    package Sets is new Ada.Containers.Indefinite_Ordered_Sets (String);
@@ -222,20 +223,21 @@ procedure Templates2Ada is
 
    procedure Output_File is
       use Maps, Sets;
-      Output         : Text_IO.File_Type;
-      T              : Translate_Set;
-      C              : Maps.Cursor := First (All_Templates);
-      C2             : Sets.Cursor := First (All_Variables);
-      Variables      : Tag;
-      Filenames      : Tag;
-      Bases          : Tag;
-      Variables_List : Tag;
-      Includes       : Tag;
-      HTTPS          : Tag;
-      URLs           : Tag;
-      From_Get       : Tag;
-      Ajax_Event     : Tag;
-      Ajax_Action    : Tag;
+      Output           : Text_IO.File_Type;
+      T                : Translate_Set;
+      C                : Maps.Cursor := First (All_Templates);
+      C2               : Sets.Cursor := First (All_Variables);
+      Variables        : Tag;
+      Filenames        : Tag;
+      Bases            : Tag;
+      Variables_List   : Tag;
+      Includes         : Tag;
+      HTTPS            : Tag;
+      URLs             : Tag;
+      From_Get         : Tag;
+      Ajax_Event       : Tag;
+      Ajax_Action      : Tag;
+      Set_Var, Set_Val : Tag;
    begin
       while Has_Element (C) loop
          Variables   := Variables   & Element (C).Variables;
@@ -247,6 +249,8 @@ procedure Templates2Ada is
          URLs        := URLs        & Element (C).URL;
          Ajax_Event  := Ajax_Event  & Element (C).Ajax_Event;
          Ajax_Action := Ajax_Action & Element (C).Ajax_Action;
+         Set_Var     := Set_Var     & Element (C).Set_Var;
+         Set_Val     := Set_Val     & Element (C).Set_Val;
          Next (C);
       end loop;
 
@@ -265,6 +269,8 @@ procedure Templates2Ada is
       Insert (T, Assoc ("URL",           URLs));
       Insert (T, Assoc ("AJAX_EVENT",    Ajax_Event));
       Insert (T, Assoc ("AJAX_ACTION",   Ajax_Action));
+      Insert (T, Assoc ("SET_VAR",       Set_Var));
+      Insert (T, Assoc ("SET_VAL",       Set_Val));
 
       Text_IO.Create (Output, Text_IO.Out_File, To_String (Opt_Output));
       Text_IO.Put (Output, Parse (To_String (Opt_Template), T));
@@ -283,15 +289,16 @@ procedure Templates2Ada is
    procedure Process_Template (Relative_Name : in String) is
       use Ada.Streams, Ada.Streams.Stream_IO;
       use Sets;
-      Result                      : Unbounded_String;
-      File                        : Ada.Streams.Stream_IO.File_Type;
-      Seen, Include, HTTP, URL    : Sets.Set;
-      To_Ignore                   : Sets.Set;
-      Variables, Includes, HTTPS  : Tag;
-      URLs, From_Get              : Tag;
-      Ajax_Event, Ajax_Action     : Tag;
-      C                           : Sets.Cursor;
-      Inserted                    : Boolean;
+      Result                     : Unbounded_String;
+      File                       : Ada.Streams.Stream_IO.File_Type;
+      Seen, Include, HTTP, URL   : Sets.Set;
+      To_Ignore                  : Sets.Set;
+      Variables, Includes, HTTPS : Tag;
+      URLs, From_Get             : Tag;
+      Ajax_Event, Ajax_Action    : Tag;
+      Set_Var, Set_Val           : Tag;
+      C                          : Sets.Cursor;
+      Inserted                   : Boolean;
       pragma Unreferenced (Result);
    begin
       --  We cannot use the templates parser, since it wouldn't process
@@ -328,6 +335,17 @@ procedure Templates2Ada is
               and then Str (S .. S + 3) = "@@--"
             then
                S := Next_Line (Str, S + 4);
+
+            elsif S + 11 <= Str'Last
+              and then Str (S .. S + 11) = "@@SET@@ SET_"
+            then
+               Next_Word (Str, S + 7, First, Last);
+               Set_Var := Set_Var & Str (First .. Last);
+               S := Last + 1;
+               Next_Word (Str, S, First, Last);
+               S := Last + 1;
+               Next_Word (Str, S, First, Last);
+               Set_Val := Set_Val & Str (First .. Last);
 
             elsif S + 6 <= Str'Last
               and then Str (S .. S + 6) = "@@SET@@"
@@ -527,7 +545,7 @@ procedure Templates2Ada is
       Maps.Insert
         (All_Templates, Directories.Base_Name (Relative_Name),
          (+Relative_Name, Variables, Includes, HTTPS, From_Get, URLs,
-          Ajax_Event, Ajax_Action));
+          Ajax_Event, Ajax_Action, Set_Var, Set_Val));
 
    exception
       when Text_IO.Name_Error =>

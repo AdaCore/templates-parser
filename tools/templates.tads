@@ -116,6 +116,7 @@
 @@--     @_AJAX_EVENT_@:    Event name (onclick, onchange...), corresponding
 @@--                        action in AJAX_ACTION.
 @@--     @_AJAX_ACTION_@    Action for the given AJAX_EVENT above.
+@@--     @_SET_@            Constants set in the template with prefix SET_
 @@--
 @@--  This templates is processed through the tool templates2ada
 @@--
@@ -173,6 +174,14 @@ package @_PACKAGE_@ is
    @@END_TABLE@@
        end HTTP;
 @@END_IF@@
+@@IF@@ @_EXIST:SET_@
+
+       package Set is
+   @@TABLE@@
+         @_CAPITALIZE:REPLACE_ALL(__/_):SET_VAR_@ : constant String := "@_SET_VAL_@";
+   @@END_TABLE@@
+       end Set;
+@@END_IF@@
 @@IF@@ @_EXIST:AJAX_EVENT_@
 
    package Ajax is
@@ -226,6 +235,14 @@ package @_PACKAGE_@.@_CAPITALIZE:REPLACE_ALL(\./_):BASENAME_@ is
       @@END_IF@@
    @@END_TABLE@@
    end HTTP;
+@@END_IF@@
+@@IF@@ @_EXIST:SET_VAR_@
+
+   package Set is
+   @@TABLE@@
+      @_CAPITALIZE:REPLACE_ALL(__/_):SET_VAR_@ : constant String := "@_SET_VAL_@";
+   @@END_TABLE@@
+   end Set;
 @@END_IF@@
 @@IF@@ @_EXIST:AJAX_EVENT_@
 

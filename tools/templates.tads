@@ -176,7 +176,7 @@ package @_PACKAGE_@ is
    @@END_TABLE@@
        end HTTP;
 @@END_IF@@
-@@IF@@ @_EXIST:SET_@
+@@IF@@ @_EXIST:SET_VAR_@
 
        package Set is
    @@TABLE@@

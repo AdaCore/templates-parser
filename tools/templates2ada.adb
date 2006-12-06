@@ -87,8 +87,8 @@ procedure Templates2Ada is
       Variables        : Tag;
       Included         : Tag;
       HTTP             : Tag;
-      From_Get         : Tag;  --  Boolean to indicate if the corresponding
-                               --  entry in HTTP is from a HTTP_GET parameter
+      From_Get         : Tag; --  Boolean to indicate if the corresponding
+                              --  entry in HTTP is from a HTTP_GET parameter
       URL              : Tag;
       Ajax_Event       : Tag;
       Ajax_Action      : Tag;

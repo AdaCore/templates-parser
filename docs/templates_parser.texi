@@ -51,7 +51,7 @@
 
 Copyright @copyright{} 1999-2004, Pascal Obry
 
-Copyright @copyright{} 2005, AdaCore
+Copyright @copyright{} 2005-2006, AdaCore
 
 @*
 

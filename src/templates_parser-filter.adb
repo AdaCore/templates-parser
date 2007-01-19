@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003-2006                          --
+--                         Copyright (C) 2003-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -1465,12 +1465,29 @@ package body Filter is
       I : in Include_Parameters := No_Include_Parameters) return String
    is
       pragma Unreferenced (T, I);
-      First, Last : Natural;
+      First, Last : Integer;
    begin
-      First := Natural'Min (P.First, S'Length + 1);
-      Last  := Natural'Min (P.Last, S'Length);
+      if S'Length = 0 then
+         return "";
+      else
+         if P.First <= 0 then
+            First := Integer'Max (S'First, S'Last + P.First);
+         else
+            First := S'First + P.First - 1;
+         end if;
 
-      return S (S'First + First - 1 .. S'First + Last - 1);
+         if P.Last <= 0 then
+            Last := S'Last + P.Last;
+         else
+            Last := Integer'Min (S'Last, S'First + P.Last - 1);
+         end if;
+
+         if First > S'Last then
+            return "";
+         end if;
+
+         return S (First .. Last);
+      end if;
    end Slice;
 
    ----------

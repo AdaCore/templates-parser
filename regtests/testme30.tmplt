@@ -7,8 +7,12 @@ Test slice
 12 = @_SLICE("1..2"):NUM0_@
 23 = @_SLICE( 2   ..   3 ):NUM0_@
 23 = @_SLICE(" 2   ..   3 "):NUM0_@
+= @_SLICE(2..1):NUM0_@
 6 = @_SLICE("6 ..10"):NUM0_@          @@-- slice test
 = @_SLICE("8 ..15"):NUM0_@
 = @_SLICE("18 ..15"):NUM0_@
 2345 = @_SLICE(2..5):NUM0_@
+456 = @_SLICE(-2..0):NUM0_@
+45 = @_SLICE(-2..-1):NUM0_@
+= @_SLICE(-10..-9):NUM0_@
 @@--  test for SLICE()

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2006                          --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -433,8 +433,8 @@ package body Templates_Parser is
                Param   : Unbounded_String;
 
             when Slice =>
-               First   : Natural;
-               Last    : Natural;
+               First   : Integer;
+               Last    : Integer;
 
             when User_Callback =>
                Handler : User_CB;
@@ -1008,9 +1008,9 @@ package body Templates_Parser is
          --  Given a Filter description, returns the filter handle and
          --  parameter.
 
-         procedure Get_Slice (Slice : in String; First, Last : out Natural);
+         procedure Get_Slice (Slice : in String; First, Last : out Integer);
          --  Returns the First and Last slice index as parsed into the Slice
-         --  string. Retruns First and Last set to 0 if there is not valid
+         --  string. Returns First and Last set to 0 if there is not valid
          --  slice definition in Slice.
 
          function Find_Slash (Str : in String) return Natural;
@@ -1085,7 +1085,7 @@ package body Templates_Parser is
          -- Get_Slice --
          ---------------
 
-         procedure Get_Slice (Slice : in String; First, Last : out Natural) is
+         procedure Get_Slice (Slice : in String; First, Last : out Integer) is
             P1 : constant Natural := Fixed.Index (Slice, "..");
          begin
             First := 0;
@@ -1095,8 +1095,8 @@ package body Templates_Parser is
                raise Template_Error with "slice expected """ & Slice & '"';
 
             else
-               First := Natural'Value (Slice (Slice'First .. P1 - 1));
-               Last  := Natural'Value (Slice (P1 + 2 .. Slice'Last));
+               First := Integer'Value (Slice (Slice'First .. P1 - 1));
+               Last  := Integer'Value (Slice (P1 + 2 .. Slice'Last));
             end if;
          end Get_Slice;
 
@@ -1238,7 +1238,7 @@ package body Templates_Parser is
 
                      when F.Slice =>
                         declare
-                           First, Last : Natural;
+                           First, Last : Integer;
                         begin
                            Get_Slice (Parameter, First, Last);
 

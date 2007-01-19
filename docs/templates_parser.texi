@@ -51,7 +51,7 @@
 
 Copyright @copyright{} 1999-2004, Pascal Obry
 
-Copyright @copyright{} 2005-2006, AdaCore
+Copyright @copyright{} 2005-2007, AdaCore
 
 @*
 
@@ -753,6 +753,9 @@ Returns the size (number of characters) of the string value.
 
 Returns the sub-string starting from position x and ending to position
 y. Note that the string to slice always start from position 1.
+If x or y are negative, they are counted from the end of the string, so
+that 0 matches the last character of the string, -1 matches the character
+just before,...
 
 @item TRIM
 @cindex Filter, TRIM

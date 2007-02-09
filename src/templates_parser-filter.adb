@@ -482,11 +482,18 @@ package body Filter is
       loop
          if S (J) = '<'
            and then J + 3 <= S'Last
-           and then Characters.Handling.To_Lower (S (J .. J + 3)) = "<br>"
+           and then Characters.Handling.To_Lower (S (J .. J + 2)) = "<br"
+           and then
+             (S (J + 3) = '>'
+              or else (J + 4 <= S'Last and then S (J + 3 .. J + 4) = "/>"))
          then
             Result (K .. K + EOL'Length - 1) := EOL;
             K := K + EOL'Length;
-            J := J + 4;
+            if S (J + 3) = '>' then
+               J := J + 4;
+            else
+               J := J + 5;
+            end if;
          else
             Result (K) := S (J);
             K := K + 1;
@@ -953,13 +960,13 @@ package body Filter is
       end if;
 
       declare
-         Result : String (1 .. S'Length + N * 3);
+         Result : String (1 .. S'Length + N * 4);
          K      : Positive := S'First;
       begin
          for J in S'Range loop
             if S (J) = ASCII.LF then
-               Result (K .. K + 3) := "<br>";
-               K := K + 4;
+               Result (K .. K + 4) := "<br/>";
+               K := K + 5;
             else
                Result (K) := S (J);
                K := K + 1;

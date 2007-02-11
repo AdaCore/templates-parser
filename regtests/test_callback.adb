@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                          Copyright (C) 2005-2007                         --
 --                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,9 +34,9 @@ package body Test_Callback is
    -- Dimension --
    ---------------
 
-   function Dimension
-     (C   : access Cursor_Tag;
-      Var : in     String) return Natural is
+   overriding function Dimension
+     (C   : not null access Cursor_Tag;
+      Var : in String) return Natural is
    begin
       if Var = "CURSOR" then
          return 2;
@@ -51,10 +51,10 @@ package body Test_Callback is
    -- Length --
    ------------
 
-   function Length
-     (C    : access Cursor_Tag;
-      Var  : in     String;
-      Path : in     Templates_Parser.Dynamic.Path) return Natural is
+   overriding function Length
+     (C    : not null access Cursor_Tag;
+      Var  : in String;
+      Path : in Templates_Parser.Dynamic.Path) return Natural is
    begin
       if Var = "CURSOR" then
          if Path'Length = 1 then
@@ -85,9 +85,9 @@ package body Test_Callback is
    -- Callback --
    --------------
 
-   procedure Value
-     (L   : access Lazy_Tag;
-      Var : in     String;
+   overriding procedure Value
+     (L   : not null access Lazy_Tag;
+      Var : in String;
       S   : in out Templates_Parser.Translate_Set)
    is
       use Templates_Parser;
@@ -104,9 +104,9 @@ package body Test_Callback is
       end if;
    end Value;
 
-   procedure Value
-     (L   : access Log_Context;
-      Var : in     String;
+   overriding procedure Value
+     (L   : not null access Log_Context;
+      Var : in String;
       S   : in out Templates_Parser.Translate_Set)
    is
       pragma Unreferenced (L, S);
@@ -114,10 +114,10 @@ package body Test_Callback is
       Ada.Text_IO.Put_Line ("Tag " & Var & " missing.");
    end Value;
 
-   function Value
-     (C    : access Cursor_Tag;
-      Var  : in     String;
-      Path : in     Templates_Parser.Dynamic.Path) return String is
+   overriding function Value
+     (C    : not null access Cursor_Tag;
+      Var  : in String;
+      Path : in Templates_Parser.Dynamic.Path) return String is
    begin
       if Var = "CURSOR" then
          if Path'Length = 2 then

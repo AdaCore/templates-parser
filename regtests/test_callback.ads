@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                          Copyright (C) 2005-2007                         --
 --                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -32,33 +32,33 @@ package Test_Callback is
 
    type Lazy_Tag is new Templates_Parser.Dynamic.Lazy_Tag with private;
 
-   procedure Value
-     (L   : access Lazy_Tag;
-      Var : in     String;
+   overriding procedure Value
+     (L   : not null access Lazy_Tag;
+      Var : in String;
       S   : in out Templates_Parser.Translate_Set);
 
    type Log_Context is new Templates_Parser.Dynamic.Lazy_Tag with null record;
 
-   procedure Value
-     (L   : access Log_Context;
-      Var : in     String;
+   overriding procedure Value
+     (L   : not null access Log_Context;
+      Var : in String;
       S   : in out Templates_Parser.Translate_Set);
 
    type Cursor_Tag is new Templates_Parser.Dynamic.Cursor_Tag with null record;
 
-   function Dimension
-     (C   : access Cursor_Tag;
-      Var : in     String) return Natural;
+   overriding function Dimension
+     (C   : not null access Cursor_Tag;
+      Var : in String) return Natural;
 
-   function Length
-     (C    : access Cursor_Tag;
-      Var  : in     String;
-      Path : in     Templates_Parser.Dynamic.Path) return Natural;
+   overriding function Length
+     (C    : not null access Cursor_Tag;
+      Var  : in String;
+      Path : in Templates_Parser.Dynamic.Path) return Natural;
 
-   function Value
-     (C    : access Cursor_Tag;
-      Var  : in     String;
-      Path : in     Templates_Parser.Dynamic.Path) return String;
+   overriding function Value
+     (C    : not null access Cursor_Tag;
+      Var  : in String;
+      Path : in Templates_Parser.Dynamic.Path) return String;
 
 private
 

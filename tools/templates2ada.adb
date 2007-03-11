@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2006                            --
+--                         Copyright (C) 2006-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -39,11 +39,14 @@ with Ada.Text_IO;
 
 with GNAT.Command_Line;                      use GNAT.Command_Line;
 
+with AWS.Utils;
+with AWS.OS_Lib;
 with Templates_Parser;                       use Templates_Parser;
 
 procedure Templates2Ada is
 
    use Ada;
+   use AWS;
 
    function "+" (Str : String) return Unbounded_String
      renames Ada.Strings.Unbounded.To_Unbounded_String;
@@ -223,6 +226,7 @@ procedure Templates2Ada is
 
    procedure Output_File is
       use Maps, Sets;
+      Template         : constant String := To_String (Opt_Template);
       Output           : Text_IO.File_Type;
       T                : Translate_Set;
       C                : Maps.Cursor := First (All_Templates);
@@ -273,7 +277,21 @@ procedure Templates2Ada is
       Insert (T, Assoc ("SET_VAL",       Set_Val));
 
       Text_IO.Create (Output, Text_IO.Out_File, To_String (Opt_Output));
-      Text_IO.Put (Output, Parse (To_String (Opt_Template), T));
+
+      if Directories.Exists (Template) then
+         Text_IO.Put (Output, Parse (Template, T));
+      else
+         Text_IO.Put
+           (Output,
+            Parse (Utils.Get_Program_Directory
+              & ".." & OS_Lib.Directory_Separator
+              & "share" & OS_Lib.Directory_Separator
+              & "examples" & OS_Lib.Directory_Separator
+              & "aws" & OS_Lib.Directory_Separator
+              & "templates" & OS_Lib.Directory_Separator & Template,
+              T));
+      end if;
+
       Text_IO.Close (Output);
 
    exception

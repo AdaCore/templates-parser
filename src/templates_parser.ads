@@ -298,7 +298,7 @@ package Templates_Parser is
       Translations : Translate_Set;
       Lazy_Tag     : Dynamic.Lazy_Tag_Access;
    end record;
-   Wor
+
    type Callback is access function
      (Value      : in String;
       Parameters : in String;

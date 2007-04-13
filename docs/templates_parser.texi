@@ -827,15 +827,20 @@ document the behavior of your filter.
 
 Here is the templates parser API for defining your own custom filters:
 
-@TPEXP{   @b{type} Callback @b{is access function}
-     (Value        : @b{in} String;
-      Parameters   : @b{in} String;
-      Translations : @b{in} Translate_Set) @b{return} String;
+@TPEXP{      @b{type} Filter_Context @b{is record}
+      Translations : Translate_Set;
+      Lazy_Tag     : Dynamic.Lazy_Tag_Access;      
+   @b{end record};
+   
+   @b{type} Callback @b{is access function}
+     (Value      : @b{in} String;
+      Parameters : @b{in} String;
+      Context    : @b{in} Filter_Context) @b{return} String;
    @i{--  User's filter callback}
 
    @b{type} Callback_No_Param @b{is access function}
-     (Value        : @b{in} String;
-      Translations : @b{in} Translate_Set) @b{return} String;
+     (Value   : @b{in} String;
+      Context : @b{in} Filter_Context) @b{return} String;
    @i{--  User's filter callback}
    
    @b{procedure} Register_Filter
@@ -850,8 +855,9 @@ Here is the templates parser API for defining your own custom filters:
 
 In the above calls, Value is the value of the tag on which the filter
 applies. In the examples above, that would be the value of @code{TAG}
-as looked up in the translation table. Translations in the translation
-table you can use if you need to look up other tags.
+as looked up in the translation table. Context contains the the translation
+table and the current lazy tag object you can use if you need to look
+up other tags.
 
 Here is a simple example of a custom filter, which can be used to
 generate HTML forms. In such a form, it is common to have some @code{<input>}
@@ -866,24 +872,25 @@ argument to the filter starts with a @code{'@@'} character, the argument
 is interpreted as the name of a tag to look up first.
 
 @TPEXP{
-   function Custom_Select_Filter
-     (Value        : String;
-      Parameters   : String;
-      Translations : Translate_Set) return String is
+   @b{function} Custom_Select_Filter
+     (Value      : @b{in} String;
+      Parameters : @b{in} String;
+      Context    : @b{in} Filter_Context) @b{return} String @b{is}
    begin
-      if Parameters /= "" and then Parameters (Parameters'First) = '@@' then
-         if Get (Get (Translations,
+      @b{if} Parameters /= "" @b{and then} Parameters (Parameters'First) = '@@' @b{then}
+         @b{if} Get (Get (Context.Translations,
                       Parameters (Parameters'First + 1 .. Parameters'Last))) =
            Value
-         then
+         @b{then}
             return "selected='selected'";
-         end if;
-      elsif Value = Parameters then
-         return "selected='selected'";
-      end if;
+         @b{end if};
 
-      return "";
-   end Custom_Select_Filter;
+      @b{elsif} Value = Parameters @b{then}
+         return "selected='selected'";
+      @b{end if};
+
+      @b{return} "";
+   @b{end} Custom_Select_Filter;
 
    Register_Filter ("SELECTED", Custom_Select_Filter'Access);
 }

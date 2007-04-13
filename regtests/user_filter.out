@@ -11,3 +11,4 @@ tag_value
 > [F2=v2/azerty+tag_value]
 > [F2=v3/azerty+tag_value]
 
+tag_value .@SET. = //@SET\\

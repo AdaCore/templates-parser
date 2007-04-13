@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2006                            --
+--                          Copyright (C) 2006-2007                         --
 --                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -34,39 +34,98 @@ procedure User_Filter is
    use Ada.Text_IO;
    use Templates_Parser;
 
+   package LT is
+
+      type Local_Tag is new Dynamic.Lazy_Tag with null record;
+
+      procedure Value
+        (Lazy_Tag     : not null access Local_Tag;
+         Var_Name     : in String;
+         Translations : in out Translate_Set);
+
+   end LT;
+
+   Lazy : aliased LT.Local_Tag;
+
    function F1
      (S : in String;
-      T : in Translate_Set) return String;
+      C : in Filter_Context) return String;
 
    function F2
      (S : in String;
       P : in String;
-      T : in Translate_Set) return String;
+      C : in Filter_Context) return String;
+
+   function Selected
+     (S : in String;
+      P : in String;
+      C : in Filter_Context) return String;
+
+   --------
+   -- LT --
+   --------
+
+   package body LT is
+
+      procedure Value
+        (Lazy_Tag     : not null access Local_Tag;
+         Var_Name     : in String;
+         Translations : in out Translate_Set) is
+      begin
+         Insert (Translations, Assoc (Var_Name, "//" & Var_Name & "\\"));
+      end Value;
+
+   end LT;
+
+   --------
+   -- F1 --
+   --------
 
    function F1
      (S : in String;
-      T : in Translate_Set) return String is
+      C : in Filter_Context) return String is
    begin
       return "[F1=" & S & "]";
    end F1;
 
+   --------
+   -- F2 --
+   --------
+
    function F2
      (S : in String;
       P : in String;
-      T : in Translate_Set) return String is
+      C : in Filter_Context) return String is
    begin
-      return "[F2=" & S & "/" & P & "+" & Get (Get (T, "STAG")) & "]";
+      return "[F2=" & S & "/" & P & "+"
+        & Get (Get (C.Translations, "STAG")) & "]";
    end F2;
+
+   --------------
+   -- Selected --
+   --------------
+
+   function Selected
+     (S : in String;
+      P : in String;
+      C : in Filter_Context) return String
+   is
+      T : Translate_Set;
+   begin
+      C.Lazy_Tag.Value (P, T);
+      return S & " ." & P & ". = " & Get (Get (T, P));
+   end Selected;
 
    T : Tag := +"v1" & "v2" & "v3";
 
 begin
    Register_Filter ("F1", F1'Unrestricted_Access);
    Register_Filter ("F2", F2'Unrestricted_Access);
+   Register_Filter ("SELECTED", Selected'Unrestricted_Access);
 
    Put_Line
      (Parse ("user_filter.tmplt",
              Translate_Table'
                (Assoc ("STAG", "tag_value"),
-                Assoc ("VTAG", T))));
+                Assoc ("VTAG", T)), Lazy_Tag => Lazy'Unchecked_Access));
 end User_Filter;

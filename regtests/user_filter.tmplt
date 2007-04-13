@@ -10,3 +10,5 @@
 @@TABLE@@
 > @_F2(azerty):VTAG_@
 @@END_TABLE@@
+
+@_SELECTED(@SET):STAG_@

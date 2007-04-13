@@ -460,11 +460,16 @@ package body Templates_Parser is
       No_Include_Parameters : constant Include_Parameters
         := (others => (Null_Unbounded_String));
 
+      type Filter_Context is record
+         Translations : Translate_Set;
+         Lazy_Tag     : Dynamic.Lazy_Tag_Access;
+         I_Parameters : Include_Parameters;
+      end record;
+
       type Callback is access function
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
       --  P is the filter parameter, no parameter by default. Parameter are
       --  untyped and will be parsed by the filter function if needed.
 
@@ -506,279 +511,233 @@ package body Templates_Parser is
 
       function Absolute
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Add_Param
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function BR_2_EOL
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function BR_2_LF
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Capitalize
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Clean_Text
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Coma_2_Point
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Contract
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Del_Param
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Exist
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function File_Exists
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Format_Date
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Format_Number
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Is_Empty
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function LF_2_BR
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Lower
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Match
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Max
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Min
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Neg
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function No_Digit
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function No_Dynamic
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function No_Letter
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function No_Space
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Oui_Non
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Point_2_Coma
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Repeat
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Replace
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Replace_All
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Replace_Param
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Reverse_Data
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Size
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Slice
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Trim
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Upper
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function User_Defined
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Web_Encode
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Web_Escape
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Web_NBSP
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Wrap
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Yes_No
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Plus
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Minus
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Divide
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Multiply
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Modulo
         (S : in String;
-         P : in Parameter_Data     := No_Parameter;
-         T : in Translate_Set      := Null_Set;
-         I : in Include_Parameters := No_Include_Parameters) return String;
+         C : not null access Filter_Context;
+         P : in Parameter_Data := No_Parameter) return String;
 
       function Handle (Name : in String) return Callback;
       --  Returns the filter function for the given filter name
@@ -832,12 +791,9 @@ package body Templates_Parser is
    --  Returns string representation for the Tag variable
 
    function Translate
-     (T            : in Tag_Var;
-      Value        : in String;
-      Translations : in Translate_Set             := Null_Set;
-      I_Params     : in Filter.Include_Parameters
-                          := Filter.No_Include_Parameters)
-      return String;
+     (T       : in Tag_Var;
+      Value   : in String;
+      Context : not null access Filter.Filter_Context) return String;
    --  Returns the result of Value after applying all filters for tag T
 
    procedure Release (T : in out Tag_Var);
@@ -1187,9 +1143,7 @@ package body Templates_Parser is
 
             else
                declare
-                  Name : constant String
-                    := Filter (Filter'First .. P1 - 1);
-
+                  Name : constant String := Filter (Filter'First .. P1 - 1);
                   Mode : constant F.Mode := F.Mode_Value (Name);
 
                   Parameter : constant String
@@ -1492,12 +1446,9 @@ package body Templates_Parser is
    ---------------
 
    function Translate
-     (T            : in Tag_Var;
-      Value        : in String;
-      Translations : in Translate_Set := Null_Set;
-      I_Params     : in Filter.Include_Parameters
-                          := Filter.No_Include_Parameters)
-      return String
+     (T       : in Tag_Var;
+      Value   : in String;
+      Context : not null access Filter.Filter_Context) return String
    is
       use type Filter.Set_Access;
    begin
@@ -1507,10 +1458,8 @@ package body Templates_Parser is
          begin
             for K in T.Filters'Range loop
                R := To_Unbounded_String
-                 (T.Filters (K).Handle (To_String (R),
-                                        T.Filters (K).Parameters,
-                                        Translations,
-                                        I_Params));
+                 (T.Filters (K).Handle
+                  (To_String (R), Context, T.Filters (K).Parameters));
             end loop;
 
             return To_String (R);
@@ -3122,8 +3071,7 @@ package body Templates_Parser is
       function Parse
         (Mode    : in Parse_Mode;
          In_If   : in Boolean;
-         No_Read : in Boolean := False)
-         return Tree
+         No_Read : in Boolean := False) return Tree
       is
          use type Data.NKind;
          use type Data.Tree;
@@ -4091,6 +4039,8 @@ package body Templates_Parser is
                   T : constant Data.Tree := State.I_Params (Var.N);
                   --  T is the data tree that should be evaluated in place
                   --  of the include variable.
+                  C : aliased Filter.Filter_Context :=
+                        (Translations, Lazy_Tag, State.F_Params);
                begin
                   if T.Next = null and then T.Kind = Data.Var then
                      --  Here we have a special case where the include
@@ -4116,8 +4066,7 @@ package body Templates_Parser is
                            --  table) the state will not be used.
 
                            return Translate
-                             (Var, Translate (V, State.Parent.all),
-                              Translations, State.F_Params);
+                             (Var, Translate (V, State.Parent.all), C'Access);
 
                         else
                            --  This variable reference a parent include
@@ -4141,10 +4090,7 @@ package body Templates_Parser is
                      begin
                         Last := 0;
                         return Translate
-                          (Var,
-                           Buffer (Buffer'First .. L),
-                           Translations,
-                           State.F_Params);
+                          (Var, Buffer (Buffer'First .. L), C'Access);
                      end;
                   end if;
                end;
@@ -4221,6 +4167,8 @@ package body Templates_Parser is
            (Var : in Tag_Var; State : in Parse_State) return String
          is
             use type Data.Tree;
+            C        : aliased Filter.Filter_Context :=
+                         (Translations, Lazy_Tag, State.F_Params);
             D_Pos    : Definitions.Def_Map.Containers.Cursor;
             Pos      : Association_Set.Containers.Cursor;
             Up_Value : Natural := 0;
@@ -4238,8 +4186,7 @@ package body Templates_Parser is
                   case N.Kind is
                      when Definitions.Const =>
                         return Translate
-                          (Var, To_String (N.Value),
-                           Translations, State.F_Params);
+                          (Var, To_String (N.Value), C'Access);
 
                      when Definitions.Ref =>
                         V.N := N.Ref;
@@ -4252,8 +4199,7 @@ package body Templates_Parser is
                            --  This include parameter does not exists, use
                            --  default value.
                            return Translate
-                             (Var, To_String (N.Value),
-                              Translations, State.F_Params);
+                             (Var, To_String (N.Value), C'Access);
                         else
                            V.N := N.Ref;
                            return I_Translate (V, State);
@@ -4310,7 +4256,7 @@ package body Templates_Parser is
                                  return Translate
                                    (Var,
                                     Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
-                                    Translations, State.F_Params);
+                                    C'Access);
 
                               else
                                  --  A composite tag, check that the dimension
@@ -4322,8 +4268,7 @@ package body Templates_Parser is
                                       (Var,
                                        Dynamic.Value
                                          (Cursor_Tag, Name,
-                                          State.Cursor (1 .. D)),
-                                       Translations, State.F_Params);
+                                          State.Cursor (1 .. D)), C'Access);
 
                                  else
                                     --  Otherwise we inline the structure
@@ -4345,8 +4290,7 @@ package body Templates_Parser is
                      when Std =>
                         if Var.Attribute.Attr = Nil then
                            return Translate
-                             (Var, To_String (Tk.Value),
-                              Translations, State.F_Params);
+                             (Var, To_String (Tk.Value), C'Access);
                         else
                            raise Template_Error
                              with "Attribute not valid on a discrete tag ("
@@ -4360,8 +4304,7 @@ package body Templates_Parser is
                            if Var.Attribute.Attr = Length then
                               return Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Count),
-                                 Translations, State.F_Params);
+                                 Image (Tk.Comp_Value.Data.Count), C'Access);
 
                            elsif Var.Attribute.Attr = Up_Level then
                               Up_Value := Var.Attribute.Value;
@@ -4377,22 +4320,19 @@ package body Templates_Parser is
                               --  'Line on a matrix
                               return Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Count),
-                                 Translations, State.F_Params);
+                                 Image (Tk.Comp_Value.Data.Count), C'Access);
 
                            elsif Var.Attribute.Attr = Min_Column then
                               --  'Min_Column on a matrix
                               return Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Min),
-                                 Translations, State.F_Params);
+                                 Image (Tk.Comp_Value.Data.Min), C'Access);
 
                            elsif Var.Attribute.Attr = Max_Column then
                               --  'Max_Column on a matrix
                               return Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Max),
-                                 Translations, State.F_Params);
+                                 Image (Tk.Comp_Value.Data.Max), C'Access);
 
                            elsif Var.Attribute.Attr /= Nil then
                               raise Template_Error
@@ -4412,8 +4352,7 @@ package body Templates_Parser is
                               Result, Found);
 
                            return Translate
-                             (Var, To_String (Result),
-                              Translations, State.F_Params);
+                             (Var, To_String (Result), C'Access);
                         end;
                   end case;
                end if;
@@ -4422,89 +4361,69 @@ package body Templates_Parser is
             case Var.Internal is
                when Up_Table_Line =>
                   if State.Table_Level < 2 then
-                     return Translate
-                       (Var, "0", Translations, State.F_Params);
+                     return Translate (Var, "0", C'Access);
                   else
                      return Translate
                        (Var,
                         Image (State.Cursor (State.Table_Level - 1)),
-                        Translations, State.F_Params);
+                        C'Access);
                   end if;
 
                when Table_Line =>
                   if State.Table_Level = 0 then
-                     return Translate
-                       (Var, "0", Translations, State.F_Params);
+                     return Translate (Var, "0", C'Access);
                   else
                      return Translate
                        (Var,
                         Image (State.Cursor (State.Table_Level)),
-                        Translations, State.F_Params);
+                        C'Access);
                   end if;
 
                when Number_Line =>
                   return Translate
-                    (Var, Image (State.Max_Lines),
-                     Translations, State.F_Params);
+                    (Var, Image (State.Max_Lines), C'Access);
 
                when Table_Level =>
                   return Translate
-                    (Var, Image (State.Table_Level),
-                     Translations, State.F_Params);
+                    (Var, Image (State.Table_Level), C'Access);
 
                when Templates_Parser.Now =>
                   return Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%Y-%m-%d %H:%M:%S"),
-                     Translations, State.F_Params);
+                     C'Access);
 
                when Year =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%Y"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%Y"), C'Access);
 
                when Month =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%m"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%m"), C'Access);
 
                when Day =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%d"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%d"), C'Access);
 
                when Hour =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%H"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%H"), C'Access);
 
                when Minute =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%M"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%M"), C'Access);
 
                when Second =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%S"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%S"), C'Access);
 
                when Month_Name =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%B"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%B"), C'Access);
 
                when Day_Name =>
                   return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%A"),
-                     Translations, State.F_Params);
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%A"), C'Access);
 
                when No =>
                   null;
@@ -4516,7 +4435,7 @@ package body Templates_Parser is
             if Keep_Unknown_Tags then
                return To_String (Begin_Tag & Var.Name & End_Tag);
             else
-               return Translate (Var, "");
+               return Translate (Var, "", C'Access);
             end if;
          end Translate;
 
@@ -5554,16 +5473,14 @@ package body Templates_Parser is
 
    function Translate
      (Template     : in String;
-      Translations : in Translate_Table := No_Translation)
-      return String is
+      Translations : in Translate_Table := No_Translation) return String is
    begin
       return Translate (Template, To_Set (Translations));
    end Translate;
 
    function Translate
      (Template     : in String;
-      Translations : in Translate_Set)
-      return String
+      Translations : in Translate_Set) return String
    is
       T : Data.Tree := Data.Parse (Template);
       P : Data.Tree := T;
@@ -5579,6 +5496,8 @@ package body Templates_Parser is
 
       function Translate (Var : in Tag_Var) return String is
          Pos : Containers.Cursor;
+         C   : aliased Filter.Filter_Context :=
+                 (Translations, null, Filter.No_Include_Parameters);
       begin
          Pos := Containers.Find (Translations.Set.all, To_String (Var.Name));
 
@@ -5588,7 +5507,7 @@ package body Templates_Parser is
             begin
                case Item.Kind is
                   when Std =>
-                     return Translate (Var, To_String (Item.Value));
+                     return Translate (Var, To_String (Item.Value), C'Access);
                   when others =>
                      return "";
                end case;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2006                          --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -294,15 +294,20 @@ package Templates_Parser is
    -- User's Filters --
    --------------------
 
+   type Filter_Context is record
+      Translations : Translate_Set;
+      Lazy_Tag     : Dynamic.Lazy_Tag_Access;
+   end record;
+   Wor
    type Callback is access function
-     (Value        : in String;
-      Parameters   : in String;
-      Translations : in Translate_Set) return String;
+     (Value      : in String;
+      Parameters : in String;
+      Context    : in Filter_Context) return String;
    --  User's filter callback
 
    type Callback_No_Param is access function
-     (Value        : in String;
-      Translations : in Translate_Set) return String;
+     (Value   : in String;
+      Context : in Filter_Context) return String;
    --  User's filter callback
 
    procedure Register_Filter

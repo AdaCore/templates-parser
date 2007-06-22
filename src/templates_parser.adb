@@ -401,10 +401,12 @@ package body Templates_Parser is
          --  If True return Yes, If False returns No, else do nothing
         );
 
-      type User_CB (Parameter : Boolean := True) is record
-         case Parameter is
-            when True  => CBP : Callback;
-            when False => CB  : Callback_No_Param;
+      type User_CB_Type is (With_Param, No_Param, As_Tagged);
+      type User_CB (Typ : User_CB_Type := With_Param) is record
+         case Typ is
+            when With_Param  => CBP : Callback;
+            when No_Param    => CB  : Callback_No_Param;
+            when As_Tagged   => CBT : User_Filter_Access;
          end case;
       end record;
 
@@ -500,6 +502,10 @@ package body Templates_Parser is
       procedure Register
         (Name    : in String;
          Handler : in Callback_No_Param);
+
+      procedure Register
+        (Name    : in String;
+         Handler : access User_Filter'Class);
 
       function User_Handle (Name : in String) return User_CB;
       --  Returns the registered user's callback for the given filter name
@@ -5540,16 +5546,17 @@ package body Templates_Parser is
 
    procedure Register_Filter
      (Name    : in String;
-      Handler : in Callback) is
-   begin
-      Filter.Register (Name, Handler);
-   end Register_Filter;
+      Handler : in Callback)
+     renames Filter.Register;
 
    procedure Register_Filter
      (Name    : in String;
-      Handler : in Callback_No_Param) is
-   begin
-      Filter.Register (Name, Handler);
-   end Register_Filter;
+      Handler : in Callback_No_Param)
+     renames Filter.Register;
+
+   procedure Register_Filter
+     (Name       : in String;
+      Filter     : access User_Filter'Class)
+     renames Filter.Register;
 
 end Templates_Parser;

@@ -807,9 +807,17 @@ capitalized (all upper, all lower or first letter capital).
 It is also possible to define a new filter by registering a callback
 routine associated with the filter name.
 
-You can define two kinds of filters: filters that take no argument, and are
-therefore simply used as in @@_FILTER:TAG_@@, and filters that take one
-or more arguments, used as in @@_FILTER(param1,param2):TAG_@@.
+You can define three kinds of filters: filters that take no argument, and are
+therefore simply used as in @@_FILTER:TAG_@@, filters that take one
+or more arguments, used as in @@_FILTER(param1,param2):TAG_@@, and filters
+that are implemented as tagged objects, and take the same form as the filters
+with arguments described above.
+
+The latter form of filters (using tagged types) provides slightly more
+flexibility, as you can store your own user data in the filter when it is
+registered. Among other things, this makes it possible to share filters
+between various applications, when the filter needs to access some
+application-specific variable as well.
 
 The templates parser will not try to interpret the parameters for you, and
 will simply return the string representation of the list of parameters,

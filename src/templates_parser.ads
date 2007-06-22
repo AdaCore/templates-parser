@@ -320,6 +320,26 @@ package Templates_Parser is
       Handler : in Callback_No_Param);
    --  Register user's filter Name using the specified Handler
 
+   type User_Filter is abstract tagged private;
+   type User_Filter_Access is access all User_Filter'Class;
+   function Execute
+     (Filter     : access User_Filter;
+      Value      : in String;
+      Parameters : in String;
+      Context    : in Filter_Context) return String is abstract;
+   --  User filters can also be implemented through a tagged type, which allows
+   --  you to added your own user data to reuse a filter in several
+   --  applications, perhaps with a slightly different behavior each time.
+   --  It is possible for the callback to modify the data stored in Filter, but
+   --  this needs to be done with care, since multiple concurrent calls to
+   --  Callback might happen.
+
+   procedure Register_Filter
+     (Name       : in String;
+      Filter     : access User_Filter'Class);
+   --  Register a new filter. Filter must not be freed by the caller, since no
+   --  copy is made.
+
    -----------------------------
    -- Parsing and Translating --
    -----------------------------
@@ -498,5 +518,11 @@ private
 
    Null_Set : constant Translate_Set :=
                 (Ada.Finalization.Controlled with null, null);
+
+   ------------------
+   -- User filters --
+   ------------------
+
+   type User_Filter is abstract tagged null record;
 
 end Templates_Parser;

@@ -1,4 +1,4 @@
-------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
 --                         Copyright (C) 2003-2007                          --
@@ -1510,17 +1510,29 @@ package body Filter is
       C : not null access Filter_Context;
       P : in Parameter_Data := No_Parameter) return String is
    begin
-      if P.Handler.Parameter then
-         return P.Handler.CBP
-           (S, To_String (P.P), (C.Translations, C.Lazy_Tag));
+      case P.Handler.Typ is
+         when With_Param =>
+            return P.Handler.CBP
+              (S, To_String (P.P), (C.Translations, C.Lazy_Tag));
 
-      else
-         if P.P /= Null_Unbounded_String then
-            raise Template_Error with "no parameter allowed in this filter";
-         else
-            return P.Handler.CB (S, (C.Translations, C.Lazy_Tag));
-         end if;
-      end if;
+         when No_Param =>
+            if P.P /= Null_Unbounded_String then
+               raise Template_Error with "no parameter allowed in this filter";
+            else
+               return P.Handler.CB (S, (C.Translations, C.Lazy_Tag));
+            end if;
+
+         when As_Tagged =>
+            if P.Handler.CBT /= null then
+               return Execute
+                 (P.Handler.CBT,
+                  Value      => S,
+                  Parameters => To_String (P.P),
+                  Context    => (C.Translations, C.Lazy_Tag));
+            else
+               return "";
+            end if;
+      end case;
    end User_Defined;
 
    ----------------
@@ -1967,7 +1979,7 @@ package body Filter is
       Success  : Boolean;
    begin
       Filter_Map.Containers.Insert
-        (User_Filters, Name, (True, Handler), Position, Success);
+        (User_Filters, Name, (With_Param, Handler), Position, Success);
    end Register;
 
    procedure Register
@@ -1978,7 +1990,19 @@ package body Filter is
       Success  : Boolean;
    begin
       Filter_Map.Containers.Insert
-        (User_Filters, Name, (False, Handler), Position, Success);
+        (User_Filters, Name, (No_Param, Handler), Position, Success);
+   end Register;
+
+   procedure Register
+     (Name    : in String;
+      Handler : access User_Filter'Class)
+   is
+      Position : Filter_Map.Containers.Cursor;
+      Success  : Boolean;
+   begin
+      Filter_Map.Containers.Insert
+        (User_Filters, Name, (As_Tagged, User_Filter_Access (Handler)),
+         Position, Success);
    end Register;
 
    -------------

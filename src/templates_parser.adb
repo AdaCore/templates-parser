@@ -507,6 +507,8 @@ package body Templates_Parser is
         (Name    : in String;
          Handler : access User_Filter'Class);
 
+      procedure Free_Filters;
+
       function User_Handle (Name : in String) return User_CB;
       --  Returns the registered user's callback for the given filter name
 
@@ -5558,5 +5560,7 @@ package body Templates_Parser is
      (Name       : in String;
       Filter     : access User_Filter'Class)
      renames Filter.Register;
+
+   procedure Free_Filters renames Filter.Free_Filters;
 
 end Templates_Parser;

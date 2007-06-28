@@ -340,6 +340,10 @@ package Templates_Parser is
    --  Register a new filter. Filter must not be freed by the caller, since no
    --  copy is made.
 
+   procedure Free_Filters;
+   --  Free all user filters registered above. This is mostly intended when
+   --  you are testing memory leaks in your application
+
    -----------------------------
    -- Parsing and Translating --
    -----------------------------

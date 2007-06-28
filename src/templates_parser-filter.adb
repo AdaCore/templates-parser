@@ -768,6 +768,27 @@ package body Filter is
       end if;
    end File_Exists;
 
+   ------------------
+   -- Free_Filters --
+   ------------------
+
+   procedure Free_Filters is
+      procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+         (User_Filter'Class, User_Filter_Access);
+      C : Filter_Map.Containers.Cursor :=
+        Filter_Map.Containers.First (User_Filters);
+      U : User_CB;
+   begin
+      while Filter_Map.Containers.Has_Element (C) loop
+         if Filter_Map.Containers.Element (C).Typ = As_Tagged then
+            U := Filter_Map.Containers.Element (C);
+            Unchecked_Free (U.CBT);
+         end if;
+         Filter_Map.Containers.Next (C);
+      end loop;
+      Filter_Map.Containers.Clear (User_Filters);
+   end Free_Filters;
+
    -----------------
    -- Format_Date --
    -----------------

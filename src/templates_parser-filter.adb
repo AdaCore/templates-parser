@@ -776,7 +776,7 @@ package body Filter is
       procedure Unchecked_Free is new Ada.Unchecked_Deallocation
          (User_Filter'Class, User_Filter_Access);
       C : Filter_Map.Containers.Cursor :=
-        Filter_Map.Containers.First (User_Filters);
+            Filter_Map.Containers.First (User_Filters);
       U : User_CB;
    begin
       while Filter_Map.Containers.Has_Element (C) loop

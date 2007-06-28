@@ -335,14 +335,14 @@ package Templates_Parser is
    --  Callback might happen.
 
    procedure Register_Filter
-     (Name       : in String;
-      Filter     : access User_Filter'Class);
+     (Name   : in String;
+      Filter : access User_Filter'Class);
    --  Register a new filter. Filter must not be freed by the caller, since no
    --  copy is made.
 
    procedure Free_Filters;
    --  Free all user filters registered above. This is mostly intended when
-   --  you are testing memory leaks in your application
+   --  you are testing memory leaks in your application.
 
    -----------------------------
    -- Parsing and Translating --

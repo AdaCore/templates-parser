@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -69,12 +69,15 @@ package body Cached_Files is
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
 
       S : Natural := 1;
-      E : Natural := Index;
+      E : Natural;
       N : Natural;
       I : Tree;
 
    begin
       Tasking.Lock;
+
+      E := Index;
+
       --  Does the table initialized and do we have enough place on it ?
 
       if Files = null or else Index = Files'Last then

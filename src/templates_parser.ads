@@ -328,7 +328,7 @@ package Templates_Parser is
       Parameters : in String;
       Context    : in Filter_Context) return String is abstract;
    --  User filters can also be implemented through a tagged type, which allows
-   --  you to added your own user data to reuse a filter in several
+   --  you to add your own user data and reuse a filter in several
    --  applications, perhaps with a slightly different behavior each time.
    --  It is possible for the callback to modify the data stored in Filter, but
    --  this needs to be done with care, since multiple concurrent calls to

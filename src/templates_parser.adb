@@ -1961,6 +1961,94 @@ package body Templates_Parser is
       return Result;
    end "+";
 
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Tag) is
+      Item   : constant Tag_Node_Access :=
+        	new Tag_Node'(Value_Set, null, new Tag'(Value));
+      T_Size : constant Natural := Size (Value);
+   begin
+      if T.Data.Head = null then
+         T.Data.Nested_Level := Value.Data.Nested_Level + 1;
+         T.Data.Separator    := To_Unbounded_String ((1 => ASCII.LF));
+         T.Data.Head         := Item;
+      else
+         T.Data.Last.Next := Item;
+         T.Data.Nested_Level :=
+              Positive'Max
+                (T.Data.Nested_Level, Value.Data.Nested_Level + 1);
+      end if;
+
+      Free (T.Data.Tag_Nodes);
+      T.Data.Tag_Nodes := null;
+      T.Data.Count := T.Data.Count + 1;
+      T.Data.Min   := Natural'Min (T.Data.Min, T_Size);
+      T.Data.Max   := Natural'Max (T.Data.Max, T_Size);
+      T.Data.Last  := Item;
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Unbounded_String) is
+      Item : constant Tag_Node_Access :=
+               new Tag_Node'(Templates_Parser.Value, null, Value);
+   begin
+      if T.Data.Head = null then
+         T.Data.Head         := Item;
+         T.Data.Nested_Level := 1;
+         T.Data.Separator    := To_Unbounded_String (Default_Separator);
+      else
+         T.Data.Last.Next := Item;
+      end if;
+
+      Free (T.Data.Tag_Nodes);
+      T.Data.Tag_Nodes := null;
+      T.Data.Count := T.Data.Count + 1;
+      T.Data.Min   := Natural'Min (T.Data.Min, 1);
+      T.Data.Max   := Natural'Max (T.Data.Max, 1);
+      T.Data.Last := Item;
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in String) is
+   begin
+      Append (T, To_Unbounded_String (Value));
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Character) is
+   begin
+      Append (T, To_Unbounded_String (String'(1 => Value)));
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Boolean) is
+   begin
+      Append (T, To_Unbounded_String (Boolean'Image (Value)));
+   end Append;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Integer) is
+   begin
+      Append (T, To_Unbounded_String (Image (Value)));
+   end Append;
+
    ---------
    -- "&" --
    ---------

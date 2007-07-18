@@ -78,6 +78,14 @@ package Templates_Parser is
    function "&" (Value : in Integer;          T : in Tag) return Tag;
    --  Add Value at the front of the tag
 
+   procedure Append (T : in out Tag; Value : in String);
+   procedure Append (T : in out Tag; Value : in Character);
+   procedure Append (T : in out Tag; Value : in Boolean);
+   procedure Append (T : in out Tag; Value : in Unbounded_String);
+   procedure Append (T : in out Tag; Value : in Integer);
+   procedure Append (T : in out Tag; Value : in Tag);
+   --  Add Value at the end of tag
+
    procedure Set_Separator (T : in out Tag; Separator : in String);
    --  Set separator to be used when building a flat representation of
    --  a composite tag.

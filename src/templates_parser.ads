@@ -69,14 +69,17 @@ package Templates_Parser is
    function "&" (T : in Tag; Value : in Unbounded_String) return Tag;
    function "&" (T : in Tag; Value : in Integer)          return Tag;
    function "&" (T : in Tag; Value : in Tag)              return Tag;
-   --  Add Value at the end of the tag
+   --  Add Value at the end of the tag, note that "&" will modify its
+   --  first parameter. It is intended to be used as [T := T & "val"],
+   --  doing [T1 := T2 & "val"] will add val to T2 and set T1 as an
+   --  alias. This is design this way for efficiency.
 
    function "&" (Value : in String;           T : in Tag) return Tag;
    function "&" (Value : in Character;        T : in Tag) return Tag;
    function "&" (Value : in Boolean;          T : in Tag) return Tag;
    function "&" (Value : in Unbounded_String; T : in Tag) return Tag;
    function "&" (Value : in Integer;          T : in Tag) return Tag;
-   --  Add Value at the front of the tag
+   --  Add Value at the front of the tag, see note above
 
    procedure Append (T : in out Tag; Value : in String);
    procedure Append (T : in out Tag; Value : in Character);

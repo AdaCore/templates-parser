@@ -4004,7 +4004,7 @@ package body Templates_Parser is
 
          function Is_True (Str : in String) return Boolean;
          pragma Inline (Is_True);
-         --  Return True if Str is one of "TRUE", "OUI", the case beeing not
+         --  Return True if Str is one of "TRUE" or "T", the test is not
          --  case sensitive.
 
          function Translate
@@ -5113,7 +5113,7 @@ package body Templates_Parser is
          function Is_True (Str : in String) return Boolean is
             L_Str : constant String := Characters.Handling.To_Upper (Str);
          begin
-            return L_Str = "TRUE";
+            return L_Str = "TRUE" or else L_Str = "T";
          end Is_True;
 
       begin
@@ -5169,7 +5169,7 @@ package body Templates_Parser is
                Analyze (T.Next, State);
 
             when If_Stmt  =>
-               if Analyze (T.Cond) = "TRUE" then
+               if Is_True (Analyze (T.Cond)) then
                   Analyze (T.N_True, State);
                else
                   Analyze (T.N_False, State);

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2002 - 2005                        --
+--                         Copyright (C) 2002-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -26,9 +26,14 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.IO_Exceptions;
+
 package Templates_Parser.Input is
 
    type File_Type is limited private;
+
+   Status_Error : exception renames Ada.IO_Exceptions.Status_Error;
+   Name_Error   : exception renames Ada.IO_Exceptions.Name_Error;
 
    procedure Open
      (File : in out File_Type;

@@ -1,3 +1,30 @@
+############################################################################
+#                              Ada Web Server                              #
+#                                                                          #
+#                         Copyright (C) 2003-2007                          #
+#                                 AdaCore                                  #
+#                                                                          #
+#  This library is free software; you can redistribute it and/or modify    #
+#  it under the terms of the GNU General Public License as published by    #
+#  the Free Software Foundation; either version 2 of the License, or (at   #
+#  your option) any later version.                                         #
+#                                                                          #
+#  This library is distributed in the hope that it will be useful, but     #
+#  WITHOUT ANY WARRANTY; without even the implied warranty of              #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU       #
+#  General Public License for more details.                                #
+#                                                                          #
+#  You should have received a copy of the GNU General Public License       #
+#  along with this library; if not, write to the Free Software Foundation, #
+#  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.          #
+#                                                                          #
+#  As a special exception, if other files instantiate generics from this   #
+#  unit, or you link this unit with other files to produce an executable,  #
+#  this  unit  does not  by itself cause  the resulting executable to be   #
+#  covered by the GNU General Public License. This exception does not      #
+#  however invalidate any other reasons why the executable file  might be  #
+#  covered by the  GNU Public License.                                     #
+############################################################################
 
 .SILENT:
 
@@ -51,13 +78,13 @@ force:
 
 $(STD_TESTS): force
 	echo $@
-	$(GNATMAKE) -q -Pregtests $@
+	$(GNAT) make -q -Pregtests $@
 	-./$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
 $(EXP_TESTS): force
 	echo $@
-	$(GNATMAKE) -q -Pregtests $@ -bargs -E
+	$(GNAT) make -q -Pregtests $@ -bargs -E
 	-./$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
@@ -74,7 +101,7 @@ print_tree: force
 
 testcat: force
 	echo $@
-	$(GNATMAKE) -q -Pregtests testcat
+	$(GNAT) make -q -Pregtests testcat
 	-./testcat
 	-diff $(DIFF_ARGS) testcat.out testcat.res >> alldiffs
 
@@ -94,7 +121,7 @@ testme10_run:
 
 check_mem: force
 	echo $@
-	$(GNATMAKE) -q -Pregtests check_mem -largs -lgmem
+	$(GNAT) make -q -Pregtests check_mem -largs -lgmem
 	./check_mem 2 > check_mem.res
 	gnatmem 3 -i gmem.out ./check_mem$(EXEEXT) 2 1248 > check_mem.run1
 	grep "   Final" check_mem.run1 > run1
@@ -117,7 +144,7 @@ $(TESTS_TREE_RUN):
 
 init:
 	-rm -f alldiffs
-	$(GNATMAKE) -q -Pregtests $(MAIN_TESTS)
+	$(GNAT) make -q -Pregtests $(MAIN_TESTS)
 
 test:  init testme print_tree $(STANDALONE_TESTS) $(STD_TESTS) $(EXP_TESTS) \
 	$(TESTS_RUN) $(TESTS_TREE_RUN)

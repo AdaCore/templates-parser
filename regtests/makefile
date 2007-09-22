@@ -42,7 +42,11 @@ TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme30 testme31 testme32 testme38 blocks3 blocks4 blocks6 testme53 \
 	testme54 testme59 testme64
 
-STANDALONE_TESTS := test_templates_if testcat testme9_run testme10_run tt2a
+STANDALONE_TESTS := test_templates_if testcat testme9_run testme10_run
+
+ifneq ($(T2A),)
+STANDALONE_TESTS := $(STANDALONE_TESTS) tt2a
+endif
 
 ifeq ($(TP_XMLADA), Installed)
 XTESTS			= translations_demo
@@ -62,8 +66,6 @@ EXP_TESTS      = regtst2 regtst3 $(XTESTS)
 MAIN_TESTS     = testme print_tree filter
 
 DIFF_ARGS = -c -w
-
-T2A	= ../bin/templates2ada
 
 ifeq (${OS}, Windows_NT)
 EXE=.exe

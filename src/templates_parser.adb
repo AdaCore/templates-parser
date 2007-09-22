@@ -5113,7 +5113,7 @@ package body Templates_Parser is
          function Is_True (Str : in String) return Boolean is
             L_Str : constant String := Characters.Handling.To_Upper (Str);
          begin
-            return L_Str = "TRUE" or else L_Str = "T";
+            return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
          end Is_True;
 
       begin

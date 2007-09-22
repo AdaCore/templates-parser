@@ -39,9 +39,9 @@
 [END_IF]
 [TEXT] 
 [IF] @_NO_SPACE:VAR5_@
-  [TEXT]   NOK
-[ELSE]
   [TEXT]   OK
+[ELSE]
+  [TEXT]   NOK
 [END_IF]
 [TEXT] 
 [IF] @_UPPER:NO_SPACE:VAR5_@

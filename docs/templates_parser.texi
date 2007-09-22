@@ -1238,8 +1238,12 @@ This is the conditional statement. The complete form is:
 @@@@END_IF@@@@}
 
 @noindent
-The part1 one will be parsed if expression1 evaluate to "TRUE", part2
-will be parsed if expression2 evaluate to "TRUE" and the part3 will
+<expression> is TRUE if it evaluates to one of "TRUE", "T" or
+"1" and FALSE otherwise. Note that the test is not case sensitive.
+
+@noindent
+The part1 one will be parsed if expression1 evaluate to TRUE, part2
+will be parsed if expression2 evaluate to TRUE and the part3 will 
 be parse in any other case. The @code{ELSIF} and @code{ELSE} parts are
 optional.
 

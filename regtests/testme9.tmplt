@@ -37,9 +37,9 @@ Just some special tags:
 @@END_IF@@
 
 @@IF@@ @_NO_SPACE:VAR5_@
-  NOK
-@@ELSE@@
   OK
+@@ELSE@@
+  NOK
 @@END_IF@@
 
 @@IF@@ @_UPPER:NO_SPACE:VAR5_@

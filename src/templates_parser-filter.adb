@@ -266,141 +266,6 @@ package body Filter is
    --  Returns a string where all occurences of <BR> HTML tag have been
    --  replaced by EOL, assuming EOL is "LF", "CR", "LFCR" or "CRLF".
 
-   --------------------------
-   -- Check_Null_Parameter --
-   --------------------------
-
-   procedure Check_Null_Parameter (P : in Parameter_Data) is
-   begin
-      if P.Mode /= Void then
-         raise Template_Error with "no parameter allowed in this filter";
-      end if;
-   end Check_Null_Parameter;
-
-   ---------------
-   -- Parameter --
-   ---------------
-
-   function Parameter (Mode : in Filter.Mode) return Parameter_Mode is
-   begin
-      case Mode is
-         when Match                 => return Regexp;
-         when Replace | Replace_All => return Regpat;
-         when Slice                 => return Slice;
-         when User_Defined          => return User_Callback;
-         when others                => return Str;
-      end case;
-   end Parameter;
-
-   ------------
-   -- Handle --
-   ------------
-
-   function Handle (Name : in String) return Callback is
-      Mode : constant Filter.Mode := Mode_Value (Name);
-   begin
-      return Table (Mode).Handle;
-   end Handle;
-
-   function Handle (Mode : in Filter.Mode) return Callback is
-   begin
-      return Table (Mode).Handle;
-   end Handle;
-
-   -----------------
-   -- User_Handle --
-   -----------------
-
-   function User_Handle (Name : in String) return User_CB is
-   begin
-      return Filter_Map.Containers.Element (User_Filters, Name);
-   end User_Handle;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (P : in Parameter_Data) return String is
-   begin
-      case P.Mode is
-         when Void         => return "";
-         when Str          => return '(' & To_String (P.S) & ')';
-         when Regexp       => return '(' & To_String (P.R_Str) & ')';
-         when Regpat       =>
-            return '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
-         when Slice  =>
-            return '(' & Image (P.First) & " .. " & Image (P.Last) & ')';
-         when User_Callback =>
-            return '(' & To_String (P.P) & ')';
-      end case;
-   end Image;
-
-   ----------------
-   -- Mode_Value --
-   ----------------
-
-   function Mode_Value (Name : in String) return Mode is
-      F, L, K : Mode;
-   begin
-      F := Mode'First;
-      L := Mode'Last;
-
-      loop
-         K := Mode'Val ((Mode'Pos (F) + Mode'Pos (L)) / 2);
-
-         if Table (K).Name.all = Name then
-            return K;
-
-         else
-            exit when F = K and then L = K;
-
-            if Table (K).Name.all < Name then
-               F := K;
-               if F /= Mode'Last then
-                  F := Mode'Succ (F);
-               end if;
-
-               exit when Table (F).Name.all > Name;
-
-            else
-               L := K;
-               if L /= Mode'First then
-                  L := Mode'Pred (L);
-               end if;
-
-               exit when Table (L).Name.all < Name;
-            end if;
-         end if;
-      end loop;
-
-      --  Not found in the table of built-in filters, look for a user's one
-
-      if Filter_Map.Containers.Contains (User_Filters, Name) then
-         return User_Defined;
-      end if;
-
-      raise Internal_Error with "Unknown filter " & Name;
-   end Mode_Value;
-
-   ----------
-   -- Name --
-   ----------
-
-   function Name (Handle : in Callback) return String is
-   begin
-      for K in Table'Range loop
-         if Table (K).Handle = Handle then
-            return Table (K).Name.all;
-         end if;
-      end loop;
-
-      raise Internal_Error with "Unknown filter handle";
-   end Name;
-
-   --
-   --  Filters definition start here
-   --
-
    --------------
    -- Absolute --
    --------------
@@ -574,6 +439,17 @@ package body Filter is
       return Result;
    end Capitalize;
 
+   --------------------------
+   -- Check_Null_Parameter --
+   --------------------------
+
+   procedure Check_Null_Parameter (P : in Parameter_Data) is
+   begin
+      if P.Mode /= Void then
+         raise Template_Error with "no parameter allowed in this filter";
+      end if;
+   end Check_Null_Parameter;
+
    ----------------
    -- Clean_Text --
    ----------------
@@ -728,6 +604,39 @@ package body Filter is
       end if;
    end Del_Param;
 
+   ------------
+   -- Divide --
+   ------------
+
+   function Divide
+     (S : in String;
+      C : not null access Filter_Context;
+      P : in Parameter_Data := No_Parameter) return String
+   is
+      N, V : Integer;
+   begin
+      declare
+         V_Str : constant String := To_String (P.S);
+      begin
+         if Is_Number (V_Str) then
+            N := Integer'Value (V_Str);
+         else
+            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Template_Error with """/"" filter parameter error";
+      end;
+
+      begin
+         V := Integer'Value (S);
+         return Image (V / N);
+      exception
+         when others =>
+            return "";
+      end;
+   end Divide;
+
    -----------
    -- Exist --
    -----------
@@ -767,27 +676,6 @@ package body Filter is
          return "FALSE";
       end if;
    end File_Exists;
-
-   ------------------
-   -- Free_Filters --
-   ------------------
-
-   procedure Free_Filters is
-      procedure Unchecked_Free is new Ada.Unchecked_Deallocation
-         (User_Filter'Class, User_Filter_Access);
-      C : Filter_Map.Containers.Cursor :=
-            Filter_Map.Containers.First (User_Filters);
-      U : User_CB;
-   begin
-      while Filter_Map.Containers.Has_Element (C) loop
-         if Filter_Map.Containers.Element (C).Typ = As_Tagged then
-            U := Filter_Map.Containers.Element (C);
-            Unchecked_Free (U.CBT);
-         end if;
-         Filter_Map.Containers.Next (C);
-      end loop;
-      Filter_Map.Containers.Clear (User_Filters);
-   end Free_Filters;
 
    -----------------
    -- Format_Date --
@@ -916,6 +804,61 @@ package body Filter is
          return S;
       end if;
    end Format_Number;
+
+   ------------------
+   -- Free_Filters --
+   ------------------
+
+   procedure Free_Filters is
+      procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+         (User_Filter'Class, User_Filter_Access);
+      C : Filter_Map.Containers.Cursor :=
+            Filter_Map.Containers.First (User_Filters);
+      U : User_CB;
+   begin
+      while Filter_Map.Containers.Has_Element (C) loop
+         if Filter_Map.Containers.Element (C).Typ = As_Tagged then
+            U := Filter_Map.Containers.Element (C);
+            Unchecked_Free (U.CBT);
+         end if;
+         Filter_Map.Containers.Next (C);
+      end loop;
+      Filter_Map.Containers.Clear (User_Filters);
+   end Free_Filters;
+
+   ------------
+   -- Handle --
+   ------------
+
+   function Handle (Name : in String) return Callback is
+      Mode : constant Filter.Mode := Mode_Value (Name);
+   begin
+      return Table (Mode).Handle;
+   end Handle;
+
+   function Handle (Mode : in Filter.Mode) return Callback is
+   begin
+      return Table (Mode).Handle;
+   end Handle;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (P : in Parameter_Data) return String is
+   begin
+      case P.Mode is
+         when Void         => return "";
+         when Str          => return '(' & To_String (P.S) & ')';
+         when Regexp       => return '(' & To_String (P.R_Str) & ')';
+         when Regpat       =>
+            return '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
+         when Slice  =>
+            return '(' & Image (P.First) & " .. " & Image (P.Last) & ')';
+         when User_Callback =>
+            return '(' & To_String (P.P) & ')';
+      end case;
+   end Image;
 
    --------------
    -- Is_Empty --
@@ -1066,6 +1009,167 @@ package body Filter is
       end if;
    end Min;
 
+   -----------
+   -- Minus --
+   -----------
+
+   function Minus
+     (S : in String;
+      C : not null access Filter_Context;
+      P : in Parameter_Data := No_Parameter) return String
+   is
+      N, V : Integer;
+   begin
+      declare
+         V_Str : constant String := To_String (P.S);
+      begin
+         if Is_Number (V_Str) then
+            N := Integer'Value (V_Str);
+         else
+            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Template_Error with """-"" filter parameter error";
+      end;
+
+      begin
+         V := Integer'Value (S);
+         return Image (V - N);
+      exception
+         when others =>
+            return "";
+      end;
+   end Minus;
+
+   ----------------
+   -- Mode_Value --
+   ----------------
+
+   function Mode_Value (Name : in String) return Mode is
+      F, L, K : Mode;
+   begin
+      F := Mode'First;
+      L := Mode'Last;
+
+      loop
+         K := Mode'Val ((Mode'Pos (F) + Mode'Pos (L)) / 2);
+
+         if Table (K).Name.all = Name then
+            return K;
+
+         else
+            exit when F = K and then L = K;
+
+            if Table (K).Name.all < Name then
+               F := K;
+               if F /= Mode'Last then
+                  F := Mode'Succ (F);
+               end if;
+
+               exit when Table (F).Name.all > Name;
+
+            else
+               L := K;
+               if L /= Mode'First then
+                  L := Mode'Pred (L);
+               end if;
+
+               exit when Table (L).Name.all < Name;
+            end if;
+         end if;
+      end loop;
+
+      --  Not found in the table of built-in filters, look for a user's one
+
+      if Filter_Map.Containers.Contains (User_Filters, Name) then
+         return User_Defined;
+      end if;
+
+      raise Internal_Error with "Unknown filter " & Name;
+   end Mode_Value;
+
+   ------------
+   -- Modulo --
+   ------------
+
+   function Modulo
+     (S : in String;
+      C : not null access Filter_Context;
+      P : in Parameter_Data := No_Parameter) return String
+   is
+      N, V : Integer;
+   begin
+      declare
+         V_Str : constant String := To_String (P.S);
+      begin
+         if Is_Number (V_Str) then
+            N := Integer'Value (V_Str);
+         else
+            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Template_Error with "modulo filter parameter error";
+      end;
+
+      begin
+         V := Integer'Value (S);
+         return Image (V mod N);
+      exception
+         when others =>
+            return "";
+      end;
+   end Modulo;
+
+   --------------
+   -- Multiply --
+   --------------
+
+   function Multiply
+     (S : in String;
+      C : not null access Filter_Context;
+      P : in Parameter_Data := No_Parameter) return String
+   is
+      N, V : Integer;
+   begin
+      declare
+         V_Str : constant String := To_String (P.S);
+      begin
+         if Is_Number (V_Str) then
+            N := Integer'Value (V_Str);
+         else
+            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Template_Error with """*"" filter parameter error";
+      end;
+
+      begin
+         V := Integer'Value (S);
+         return Image (V * N);
+      exception
+         when others =>
+            return "";
+      end;
+   end Multiply;
+
+   ----------
+   -- Name --
+   ----------
+
+   function Name (Handle : in Callback) return String is
+   begin
+      for K in Table'Range loop
+         if Table (K).Handle = Handle then
+            return Table (K).Name.all;
+         end if;
+      end loop;
+
+      raise Internal_Error with "Unknown filter handle";
+   end Name;
+
    ---------
    -- Neg --
    ---------
@@ -1210,6 +1314,54 @@ package body Filter is
       end if;
    end Oui_Non;
 
+   ---------------
+   -- Parameter --
+   ---------------
+
+   function Parameter (Mode : in Filter.Mode) return Parameter_Mode is
+   begin
+      case Mode is
+         when Match                 => return Regexp;
+         when Replace | Replace_All => return Regpat;
+         when Slice                 => return Slice;
+         when User_Defined          => return User_Callback;
+         when others                => return Str;
+      end case;
+   end Parameter;
+
+   ----------
+   -- Plus --
+   ----------
+
+   function Plus
+     (S : in String;
+      C : not null access Filter_Context;
+      P : in Parameter_Data := No_Parameter) return String
+   is
+      N, V : Integer;
+   begin
+      declare
+         V_Str : constant String := To_String (P.S);
+      begin
+         if Is_Number (V_Str) then
+            N := Integer'Value (V_Str);
+         else
+            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
+         end if;
+      exception
+         when Constraint_Error =>
+            raise Template_Error with """+"" filter parameter error";
+      end;
+
+      begin
+         V := Integer'Value (S);
+         return Image (V + N);
+      exception
+         when others =>
+            return "";
+      end;
+   end Plus;
+
    ------------------
    -- Point_2_Coma --
    ------------------
@@ -1232,6 +1384,66 @@ package body Filter is
 
       return Result;
    end Point_2_Coma;
+
+   --------------
+   -- Register --
+   --------------
+
+   procedure Register
+     (Name    : in String;
+      Handler : in Templates_Parser.Callback)
+   is
+      Position : Filter_Map.Containers.Cursor;
+      Success  : Boolean;
+   begin
+      Filter_Map.Containers.Insert
+        (User_Filters, Name, (With_Param, Handler), Position, Success);
+   end Register;
+
+   procedure Register
+     (Name    : in String;
+      Handler : in Callback_No_Param)
+   is
+      Position : Filter_Map.Containers.Cursor;
+      Success  : Boolean;
+   begin
+      Filter_Map.Containers.Insert
+        (User_Filters, Name, (No_Param, Handler), Position, Success);
+   end Register;
+
+   procedure Register
+     (Name    : in String;
+      Handler : access User_Filter'Class)
+   is
+      Position : Filter_Map.Containers.Cursor;
+      Success  : Boolean;
+   begin
+      Filter_Map.Containers.Insert
+        (User_Filters, Name, (As_Tagged, User_Filter_Access (Handler)),
+         Position, Success);
+   end Register;
+
+   -------------
+   -- Release --
+   -------------
+
+   procedure Release (P : in out Parameter_Data) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (GNAT.Regpat.Pattern_Matcher, Pattern_Matcher_Access);
+   begin
+      if P.Mode = Regpat then
+         Free (P.Regpat);
+      elsif P.Mode = Regexp then
+         Free (P.Regexp);
+      end if;
+   end Release;
+
+   procedure Release (S : in out Set) is
+   begin
+      for K in S'Range loop
+         Release (S (K).Parameters);
+      end loop;
+   end Release;
 
    ------------
    -- Repeat --
@@ -1556,6 +1768,60 @@ package body Filter is
       end case;
    end User_Defined;
 
+   -----------------
+   -- User_Handle --
+   -----------------
+
+   function User_Handle (Name : in String) return User_CB is
+   begin
+      return Filter_Map.Containers.Element (User_Filters, Name);
+   end User_Handle;
+
+   -----------
+   -- Value --
+   -----------
+
+   function Value
+     (Str          : in String;
+      Translations : in Translate_Set;
+      I_Params     : in Include_Parameters) return String
+   is
+      Pos : Association_Set.Containers.Cursor;
+   begin
+      if Str'Length > 0
+        and then Str (Str'First) = '$'
+        and then Is_Number (Str (Str'First + 1 .. Str'Last))
+      then
+         --  This is an include parameter
+
+         declare
+            N : constant Natural
+              := Natural'Value (Str (Str'First + 1 .. Str'Last));
+         begin
+            return To_String (I_Params (N));
+         end;
+
+      elsif Translations = Null_Set then
+         return Str;
+
+      else
+         Pos := Association_Set.Containers.Find (Translations.Set.all, Str);
+
+         if Association_Set.Containers.Has_Element (Pos) then
+            declare
+               Tk : constant Association :=
+                      Association_Set.Containers.Element (Pos);
+            begin
+               if Tk.Kind = Std then
+                  return To_String (Tk.Value);
+               end if;
+            end;
+         end if;
+
+         return Str;
+      end if;
+   end Value;
+
    ----------------
    -- Web_Encode --
    ----------------
@@ -1822,275 +2088,5 @@ package body Filter is
          return S;
       end if;
    end Yes_No;
-
-   ----------
-   -- Plus --
-   ----------
-
-   function Plus
-     (S : in String;
-      C : not null access Filter_Context;
-      P : in Parameter_Data := No_Parameter) return String
-   is
-      N, V : Integer;
-   begin
-      declare
-         V_Str : constant String := To_String (P.S);
-      begin
-         if Is_Number (V_Str) then
-            N := Integer'Value (V_Str);
-         else
-            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Template_Error with """+"" filter parameter error";
-      end;
-
-      begin
-         V := Integer'Value (S);
-         return Image (V + N);
-      exception
-         when others =>
-            return "";
-      end;
-   end Plus;
-
-   -----------
-   -- Minus --
-   -----------
-
-   function Minus
-     (S : in String;
-      C : not null access Filter_Context;
-      P : in Parameter_Data := No_Parameter) return String
-   is
-      N, V : Integer;
-   begin
-      declare
-         V_Str : constant String := To_String (P.S);
-      begin
-         if Is_Number (V_Str) then
-            N := Integer'Value (V_Str);
-         else
-            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Template_Error with """-"" filter parameter error";
-      end;
-
-      begin
-         V := Integer'Value (S);
-         return Image (V - N);
-      exception
-         when others =>
-            return "";
-      end;
-   end Minus;
-
-   ------------
-   -- Divide --
-   ------------
-
-   function Divide
-     (S : in String;
-      C : not null access Filter_Context;
-      P : in Parameter_Data := No_Parameter) return String
-   is
-      N, V : Integer;
-   begin
-      declare
-         V_Str : constant String := To_String (P.S);
-      begin
-         if Is_Number (V_Str) then
-            N := Integer'Value (V_Str);
-         else
-            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Template_Error with """/"" filter parameter error";
-      end;
-
-      begin
-         V := Integer'Value (S);
-         return Image (V / N);
-      exception
-         when others =>
-            return "";
-      end;
-   end Divide;
-
-   --------------
-   -- Multiply --
-   --------------
-
-   function Multiply
-     (S : in String;
-      C : not null access Filter_Context;
-      P : in Parameter_Data := No_Parameter) return String
-   is
-      N, V : Integer;
-   begin
-      declare
-         V_Str : constant String := To_String (P.S);
-      begin
-         if Is_Number (V_Str) then
-            N := Integer'Value (V_Str);
-         else
-            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Template_Error with """*"" filter parameter error";
-      end;
-
-      begin
-         V := Integer'Value (S);
-         return Image (V * N);
-      exception
-         when others =>
-            return "";
-      end;
-   end Multiply;
-
-   ------------
-   -- Modulo --
-   ------------
-
-   function Modulo
-     (S : in String;
-      C : not null access Filter_Context;
-      P : in Parameter_Data := No_Parameter) return String
-   is
-      N, V : Integer;
-   begin
-      declare
-         V_Str : constant String := To_String (P.S);
-      begin
-         if Is_Number (V_Str) then
-            N := Integer'Value (V_Str);
-         else
-            N := Integer'Value (Value (V_Str, C.Translations, C.I_Parameters));
-         end if;
-      exception
-         when Constraint_Error =>
-            raise Template_Error with "modulo filter parameter error";
-      end;
-
-      begin
-         V := Integer'Value (S);
-         return Image (V mod N);
-      exception
-         when others =>
-            return "";
-      end;
-   end Modulo;
-
-   --------------
-   -- Register --
-   --------------
-
-   procedure Register
-     (Name    : in String;
-      Handler : in Templates_Parser.Callback)
-   is
-      Position : Filter_Map.Containers.Cursor;
-      Success  : Boolean;
-   begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (With_Param, Handler), Position, Success);
-   end Register;
-
-   procedure Register
-     (Name    : in String;
-      Handler : in Callback_No_Param)
-   is
-      Position : Filter_Map.Containers.Cursor;
-      Success  : Boolean;
-   begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (No_Param, Handler), Position, Success);
-   end Register;
-
-   procedure Register
-     (Name    : in String;
-      Handler : access User_Filter'Class)
-   is
-      Position : Filter_Map.Containers.Cursor;
-      Success  : Boolean;
-   begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (As_Tagged, User_Filter_Access (Handler)),
-         Position, Success);
-   end Register;
-
-   -------------
-   -- Release --
-   -------------
-
-   procedure Release (P : in out Parameter_Data) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (GNAT.Regpat.Pattern_Matcher, Pattern_Matcher_Access);
-   begin
-      if P.Mode = Regpat then
-         Free (P.Regpat);
-      elsif P.Mode = Regexp then
-         Free (P.Regexp);
-      end if;
-   end Release;
-
-   procedure Release (S : in out Set) is
-   begin
-      for K in S'Range loop
-         Release (S (K).Parameters);
-      end loop;
-   end Release;
-
-   -----------
-   -- Value --
-   -----------
-
-   function Value
-     (Str          : in String;
-      Translations : in Translate_Set;
-      I_Params     : in Include_Parameters) return String
-   is
-      Pos : Association_Set.Containers.Cursor;
-   begin
-      if Str'Length > 0
-        and then Str (Str'First) = '$'
-        and then Is_Number (Str (Str'First + 1 .. Str'Last))
-      then
-         --  This is an include parameter
-
-         declare
-            N : constant Natural
-              := Natural'Value (Str (Str'First + 1 .. Str'Last));
-         begin
-            return To_String (I_Params (N));
-         end;
-
-      elsif Translations = Null_Set then
-         return Str;
-
-      else
-         Pos := Association_Set.Containers.Find (Translations.Set.all, Str);
-
-         if Association_Set.Containers.Has_Element (Pos) then
-            declare
-               Tk : constant Association :=
-                      Association_Set.Containers.Element (Pos);
-            begin
-               if Tk.Kind = Std then
-                  return To_String (Tk.Value);
-               end if;
-            end;
-         end if;
-
-         return Str;
-      end if;
-   end Value;
 
 end Filter;

@@ -196,55 +196,6 @@ package body Cached_Files is
          raise;
    end Get;
 
-   -------------
-   -- Release --
-   -------------
-
-   procedure Release (T : in out Static_Tree) is
-   begin
-      pragma Assert (T.C_Info /= null);
-      Tasking.Lock;
-
-      Update_Used_Counter (T, Mode => Released);
-
-      if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
-         pragma Assert (T.Info.Next /= T.C_Info);
-         Release (T.C_Info, Include => False);
-      end if;
-      Tasking.Unlock;
-   exception
-      when others =>
-         Tasking.Unlock;
-         raise;
-   end Release;
-
-   -------------
-   -- Release --
-   -------------
-
-   procedure Release is
-   begin
-      Tasking.Lock;
-
-      for K in 1 .. Index loop
-         --  We do not want to release the include files, each include file as
-         --  its own entry into the cache and is released as part of this loop.
-         Release (Files (K), Include => False);
-      end loop;
-
-      Index := 0;
-
-      Tasking.Unlock;
-   exception
-      when others =>
-         Tasking.Unlock;
-         raise;
-   end Release;
-
-   ---------
-   -- Get --
-   ---------
-
    function Get (Filename : in String) return Natural is
 
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
@@ -304,6 +255,51 @@ package body Cached_Files is
          end;
       end if;
    end Growth;
+
+   -------------
+   -- Release --
+   -------------
+
+   procedure Release (T : in out Static_Tree) is
+   begin
+      pragma Assert (T.C_Info /= null);
+      Tasking.Lock;
+
+      Update_Used_Counter (T, Mode => Released);
+
+      if T.C_Info.Obsolete and then T.C_Info.Used = 0 then
+         pragma Assert (T.Info.Next /= T.C_Info);
+         Release (T.C_Info, Include => False);
+      end if;
+      Tasking.Unlock;
+   exception
+      when others =>
+         Tasking.Unlock;
+         raise;
+   end Release;
+
+   -------------
+   -- Release --
+   -------------
+
+   procedure Release is
+   begin
+      Tasking.Lock;
+
+      for K in 1 .. Index loop
+         --  We do not want to release the include files, each include file as
+         --  its own entry into the cache and is released as part of this loop.
+         Release (Files (K), Include => False);
+      end loop;
+
+      Index := 0;
+
+      Tasking.Unlock;
+   exception
+      when others =>
+         Tasking.Unlock;
+         raise;
+   end Release;
 
    ----------------
    -- Up_To_Date --

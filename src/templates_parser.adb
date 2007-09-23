@@ -30,6 +30,7 @@ with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;
 with Ada.Directories;
+with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Unchecked_Deallocation;
@@ -47,12 +48,6 @@ package body Templates_Parser is
    use Ada.Exceptions;
    use Ada.Strings;
 
-   pragma Warnings (Off);
-   use Ada.Strings.Unbounded;
-   --  Work around a visibility bug in GNAT 5.03a1, the with/use clauses for
-   --  Ada.Strings.Unbounded can be removed for later version.
-   pragma Warnings (On);
-
    Internal_Error : exception;
 
    Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
@@ -63,87 +58,6 @@ package body Templates_Parser is
    Windows_OS : constant Boolean :=
                   Fixed.Index (Directories.Current_Directory, "/") = 0;
    --  Simple Windows OS detection based on the current directory
-
-   function No_Quote (Str : in String) return String;
-   --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
-   --  are quotes return Str (Str'First + 1 ..  Str'Last - 1) otherwise
-   --  return Str as-is.
-
-   function Quote (Str : in String) return String;
-   --  Returns Str quoted if it contains spaces, otherwise just returns Str
-
-   function Is_Number (S : in String) return Boolean;
-   pragma Inline (Is_Number);
-   --  Returns True if S is a decimal number
-
-   procedure Free is new Ada.Unchecked_Deallocation (Integer, Integer_Access);
-
-   procedure Free is
-     new Unchecked_Deallocation (Tag_Node_Arr, Tag_Node_Arr_Access);
-
-   function Build_Include_Pathname
-     (Filename, Include_Filename : in String) return String;
-   --  Returns the full pathname to the include file (Include_Filename). It
-   --  returns Include_Filename if there is a pathname specified, or the
-   --  pathname of the main template file as a prefix of the include
-   --  filename.
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (N : in Integer) return String is
-      N_Img : constant String := Integer'Image (N);
-   begin
-      if N_Img (N_Img'First) = '-' then
-         return N_Img;
-      else
-         return N_Img (N_Img'First + 1 .. N_Img'Last);
-      end if;
-   end Image;
-
-   --------------
-   -- No_Quote --
-   --------------
-
-   function No_Quote (Str : in String) return String is
-   begin
-      if Str'Length > 1
-        and then Str (Str'First) = '"'
-        and then Str (Str'Last) = '"'
-      then
-         return Str (Str'First + 1 .. Str'Last - 1);
-      else
-         return Str;
-      end if;
-   end No_Quote;
-
-   -----------
-   -- Quote --
-   -----------
-
-   function Quote (Str : in String) return String is
-      K : constant Natural := Strings.Fixed.Index (Str, " ");
-   begin
-      if K = 0 then
-         return Str;
-      else
-         return '"' & Str & '"';
-      end if;
-   end Quote;
-
-   ---------------
-   -- Is_Number --
-   ---------------
-
-   function Is_Number (S : in String) return Boolean is
-      use Strings.Maps;
-   begin
-      return S'Length > 0
-        and then Is_Subset
-          (To_Set (S),
-           Constants.Decimal_Digit_Set or To_Set ("-"));
-   end Is_Number;
 
    --------------
    -- Tag Info --
@@ -168,53 +82,6 @@ package body Templates_Parser is
    End_Inline_Token           : constant String := "@@END_INLINE@@";
    A_Terminate_Sections_Token : constant String := "TERMINATE_SECTIONS";
    A_Reverse_Token            : constant String := "REVERSE";
-
-   -------------------
-   -- Translate_Set --
-   -------------------
-
-   ----------------
-   -- Initialize --
-   ----------------
-
-   procedure Initialize (Set : in out Translate_Set) is
-   begin
-      Set.Ref_Count := new Integer'(1);
-      Set.Set       := new Association_Set.Containers.Map;
-   end Initialize;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   procedure Finalize (Set : in out Translate_Set) is
-      procedure Free is new Unchecked_Deallocation
-        (Association_Set.Containers.Map, Map_Access);
-   begin
-      if Set.Ref_Count /= null then
-         Tasking.Lock;
-         Set.Ref_Count.all := Set.Ref_Count.all - 1;
-
-         if Set.Ref_Count.all = 0 then
-            Free (Set.Ref_Count);
-            Free (Set.Set);
-         end if;
-         Tasking.Unlock;
-      end if;
-   end Finalize;
-
-   ------------
-   -- Adjust --
-   ------------
-
-   procedure Adjust (Set : in out Translate_Set) is
-   begin
-      if Set.Ref_Count /= null then
-         Tasking.Lock;
-         Set.Ref_Count.all := Set.Ref_Count.all + 1;
-         Tasking.Unlock;
-      end if;
-   end Adjust;
 
    ------------
    -- Filter --
@@ -789,6 +656,7 @@ package body Templates_Parser is
    end record;
 
    function Is_Include_Variable (T : in Tag_Var) return Boolean;
+   pragma Inline (Is_Include_Variable);
    --  Returns True if T is an include variable (Name is $<n>)
 
    function Build (Str : in String) return Tag_Var;
@@ -807,58 +675,676 @@ package body Templates_Parser is
    procedure Release (T : in out Tag_Var);
    --  Release all memory associated with Tag
 
-   -----------
-   -- Image --
-   -----------
+   ----------
+   -- Data --
+   ----------
 
-   function Image (T : in Tag_Var) return String is
-      use type Filter.Set_Access;
-      R : Unbounded_String;
+   package Data is
+
+      type Node;
+      type Tree is access Node;
+
+      type NKind is (Text, Var);
+
+      type Node (Kind : NKind) is record
+         Next : Tree;
+         case Kind is
+            when Text =>
+               Value : Unbounded_String;
+            when Var =>
+               Var   : Tag_Var;
+         end case;
+      end record;
+
+      function Parse (Line : in String) return Tree;
+      --  Parse text line and returns the corresponding tree representation
+
+      procedure Print_Tree (D : in Tree);
+      --  Decend the text tree and print it to the standard output
+
+      procedure Release (D : in out Tree);
+      --  Release all memory used by the tree
+
+   end Data;
+
+   -----------------
+   -- Definitions --
+   -----------------
+
+   package Definitions is
+
+      type NKind is (Const, Ref, Ref_Default);
+
+      type Node (Kind : NKind := Const) is record
+         Value : Unbounded_String;
+         Ref   : Positive;
+      end record;
+
+      type Def is record
+         Name : Unbounded_String;
+         N    : Node;
+      end record;
+
+      type Tree is access Def;
+
+      function Parse (Line : in String) return Tree;
+      --  Returns a defintion data
+
+      package Def_Map is new Strings_Maps (Node);
+      subtype Map is Def_Map.Containers.Map;
+
+      procedure Print_Tree (D : in Tree);
+      --  Decend the text tree and print it to the standard output
+
+      procedure Release (D : in out Tree);
+      --  Release all memory used by the tree
+
+   end Definitions;
+
+   ------------------
+   --  Expressions --
+   ------------------
+
+   package Expr is
+
+      type Ops is (O_And, O_Or, O_Xor,
+                   O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
+
+      function Image (O : in Ops) return String;
+      --  Returns Ops string representation.
+
+      type U_Ops is (O_Not);
+
+      function Image (O : in U_Ops) return String;
+      --  Returns U_Ops string representation.
+
+      type Node;
+      type Tree is access Node;
+
+      type NKind is (Value, Var, Op, U_Op);
+      --  The node is a value, a variable a binary operator or an unary
+      --  operator
+
+      type Node (Kind : NKind) is record
+         case Kind is
+            when Value =>
+               V   : Unbounded_String;
+
+            when Var =>
+               Var : Tag_Var;
+
+            when Op =>
+               O           : Ops;
+               Left, Right : Tree;
+
+            when U_Op =>
+               U_O         : U_Ops;
+               Next        : Tree;
+         end case;
+      end record;
+
+      function Parse (Expression : in String) return Tree;
+      --  Parse Expression and returns the corresponding tree representation.
+
+      procedure Print_Tree (E : in Tree);
+      --  Decend the expression's tree and print the expression. It outputs the
+      --  expression with all parenthesis to show without ambiguity the way the
+      --  expression has been parsed.
+
+      procedure Release (E : in out Tree);
+      --  Release all associated memory with the tree.
+
+   end Expr;
+
+   --------------------------------
+   --  Template Tree definitions --
+   --------------------------------
+
+   type Nkind is (Info,          --  first node is tree infos
+                  C_Info,        --  second node is cache tree info
+                  Text,          --  this is a text line
+                  Set_Stmt,      --  a definition statement
+                  If_Stmt,       --  an IF tag statement
+                  Table_Stmt,    --  a TABLE tag statement
+                  Section_Block, --  a TABLE block (common, section)
+                  Section_Stmt,  --  a TABLE section
+                  Include_Stmt,  --  an INCLUDE tag statement
+                  Inline_Stmt);  --  an INLINE tag statement
+
+   --  A template line is coded as a suite of Data and Var element.
+
+   --  The first node in the tree is of type Info and should never be release
+   --  and changed. This ensure that included tree will always be valid
+   --  otherwise will would have to parse all the current trees in the cache
+   --  to update the reference.
+
+   type Node;
+   type Tree is access Node;
+
+   --  Static_Tree represent a Tree immune to cache changes. Info point to the
+   --  first node and C_Info to the second one. C_Info could be different to
+   --  Info.Next in case of cache changes. This way we keep a pointer to the
+   --  old tree to be able to release it when not used anymore. This way it is
+   --  possible to use the cache in multitasking program without trouble. The
+   --  changes in the cache are either because more than one task is parsing
+   --  the same template at the same time, they will update the cache with the
+   --  same tree at some point, or because a newer template was found in the
+   --  file system.
+
+   type Static_Tree is record
+      Info   : Tree;
+      C_Info : Tree;
+   end record;
+
+   Null_Static_Tree : constant Static_Tree := (null, null);
+
+   type Include_Parameters is array (0 .. Max_Include_Parameters) of Data.Tree;
+
+   No_Parameter : constant Include_Parameters := (others => null);
+
+   type Node (Kind : Nkind) is record
+      Next : Tree;
+      Line : Natural;
+
+      case Kind is
+         when Info =>
+            Filename  : Unbounded_String;         -- Name of the file
+            Timestamp : Configuration.Time_Stamp; -- Date/Time of last change
+            I_File    : Tree;                     -- Included file references
+
+         when C_Info =>
+            Obsolete  : Boolean := False;    -- True if newer version in cache
+            Used      : Natural := 0;        -- >0 if currently used
+
+         when Text =>
+            Text      : Data.Tree;
+
+         when Set_Stmt =>
+            Def       : Definitions.Tree;
+
+         when If_Stmt =>
+            Cond      : Expr.Tree;
+            N_True    : Tree;
+            N_False   : Tree;
+
+         when Table_Stmt =>
+            Terminate_Sections : Boolean;
+            Reverse_Index      : Boolean;
+            Blocks             : Tree;
+            Blocks_Count       : Natural;     -- Number if blocks
+
+         when Section_Block =>
+            Common         : Tree;
+            Sections       : Tree;
+            Sections_Count : Natural;         -- Number of sections
+
+         when Section_Stmt =>
+            N_Section : Tree;
+
+         when Include_Stmt =>
+            File       : Static_Tree;
+            I_Filename : Data.Tree;
+            I_Params   : Include_Parameters;
+
+         when Inline_Stmt =>
+            Before  : Unbounded_String;
+            Sep     : Unbounded_String;
+            After   : Unbounded_String;
+            I_Block : Tree;
+      end case;
+   end record;
+
+   procedure Release (T : in out Tree; Include : in Boolean := True);
+   --  Release all memory associated with the tree
+
+   procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
+
+   -------------------
+   --  Cached Files --
+   -------------------
+
+   --  Cached_Files keep the parsed Tree for a given file in memory. This
+   --  package has two implementations one is thread safe so it is possible to
+   --  use the cache in a multitasking program. The other is meant to be used
+   --  for configuration that do not want to drag the tasking runtime.
+
+   package Cached_Files is
+
+      procedure Add
+        (Filename : in     String;
+         T        : in     Tree;
+         Old      :    out Tree);
+      --  Add Filename/T to the list of cached files. If Filename is
+      --  already in the list, replace the current tree with T. Furthermore
+      --  if Filename tree is already in use, Old will be set with the
+      --  previous C_Info node otherwise Old will be T.Next (C_Info node
+      --  for current tree).
+
+      procedure Get
+        (Filename : in     String;
+         Result   :    out Static_Tree);
+      --  Returns the Tree for Filename or Null_Static_Tree if Filename has
+      --  not been cached or is obsolete.
+
+      procedure Release (T : in out Static_Tree);
+      --  After loading a tree and using it, it is required that it be
+      --  released. This will ensure that a tree marked as obsolete (a new
+      --  version being now in the cache) will be released from the memory.
+
+      procedure Release;
+      --  Release the internal cache. This free the memory used for all
+      --  currently loaded template trees.
+
+   end Cached_Files;
+
+   ---------
+   -- Tag --
+   ---------
+
+   procedure Field
+     (T      : in     Tag;
+      N      : in     Positive;
+      Result :    out Tag_Node_Access;
+      Found  :    out Boolean);
+   --  Returns the Nth item in Tag
+
+   procedure Field
+     (T        : in     Tag;
+      Cursor   : in     Indices;
+      Up_Value : in     Natural;
+      Result   :    out Unbounded_String;
+      Found    :    out Boolean);
+   --  Returns Value in Tag at position Cursor. Found is set to False if
+   --  there is no such value in Tag.
+
+   function No_Quote (Str : in String) return String;
+   --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
+   --  are quotes return Str (Str'First + 1 ..  Str'Last - 1) otherwise
+   --  return Str as-is.
+
+   function Quote (Str : in String) return String;
+   --  Returns Str quoted if it contains spaces, otherwise just returns Str
+
+   function Is_Number (S : in String) return Boolean;
+   pragma Inline (Is_Number);
+   --  Returns True if S is a decimal number
+
+   procedure Free is new Ada.Unchecked_Deallocation (Integer, Integer_Access);
+
+   procedure Free is
+     new Unchecked_Deallocation (Tag_Node_Arr, Tag_Node_Arr_Access);
+
+   function Build_Include_Pathname
+     (Filename, Include_Filename : in String) return String;
+   --  Returns the full pathname to the include file (Include_Filename). It
+   --  returns Include_Filename if there is a pathname specified, or the
+   --  pathname of the main template file as a prefix of the include
+   --  filename.
+
+   function Load
+     (Filename     : in String;
+      Cached       : in Boolean := False;
+      Include_File : in Boolean := False) return Static_Tree;
+   --  Load a template file and returns the semantic tree. The template file is
+   --  cached if Cached is set to true. If cached next Load will use the
+   --  preparsed tree.
+
+   procedure Print_Tree (T : in Tree; Level : in Natural := 0);
+   --  Print the semantic tree, this is mostly for debugging purpose
+
+   ---------
+   -- "&" --
+   ---------
+
+   function "&" (T : in Tag; Value : in String) return Tag is
+      Item : constant Tag_Node_Access
+        := new Tag_Node'
+          (Templates_Parser.Value, null, To_Unbounded_String (Value));
    begin
-      R := Begin_Tag;
+      T.Ref_Count.all := T.Ref_Count.all + 1;
 
-      --  Filters
+      Free (T.Data.Tag_Nodes);
 
-      if T.Filters /= null then
-         for K in reverse T.Filters'Range loop
-            Append (R, Filter.Name (T.Filters (K).Handle));
-            Append (R, Filter.Image (T.Filters (K).Parameters));
-            Append (R, ":");
-         end loop;
+      if T.Data.Head = null then
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, 1),
+            Max          => Natural'Max (T.Data.Max, 1),
+            Nested_Level => 1,
+            Separator    => To_Unbounded_String (Default_Separator),
+            Head         => Item,
+            Last         => Item,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+
+      else
+         T.Data.Last.Next := Item;
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, 1),
+            Max          => Natural'Max (T.Data.Max, 1),
+            Nested_Level => T.Data.Nested_Level,
+            Separator    => T.Data.Separator,
+            Head         => T.Data.Head,
+            Last         => Item,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+      end if;
+   end "&";
+
+   function "&" (Value : in String; T : in Tag) return Tag is
+      Item : constant Tag_Node_Access
+        := new Tag_Node'
+          (Templates_Parser.Value, T.Data.Head, To_Unbounded_String (Value));
+   begin
+      T.Ref_Count.all := T.Ref_Count.all + 1;
+
+      Free (T.Data.Tag_Nodes);
+
+      if T.Data.Head = null then
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, 1),
+            Max          => Natural'Max (T.Data.Max, 1),
+            Nested_Level => 1,
+            Separator    => To_Unbounded_String (Default_Separator),
+            Head         => Item,
+            Last         => Item,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+
+      else
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, 1),
+            Max          => Natural'Max (T.Data.Max, 1),
+            Nested_Level => T.Data.Nested_Level,
+            Separator    => T.Data.Separator,
+            Head         => Item,
+            Last         => T.Data.Last,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+      end if;
+   end "&";
+
+   function "&" (T : in Tag; Value : in Tag) return Tag is
+      Item   : constant Tag_Node_Access
+        := new Tag_Node'(Value_Set, null, new Tag'(Value));
+      T_Size : constant Natural := Size (Value);
+   begin
+      T.Ref_Count.all := T.Ref_Count.all + 1;
+
+      Free (T.Data.Tag_Nodes);
+
+      if T.Data.Head = null then
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, T_Size),
+            Max          => Natural'Max (T.Data.Max, T_Size),
+            Nested_Level => Value.Data.Nested_Level + 1,
+            Separator    => To_Unbounded_String ((1 => ASCII.LF)),
+            Head         => Item,
+            Last         => Item,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+
+      else
+         T.Data.Last.Next := Item;
+
+         T.Data.all :=
+           (T.Data.Count + 1,
+            Min          => Natural'Min (T.Data.Min, T_Size),
+            Max          => Natural'Max (T.Data.Max, T_Size),
+            Nested_Level =>
+              Positive'Max
+                (T.Data.Nested_Level, Value.Data.Nested_Level + 1),
+            Separator    => T.Data.Separator,
+            Head         => T.Data.Head,
+            Last         => Item,
+            Tag_Nodes    => null);
+
+         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+      end if;
+   end "&";
+
+   function "&" (T : in Tag; Value : in Character) return Tag is
+   begin
+      return T & String'(1 => Value);
+   end "&";
+
+   function "&" (T : in Tag; Value : in Boolean) return Tag is
+   begin
+      return T & Boolean'Image (Value);
+   end "&";
+
+   function "&" (T : in Tag; Value : in Unbounded_String) return Tag is
+   begin
+      return T & To_String (Value);
+   end "&";
+
+   function "&" (T : in Tag; Value : in Integer) return Tag is
+   begin
+      return T & Image (Value);
+   end "&";
+
+   function "&" (Value : in Character; T : in Tag) return Tag is
+   begin
+      return String'(1 => Value) & T;
+   end "&";
+
+   function "&" (Value : in Boolean; T : in Tag) return Tag is
+   begin
+      return Boolean'Image (Value) & T;
+   end "&";
+
+   function "&" (Value : in Unbounded_String; T : in Tag) return Tag is
+   begin
+      return To_String (Value) & T;
+   end "&";
+
+   function "&" (Value : in Integer; T : in Tag) return Tag is
+   begin
+      return Image (Value) & T;
+   end "&";
+
+   ---------
+   -- "+" --
+   ---------
+
+   function "+" (Value : in String) return Tag is
+      Item : constant Tag_Node_Access
+        := new Tag_Node'(Templates_Parser.Value,
+                         null, To_Unbounded_String (Value));
+   begin
+      return (Ada.Finalization.Controlled with
+              Ref_Count    => new Integer'(1),
+              Data         => new Tag_Data'
+                (Count        => 1,
+                 Min          => 1,
+                 Max          => 1,
+                 Nested_Level => 1,
+                 Separator    => To_Unbounded_String (Default_Separator),
+                 Head         => Item,
+                 Last         => Item,
+                 Tag_Nodes    => null));
+   end "+";
+
+   function "+" (Value : in Character) return Tag is
+   begin
+      return +String'(1 => Value);
+   end "+";
+
+   function "+" (Value : in Boolean) return Tag is
+   begin
+      return +Boolean'Image (Value);
+   end "+";
+
+   function "+" (Value : in Unbounded_String) return Tag is
+   begin
+      return +To_String (Value);
+   end "+";
+
+   function "+" (Value : in Integer) return Tag is
+   begin
+      return +Image (Value);
+   end "+";
+
+   function "+" (Value : in Tag) return Tag is
+      Result : Tag;
+   begin
+      Result := Result & Value;
+      --  This is an embedded tag, set separator to LF
+      Set_Separator (Result, (1 => ASCII.LF));
+      return Result;
+   end "+";
+
+   ------------
+   -- Adjust --
+   ------------
+
+   procedure Adjust (Set : in out Translate_Set) is
+   begin
+      if Set.Ref_Count /= null then
+         Tasking.Lock;
+         Set.Ref_Count.all := Set.Ref_Count.all + 1;
+         Tasking.Unlock;
+      end if;
+   end Adjust;
+
+   procedure Adjust (T : in out Tag) is
+   begin
+      Tasking.Lock;
+      T.Ref_Count.all := T.Ref_Count.all + 1;
+      Tasking.Unlock;
+   end Adjust;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append (T : in out Tag; Value : in Tag) is
+      Item   : constant Tag_Node_Access :=
+                 new Tag_Node'(Value_Set, null, new Tag'(Value));
+      T_Size : constant Natural := Size (Value);
+   begin
+      if T.Data.Head = null then
+         T.Data.Nested_Level := Value.Data.Nested_Level + 1;
+         T.Data.Separator    := To_Unbounded_String ((1 => ASCII.LF));
+         T.Data.Head         := Item;
+      else
+         T.Data.Last.Next := Item;
+         T.Data.Nested_Level :=
+           Positive'Max
+             (T.Data.Nested_Level, Value.Data.Nested_Level + 1);
       end if;
 
-      --  Tag name
+      Free (T.Data.Tag_Nodes);
+      T.Data.Tag_Nodes := null;
+      T.Data.Count     := T.Data.Count + 1;
+      T.Data.Min       := Natural'Min (T.Data.Min, T_Size);
+      T.Data.Max       := Natural'Max (T.Data.Max, T_Size);
+      T.Data.Last      := Item;
+   end Append;
 
-      Append (R, T.Name);
-
-      --  Attributes
-
-      case T.Attribute.Attr is
-         when Nil        => null;
-         when Length     => Append (R, "'Length");
-         when Line       => Append (R, "'Line");
-         when Min_Column => Append (R, "'Min_Column");
-         when Max_Column => Append (R, "'Max_Column");
-         when Up_Level   =>
-            Append (R, "'Up_Level");
-            if T.Attribute.Value /= 1 then
-               Append (R, '(' & Image (T.Attribute.Value) & ')');
-            end if;
-      end case;
-
-      Append (R, End_Tag);
-
-      return To_String (R);
-   end Image;
-
-   -------------------------
-   -- Is_Include_Variable --
-   -------------------------
-
-   function Is_Include_Variable (T : in Tag_Var) return Boolean is
+   procedure Append (T : in out Tag; Value : in Unbounded_String) is
+      Item : constant Tag_Node_Access :=
+               new Tag_Node'(Templates_Parser.Value, null, Value);
    begin
-      return T.N /= -1;
-   end Is_Include_Variable;
+      if T.Data.Head = null then
+         T.Data.Head         := Item;
+         T.Data.Nested_Level := 1;
+         T.Data.Separator    := To_Unbounded_String (Default_Separator);
+
+      else
+         T.Data.Last.Next := Item;
+      end if;
+
+      Free (T.Data.Tag_Nodes);
+      T.Data.Tag_Nodes := null;
+      T.Data.Count     := T.Data.Count + 1;
+      T.Data.Min       := Natural'Min (T.Data.Min, 1);
+      T.Data.Max       := Natural'Max (T.Data.Max, 1);
+      T.Data.Last      := Item;
+   end Append;
+
+   procedure Append (T : in out Tag; Value : in String) is
+   begin
+      Append (T, To_Unbounded_String (Value));
+   end Append;
+
+   procedure Append (T : in out Tag; Value : in Character) is
+   begin
+      Append (T, To_Unbounded_String (String'(1 => Value)));
+   end Append;
+
+   procedure Append (T : in out Tag; Value : in Boolean) is
+   begin
+      Append (T, To_Unbounded_String (Boolean'Image (Value)));
+   end Append;
+
+   procedure Append (T : in out Tag; Value : in Integer) is
+   begin
+      Append (T, To_Unbounded_String (Image (Value)));
+   end Append;
+
+   -----------
+   -- Assoc --
+   -----------
+
+   function Assoc
+     (Variable : in String;
+      Value    : in String) return Association is
+   begin
+      return Association'
+        (Std,
+         To_Unbounded_String (Variable),
+         To_Unbounded_String (Value));
+   end Assoc;
+
+   function Assoc
+     (Variable : in String;
+      Value    : in Ada.Strings.Unbounded.Unbounded_String)
+      return Association is
+   begin
+      return Assoc (Variable, To_String (Value));
+   end Assoc;
+
+   function Assoc
+     (Variable : in String;
+      Value    : in Integer) return Association is
+   begin
+      return Assoc (Variable, Image (Value));
+   end Assoc;
+
+   function Assoc
+     (Variable : in String;
+      Value    : in Boolean) return Association is
+   begin
+      if Value then
+         return Assoc (Variable, "TRUE");
+      else
+         return Assoc (Variable, "FALSE");
+      end if;
+   end Assoc;
+
+   function Assoc
+     (Variable  : in String;
+      Value     : in Tag;
+      Separator : in String := Default_Separator) return Association
+   is
+      T : Tag := Value;
+   begin
+      if Separator /= Default_Separator then
+         Set_Separator  (T, Separator);
+      end if;
+
+      return Association'(Composite, To_Unbounded_String (Variable), T);
+   end Assoc;
 
    -----------
    -- Build --
@@ -1434,347 +1920,11 @@ package body Templates_Parser is
       end if;
    end Build_Include_Pathname;
 
-   -------------
-   -- Release --
-   -------------
-
-   procedure Release (T : in out Tag_Var) is
-      use type Filter.Set_Access;
-      procedure Free is
-         new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
-   begin
-      if T.Filters /= null then
-         Filter.Release (T.Filters.all);
-         Free (T.Filters);
-      end if;
-   end Release;
-
-   ---------------
-   -- Translate --
-   ---------------
-
-   function Translate
-     (T       : in Tag_Var;
-      Value   : in String;
-      Context : not null access Filter.Filter_Context) return String
-   is
-      use type Filter.Set_Access;
-   begin
-      if T.Filters /= null then
-         declare
-            R : Unbounded_String := To_Unbounded_String (Value);
-         begin
-            for K in T.Filters'Range loop
-               R := To_Unbounded_String
-                 (T.Filters (K).Handle
-                  (To_String (R), Context, T.Filters (K).Parameters));
-            end loop;
-
-            return To_String (R);
-         end;
-      end if;
-
-      return Value;
-   end Translate;
-
-   ----------
-   -- Data --
-   ----------
-
-   package Data is
-
-      type Node;
-      type Tree is access Node;
-
-      type NKind is (Text, Var);
-
-      type Node (Kind : NKind) is record
-         Next : Tree;
-         case Kind is
-            when Text =>
-               Value : Unbounded_String;
-            when Var =>
-               Var   : Tag_Var;
-         end case;
-      end record;
-
-      function Parse (Line : in String) return Tree;
-      --  Parse text line and returns the corresponding tree representation
-
-      procedure Print_Tree (D : in Tree);
-      --  Decend the text tree and print it to the standard output
-
-      procedure Release (D : in out Tree);
-      --  Release all memory used by the tree
-
-   end Data;
-
-   -----------------
-   -- Definitions --
-   -----------------
-
-   package Definitions is
-
-      type NKind is (Const, Ref, Ref_Default);
-
-      type Node (Kind : NKind := Const) is record
-         Value : Unbounded_String;
-         Ref   : Positive;
-      end record;
-
-      type Def is record
-         Name : Unbounded_String;
-         N    : Node;
-      end record;
-
-      type Tree is access Def;
-
-      function Parse (Line : in String) return Tree;
-      --  Returns a defintion data
-
-      package Def_Map is new Strings_Maps (Node);
-      subtype Map is Def_Map.Containers.Map;
-
-      procedure Print_Tree (D : in Tree);
-      --  Decend the text tree and print it to the standard output
-
-      procedure Release (D : in out Tree);
-      --  Release all memory used by the tree
-
-   end Definitions;
-
    ------------------
-   --  Expressions --
+   -- Cached_Files --
    ------------------
 
-   package Expr is
-
-      type Ops is (O_And, O_Or, O_Xor,
-                   O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
-
-      function Image (O : in Ops) return String;
-      --  Returns Ops string representation.
-
-      function Value (O : in String) return Ops;
-      --  Returns Ops from its string representation. Raises Templates_Error if
-      --  the token is not a known operation.
-
-      type U_Ops is (O_Not);
-
-      function Image (O : in U_Ops) return String;
-      --  Returns U_Ops string representation.
-
-      function Value (O : in String) return U_Ops;
-      --  Returns U_Ops from its string representation. Raises Templates_Error
-      --  if the token is not a known operation.
-
-      type Node;
-      type Tree is access Node;
-
-      type NKind is (Value, Var, Op, U_Op);
-      --  The node is a value, a variable a binary operator or an unary
-      --  operator
-
-      type Node (Kind : NKind) is record
-         case Kind is
-            when Value =>
-               V   : Unbounded_String;
-
-            when Var =>
-               Var : Tag_Var;
-
-            when Op =>
-               O           : Ops;
-               Left, Right : Tree;
-
-            when U_Op =>
-               U_O         : U_Ops;
-               Next        : Tree;
-         end case;
-      end record;
-
-      function Parse (Expression : in String) return Tree;
-      --  Parse Expression and returns the corresponding tree representation.
-
-      procedure Print_Tree (E : in Tree);
-      --  Decend the expression's tree and print the expression. It outputs the
-      --  expression with all parenthesis to show without ambiguity the way the
-      --  expression has been parsed.
-
-      procedure Release (E : in out Tree);
-      --  Release all associated memory with the tree.
-
-   end Expr;
-
-   --------------------------------
-   --  Template Tree definitions --
-   --------------------------------
-
-   type Nkind is (Info,          --  first node is tree infos
-                  C_Info,        --  second node is cache tree info
-                  Text,          --  this is a text line
-                  Set_Stmt,      --  a definition statement
-                  If_Stmt,       --  an IF tag statement
-                  Table_Stmt,    --  a TABLE tag statement
-                  Section_Block, --  a TABLE block (common, section)
-                  Section_Stmt,  --  a TABLE section
-                  Include_Stmt,  --  an INCLUDE tag statement
-                  Inline_Stmt);  --  an INLINE tag statement
-
-   --  A template line is coded as a suite of Data and Var element.
-
-   --  The first node in the tree is of type Info and should never be release
-   --  and changed. This ensure that included tree will always be valid
-   --  otherwise will would have to parse all the current trees in the cache
-   --  to update the reference.
-
-   type Node;
-   type Tree is access Node;
-
-   --  Static_Tree represent a Tree immune to cache changes. Info point to the
-   --  first node and C_Info to the second one. C_Info could be different to
-   --  Info.Next in case of cache changes. This way we keep a pointer to the
-   --  old tree to be able to release it when not used anymore. This way it is
-   --  possible to use the cache in multitasking program without trouble. The
-   --  changes in the cache are either because more than one task is parsing
-   --  the same template at the same time, they will update the cache with the
-   --  same tree at some point, or because a newer template was found in the
-   --  file system.
-
-   type Static_Tree is record
-      Info   : Tree;
-      C_Info : Tree;
-   end record;
-
-   Null_Static_Tree : constant Static_Tree := (null, null);
-
-   type Include_Parameters is array (0 .. Max_Include_Parameters) of Data.Tree;
-
-   No_Parameter : constant Include_Parameters := (others => null);
-
-   type Node (Kind : Nkind) is record
-      Next : Tree;
-      Line : Natural;
-
-      case Kind is
-         when Info =>
-            Filename  : Unbounded_String;         -- Name of the file
-            Timestamp : Configuration.Time_Stamp; -- Date/Time of last change
-            I_File    : Tree;                     -- Included file references
-
-         when C_Info =>
-            Obsolete  : Boolean := False;    -- True if newer version in cache
-            Used      : Natural := 0;        -- >0 if currently used
-
-         when Text =>
-            Text      : Data.Tree;
-
-         when Set_Stmt =>
-            Def       : Definitions.Tree;
-
-         when If_Stmt =>
-            Cond      : Expr.Tree;
-            N_True    : Tree;
-            N_False   : Tree;
-
-         when Table_Stmt =>
-            Terminate_Sections : Boolean;
-            Reverse_Index      : Boolean;
-            Blocks             : Tree;
-            Blocks_Count       : Natural;     -- Number if blocks
-
-         when Section_Block =>
-            Common         : Tree;
-            Sections       : Tree;
-            Sections_Count : Natural;         -- Number of sections
-
-         when Section_Stmt =>
-            N_Section : Tree;
-
-         when Include_Stmt =>
-            File       : Static_Tree;
-            I_Filename : Data.Tree;
-            I_Params   : Include_Parameters;
-
-         when Inline_Stmt =>
-            Before  : Unbounded_String;
-            Sep     : Unbounded_String;
-            After   : Unbounded_String;
-            I_Block : Tree;
-      end case;
-   end record;
-
-   procedure Release (T : in out Tree; Include : in Boolean := True);
-   --  Release all memory associated with the tree
-
-   procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
-
-   -------------------
-   --  Cached Files --
-   -------------------
-
-   --  Cached_Files keep the parsed Tree for a given file in memory. This
-   --  package has two implementations one is thread safe so it is possible to
-   --  use the cache in a multitasking program. The other is meant to be used
-   --  for configuration that do not want to drag the tasking runtime.
-
-   package Cached_Files is
-
-      procedure Add
-        (Filename : in     String;
-         T        : in     Tree;
-         Old      :    out Tree);
-      --  Add Filename/T to the list of cached files. If Filename is
-      --  already in the list, replace the current tree with T. Furthermore
-      --  if Filename tree is already in use, Old will be set with the
-      --  previous C_Info node otherwise Old will be T.Next (C_Info node
-      --  for current tree).
-
-      procedure Get
-        (Filename : in     String;
-         Result   :    out Static_Tree);
-      --  Returns the Tree for Filename or Null_Static_Tree if Filename has
-      --  not been cached or is obsolete.
-
-      procedure Release (T : in out Static_Tree);
-      --  After loading a tree and using it, it is required that it be
-      --  released. This will ensure that a tree marked as obsolete (a new
-      --  version being now in the cache) will be released from the memory.
-
-      procedure Release;
-      --  Release the internal cache. This free the memory used for all
-      --  currently loaded template trees.
-
-   end Cached_Files;
-
-   ---------
-   -- Tag --
-   ---------
-
-   procedure Field
-     (T      : in     Tag;
-      N      : in     Positive;
-      Result :    out Tag_Node_Access;
-      Found  :    out Boolean);
-   --  Returns the Nth item in Tag
-
-   procedure Field
-     (T        : in     Tag;
-      Cursor   : in     Indices;
-      Up_Value : in     Natural;
-      Result   :    out Unbounded_String;
-      Found    :    out Boolean);
-   --  Returns Value in Tag at position Cursor. Found is set to False if
-   --  there is no such value in Tag.
-
-   ----------
-   -- Size --
-   ----------
-
-   function Size (T : in Tag) return Natural is
-   begin
-      return T.Data.Count;
-   end Size;
+   package body Cached_Files is separate;
 
    -----------
    -- Clear --
@@ -1786,23 +1936,6 @@ package body Templates_Parser is
       --  Here we just separate current vector from the new one
       T := NT;
    end Clear;
-
-   ----------
-   -- Item --
-   ----------
-
-   function Item (T : in Tag; N : in Positive) return String is
-      Result : Unbounded_String;
-      Found  : Boolean;
-   begin
-      Field (T, (1 => N), 0, Result, Found);
-
-      if not Found then
-         raise Constraint_Error;
-      else
-         return To_String (Result);
-      end if;
-   end Item;
 
    ---------------
    -- Composite --
@@ -1821,381 +1954,6 @@ package body Templates_Parser is
       end if;
    end Composite;
 
-   -------------------
-   -- Set_Separator --
-   -------------------
-
-   procedure Set_Separator (T : in out Tag; Separator : in String) is
-   begin
-      T.Data.Separator := To_Unbounded_String (Separator);
-   end Set_Separator;
-
-   ----------------
-   -- Initialize --
-   ----------------
-
-   procedure Initialize (T : in out Tag) is
-   begin
-      T.Ref_Count         := new Integer'(1);
-      T.Data              := new Tag_Data;
-      T.Data.Count        := 0;
-      T.Data.Min          := Natural'Last;
-      T.Data.Max          := 0;
-      T.Data.Nested_Level := 1;
-   end Initialize;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   procedure Finalize (T : in out Tag) is
-   begin
-      Tasking.Lock;
-
-      T.Ref_Count.all := T.Ref_Count.all - 1;
-
-      if T.Ref_Count.all = 0 then
-         Tasking.Unlock;
-
-         declare
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Node, Tag_Node_Access);
-
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag, Tag_Access);
-
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Node_Access, Access_Tag_Node_Access);
-
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Data, Tag_Data_Access);
-
-            P, N : Tag_Node_Access;
-         begin
-            P := T.Data.Head;
-
-            while P /= null loop
-               N := P.Next;
-
-               if P.Kind = Value_Set then
-                  Free (P.VS);
-               end if;
-
-               Free (P);
-
-               P := N;
-            end loop;
-
-            T.Data.Head := null;
-            T.Data.Last := null;
-
-            Free (T.Ref_Count);
-            Free (T.Data.Tag_Nodes);
-            Free (T.Data);
-         end;
-
-      else
-         Tasking.Unlock;
-      end if;
-   end Finalize;
-
-   ------------
-   -- Adjust --
-   ------------
-
-   procedure Adjust (T : in out Tag) is
-   begin
-      Tasking.Lock;
-      T.Ref_Count.all := T.Ref_Count.all + 1;
-      Tasking.Unlock;
-   end Adjust;
-
-   ---------
-   -- "+" --
-   ---------
-
-   function "+" (Value : in String) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'(Templates_Parser.Value,
-                         null, To_Unbounded_String (Value));
-   begin
-      return (Ada.Finalization.Controlled with
-              Ref_Count    => new Integer'(1),
-              Data         => new Tag_Data'
-                (Count        => 1,
-                 Min          => 1,
-                 Max          => 1,
-                 Nested_Level => 1,
-                 Separator    => To_Unbounded_String (Default_Separator),
-                 Head         => Item,
-                 Last         => Item,
-                 Tag_Nodes    => null));
-   end "+";
-
-   function "+" (Value : in Character) return Tag is
-   begin
-      return +String'(1 => Value);
-   end "+";
-
-   function "+" (Value : in Boolean) return Tag is
-   begin
-      return +Boolean'Image (Value);
-   end "+";
-
-   function "+" (Value : in Unbounded_String) return Tag is
-   begin
-      return +To_String (Value);
-   end "+";
-
-   function "+" (Value : in Integer) return Tag is
-   begin
-      return +Image (Value);
-   end "+";
-
-   function "+" (Value : in Tag) return Tag is
-      Result : Tag;
-   begin
-      Result := Result & Value;
-      --  This is an embedded tag, set separator to LF
-      Set_Separator (Result, (1 => ASCII.LF));
-      return Result;
-   end "+";
-
-   ------------
-   -- Append --
-   ------------
-
-   procedure Append (T : in out Tag; Value : in Tag) is
-      Item   : constant Tag_Node_Access :=
-                 new Tag_Node'(Value_Set, null, new Tag'(Value));
-      T_Size : constant Natural := Size (Value);
-   begin
-      if T.Data.Head = null then
-         T.Data.Nested_Level := Value.Data.Nested_Level + 1;
-         T.Data.Separator    := To_Unbounded_String ((1 => ASCII.LF));
-         T.Data.Head         := Item;
-      else
-         T.Data.Last.Next := Item;
-         T.Data.Nested_Level :=
-           Positive'Max
-             (T.Data.Nested_Level, Value.Data.Nested_Level + 1);
-      end if;
-
-      Free (T.Data.Tag_Nodes);
-      T.Data.Tag_Nodes := null;
-      T.Data.Count     := T.Data.Count + 1;
-      T.Data.Min       := Natural'Min (T.Data.Min, T_Size);
-      T.Data.Max       := Natural'Max (T.Data.Max, T_Size);
-      T.Data.Last      := Item;
-   end Append;
-
-   procedure Append (T : in out Tag; Value : in Unbounded_String) is
-      Item : constant Tag_Node_Access :=
-               new Tag_Node'(Templates_Parser.Value, null, Value);
-   begin
-      if T.Data.Head = null then
-         T.Data.Head         := Item;
-         T.Data.Nested_Level := 1;
-         T.Data.Separator    := To_Unbounded_String (Default_Separator);
-
-      else
-         T.Data.Last.Next := Item;
-      end if;
-
-      Free (T.Data.Tag_Nodes);
-      T.Data.Tag_Nodes := null;
-      T.Data.Count     := T.Data.Count + 1;
-      T.Data.Min       := Natural'Min (T.Data.Min, 1);
-      T.Data.Max       := Natural'Max (T.Data.Max, 1);
-      T.Data.Last      := Item;
-   end Append;
-
-   procedure Append (T : in out Tag; Value : in String) is
-   begin
-      Append (T, To_Unbounded_String (Value));
-   end Append;
-
-   procedure Append (T : in out Tag; Value : in Character) is
-   begin
-      Append (T, To_Unbounded_String (String'(1 => Value)));
-   end Append;
-
-   procedure Append (T : in out Tag; Value : in Boolean) is
-   begin
-      Append (T, To_Unbounded_String (Boolean'Image (Value)));
-   end Append;
-
-   procedure Append (T : in out Tag; Value : in Integer) is
-   begin
-      Append (T, To_Unbounded_String (Image (Value)));
-   end Append;
-
-   ---------
-   -- "&" --
-   ---------
-
-   function "&" (T : in Tag; Value : in String) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'
-          (Templates_Parser.Value, null, To_Unbounded_String (Value));
-   begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
-
-      Free (T.Data.Tag_Nodes);
-
-      if T.Data.Head = null then
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => 1,
-            Separator    => To_Unbounded_String (Default_Separator),
-            Head         => Item,
-            Last         => Item,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-
-      else
-         T.Data.Last.Next := Item;
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => T.Data.Nested_Level,
-            Separator    => T.Data.Separator,
-            Head         => T.Data.Head,
-            Last         => Item,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-      end if;
-   end "&";
-
-   function "&" (Value : in String; T : in Tag) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'
-          (Templates_Parser.Value, T.Data.Head, To_Unbounded_String (Value));
-   begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
-
-      Free (T.Data.Tag_Nodes);
-
-      if T.Data.Head = null then
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => 1,
-            Separator    => To_Unbounded_String (Default_Separator),
-            Head         => Item,
-            Last         => Item,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-
-      else
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => T.Data.Nested_Level,
-            Separator    => T.Data.Separator,
-            Head         => Item,
-            Last         => T.Data.Last,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-      end if;
-   end "&";
-
-   function "&" (T : in Tag; Value : in Tag) return Tag is
-      Item   : constant Tag_Node_Access
-        := new Tag_Node'(Value_Set, null, new Tag'(Value));
-      T_Size : constant Natural := Size (Value);
-   begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
-
-      Free (T.Data.Tag_Nodes);
-
-      if T.Data.Head = null then
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, T_Size),
-            Max          => Natural'Max (T.Data.Max, T_Size),
-            Nested_Level => Value.Data.Nested_Level + 1,
-            Separator    => To_Unbounded_String ((1 => ASCII.LF)),
-            Head         => Item,
-            Last         => Item,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-
-      else
-         T.Data.Last.Next := Item;
-
-         T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, T_Size),
-            Max          => Natural'Max (T.Data.Max, T_Size),
-            Nested_Level =>
-              Positive'Max
-                (T.Data.Nested_Level, Value.Data.Nested_Level + 1),
-            Separator    => T.Data.Separator,
-            Head         => T.Data.Head,
-            Last         => Item,
-            Tag_Nodes    => null);
-
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
-      end if;
-   end "&";
-
-   function "&" (T : in Tag; Value : in Character) return Tag is
-   begin
-      return T & String'(1 => Value);
-   end "&";
-
-   function "&" (T : in Tag; Value : in Boolean) return Tag is
-   begin
-      return T & Boolean'Image (Value);
-   end "&";
-
-   function "&" (T : in Tag; Value : in Unbounded_String) return Tag is
-   begin
-      return T & To_String (Value);
-   end "&";
-
-   function "&" (T : in Tag; Value : in Integer) return Tag is
-   begin
-      return T & Image (Value);
-   end "&";
-
-   function "&" (Value : in Character; T : in Tag) return Tag is
-   begin
-      return String'(1 => Value) & T;
-   end "&";
-
-   function "&" (Value : in Boolean; T : in Tag) return Tag is
-   begin
-      return Boolean'Image (Value) & T;
-   end "&";
-
-   function "&" (Value : in Unbounded_String; T : in Tag) return Tag is
-   begin
-      return To_String (Value) & T;
-   end "&";
-
-   function "&" (Value : in Integer; T : in Tag) return Tag is
-   begin
-      return Image (Value) & T;
-   end "&";
-
-   ------------------
-   -- Cached_Files --
-   ------------------
-
-   package body Cached_Files is separate;
-
    ----------
    -- Data --
    ----------
@@ -2207,6 +1965,17 @@ package body Templates_Parser is
    -----------------
 
    package body Definitions is separate;
+
+   ------------
+   -- Exists --
+   ------------
+
+   function Exists
+     (Set      : in Translate_Set;
+      Variable : in String) return Boolean is
+   begin
+      return Association_Set.Containers.Contains (Set.Set.all, Variable);
+   end Exists;
 
    ----------
    -- Expr --
@@ -2384,21 +2153,93 @@ package body Templates_Parser is
 
    package body Filter is separate;
 
-   -------------------
-   -- Translate_Set --
-   -------------------
+   --------------
+   -- Finalize --
+   --------------
 
-   ------------
-   -- Exists --
-   ------------
-
-   function Exists
-     (Set      : in Translate_Set;
-      Variable : in String)
-      return Boolean is
+   procedure Finalize (Set : in out Translate_Set) is
+      procedure Free is new Unchecked_Deallocation
+        (Association_Set.Containers.Map, Map_Access);
    begin
-      return Association_Set.Containers.Contains (Set.Set.all, Variable);
-   end Exists;
+      if Set.Ref_Count /= null then
+         Tasking.Lock;
+         Set.Ref_Count.all := Set.Ref_Count.all - 1;
+
+         if Set.Ref_Count.all = 0 then
+            Free (Set.Ref_Count);
+            Free (Set.Set);
+         end if;
+         Tasking.Unlock;
+      end if;
+   end Finalize;
+
+   procedure Finalize (T : in out Tag) is
+   begin
+      Tasking.Lock;
+
+      T.Ref_Count.all := T.Ref_Count.all - 1;
+
+      if T.Ref_Count.all = 0 then
+         Tasking.Unlock;
+
+         declare
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Tag_Node, Tag_Node_Access);
+
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Tag, Tag_Access);
+
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Tag_Node_Access, Access_Tag_Node_Access);
+
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Tag_Data, Tag_Data_Access);
+
+            P, N : Tag_Node_Access;
+         begin
+            P := T.Data.Head;
+
+            while P /= null loop
+               N := P.Next;
+
+               if P.Kind = Value_Set then
+                  Free (P.VS);
+               end if;
+
+               Free (P);
+
+               P := N;
+            end loop;
+
+            T.Data.Head := null;
+            T.Data.Last := null;
+
+            Free (T.Ref_Count);
+            Free (T.Data.Tag_Nodes);
+            Free (T.Data);
+         end;
+
+      else
+         Tasking.Unlock;
+      end if;
+   end Finalize;
+
+   ---------------------------
+   -- For_Every_Association --
+   ---------------------------
+
+   procedure For_Every_Association (Set : in Translate_Set) is
+      Pos  : Association_Set.Containers.Cursor;
+      Quit : Boolean := False;
+   begin
+      Pos := Association_Set.Containers.First (Set.Set.all);
+
+      while Association_Set.Containers.Has_Element (Pos) loop
+         Action (Association_Set.Containers.Element (Pos), Quit);
+         exit when Quit;
+         Pos := Association_Set.Containers.Next (Pos);
+      end loop;
+   end For_Every_Association;
 
    ---------
    -- Get --
@@ -2418,6 +2259,98 @@ package body Templates_Parser is
          return Null_Association;
       end if;
    end Get;
+
+   function Get (Assoc : in Association) return Tag is
+   begin
+      if Assoc.Kind = Composite then
+         return Assoc.Comp_Value;
+      else
+         raise Constraint_Error;
+      end if;
+   end Get;
+
+   function Get (Assoc : in Association) return String is
+   begin
+      if Assoc.Kind = Std then
+         return To_String (Assoc.Value);
+      else
+         raise Constraint_Error;
+      end if;
+   end Get;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (N : in Integer) return String is
+      N_Img : constant String := Integer'Image (N);
+   begin
+      if N_Img (N_Img'First) = '-' then
+         return N_Img;
+      else
+         return N_Img (N_Img'First + 1 .. N_Img'Last);
+      end if;
+   end Image;
+
+   function Image (T : in Tag_Var) return String is
+      use type Filter.Set_Access;
+      R : Unbounded_String;
+   begin
+      R := Begin_Tag;
+
+      --  Filters
+
+      if T.Filters /= null then
+         for K in reverse T.Filters'Range loop
+            Append (R, Filter.Name (T.Filters (K).Handle));
+            Append (R, Filter.Image (T.Filters (K).Parameters));
+            Append (R, ":");
+         end loop;
+      end if;
+
+      --  Tag name
+
+      Append (R, T.Name);
+
+      --  Attributes
+
+      case T.Attribute.Attr is
+         when Nil        => null;
+         when Length     => Append (R, "'Length");
+         when Line       => Append (R, "'Line");
+         when Min_Column => Append (R, "'Min_Column");
+         when Max_Column => Append (R, "'Max_Column");
+         when Up_Level   =>
+            Append (R, "'Up_Level");
+            if T.Attribute.Value /= 1 then
+               Append (R, '(' & Image (T.Attribute.Value) & ')');
+            end if;
+      end case;
+
+      Append (R, End_Tag);
+
+      return To_String (R);
+   end Image;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Set : in out Translate_Set) is
+   begin
+      Set.Ref_Count := new Integer'(1);
+      Set.Set       := new Association_Set.Containers.Map;
+   end Initialize;
+
+   procedure Initialize (T : in out Tag) is
+   begin
+      T.Ref_Count         := new Integer'(1);
+      T.Data              := new Tag_Data;
+      T.Data.Count        := 0;
+      T.Data.Min          := Natural'Last;
+      T.Data.Max          := 0;
+      T.Data.Nested_Level := 1;
+   end Initialize;
 
    ------------
    -- Insert --
@@ -2440,124 +2373,44 @@ package body Templates_Parser is
       end loop;
    end Insert;
 
-   ------------
-   -- Remove --
-   ------------
+   -------------------------
+   -- Is_Include_Variable --
+   -------------------------
 
-   procedure Remove (Set : in out Translate_Set; Name : in String) is
+   function Is_Include_Variable (T : in Tag_Var) return Boolean is
    begin
-      if Association_Set.Containers.Contains (Set.Set.all, Name) then
-         Association_Set.Containers.Delete (Set.Set.all, Name);
-      end if;
-   end Remove;
+      return T.N /= -1;
+   end Is_Include_Variable;
 
-   ---------------------------
-   -- For_Every_Association --
-   ---------------------------
+   ---------------
+   -- Is_Number --
+   ---------------
 
-   procedure For_Every_Association (Set : in Translate_Set) is
-      Pos  : Association_Set.Containers.Cursor;
-      Quit : Boolean := False;
+   function Is_Number (S : in String) return Boolean is
+      use Strings.Maps;
    begin
-      Pos := Association_Set.Containers.First (Set.Set.all);
+      return S'Length > 0
+        and then Is_Subset
+          (To_Set (S),
+           Constants.Decimal_Digit_Set or To_Set ("-"));
+   end Is_Number;
 
-      while Association_Set.Containers.Has_Element (Pos) loop
-         Action (Association_Set.Containers.Element (Pos), Quit);
-         exit when Quit;
-         Pos := Association_Set.Containers.Next (Pos);
-      end loop;
-   end For_Every_Association;
+   ----------
+   -- Item --
+   ----------
 
-   ------------
-   -- To_Set --
-   ------------
-
-   function To_Set (Table : in Translate_Table) return Translate_Set is
-      Set : Translate_Set;
+   function Item (T : in Tag; N : in Positive) return String is
+      Result : Unbounded_String;
+      Found  : Boolean;
    begin
-      for K in Table'Range loop
-         Insert (Set, Table (K));
-      end loop;
-      return Set;
-   end To_Set;
+      Field (T, (1 => N), 0, Result, Found);
 
-   -----------
-   -- Assoc --
-   -----------
-
-   function Assoc
-     (Variable : in String;
-      Value    : in String) return Association is
-   begin
-      return Association'
-        (Std,
-         To_Unbounded_String (Variable),
-         To_Unbounded_String (Value));
-   end Assoc;
-
-   function Assoc
-     (Variable : in String;
-      Value    : in Ada.Strings.Unbounded.Unbounded_String)
-      return Association is
-   begin
-      return Assoc (Variable, To_String (Value));
-   end Assoc;
-
-   function Assoc
-     (Variable : in String;
-      Value    : in Integer) return Association
-   is
-      S_Value : constant String := Integer'Image (Value);
-   begin
-      return Assoc (Variable, Image (Value));
-   end Assoc;
-
-   function Assoc
-     (Variable : in String;
-      Value    : in Boolean) return Association is
-   begin
-      if Value then
-         return Assoc (Variable, "TRUE");
-      else
-         return Assoc (Variable, "FALSE");
-      end if;
-   end Assoc;
-
-   function Assoc
-     (Variable  : in String;
-      Value     : in Tag;
-      Separator : in String := Default_Separator) return Association
-   is
-      T : Tag := Value;
-   begin
-      if Separator /= Default_Separator then
-         Set_Separator  (T, Separator);
-      end if;
-
-      return Association'(Composite, To_Unbounded_String (Variable), T);
-   end Assoc;
-
-   ---------
-   -- Get --
-   ---------
-
-   function Get (Assoc : in Association) return Tag is
-   begin
-      if Assoc.Kind = Composite then
-         return Assoc.Comp_Value;
-      else
+      if not Found then
          raise Constraint_Error;
-      end if;
-   end Get;
-
-   function Get (Assoc : in Association) return String is
-   begin
-      if Assoc.Kind = Std then
-         return To_String (Assoc.Value);
       else
-         raise Constraint_Error;
+         return To_String (Result);
       end if;
-   end Get;
+   end Item;
 
    ----------
    -- Load --
@@ -2566,8 +2419,7 @@ package body Templates_Parser is
    function Load
      (Filename     : in String;
       Cached       : in Boolean := False;
-      Include_File : in Boolean := False)
-      return Static_Tree
+      Include_File : in Boolean := False) return Static_Tree
    is
       use type Definitions.NKind;
 
@@ -2610,6 +2462,9 @@ package body Templates_Parser is
 
       function Get_Tag_Parameter (N : in Positive) return String;
       --  Returns the Nth tag parameter found between parenthesis
+
+      function Get_Tag_Parameter_Count return Natural;
+      --  Returns the number of parameter
 
       function Is_Stmt
         (Stmt : in String; Extended : in Boolean := False) return Boolean;
@@ -3599,7 +3454,7 @@ package body Templates_Parser is
                begin
                   T.File := Load (I_Filename, Cached, True);
                exception
-                  when Text_IO.Name_Error =>
+                  when IO_Exceptions.Name_Error =>
                      --  File not found, this is an error only if we are not
                      --  inside a conditional.
                      if not In_If then
@@ -3855,6 +3710,22 @@ package body Templates_Parser is
          Fatal_Error (Exceptions.Exception_Message (E));
    end Load;
 
+   --------------
+   -- No_Quote --
+   --------------
+
+   function No_Quote (Str : in String) return String is
+   begin
+      if Str'Length > 1
+        and then Str (Str'First) = '"'
+        and then Str (Str'Last) = '"'
+      then
+         return Str (Str'First + 1 .. Str'Last - 1);
+      else
+         return Str;
+      end if;
+   end No_Quote;
+
    -----------
    -- Parse --
    -----------
@@ -4069,452 +3940,6 @@ package body Templates_Parser is
 
             Last_Was_Sep := Sep;
          end Add;
-
-         ------------------------
-         -- Flatten_Parameter  --
-         ------------------------
-
-         function Flatten_Parameters
-           (I : in Include_Parameters) return Filter.Include_Parameters
-         is
-            use type Data.Tree;
-            F : Filter.Include_Parameters;
-         begin
-            for K in I'Range loop
-               if I (K) = null then
-                  F (K) := Null_Unbounded_String;
-               else
-                  case I (K).Kind is
-                     when Data.Text =>
-                        F (K) := I (K).Value;
-                     when Data.Var  =>
-                        F (K) := To_Unbounded_String
-                                  (Translate (I (K).Var, State));
-                  end case;
-               end if;
-            end loop;
-            return F;
-         end Flatten_Parameters;
-
-         -----------------
-         -- I_Translate --
-         -----------------
-
-         function I_Translate
-           (Var   : in Tag_Var;
-            State : in Parse_State) return String
-         is
-            use type Data.Tree;
-            use type Data.NKind;
-         begin
-            pragma Assert (Var.N /= -1);
-
-            if Var.N <= Max_Include_Parameters
-              and then State.I_Params (Var.N) /= null
-            then
-               declare
-                  T : constant Data.Tree := State.I_Params (Var.N);
-                  --  T is the data tree that should be evaluated in place
-                  --  of the include variable.
-                  C : aliased Filter.Filter_Context :=
-                        (Translations, Lazy_Tag, State.F_Params);
-               begin
-                  if T.Next = null and then T.Kind = Data.Var then
-                     --  Here we have a special case where the include
-                     --  variable is replaced by a single variable.
-
-                     declare
-                        V : Tag_Var := T.Var;
-                     begin
-                        if V.N = -1 then
-                           --  First thing we want to do is to inherit
-                           --  attributes from the include variable if we
-                           --  have no attribute.
-
-                           if V.Attribute.Attr = Nil then
-                              V.Attribute := Var.Attribute;
-                           end if;
-
-                           --  Note that below we pass the parent state. This
-                           --  is required as if the variable is an alias to
-                           --  to an include parameter we need to get the
-                           --  value for this variable in parent state. If the
-                           --  variable is a standard one (from a translate
-                           --  table) the state will not be used.
-
-                           return Translate
-                             (Var, Translate (V, State.Parent.all), C'Access);
-
-                        else
-                           --  This variable reference a parent include
-                           --  variable.
-
-                           return I_Translate (V, State.Parent.all);
-                        end if;
-                     end;
-
-                  else
-                     --  Here we flush the buffer and then we analyse the
-                     --  include parameter. The result is contained into
-                     --  the buffer which is large enough for an include
-                     --  variable.
-
-                     Flush;
-                     Analyze (T);
-
-                     declare
-                        L : constant Natural := Last;
-                     begin
-                        Last := 0;
-                        return Translate
-                          (Var, Buffer (Buffer'First .. L), C'Access);
-                     end;
-                  end if;
-               end;
-
-            else
-               return "";
-            end if;
-         end I_Translate;
-
-         -----------------------
-         -- Inline_Cursor_Tag --
-         -----------------------
-
-         function Inline_Cursor_Tag
-           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
-            Var_Name   : in String;
-            Dim        : in Positive;
-            Path       : in Dynamic.Path) return Unbounded_String
-         is
-            use type Dynamic.Path;
-            Result : Unbounded_String;
-            L      : Natural;
-         begin
-            L := Dynamic.Length (Cursor_Tag, Var_Name, 1 & Path);
-
-            for K in 1 .. L loop
-               if Result /= Null_Unbounded_String then
-                  Append (Result, ' ');
-               end if;
-
-               if Dim = Path'Length + 1 then
-                  Append
-                    (Result,
-                     Dynamic.Value (Cursor_Tag, Var_Name, Path & K));
-               else
-                  Append
-                    (Result,
-                     Inline_Cursor_Tag
-                       (Cursor_Tag, Var_Name, Dim, Path & K));
-               end if;
-            end loop;
-
-            return Result;
-         end Inline_Cursor_Tag;
-
-         -------------
-         -- Pop_Sep --
-         -------------
-
-         procedure Pop_Sep (State : in Parse_State) is
-         begin
-            if Last_Was_Sep then
-               Last := Last - Length (State.Inline_Sep);
-               Last_Was_Sep := False;
-            end if;
-         end Pop_Sep;
-
-         --------------
-         -- Push_Sep --
-         --------------
-
-         procedure Push_Sep (State : in Parse_State) is
-         begin
-            if State.Inline_Sep /= Null_Unbounded_String then
-               Add (To_String (State.Inline_Sep), Sep => True);
-            end if;
-         end Push_Sep;
-
-         ---------------
-         -- Translate --
-         ---------------
-
-         function Translate
-           (Var : in Tag_Var; State : in Parse_State) return String
-         is
-            use type Data.Tree;
-            C        : aliased Filter.Filter_Context :=
-                         (Translations, Lazy_Tag, State.F_Params);
-            D_Pos    : Definitions.Def_Map.Containers.Cursor;
-            Pos      : Association_Set.Containers.Cursor;
-            Up_Value : Natural := 0;
-         begin
-            D_Pos := Definitions.Def_Map.Containers.Find
-              (D_Map, To_String (Var.Name));
-
-            if Definitions.Def_Map.Containers.Has_Element (D_Pos) then
-               --  We have a definition for this variable in the template
-               declare
-                  N : Definitions.Node
-                    := Definitions.Def_Map.Containers.Element (D_Pos);
-                  V : Tag_Var := Var;
-               begin
-                  case N.Kind is
-                     when Definitions.Const =>
-                        return Translate
-                          (Var, To_String (N.Value), C'Access);
-
-                     when Definitions.Ref =>
-                        V.N := N.Ref;
-                        return I_Translate (V, State);
-
-                     when Definitions.Ref_Default =>
-                        if N.Ref > Max_Include_Parameters
-                          or else State.I_Params (N.Ref) = null
-                        then
-                           --  This include parameter does not exists, use
-                           --  default value.
-                           return Translate
-                             (Var, To_String (N.Value), C'Access);
-                        else
-                           V.N := N.Ref;
-                           return I_Translate (V, State);
-                        end if;
-                  end case;
-               end;
-            end if;
-
-            declare
-               use type Dynamic.Cursor_Tag_Access;
-               use type Dynamic.Path;
-               Tk : constant Association := Get_Association (Var);
-            begin
-               if Tk = Null_Association then
-
-                  if Cursor_Tag /= Dynamic.Null_Cursor_Tag then
-                     --  Check the Cursor_Tag
-                     declare
-                        Name         : constant String := To_String (Var.Name);
-                        D, L         : Natural;
-                        Valid_Cursor : Boolean := True;
-                     begin
-                        D := Dynamic.Dimension (Cursor_Tag, Name);
-
-                        if D /= 0 then
-                           if Var.Attribute.Attr /= Nil then
-                              --  ??? Would be nice to remove this restriction
-                              raise Template_Error with
-                                "Attributes not supported for Cursor_Tag.";
-                           end if;
-
-                           --  This is a Cursor_Tag, check that the current
-                           --  table cursor is valid for it.
-
-                           for K in 1 .. D loop
-                              if State.Cursor (K) >
-                                Dynamic.Length
-                                  (Cursor_Tag, Name,
-                                   1 & State.Cursor (1 .. K - 1))
-                              then
-                                 Valid_Cursor := False;
-                              end if;
-                           end loop;
-
-                           if Valid_Cursor then
-
-                              L := Dynamic.Length
-                                (Cursor_Tag, Name,
-                                 1 & State.Cursor
-                                   (1 .. State.Table_Level - 1));
-
-                              if D = 1 and then L = 1 then
-                                 --  A standard tag (single value)
-                                 return Translate
-                                   (Var,
-                                    Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
-                                    C'Access);
-
-                              else
-                                 --  A composite tag, check that the dimension
-                                 --  of the tag correspond to the current table
-                                 --  nested level.
-
-                                 if D = State.Table_Level then
-                                    return Translate
-                                      (Var,
-                                       Dynamic.Value
-                                         (Cursor_Tag, Name,
-                                          State.Cursor (1 .. D)), C'Access);
-
-                                 else
-                                    --  Otherwise we inline the structure
-                                    return To_String
-                                      (Inline_Cursor_Tag
-                                         (Cursor_Tag, Name, D,
-                                          State.Cursor
-                                            (1 .. State.Table_Level)));
-                                 end if;
-                              end if;
-                           end if;
-                        end if;
-                     end;
-                  end if;
-
-               else
-                  case Tk.Kind is
-
-                     when Std =>
-                        if Var.Attribute.Attr = Nil then
-                           return Translate
-                             (Var, To_String (Tk.Value), C'Access);
-                        else
-                           raise Template_Error
-                             with "Attribute not valid on a discrete tag ("
-                               & Image (Var) & ')';
-                        end if;
-
-                     when Composite =>
-                        if Tk.Comp_Value.Data.Nested_Level = 1 then
-                           --  This is a vector
-
-                           if Var.Attribute.Attr = Length then
-                              return Translate
-                                (Var,
-                                 Image (Tk.Comp_Value.Data.Count), C'Access);
-
-                           elsif Var.Attribute.Attr = Up_Level then
-                              Up_Value := Var.Attribute.Value;
-
-                           elsif Var.Attribute.Attr /= Nil then
-                              raise Template_Error
-                                with "This attribute is not valid for a "
-                                  & "vector tag (" & Image (Var) & ')';
-                           end if;
-
-                        elsif Tk.Comp_Value.Data.Nested_Level = 2 then
-                           if Var.Attribute.Attr = Line then
-                              --  'Line on a matrix
-                              return Translate
-                                (Var,
-                                 Image (Tk.Comp_Value.Data.Count), C'Access);
-
-                           elsif Var.Attribute.Attr = Min_Column then
-                              --  'Min_Column on a matrix
-                              return Translate
-                                (Var,
-                                 Image (Tk.Comp_Value.Data.Min), C'Access);
-
-                           elsif Var.Attribute.Attr = Max_Column then
-                              --  'Max_Column on a matrix
-                              return Translate
-                                (Var,
-                                 Image (Tk.Comp_Value.Data.Max), C'Access);
-
-                           elsif Var.Attribute.Attr /= Nil then
-                              raise Template_Error
-                                with "This attribute is not valid for a "
-                                  & "matrix tag (" & Image (Var) & ')';
-                           end if;
-                        end if;
-
-                        declare
-                           Result : Unbounded_String;
-                           Found  : Boolean;
-                        begin
-                           Field
-                             (Tk.Comp_Value,
-                              State.Cursor (1 .. State.Table_Level),
-                              Up_Value,
-                              Result, Found);
-
-                           return Translate
-                             (Var, To_String (Result), C'Access);
-                        end;
-                  end case;
-               end if;
-            end;
-
-            case Var.Internal is
-               when Up_Table_Line =>
-                  if State.Table_Level < 2 then
-                     return Translate (Var, "0", C'Access);
-                  else
-                     return Translate
-                       (Var,
-                        Image (State.Cursor (State.Table_Level - 1)),
-                        C'Access);
-                  end if;
-
-               when Table_Line =>
-                  if State.Table_Level = 0 then
-                     return Translate (Var, "0", C'Access);
-                  else
-                     return Translate
-                       (Var,
-                        Image (State.Cursor (State.Table_Level)),
-                        C'Access);
-                  end if;
-
-               when Number_Line =>
-                  return Translate
-                    (Var, Image (State.Max_Lines), C'Access);
-
-               when Table_Level =>
-                  return Translate
-                    (Var, Image (State.Table_Level), C'Access);
-
-               when Templates_Parser.Now =>
-                  return Translate
-                    (Var,
-                     GNAT.Calendar.Time_IO.Image (Now, "%Y-%m-%d %H:%M:%S"),
-                     C'Access);
-
-               when Year =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%Y"), C'Access);
-
-               when Month =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%m"), C'Access);
-
-               when Day =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%d"), C'Access);
-
-               when Hour =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%H"), C'Access);
-
-               when Minute =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%M"), C'Access);
-
-               when Second =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%S"), C'Access);
-
-               when Month_Name =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%B"), C'Access);
-
-               when Day_Name =>
-                  return Translate
-                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%A"), C'Access);
-
-               when No =>
-                  null;
-            end case;
-
-            --  The tag was not found in the Translation_Table, we either
-            --  returns the empty string or we keep the tag as is.
-
-            if Keep_Unknown_Tags then
-               return To_String (Begin_Tag & Var.Name & End_Tag);
-            else
-               return Translate (Var, "", C'Access);
-            end if;
-         end Translate;
 
          -------------
          -- Analyze --
@@ -4759,6 +4184,32 @@ package body Templates_Parser is
                   return U_Op_Table (E.U_O) (Analyze (E.Next));
             end case;
          end Analyze;
+
+         ------------------------
+         -- Flatten_Parameter  --
+         ------------------------
+
+         function Flatten_Parameters
+           (I : in Include_Parameters) return Filter.Include_Parameters
+         is
+            use type Data.Tree;
+            F : Filter.Include_Parameters;
+         begin
+            for K in I'Range loop
+               if I (K) = null then
+                  F (K) := Null_Unbounded_String;
+               else
+                  case I (K).Kind is
+                     when Data.Text =>
+                        F (K) := I (K).Value;
+                     when Data.Var  =>
+                        F (K) := To_Unbounded_String
+                                  (Translate (I (K).Var, State));
+                  end case;
+               end if;
+            end loop;
+            return F;
+         end Flatten_Parameters;
 
          -----------
          -- Flush --
@@ -5106,6 +4557,123 @@ package body Templates_Parser is
             Max_Expand := Result;
          end Get_Max;
 
+         -----------------
+         -- I_Translate --
+         -----------------
+
+         function I_Translate
+           (Var   : in Tag_Var;
+            State : in Parse_State) return String
+         is
+            use type Data.Tree;
+            use type Data.NKind;
+         begin
+            pragma Assert (Var.N /= -1);
+
+            if Var.N <= Max_Include_Parameters
+              and then State.I_Params (Var.N) /= null
+            then
+               declare
+                  T : constant Data.Tree := State.I_Params (Var.N);
+                  --  T is the data tree that should be evaluated in place
+                  --  of the include variable.
+                  C : aliased Filter.Filter_Context :=
+                        (Translations, Lazy_Tag, State.F_Params);
+               begin
+                  if T.Next = null and then T.Kind = Data.Var then
+                     --  Here we have a special case where the include
+                     --  variable is replaced by a single variable.
+
+                     declare
+                        V : Tag_Var := T.Var;
+                     begin
+                        if V.N = -1 then
+                           --  First thing we want to do is to inherit
+                           --  attributes from the include variable if we
+                           --  have no attribute.
+
+                           if V.Attribute.Attr = Nil then
+                              V.Attribute := Var.Attribute;
+                           end if;
+
+                           --  Note that below we pass the parent state. This
+                           --  is required as if the variable is an alias to
+                           --  to an include parameter we need to get the
+                           --  value for this variable in parent state. If the
+                           --  variable is a standard one (from a translate
+                           --  table) the state will not be used.
+
+                           return Translate
+                             (Var, Translate (V, State.Parent.all), C'Access);
+
+                        else
+                           --  This variable reference a parent include
+                           --  variable.
+
+                           return I_Translate (V, State.Parent.all);
+                        end if;
+                     end;
+
+                  else
+                     --  Here we flush the buffer and then we analyse the
+                     --  include parameter. The result is contained into
+                     --  the buffer which is large enough for an include
+                     --  variable.
+
+                     Flush;
+                     Analyze (T);
+
+                     declare
+                        L : constant Natural := Last;
+                     begin
+                        Last := 0;
+                        return Translate
+                          (Var, Buffer (Buffer'First .. L), C'Access);
+                     end;
+                  end if;
+               end;
+
+            else
+               return "";
+            end if;
+         end I_Translate;
+
+         -----------------------
+         -- Inline_Cursor_Tag --
+         -----------------------
+
+         function Inline_Cursor_Tag
+           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
+            Var_Name   : in String;
+            Dim        : in Positive;
+            Path       : in Dynamic.Path) return Unbounded_String
+         is
+            use type Dynamic.Path;
+            Result : Unbounded_String;
+            L      : Natural;
+         begin
+            L := Dynamic.Length (Cursor_Tag, Var_Name, 1 & Path);
+
+            for K in 1 .. L loop
+               if Result /= Null_Unbounded_String then
+                  Append (Result, ' ');
+               end if;
+
+               if Dim = Path'Length + 1 then
+                  Append
+                    (Result,
+                     Dynamic.Value (Cursor_Tag, Var_Name, Path & K));
+               else
+                  Append
+                    (Result,
+                     Inline_Cursor_Tag
+                       (Cursor_Tag, Var_Name, Dim, Path & K));
+               end if;
+            end loop;
+
+            return Result;
+         end Inline_Cursor_Tag;
+
          -------------
          -- Is_True --
          -------------
@@ -5115,6 +4683,309 @@ package body Templates_Parser is
          begin
             return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
          end Is_True;
+
+         -------------
+         -- Pop_Sep --
+         -------------
+
+         procedure Pop_Sep (State : in Parse_State) is
+         begin
+            if Last_Was_Sep then
+               Last := Last - Length (State.Inline_Sep);
+               Last_Was_Sep := False;
+            end if;
+         end Pop_Sep;
+
+         --------------
+         -- Push_Sep --
+         --------------
+
+         procedure Push_Sep (State : in Parse_State) is
+         begin
+            if State.Inline_Sep /= Null_Unbounded_String then
+               Add (To_String (State.Inline_Sep), Sep => True);
+            end if;
+         end Push_Sep;
+
+         ---------------
+         -- Translate --
+         ---------------
+
+         function Translate
+           (Var : in Tag_Var; State : in Parse_State) return String
+         is
+            use type Data.Tree;
+            C        : aliased Filter.Filter_Context :=
+                         (Translations, Lazy_Tag, State.F_Params);
+            D_Pos    : Definitions.Def_Map.Containers.Cursor;
+            Pos      : Association_Set.Containers.Cursor;
+            Up_Value : Natural := 0;
+         begin
+            D_Pos := Definitions.Def_Map.Containers.Find
+              (D_Map, To_String (Var.Name));
+
+            if Definitions.Def_Map.Containers.Has_Element (D_Pos) then
+               --  We have a definition for this variable in the template
+               declare
+                  N : Definitions.Node
+                    := Definitions.Def_Map.Containers.Element (D_Pos);
+                  V : Tag_Var := Var;
+               begin
+                  case N.Kind is
+                     when Definitions.Const =>
+                        return Translate
+                          (Var, To_String (N.Value), C'Access);
+
+                     when Definitions.Ref =>
+                        V.N := N.Ref;
+                        return I_Translate (V, State);
+
+                     when Definitions.Ref_Default =>
+                        if N.Ref > Max_Include_Parameters
+                          or else State.I_Params (N.Ref) = null
+                        then
+                           --  This include parameter does not exists, use
+                           --  default value.
+                           return Translate
+                             (Var, To_String (N.Value), C'Access);
+                        else
+                           V.N := N.Ref;
+                           return I_Translate (V, State);
+                        end if;
+                  end case;
+               end;
+            end if;
+
+            declare
+               use type Dynamic.Cursor_Tag_Access;
+               use type Dynamic.Path;
+               Tk : constant Association := Get_Association (Var);
+            begin
+               if Tk = Null_Association then
+
+                  if Cursor_Tag /= Dynamic.Null_Cursor_Tag then
+                     --  Check the Cursor_Tag
+                     declare
+                        Name         : constant String := To_String (Var.Name);
+                        D, L         : Natural;
+                        Valid_Cursor : Boolean := True;
+                     begin
+                        D := Dynamic.Dimension (Cursor_Tag, Name);
+
+                        if D /= 0 then
+                           if Var.Attribute.Attr /= Nil then
+                              --  ??? Would be nice to remove this restriction
+                              raise Template_Error with
+                                "Attributes not supported for Cursor_Tag.";
+                           end if;
+
+                           --  This is a Cursor_Tag, check that the current
+                           --  table cursor is valid for it.
+
+                           for K in 1 .. D loop
+                              if State.Cursor (K) >
+                                Dynamic.Length
+                                  (Cursor_Tag, Name,
+                                   1 & State.Cursor (1 .. K - 1))
+                              then
+                                 Valid_Cursor := False;
+                              end if;
+                           end loop;
+
+                           if Valid_Cursor then
+
+                              L := Dynamic.Length
+                                (Cursor_Tag, Name,
+                                 1 & State.Cursor
+                                   (1 .. State.Table_Level - 1));
+
+                              if D = 1 and then L = 1 then
+                                 --  A standard tag (single value)
+                                 return Translate
+                                   (Var,
+                                    Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
+                                    C'Access);
+
+                              else
+                                 --  A composite tag, check that the dimension
+                                 --  of the tag correspond to the current table
+                                 --  nested level.
+
+                                 if D = State.Table_Level then
+                                    return Translate
+                                      (Var,
+                                       Dynamic.Value
+                                         (Cursor_Tag, Name,
+                                          State.Cursor (1 .. D)), C'Access);
+
+                                 else
+                                    --  Otherwise we inline the structure
+                                    return To_String
+                                      (Inline_Cursor_Tag
+                                         (Cursor_Tag, Name, D,
+                                          State.Cursor
+                                            (1 .. State.Table_Level)));
+                                 end if;
+                              end if;
+                           end if;
+                        end if;
+                     end;
+                  end if;
+
+               else
+                  case Tk.Kind is
+
+                     when Std =>
+                        if Var.Attribute.Attr = Nil then
+                           return Translate
+                             (Var, To_String (Tk.Value), C'Access);
+                        else
+                           raise Template_Error
+                             with "Attribute not valid on a discrete tag ("
+                               & Image (Var) & ')';
+                        end if;
+
+                     when Composite =>
+                        if Tk.Comp_Value.Data.Nested_Level = 1 then
+                           --  This is a vector
+
+                           if Var.Attribute.Attr = Length then
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Data.Count), C'Access);
+
+                           elsif Var.Attribute.Attr = Up_Level then
+                              Up_Value := Var.Attribute.Value;
+
+                           elsif Var.Attribute.Attr /= Nil then
+                              raise Template_Error
+                                with "This attribute is not valid for a "
+                                  & "vector tag (" & Image (Var) & ')';
+                           end if;
+
+                        elsif Tk.Comp_Value.Data.Nested_Level = 2 then
+                           if Var.Attribute.Attr = Line then
+                              --  'Line on a matrix
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Data.Count), C'Access);
+
+                           elsif Var.Attribute.Attr = Min_Column then
+                              --  'Min_Column on a matrix
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Data.Min), C'Access);
+
+                           elsif Var.Attribute.Attr = Max_Column then
+                              --  'Max_Column on a matrix
+                              return Translate
+                                (Var,
+                                 Image (Tk.Comp_Value.Data.Max), C'Access);
+
+                           elsif Var.Attribute.Attr /= Nil then
+                              raise Template_Error
+                                with "This attribute is not valid for a "
+                                  & "matrix tag (" & Image (Var) & ')';
+                           end if;
+                        end if;
+
+                        declare
+                           Result : Unbounded_String;
+                           Found  : Boolean;
+                        begin
+                           Field
+                             (Tk.Comp_Value,
+                              State.Cursor (1 .. State.Table_Level),
+                              Up_Value,
+                              Result, Found);
+
+                           return Translate
+                             (Var, To_String (Result), C'Access);
+                        end;
+                  end case;
+               end if;
+            end;
+
+            case Var.Internal is
+               when Up_Table_Line =>
+                  if State.Table_Level < 2 then
+                     return Translate (Var, "0", C'Access);
+                  else
+                     return Translate
+                       (Var,
+                        Image (State.Cursor (State.Table_Level - 1)),
+                        C'Access);
+                  end if;
+
+               when Table_Line =>
+                  if State.Table_Level = 0 then
+                     return Translate (Var, "0", C'Access);
+                  else
+                     return Translate
+                       (Var,
+                        Image (State.Cursor (State.Table_Level)),
+                        C'Access);
+                  end if;
+
+               when Number_Line =>
+                  return Translate
+                    (Var, Image (State.Max_Lines), C'Access);
+
+               when Table_Level =>
+                  return Translate
+                    (Var, Image (State.Table_Level), C'Access);
+
+               when Templates_Parser.Now =>
+                  return Translate
+                    (Var,
+                     GNAT.Calendar.Time_IO.Image (Now, "%Y-%m-%d %H:%M:%S"),
+                     C'Access);
+
+               when Year =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%Y"), C'Access);
+
+               when Month =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%m"), C'Access);
+
+               when Day =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%d"), C'Access);
+
+               when Hour =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%H"), C'Access);
+
+               when Minute =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%M"), C'Access);
+
+               when Second =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%S"), C'Access);
+
+               when Month_Name =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%B"), C'Access);
+
+               when Day_Name =>
+                  return Translate
+                    (Var, GNAT.Calendar.Time_IO.Image (Now, "%A"), C'Access);
+
+               when No =>
+                  null;
+            end case;
+
+            --  The tag was not found in the Translation_Table, we either
+            --  returns the empty string or we keep the tag as is.
+
+            if Keep_Unknown_Tags then
+               return To_String (Begin_Tag & Var.Name & End_Tag);
+            else
+               return Translate (Var, "", C'Access);
+            end if;
+         end Translate;
 
       begin
          if T = null then
@@ -5430,18 +5301,52 @@ package body Templates_Parser is
       Release (T.Info);
    end Print_Tree;
 
-   -------------------
-   -- Release_Cache --
-   -------------------
+   -----------
+   -- Quote --
+   -----------
 
-   procedure Release_Cache is
+   function Quote (Str : in String) return String is
+      K : constant Natural := Strings.Fixed.Index (Str, " ");
    begin
-      Cached_Files.Release;
-   end Release_Cache;
+      if K = 0 then
+         return Str;
+      else
+         return '"' & Str & '"';
+      end if;
+   end Quote;
+
+   ---------------------
+   -- Register_Filter --
+   ---------------------
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback) renames Filter.Register;
+
+   procedure Register_Filter
+     (Name    : in String;
+      Handler : in Callback_No_Param) renames Filter.Register;
+
+   procedure Register_Filter
+     (Name   : in String;
+      Filter : access User_Filter'Class) renames Filter.Register;
+
+   procedure Free_Filters renames Filter.Free_Filters;
 
    -------------
    -- Release --
    -------------
+
+   procedure Release (T : in out Tag_Var) is
+      use type Filter.Set_Access;
+      procedure Free is
+         new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
+   begin
+      if T.Filters /= null then
+         Filter.Release (T.Filters.all);
+         Free (T.Filters);
+      end if;
+   end Release;
 
    procedure Release (T : in out Tree; Include : in Boolean := True) is
       use type Data.Tree;
@@ -5532,6 +5437,35 @@ package body Templates_Parser is
       Free (T);
    end Release;
 
+   -------------------
+   -- Release_Cache --
+   -------------------
+
+   procedure Release_Cache is
+   begin
+      Cached_Files.Release;
+   end Release_Cache;
+
+   ------------
+   -- Remove --
+   ------------
+
+   procedure Remove (Set : in out Translate_Set; Name : in String) is
+   begin
+      if Association_Set.Containers.Contains (Set.Set.all, Name) then
+         Association_Set.Containers.Delete (Set.Set.all, Name);
+      end if;
+   end Remove;
+
+   -------------------
+   -- Set_Separator --
+   -------------------
+
+   procedure Set_Separator (T : in out Tag; Separator : in String) is
+   begin
+      T.Data.Separator := To_Unbounded_String (Separator);
+   end Set_Separator;
+
    ------------------------
    -- Set_Tag_Separators --
    ------------------------
@@ -5543,6 +5477,56 @@ package body Templates_Parser is
       Begin_Tag := To_Unbounded_String (Start_With);
       End_Tag   := To_Unbounded_String (Stop_With);
    end Set_Tag_Separators;
+
+   ----------
+   -- Size --
+   ----------
+
+   function Size (T : in Tag) return Natural is
+   begin
+      return T.Data.Count;
+   end Size;
+
+   ------------
+   -- To_Set --
+   ------------
+
+   function To_Set (Table : in Translate_Table) return Translate_Set is
+      Set : Translate_Set;
+   begin
+      for K in Table'Range loop
+         Insert (Set, Table (K));
+      end loop;
+      return Set;
+   end To_Set;
+
+   ---------------
+   -- Translate --
+   ---------------
+
+   function Translate
+     (T       : in Tag_Var;
+      Value   : in String;
+      Context : not null access Filter.Filter_Context) return String
+   is
+      use type Filter.Set_Access;
+   begin
+      if T.Filters /= null then
+         declare
+            R : Unbounded_String := To_Unbounded_String (Value);
+         begin
+            for K in T.Filters'Range loop
+               R := To_Unbounded_String
+                 (T.Filters (K).Handle
+                  (To_String (R), Context, T.Filters (K).Parameters));
+            end loop;
+
+            return To_String (R);
+         end;
+      end if;
+
+      return Value;
+   end Translate;
 
    ---------------
    -- Translate --
@@ -5572,15 +5556,17 @@ package body Templates_Parser is
       ---------------
 
       function Translate (Var : in Tag_Var) return String is
-         Pos : Containers.Cursor;
+         Pos : Association_Set.Containers.Cursor;
          C   : aliased Filter.Filter_Context :=
                  (Translations, null, Filter.No_Include_Parameters);
       begin
-         Pos := Containers.Find (Translations.Set.all, To_String (Var.Name));
+         Pos := Association_Set.Containers.Find
+           (Translations.Set.all, To_String (Var.Name));
 
-         if Containers.Has_Element (Pos) then
+         if Association_Set.Containers.Has_Element (Pos) then
             declare
-               Item : constant Association := Containers.Element (Pos);
+               Item : constant Association :=
+                        Association_Set.Containers.Element (Pos);
             begin
                case Item.Kind is
                   when Std =>
@@ -5610,26 +5596,5 @@ package body Templates_Parser is
 
       return To_String (Results);
    end Translate;
-
-   ---------------------
-   -- Register_Filter --
-   ---------------------
-
-   procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback)
-     renames Filter.Register;
-
-   procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback_No_Param)
-     renames Filter.Register;
-
-   procedure Register_Filter
-     (Name       : in String;
-      Filter     : access User_Filter'Class)
-     renames Filter.Register;
-
-   procedure Free_Filters renames Filter.Free_Filters;
 
 end Templates_Parser;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2006                          --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -115,6 +115,9 @@ package body Expr is
       function Relation return Tree;
       --  Parse a relational operator
 
+      function Primary return Tree;
+      --  ???
+
       -----------
       -- Error --
       -----------
@@ -128,6 +131,27 @@ package body Expr is
       procedure Next_Token;
       --  Moves Current_Token to next token. Set Index after the last analysed
       --  consumed from expression.
+
+      ----------
+      -- Expr --
+      ----------
+
+      function Expr return Tree is
+         N : Tree;
+         O : Ops;
+      begin
+         N := Relation;
+
+         while Current_Token.Kind = Binary_Op
+           and then Current_Token.Bin_Op in Logic_Op
+         loop
+            O := Current_Token.Bin_Op;
+            Next_Token;
+            N := new Node'(Op, O, N, Relation);
+         end loop;
+
+         return N;
+      end Expr;
 
       ----------------
       -- Next_Token --
@@ -334,22 +358,6 @@ package body Expr is
          end case;
       end Primary;
 
-      ----------
-      -- Term --
-      ----------
-
-      function Term return Tree is
-         O : U_Ops;
-      begin
-         if Current_Token.Kind = Unary_Op then
-            O := Current_Token.Un_Op;
-            Next_Token;
-            return new Node'(U_Op, O, Primary);
-         else
-            return Primary;
-         end if;
-      end Term;
-
       --------------
       -- Relation --
       --------------
@@ -372,25 +380,20 @@ package body Expr is
       end Relation;
 
       ----------
-      -- Expr --
+      -- Term --
       ----------
 
-      function Expr return Tree is
-         N : Tree;
-         O : Ops;
+      function Term return Tree is
+         O : U_Ops;
       begin
-         N := Relation;
-
-         while Current_Token.Kind = Binary_Op
-           and then Current_Token.Bin_Op in Logic_Op
-         loop
-            O := Current_Token.Bin_Op;
+         if Current_Token.Kind = Unary_Op then
+            O := Current_Token.Un_Op;
             Next_Token;
-            N := new Node'(Op, O, N, Relation);
-         end loop;
-
-         return N;
-      end Expr;
+            return new Node'(U_Op, O, Primary);
+         else
+            return Primary;
+         end if;
+      end Term;
 
       Result : Tree;
 
@@ -464,53 +467,5 @@ package body Expr is
 
       Free (E);
    end Release;
-
-   -----------
-   -- Value --
-   -----------
-
-   function Value (O : in String) return Ops is
-   begin
-      if O = "and" then
-         return O_And;
-
-      elsif O = "or" then
-         return O_Or;
-
-      elsif O = "xor" then
-         return O_Xor;
-
-      elsif O = ">" then
-         return O_Sup;
-
-      elsif O = "<" then
-         return O_Inf;
-
-      elsif O = ">=" then
-         return O_Esup;
-
-      elsif O = "<=" then
-         return O_Einf;
-
-      elsif O = "=" then
-         return O_Equal;
-
-      elsif O = "/=" then
-         return O_Diff;
-
-      else
-         raise Template_Error with "unknown operator " & O;
-      end if;
-   end Value;
-
-   function Value (O : in String) return U_Ops is
-   begin
-      if O = "not" then
-         return O_Not;
-
-      else
-         raise Template_Error with "unknown operator " & O;
-      end if;
-   end Value;
 
 end Expr;

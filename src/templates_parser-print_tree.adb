@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                        Copyright (C) 1999 - 2005                         --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -31,6 +31,9 @@ with Ada.Text_IO;
 separate (Templates_Parser)
 
 procedure Print_Tree (T : in Tree; Level : in Natural := 0) is
+
+   procedure Print_Indent (L : in Natural);
+   --  Output proper number of spaces for identation
 
    ------------------
    -- Print_Indent --

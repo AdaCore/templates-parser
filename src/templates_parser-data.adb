@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2006                          --
+--                         Copyright (C) 1999-2007                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -38,11 +38,8 @@ package body Data is
 
    function Parse (Line : in String) return Tree is
 
-      Begin_Tag : constant String
-        := To_String (Templates_Parser.Begin_Tag);
-
-      End_Tag : constant String
-        := To_String (Templates_Parser.End_Tag);
+      Begin_Tag : constant String := To_String (Templates_Parser.Begin_Tag);
+      End_Tag   : constant String := To_String (Templates_Parser.End_Tag);
 
       function Build (Line : in String) return Tree;
       --  Recursive function to build the tree
@@ -62,9 +59,8 @@ package body Data is
 
             if Start = 0 then
                --  No more tag
-               return new Node'(Text,
-                                null,
-                                To_Unbounded_String (Line));
+               return new Node'(Text, null, To_Unbounded_String (Line));
+
             else
                Stop := Strings.Fixed.Index (Line, End_Tag);
 

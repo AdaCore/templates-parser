@@ -5,6 +5,7 @@ MAKEINFO        = $(shell which makeinfo 2> /dev/null)
 DVIPS           = $(shell which dvips 2> /dev/null)
 TEXI2DVI        = $(shell which texi2dvi 2> /dev/null)
 PDFTEX          = $(shell which pdftex 2> /dev/null)
+GNATMAKE        = $(shell which gnatmake 2> /dev/null)
 
 TMPLT	  = demo.tmplt user.tmplt table.tmplt table_section.tmplt \
 	    table_if.tmplt matrix.tmplt table_block.tmplt table_inline.tmplt \

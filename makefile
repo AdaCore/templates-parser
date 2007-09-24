@@ -29,11 +29,11 @@
 .SILENT:
 
 MODE	= RELEASE
-
 VERSION	= 10.0
+GNAT	= gnat
 
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
-		TP_XMLADA="$(TP_XMLADA)" GNAT="gnat"
+		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)"
 
 all:
 	echo ""
@@ -48,7 +48,7 @@ all:
 force:
 
 build: force
-	gnat make -Ptemplates_parser
+	$(GNAT) make -Ptemplates_parser
 
 test: build
 	make -C regtests $(ALL_OPTIONS) test
@@ -58,7 +58,7 @@ doc:
 	echo Templates_Parser Documentation built with success.
 
 clean:
-	gnat clean -Ptemplates_parser
+	$(GNAT) clean -Ptemplates_parser
 	make -C docs clean
 	make -C regtests clean
 

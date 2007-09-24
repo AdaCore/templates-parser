@@ -5,7 +5,6 @@ MAKEINFO        = $(shell which makeinfo 2> /dev/null)
 DVIPS           = $(shell which dvips 2> /dev/null)
 TEXI2DVI        = $(shell which texi2dvi 2> /dev/null)
 PDFTEX          = $(shell which pdftex 2> /dev/null)
-GNATMAKE        = $(shell which gnatmake 2> /dev/null)
 
 TMPLT	  = demo.tmplt user.tmplt table.tmplt table_section.tmplt \
 	    table_if.tmplt matrix.tmplt table_block.tmplt table_inline.tmplt \
@@ -110,11 +109,11 @@ endif
 
 $(ADBFILES) $(ADSFILES): all_sources.ada
 	tail +3 all_sources.ada > sources.ada
-	gnatchop -w sources.ada
+	$(GNAT) chop -w sources.ada
 	rm sources.ada
 
 $(EXEFILES): $(ADBFILES) $(ADSFILES)
-	$(GNATMAKE) -q -Pdocs $(EXEFILES)
+	$(GNAT) make -q -Pdocs $(EXEFILES)
 
 %.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res

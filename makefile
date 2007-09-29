@@ -57,6 +57,13 @@ doc:
 	make -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
 
+setup:
+ifeq ($(TP_XMLADA), Installed)
+	cp config/tp_xmlada_installed.gpr tp_xmlada.gpr
+else
+	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
+endif
+
 clean:
 	$(GNAT) clean -Ptemplates_parser
 	make -C docs clean

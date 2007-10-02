@@ -150,7 +150,7 @@ ada.sed: makefile
 force:
 
 clean-tmp:
-	-gnatclean -q -r -Pdocs $(EXEFILES)
+	-$(GNAT) clean -q -r -Pdocs $(EXEFILES)
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
 		*.exe templates_parser*.ads.texi ada.sed \

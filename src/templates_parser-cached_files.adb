@@ -42,7 +42,7 @@ package body Cached_Files is
    Index : Natural := 0;
 
    procedure Growth;
-   --  Growth the size (by Growing_Size places) of Files array.
+   --  Growth the size (by Growing_Size places) of Files array
 
    function Get (Filename : in String) return Natural;
    --  Look for Filename into the set and return its index. Returns 0 if
@@ -99,7 +99,7 @@ package body Cached_Files is
             --  info node (first node).
 
             I := Files (N).I_File;
-            --  Old include files dependances
+            --  Old include files dependencies
 
             Files (N).Next      := T.Next;
             Files (N).Timestamp := T.Timestamp;
@@ -346,11 +346,12 @@ package body Cached_Files is
    begin
       --  Mark current tree
 
-      if Mode = Used then
-         T.Info.Next.Used := T.Info.Next.Used + 1;
-      else
-         T.Info.Next.Used := T.Info.Next.Used - 1;
-      end if;
+      case Mode is
+         when Used =>
+            T.Info.Next.Used := T.Info.Next.Used + 1;
+         when Released =>
+            T.Info.Next.Used := T.Info.Next.Used - 1;
+      end case;
 
       --  And mark all include files
 

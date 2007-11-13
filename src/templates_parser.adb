@@ -3678,16 +3678,20 @@ package body Templates_Parser is
 
       --  Add second node (cache info)
 
-      Old := new Node'(C_Info, New_T, 0, False, 1);
+      Old := new Node'(Kind     => C_Info,
+                       Next     => New_T,
+                       Line     => 0,
+                       Obsolete => False,
+                       Used     => 1);
 
       --  Add first node (info about tree)
 
-      New_T := new Node'(Info,
-                         Old,
-                         0,
-                         To_Unbounded_String (Filename),
-                         Configuration.File_Time_Stamp (Filename),
-                         I_File);
+      New_T := new Node'(Kind      => Info,
+                         Next      => Old,
+                         Line      => 0,
+                         Filename  => To_Unbounded_String (Filename),
+                         Timestamp => Configuration.File_Time_Stamp (Filename),
+                         I_File    => I_File);
 
       if Error_Include_Message /= Null_Unbounded_String then
          --  An include filename was not found, release the memory now and

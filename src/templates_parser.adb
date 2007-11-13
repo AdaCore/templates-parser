@@ -3652,11 +3652,14 @@ package body Templates_Parser is
       Old   : Tree;
 
    begin
+      Tasking.Lock;
+
       if Cached then
          Cached_Files.Get (Filename, Result => T);
 
          if T /= Null_Static_Tree then
             pragma Assert (T.C_Info /= null);
+            Tasking.Unlock;
             return T;
          end if;
       end if;
@@ -3707,10 +3710,12 @@ package body Templates_Parser is
          pragma Assert (Old /= null);
       end if;
 
+      Tasking.Unlock;
       return Static_Tree'(New_T, Old);
 
    exception
       when E : Internal_Error =>
+         Tasking.Unlock;
          Fatal_Error (Exceptions.Exception_Message (E));
    end Load;
 

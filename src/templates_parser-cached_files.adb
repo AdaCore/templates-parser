@@ -74,8 +74,6 @@ package body Cached_Files is
       I : Tree;
 
    begin
-      Tasking.Lock;
-
       E := Index;
 
       --  Does the table initialized and do we have enough place on it ?
@@ -141,7 +139,6 @@ package body Cached_Files is
 
             --  Nothing more to do in this case
 
-            Tasking.Unlock;
             return;
 
          elsif Files (N).Filename < L_Filename then
@@ -162,12 +159,6 @@ package body Cached_Files is
 
       Old := T.Next;
       --  Old point to the current C_Info tree
-
-      Tasking.Unlock;
-   exception
-      when others =>
-         Tasking.Unlock;
-         raise;
    end Add;
 
    ---------
@@ -180,7 +171,6 @@ package body Cached_Files is
    is
       N : constant Natural := Get (Filename);
    begin
-      Tasking.Lock;
       if N = 0 then
          Result := Null_Static_Tree;
 
@@ -189,11 +179,6 @@ package body Cached_Files is
 
          Update_Used_Counter (Result, Mode => Used);
       end if;
-      Tasking.Unlock;
-   exception
-      when others =>
-         Tasking.Unlock;
-         raise;
    end Get;
 
    function Get (Filename : in String) return Natural is

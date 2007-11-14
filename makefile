@@ -51,10 +51,10 @@ build: force
 	$(GNAT) make -Ptemplates_parser
 
 test: build
-	make -C regtests $(ALL_OPTIONS) test
+	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
 doc:
-	make -C docs $(ALL_OPTIONS) doc
+	$(MAKE) -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
 
 setup:
@@ -66,8 +66,8 @@ endif
 
 clean:
 	$(GNAT) clean -Ptemplates_parser
-	make -C docs clean
-	make -C regtests clean
+	$(MAKE) -C docs clean
+	$(MAKE) -C regtests clean
 
 distrib:
 	-rm templates_parser-?.?.tar*

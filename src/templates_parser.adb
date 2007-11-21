@@ -3717,6 +3717,9 @@ package body Templates_Parser is
       when E : Internal_Error =>
          Tasking.Unlock;
          Fatal_Error (Exceptions.Exception_Message (E));
+      when others =>
+         Tasking.Unlock;
+         raise;
    end Load;
 
    --------------

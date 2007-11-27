@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                          Copyright (C) 2005-2007                         --
 --                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -74,7 +74,8 @@ procedure Regtst2 is
       Last_Error_Code     : constant Integer := 12345;
       Task_Image          : constant String  := Image (Current_Task);
       Short_Error_Message : String renames Task_Image;
-      Error_Message       : constant String  := 140 * (Short_Error_Message & ASCII.LF);
+      Error_Message       : constant String  :=
+        140 * (Short_Error_Message & ASCII.LF);
    begin
       Start_Line.Wait;
       Result := Parse

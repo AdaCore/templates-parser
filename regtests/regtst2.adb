@@ -65,16 +65,16 @@ procedure Regtst2 is
 
    end Start_Line;
 
-   task body parser is
+   task body Parser is
       use Ada.Strings.Fixed;
       use Ada.Task_Identification;
 
-      B                   : Boolean := False;
+      B                   : constant Boolean := False;
       Result              : Unbounded_String;
-      Last_Error_Code     : Integer := 12345;
-      Task_Image          : String := Image (Current_Task);
+      Last_Error_Code     : constant Integer := 12345;
+      Task_Image          : constant String  := Image (Current_Task);
       Short_Error_Message : String renames Task_Image;
-      Error_Message       : String := 140 * (Short_Error_Message & ASCII.LF);
+      Error_Message       : constant String  := 140 * (Short_Error_Message & ASCII.LF);
    begin
       Start_Line.Wait;
       Result := Parse
@@ -88,8 +88,6 @@ procedure Regtst2 is
    end;
 
    Parsers : array (1 .. 20) of Parser;
-
-   Result : Unbounded_String;
 
 begin
    delay 1.0;

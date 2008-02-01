@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2008, AdaCore                      --
+--                       Copyright (C) 2008, AdaCore                        --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -26,50 +26,70 @@
 ------------------------------------------------------------------------------
 
 --  This tool parses a file specified on the command line, and generates
---  another file.
---  It can be used as a preprocessor
+--  another file. It can be used as a preprocessor.
 
-with Ada.Command_Line;      use Ada.Command_Line;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Text_IO;           use Ada.Text_IO;
-with AWS.Templates;         use AWS.Templates;
-with GNAT.Command_Line;     use GNAT.Command_Line;
+with Ada.Command_Line;
+with Ada.Strings.Unbounded;
+with Ada.Text_IO;
+
+with GNAT.Command_Line;
+
+with AWS.Templates;
 
 procedure TemplatesPP is
+
+   use Ada;
+   use Ada.Command_Line;
+   use Ada.Strings.Unbounded;
+   use GNAT.Command_Line;
+   use AWS;
+
    procedure Help;
    --  Print help message
 
-   procedure Process (In_File : String; Output : File_Type);
+   procedure Process (In_File : in String; Output : in Text_IO.File_Type);
    --  Parses In_File, and print the result to Output
+
+   ----------
+   -- Help --
+   ----------
 
    procedure Help is
    begin
-      Put_Line ("Pre-processor based on the AWS template parser");
-      Put_Line (Command_Name & " [-o output] file");
-      Put_Line
+      Text_IO.Put_Line ("Pre-processor based on the AWS template parser");
+      Text_IO.Put_Line (Command_Name & " [-o output] file");
+      Text_IO.Put_Line
          ("   Parses file and generate output file (or display on stdin");
    end Help;
 
-   procedure Process (In_File : String; Output : File_Type) is
+   -------------
+   -- Process --
+   -------------
+
+   procedure Process (In_File : in String; Output : in Text_IO.File_Type) is
    begin
-      Put_Line (Output, Parse (In_File));
+      Text_IO.Put_Line (Output, Templates.Parse (In_File));
    end Process;
 
-   F : File_Type;
+   F           : Text_IO.File_Type;
    Output_File : Unbounded_String;
+
 begin
    loop
       case Getopt ("o: h -help") is
          when 'h' =>
             Help;
             return;
+
          when '-' =>
             if Full_Switch = "-help" then
                Help;
                return;
             end if;
+
          when 'o' =>
             Output_File := To_Unbounded_String (Parameter);
+
          when others =>
             exit;
       end case;
@@ -80,16 +100,18 @@ begin
    begin
       if Input = "" then
          Help;
+
       elsif Output_File = Null_Unbounded_String then
-         Process (Input, Standard_Output);
+         Process (Input, Text_IO.Standard_Output);
+
       else
-         Create (F, Out_File, To_String (Output_File));
+         Text_IO.Create (F, Text_IO.Out_File, To_String (Output_File));
          Process (Input, F);
-         Close (F);
+         Text_IO.Close (F);
       end if;
    end;
 
 exception
-   when Name_Error =>
-      Put_Line ("Input file not found");
+   when Text_IO.Name_Error =>
+      Text_IO.Put_Line ("Input file not found");
 end TemplatesPP;

@@ -317,6 +317,7 @@ procedure Templates2Ada is
       Set_Var, Set_Val           : Tag;
       C                          : Sets.Cursor;
       Inserted                   : Boolean;
+      Parents_Nesting            : Natural;
       pragma Unreferenced (Result);
    begin
       --  We cannot use the templates parser, since it wouldn't process
@@ -338,8 +339,10 @@ procedure Templates2Ada is
               and then Str (S .. S + 13) = "@@-- HTTP_GET("
             then
                Next_Word (Str, S + 14, First, Last);
-               Insert
-                 (HTTP, Str (First .. Last) & HTTP_Get_Suffix, C, Inserted);
+               if not Contains (HTTP, Str (First .. Last)) then
+                  Insert
+                    (HTTP, Str (First .. Last) & HTTP_Get_Suffix, C, Inserted);
+               end if;
                S := Next_Line (Str, Last + 1);
 
             elsif S + 13 <= Str'Last
@@ -383,6 +386,37 @@ procedure Templates2Ada is
                      exit;
                   end if;
                   Last := Last + 1;
+               end loop;
+
+               --  Special case: a convention is that user-defined scripts
+               --  might accept arguments that reference other tags, by using
+               --  the syntax @_FILTER(@param):..._@, ie the parameter starts
+               --  with a single @ sign. In this case, we want to make sure
+               --  there is a entry made for the argument as well. Such
+               --  filters might have multiple arguments. Multiple arguments
+               --  must be comma-separated.
+
+               Parents_Nesting := 0;
+
+               for A in S + 2 .. Last - 1 loop
+                  if Str (A) = '(' then
+                     Parents_Nesting := Parents_Nesting + 1;
+                  elsif Str (A) = ')' then
+                     Parents_Nesting := Parents_Nesting - 1;
+                  elsif Str (A) = '@'
+                     and then Parents_Nesting > 0
+                     and then (Str (A - 1) = ',' or else Str (A - 1) = '(')
+                  then
+                     for B in A + 1 .. Last - 1 loop
+                        if Str (B) = ',' or else Str (B) = ')' then
+                           Insert (Seen, Str (A + 1 .. B - 1), C, Inserted);
+                           Insert
+                              (All_Variables, Str (A + 1 .. B - 1),
+                               C, Inserted);
+                           exit;
+                        end if;
+                     end loop;
+                  end if;
                end loop;
 
                --  Remove attributes (can't be done in the loop above, because
@@ -500,9 +534,15 @@ procedure Templates2Ada is
                      & " in template " & Relative_Name);
                end if;
 
+               --  We do not insert the parameter in case a matching
+               --  HTTP_GET parameter has already been inserted otherwise
+               --  we end up with duplicated constants in the HTTP package.
+
                if First in Str'Range
                  and then Last in Str'Range
                  and then Last - First >= 0
+                 and then
+                   not Contains (HTTP, Str (First .. Last) & HTTP_Get_Suffix)
                then
                   Insert (HTTP, Str (First .. Last), C, Inserted);
                end if;

@@ -1763,6 +1763,52 @@ needs.
   @b{end} Http;
 @b{end} Templates.Block1;}
 
+@code{templates2ada} knows about special constructs in the template file.
+Such templates are generally associated with html pages. It is possible to
+specify within the template itself what the url associated with the template
+is, so that it provides a convenient link between the two. Likewise, you
+can also define explicitly what the possible HTTP parameters are when loading
+that page. This is mostly useful when those parameters do not correspond to
+some form fields within the page itself. The syntax for these two is the
+following:
+
+@TPEXP{
+@@--  HTTP_URL(the_url): any comment you want
+@@--  HTTP_GET(param1_name): description of the parameter
+@@--  HTTP_GET(param2_name): description of the parameter
+}
+
+and that results in the following constants in the generated Ada package:
+
+@TPEXP{
+@b{package} Templates.Block1 @b{is}
+  URL : constant String := "the_url";
+  @b{package} Http @b{is}
+     Param1_Name : constant String := "param1_name";
+     Param2_Name : constant String := "param2_name";
+  @b{end} Http;
+@b{end} Templates.Block1;}
+
+The templates parser API lets you define your own custom filters. It is
+often useful for those filters to take parameters, just like the predefined
+filters do. However, it is also useful for these parameters to be able to
+check the value of other tags. One convention for doing this is to start the
+name of the parameter with "@". See for example the example in
+@pxref{User defined filters}. As a reminder, the template would look like
+
+@TPEXP{
+   <option value="foo" @@_SELECTED(@@SELECTED_STATUS):STATUS_@@ />}
+
+The @code{templates2ada} tool knows about this special convention, and would
+generate the following Ada package from this example:
+
+@TPEXP{
+@b{package} Templates.Block1 @b{is}
+   Selected_Status : @b{constant} String := "SELECTED_STATUS";
+   Status : @b{constant} String := "STATUS";
+@b{end} Templates.Block1;}
+
+
 @c --------------------------------------------------------------------------
 @c -- Templates2Ada -- Running templates2ada
 @c --------------------------------------------------------------------------

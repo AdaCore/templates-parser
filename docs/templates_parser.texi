@@ -51,7 +51,7 @@
 
 Copyright @copyright{} 1999-2004, Pascal Obry
 
-Copyright @copyright{} 2005-2007, AdaCore
+Copyright @copyright{} 2005-2008, AdaCore
 
 @*
 
@@ -1688,6 +1688,7 @@ We get the following result:
 * Tag utils::
 * XML representation::
 * Templates2Ada::
+* Templatespp::
 * Debug::
 @end menu
 
@@ -1875,6 +1876,43 @@ modified file.
 
 This file contains extensive comments on how to make use, and customize, it.
 This documentation is not duplicated here
+
+@c --------------------------------------------------------------------------
+@c --  Templatespp
+@c --------------------------------------------------------------------------
+
+@node Templatespp
+@section Templatespp
+@cindex templatespp
+
+@noindent
+@code{templatespp} is a pre-processor based on the template parser. It is
+generally used from scripts to process files and generate other files. One
+of the possible uses, for instance, is to write the CSS (style-sheet) of a
+web site as a template file (for instance @file{mycss.tcss}), and use 
+template parser structures in there. This is a good way to share colors for
+instance, or to name constants, as is often done in Ada code.
+
+Here is a small example of such a CSS:
+
+@TPEXP{
+@@@@SET@@@@ COLOR1=blue
+@@@@SET@@@@ COLOR2=red
+@@@@SET@@@@ LENGTH1=10
+
+body @{background:@@_COLOR1_@@@}
+div  @{background:@@_COLOR2_@@@}
+ul.class @{background:@@_COLOR1_@@@}  /* same color as body */
+
+ul   @{width:@@_ADD(3):LENGTH1_@@px@} /* ul 3 pixels wider than li */
+li   @{width:@@_LENGTH1_@@px@}
+}
+
+Such a file would be processed with the following command line:
+
+@TPEXP{
+   templatespp -o mycss.css mycss.tcss
+}
 
 @c ---------------------------------------------------------------------------
 @c --  Debug

@@ -28,6 +28,7 @@
 
 with Ada.Characters.Handling;                use Ada.Characters.Handling;
 with Ada.Command_Line;
+with Ada.Containers.Indefinite_Doubly_Linked_Lists;
 with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Directories;
@@ -51,6 +52,9 @@ procedure Templates2Ada is
    function "+" (Str : String) return Unbounded_String
      renames Ada.Strings.Unbounded.To_Unbounded_String;
 
+   package String_Lists is new Ada.Containers.Indefinite_Doubly_Linked_Lists
+     (String);
+
    Opt_Output    : Unbounded_String := +"templates.ads";
    --  Output file name
 
@@ -61,8 +65,8 @@ procedure Templates2Ada is
    Opt_Recursive      : Boolean := False;
    --  Whether the search for template files should be recursive
 
-   Opt_Templates_Ext  : Unbounded_String := +".thtml";
-   --  Extension for the templates files
+   Opt_Templates_Ext  : String_Lists.List;
+   --  List of extensions for the templates files
 
    Opt_Template : Unbounded_String := +"templates.tads";
    --  Name of the template file for the generated package.
@@ -81,6 +85,9 @@ procedure Templates2Ada is
 
    Help : Boolean := False;
    --  Set to true if -h option used
+
+   Default_Template_Extension : constant String := ".thtml";
+   --  The default extension used for template files
 
    N_Word_Set : constant Strings.Maps.Character_Set :=
                   To_Set (ASCII.HT & ASCII.LF & " ,()");
@@ -143,6 +150,7 @@ procedure Templates2Ada is
       use type Directories.File_Kind;
       Search  : Directories.Search_Type;
       Dir_Ent : Directories.Directory_Entry_Type;
+      C       : String_Lists.Cursor;
    begin
       Directories.Start_Search (Search, Relative_Directory, "");
 
@@ -161,20 +169,26 @@ procedure Templates2Ada is
             end if;
 
          elsif Directories.Kind (Dir_Ent) = Directories.Ordinary_File then
-            declare
-               Simple : constant String := Directories.Simple_Name (Dir_Ent);
-            begin
-               if Simple'Length > Length (Opt_Templates_Ext)
-                 and then Simple
-                   (Simple'Last - Length (Opt_Templates_Ext) + 1
-                    .. Simple'Last) = To_String (Opt_Templates_Ext)
-               then
-                  Process_Template
-                    (Directories.Compose
-                       (Relative_Directory,
-                        Directories.Simple_Name (Dir_Ent)));
-               end if;
-            end;
+            C := Opt_Templates_Ext.First;
+            while String_Lists.Has_Element (C) loop
+               declare
+                  Simple : constant String :=
+                             Directories.Simple_Name (Dir_Ent);
+                  Ext    : constant String := String_Lists.Element (C);
+               begin
+                  if Simple'Length > Ext'Length
+                    and then Simple
+                      (Simple'Last - Ext'Length + 1
+                       .. Simple'Last) = Ext
+                  then
+                     Process_Template
+                       (Directories.Compose
+                          (Relative_Directory,
+                           Directories.Simple_Name (Dir_Ent)));
+                  end if;
+               end;
+               String_Lists.Next (C);
+            end loop;
          end if;
       end loop;
 
@@ -649,7 +663,7 @@ begin
       case Getopt ("o: d: e: t: r v h") is
          when 'd'    => Opt_Templates_Dir  := +Parameter;
          when 'o'    => Opt_Output         := +Parameter;
-         when 'e'    => Opt_Templates_Ext  := +Parameter;
+         when 'e'    => Opt_Templates_Ext.Append (Parameter);
          when 't'    => Opt_Template       := +Parameter;
          when 'r'    => Opt_Recursive      := True;
          when 'v'    => Opt_Verbose        := True;
@@ -657,6 +671,10 @@ begin
          when others => exit;
       end case;
    end loop;
+
+   if Opt_Templates_Ext.Is_Empty then
+      Opt_Templates_Ext.Append (Default_Template_Extension);
+   end if;
 
    if Help or else Ada.Command_Line.Argument_Count = 0 then
       Text_IO.New_Line;
@@ -668,7 +686,7 @@ begin
         ("   -o file  : output filename (" & To_String (Opt_Output) & ')');
       Text_IO.Put_Line
         ("   -e ext   : template filename's extension (" &
-         To_String (Opt_Templates_Ext) & ')');
+         Default_Template_Extension & ')');
       Text_IO.Put_Line
         ("   -t tmplt : template filename (" & To_String (Opt_Template) & ')');
       Text_IO.Put_Line

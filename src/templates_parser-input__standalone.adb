@@ -86,19 +86,6 @@ package body Templates_Parser.Input is
       end if;
    end End_Of_File;
 
-   -------------------
-   -- LF_Terminated --
-   -------------------
-
-   function LF_Terminated (File : in File_Type) return Boolean is
-   begin
-      if File = null then
-         raise Stream_IO.Status_Error;
-      else
-         return File.LFT;
-      end if;
-   end LF_Terminated;
-
    --------------
    -- Get_Line --
    --------------
@@ -171,6 +158,19 @@ package body Templates_Parser.Input is
          end loop;
       end if;
    end Get_Line;
+
+   -------------------
+   -- LF_Terminated --
+   -------------------
+
+   function LF_Terminated (File : in File_Type) return Boolean is
+   begin
+      if File = null then
+         raise Stream_IO.Status_Error;
+      else
+         return File.LFT;
+      end if;
+   end LF_Terminated;
 
    ----------
    -- Open --

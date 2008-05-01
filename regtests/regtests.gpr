@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                         Copyright (C) 2005-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -64,7 +64,7 @@ project Regtests is
    ---------
 
    package Ide is
-      for Vcs_Kind use "CVS";
+      for Vcs_Kind use "Subversion";
    end Ide;
 
 end Regtests;

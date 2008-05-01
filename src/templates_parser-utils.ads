@@ -26,7 +26,11 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Environment_Variables;
+
 package Templates_Parser.Utils is
+
+   use Ada;
 
    function Image (T : in Tag) return String;
    --  Returns a string representation for this tag
@@ -35,5 +39,30 @@ package Templates_Parser.Utils is
    --  Give a string representation of a tag (as encoded with Image above),
    --  build the corresponding Tag object. Raises Constraint_Error if T is
    --  not a valid tag representation.
+
+   function Get_Program_Directory return String;
+   --  Returns the directory full path name for the current running program
+
+   Is_Windows          : constant Boolean :=
+                           Environment_Variables.Exists ("OS") and then
+                           Environment_Variables.Value ("OS") = "Windows_NT";
+
+   Directory_Separator : constant Character;
+   Path_Separator      : constant Character;
+
+   function Executable_Extension return String;
+   --  Return the executable exetension for the running host
+
+private
+
+   subtype Windows_Host is Boolean;
+
+   type C_Array is array (Windows_Host) of Character;
+
+   DS : C_Array := C_Array'(True => '\', False => '/');
+   PS : C_Array := C_Array'(True => ';', False => ':');
+
+   Directory_Separator : constant Character := DS (Is_Windows);
+   Path_Separator      : constant Character := PS (Is_Windows);
 
 end Templates_Parser.Utils;

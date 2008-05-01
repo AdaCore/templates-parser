@@ -26,7 +26,169 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Command_Line;
+with Ada.Directories;
+with Ada.Strings.Fixed;
+
 package body Templates_Parser.Utils is
+
+   --------------------------
+   -- Executable_Extension --
+   --------------------------
+
+   function Executable_Extension return String is
+   begin
+      if Is_Windows then
+         return "exe";
+      else
+         return "";
+      end if;
+   end Executable_Extension;
+
+   ---------------------------
+   -- Get_Program_Directory --
+   ---------------------------
+
+   function Get_Program_Directory return String is
+
+      function Locate_On_Path (Filename : in String) return String;
+      --  Returns the full pathname for filename or the empty string if not
+      --  found.
+
+      function Is_Full_Pathname (Filename : in String) return Boolean;
+      --  Returns True is Filename is a full pathname
+
+      function Get_Command_Name return String;
+      --  Returns the normalized command string
+
+      function Containing_Directory (Filename : in String) return String;
+      --  Containing directory without directory separator, this can happen
+      --  with GNAT when returning the current working directory?
+
+      --------------------------
+      -- Containing_Directory --
+      --------------------------
+
+      function Containing_Directory (Filename : in String) return String is
+         CD : constant String := Directories.Containing_Directory (Filename);
+      begin
+         if CD (CD'Last) = Directory_Separator then
+            return CD (CD'First .. CD'Last - 1);
+         else
+            return CD;
+         end if;
+      end Containing_Directory;
+
+      ----------------------
+      -- Get_Command_Name --
+      ----------------------
+
+      function Get_Command_Name return String is
+         N : constant String := Command_Line.Command_Name;
+         E : constant String := Executable_Extension;
+      begin
+         if N'Length > E'Length
+           and then N (N'Last - E'Length + 1 .. N'Last) = E
+         then
+            return N;
+         else
+            return N & E;
+         end if;
+      end Get_Command_Name;
+
+      ----------------------
+      -- Is_Full_Pathname --
+      ----------------------
+
+      function Is_Full_Pathname (Filename : in String) return Boolean is
+         F : String renames Filename;
+      begin
+         return F (F'First) = Directory_Separator
+           or else
+             (F'Length > 2
+              and then (F (F'First) in 'a' .. 'z'
+                        or else F (F'First) in 'A' .. 'Z')
+              and then F (F'First + 1) = ':'
+              and then F (F'First + 2) = Directory_Separator);
+      end Is_Full_Pathname;
+
+      --------------------
+      -- Locate_On_Path --
+      --------------------
+
+      function Locate_On_Path (Filename : in String) return String is
+         PATH        : constant String := Environment_Variables.Value ("PATH");
+         First, Last : Natural;
+         Idx         : Natural;
+      begin
+         First := PATH'First;
+
+         loop
+            Last := Strings.Fixed.Index
+              (PATH, String'(1 => Path_Separator), From => First);
+
+            if Last = 0 then
+               Idx := PATH'Last;
+            else
+               Idx := Last - 1;
+            end if;
+
+            declare
+               Full_Pathname : constant String := Directories.Compose
+                 (PATH (First .. Idx) & Directory_Separator, Filename);
+            begin
+               if Directories.Exists (Full_Pathname) then
+                  return Full_Pathname;
+               end if;
+            end;
+
+            First := Last + 1;
+
+            exit when Last = 0 or else First > PATH'Last;
+         end loop;
+
+         return "";
+      end Locate_On_Path;
+
+      Command_Name : constant String := Get_Command_Name;
+
+      Dir          : constant String := Containing_Directory (Command_Name);
+
+   begin
+      --  On UNIX command_name doesn't include the directory name when the
+      --  command was found on the PATH. On Windows using the standard shell,
+      --  the command is never passed using a full pathname. In such a case,
+      --  which check on the PATH ourselves to find it.
+
+      if Directories.Exists (Command_Name) then
+         --  Command is found
+         if Is_Full_Pathname (Command_Name) or else Is_Full_Pathname (Dir) then
+            --  And we have a full pathname use it
+            return Dir & Directory_Separator;
+         else
+            --  A relative pathname, catenate the current directory
+            return Directories.Current_Directory
+              & Directory_Separator & Dir & Directory_Separator;
+         end if;
+
+      else
+         --  Command does not exists, try checkin it on the PATH
+         declare
+            Full_Pathname : constant String :=
+                              Locate_On_Path
+                                (Directories.Simple_Name (Command_Name));
+         begin
+            if Full_Pathname = "" then
+               --  Not found on the PATH, nothing we can do
+               return Dir;
+
+            else
+               return Directories.Containing_Directory (Full_Pathname)
+                 & Directory_Separator;
+            end if;
+         end;
+      end if;
+   end Get_Program_Directory;
 
    -----------
    -- Image --

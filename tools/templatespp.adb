@@ -35,7 +35,7 @@ with Ada.Text_IO;
 
 with GNAT.Command_Line;
 
-with AWS.Templates;
+with Templates_Parser;
 
 procedure TemplatesPP is
 
@@ -43,7 +43,6 @@ procedure TemplatesPP is
    use Ada.Command_Line;
    use Ada.Strings.Unbounded;
    use GNAT.Command_Line;
-   use AWS;
 
    procedure Help;
    --  Print help message
@@ -57,7 +56,7 @@ procedure TemplatesPP is
 
    procedure Help is
    begin
-      Text_IO.Put_Line ("Pre-processor based on the AWS template parser");
+      Text_IO.Put_Line ("Pre-processor based on the templates parser");
       Text_IO.Put_Line (Command_Name & " [-o output] file");
       Text_IO.Put_Line
          ("   Parses file and generate output file (or display on stdin");
@@ -69,7 +68,7 @@ procedure TemplatesPP is
 
    procedure Process (In_File : in String; Output : in Text_IO.File_Type) is
    begin
-      Text_IO.Put_Line (Output, Templates.Parse (In_File));
+      Text_IO.Put_Line (Output, Templates_Parser.Parse (In_File));
    end Process;
 
    F           : Text_IO.File_Type;

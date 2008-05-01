@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2006-2007                          --
+--                         Copyright (C) 2006-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -40,14 +40,12 @@ with Ada.Text_IO;
 
 with GNAT.Command_Line;                      use GNAT.Command_Line;
 
-with AWS.Utils;
-with AWS.OS_Lib;
 with Templates_Parser;                       use Templates_Parser;
+with Templates_Parser.Utils;                 use Templates_Parser.Utils;
 
 procedure Templates2Ada is
 
    use Ada;
-   use AWS;
 
    function "+" (Str : String) return Unbounded_String
      renames Ada.Strings.Unbounded.To_Unbounded_String;
@@ -298,11 +296,11 @@ procedure Templates2Ada is
          Text_IO.Put
            (Output,
             Parse (Utils.Get_Program_Directory
-              & ".." & OS_Lib.Directory_Separator
-              & "share" & OS_Lib.Directory_Separator
-              & "examples" & OS_Lib.Directory_Separator
-              & "aws" & OS_Lib.Directory_Separator
-              & "templates" & OS_Lib.Directory_Separator & Template,
+              & ".." & Directory_Separator
+              & "share" & Directory_Separator
+              & "examples" & Directory_Separator
+              & "aws" & Directory_Separator
+              & "templates" & Directory_Separator & Template,
               T));
       end if;
 

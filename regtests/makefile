@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                         Copyright (C) 2003-2007                          #
+#                         Copyright (C) 2003-2008                          #
 #                                 AdaCore                                  #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
@@ -27,6 +27,8 @@
 ############################################################################
 
 .SILENT:
+
+# Add relocatable DLL into the PATH for Windows
 
 TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme22 testme23 testme28 testme29 testme33 testme34 testme35 \
@@ -65,6 +67,12 @@ EXP_TESTS      = regtst2 regtst3 $(XTESTS)
 
 MAIN_TESTS     = testme print_tree filter
 
+EXECP          = ../$(BDIR)/rbin
+
+ifeq (${OS}, Windows_NT)
+export PATH := $(EXECP)/../lib:${PATH}
+endif
+
 DIFF_ARGS = -c -w
 
 ifeq (${OS}, Windows_NT)
@@ -80,14 +88,14 @@ force:
 
 $(STD_TESTS): force
 	echo $@
-	$(GNAT) make -q -Pregtests $@
-	-./$@ > $@.res 2>&1
+	$(GNAT) make -q -p -Pregtests $@
+	-$(EXECP)/$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
 $(EXP_TESTS): force
 	echo $@
-	$(GNAT) make -q -Pregtests $@ -bargs -E
-	-./$@ > $@.res 2>&1
+	$(GNAT) make -q -p -Pregtests $@ -bargs -E
+	-$(EXECP)/$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
 tt2a: force
@@ -98,68 +106,70 @@ tt2a: force
 
 print_tree: force
 	echo $@
-	-./print_tree ftp.tmplt > ftp.res 2>&1
+	-$(EXECP)/print_tree ftp.tmplt > ftp.res 2>&1
 	-diff $(DIFF_ARGS) ftp.out ftp.res >> alldiffs
 
 testcat: force
 	echo $@
-	$(GNAT) make -q -Pregtests testcat
-	-./testcat
+	$(GNAT) make -q -p -Pregtests testcat
+	-$(EXECP)/testcat
 	-diff $(DIFF_ARGS) testcat.out testcat.res >> alldiffs
 
 testme9_run:
 	echo $@
-	-./testme testme9.tmplt | tail -n +6 > testme9.res 2>&1
-	-./print_tree testme9.tmplt > testme9_pt.res 2>&1
+	-$(EXECP)/testme testme9.tmplt | tail -n +6 > testme9.res 2>&1
+	-$(EXECP)/print_tree testme9.tmplt > testme9_pt.res 2>&1
 	-diff $(DIFF_ARGS) testme9.out testme9.res >> alldiffs
 	-diff $(DIFF_ARGS) testme9_pt.out testme9_pt.res >> alldiffs
 
 testme10_run:
 	echo $@
-	-./testme testme10.tmplt kut > testme10.res 2>&1
-	-./print_tree testme10.tmplt > testme10_pt.res 2>&1
+	-$(EXECP)/testme testme10.tmplt kut > testme10.res 2>&1
+	-$(EXECP)/print_tree testme10.tmplt > testme10_pt.res 2>&1
 	-diff $(DIFF_ARGS) testme10.out testme10.res >> alldiffs
 	-diff $(DIFF_ARGS) testme10_pt.out testme10_pt.res >> alldiffs
 
 check_mem: force
 	echo $@
-	$(GNAT) make -q -Pregtests check_mem -largs -lgmem
-	./check_mem 2 > check_mem.res
+	$(GNAT) make -q -p -Pregtests check_mem -largs -lgmem
+	$(EXECP)/check_mem 2 > check_mem.res
 	gnatmem 3 -i gmem.out ./check_mem$(EXEEXT) 2 1248 > check_mem.run1
 	grep "   Final" check_mem.run1 > run1
-	./check_mem 30 >> check_mem.res
+	$(EXECP)/check_mem 30 >> check_mem.res
 	gnatmem 3 -i gmem.out ./check_mem$(EXEEXT) 30 1249 > check_mem.run2
 	grep "   Final" check_mem.run2 > run2
 	-diff -c -w run1 run2 1>> alldiffs 2>> alldiffs
 
 $(TESTS_RUN):
 	echo $@
-	-./testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
+	-$(EXECP)/testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
 	-diff $(DIFF_ARGS) ${@:%_run=%}.out ${@:%_run=%}.res >> alldiffs
 
 $(TESTS_TREE_RUN):
 	echo $@
-	-./testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
-	-./print_tree ${@:%_run=%}.tmplt > ${@:%_run=%}_pt.res 2>&1
+	-$(EXECP)/testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
+	-$(EXECP)/print_tree ${@:%_run=%}.tmplt > ${@:%_run=%}_pt.res 2>&1
 	-diff $(DIFF_ARGS) ${@:%_run=%}.out ${@:%_run=%}.res >> alldiffs
 	-diff $(DIFF_ARGS) ${@:%_run=%}_pt.out ${@:%_run=%}_pt.res >> alldiffs
 
 init:
 	-rm -f alldiffs
-	$(GNAT) make -q -Pregtests $(MAIN_TESTS)
+	$(GNAT) make -q -p -Pregtests $(MAIN_TESTS)
 
-test:  init testme print_tree $(STANDALONE_TESTS) $(STD_TESTS) $(EXP_TESTS) \
+test:  init $(EXECP)/testme $(EXECP)/print_tree $(STANDALONE_TESTS) \
+	$(STD_TESTS) $(EXP_TESTS) \
 	$(TESTS_RUN) $(TESTS_TREE_RUN)
 ifeq ($(TP_XMLADA), Installed)
 	-rm -f ts.f.xml tsr.f.xml
-	./filter < ts.xml | sort > ts.f.xml
-	./filter < tsr.xml | sort > tsr.f.xml
+	$(EXECP)/filter < ts.xml | sort > ts.f.xml
+	$(EXECP)/filter < tsr.xml | sort > tsr.f.xml
 	-diff -c ts.f.xml tsr.f.xml >> alldiffs
 endif
 	echo "### Any line displayed after this line indicate a problem in Templates_Parser"
 	cat alldiffs
 
 clean:
+	-$(GNAT) clean -Pregtests
 	-rm -f *.res *.o *.ali b~*.ad[sb] *.exe *~ check_mem.run* run1 run2
 	-rm -f $(ALL_EXEC) gmem.out alldiffs
 	-rm -f ts.xml tsr.xml m.xml ts.f.xml tsr.f.xml

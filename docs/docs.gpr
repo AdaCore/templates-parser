@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                              Ada Web Server                              --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                         Copyright (C) 2005-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  Authors: Dmitriy Anisimkov - Pascal Obry                                --
@@ -29,11 +29,14 @@
 ------------------------------------------------------------------------------
 
 with "../templates_parser";
+with "../tp_shared.gpr";
 
 project Docs is
 
    for Languages use ("Ada", "Project file");
 
    for Main use ("build.adb");
+
+   package Compiler renames TP_Shared.Compiler;
 
 end Docs;

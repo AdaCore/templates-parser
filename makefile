@@ -63,6 +63,7 @@ all:
 	echo "Targets:"
 	echo ""
 	echo "build     : build package"
+	echo "install   : install package (default INSTALL="$(INSTALL)")"
 	echo "test      : run a regression test"
 	echo "doc       : build documentation"
 	echo "distrib   : build tarball distribution"

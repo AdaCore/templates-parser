@@ -1,0 +1,17 @@
+
+Templates_Parser
+----------------
+
+To build:
+
+   $ make build
+
+To install:
+
+   $ make install
+
+Note that the installation will be done into your current GNAT root directory.
+It is possible to change this default by setting the INSTALL make variable,
+for example:
+
+   $ make INSTALL=/opt/templates_parser install

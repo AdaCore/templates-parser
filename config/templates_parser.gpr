@@ -33,11 +33,11 @@ project Templates_Parser is
 
    for Source_Dirs use ("../../include/templates_parser");
 
-   for Library_Dir use "../../lib/templates_parser/" 
-       & TP_Config.Default_Library_Type;
+   for Library_Dir use "../../lib/templates_parser/"
+       & TP_Shared.Library_Type;
 
    for Library_Name use "templates_parser";
-   for Library_Kind use TP_Config.Default_Library_Type;
+   for Library_Kind use TP_Shared.Library_Type;
    for Externally_Built use "true";
 
 end Templates_Parser;

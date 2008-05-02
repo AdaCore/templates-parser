@@ -28,8 +28,6 @@
 
 .SILENT:
 
-# Add relocatable DLL into the PATH for Windows
-
 TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme22 testme23 testme28 testme29 testme33 testme34 testme35 \
         testme36 testme37 testme39 testme40 testme41 testme42 blocks1 \
@@ -69,8 +67,10 @@ MAIN_TESTS     = testme print_tree filter
 
 EXECP          = ../$(BDIR)/rbin
 
+# Add relocatable DLL into the PATH for Windows
+
 ifeq (${OS}, Windows_NT)
-export PATH := $(EXECP)/../lib:${PATH}
+export PATH := $(EXECP)/../lib:../$(BDIR)/lib:${PATH}
 endif
 
 DIFF_ARGS = -c -w

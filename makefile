@@ -51,6 +51,24 @@ I_DOC	= $(INSTALL)/share/doc/templates_parser
 CP	= cp -p
 MKDIR	= mkdir -p
 
+ifeq (${OS}, Windows_NT)
+EXEEXT	= .exe
+SOEXT	= .dll
+LN	= cp -p
+else
+ifeq ($(UNAME), Darwin)
+SOEXT   = .dylib
+else
+ifeq ($(UNAME), HP-UX)
+SOEXT	= .sl
+else
+SOEXT	= .so
+endif
+endif
+EXEEXT	=
+LN	= ln -s
+endif
+
 CONFGPR	= config/tp_config.gpr
 
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
@@ -120,6 +138,9 @@ install: install_dirs
 	$(CP) $(CONFGPR) $(I_TGP)
 ifeq ($(TP_XMLADA), Installed)
 	$(CP) xsrc/*.ad* $(I_INC)
+endif
+ifeq ($(LIBRARY_TYPE), relocatable)
+	$(LN) $(I_LIB)/libtemplates_parser$(SOEXT) $(I_LIB)/../../
 endif
 
 clean:

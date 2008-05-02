@@ -29,8 +29,6 @@
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
 
-with Strings_Maps;
-
 with DOM.Core.Nodes;
 with DOM.Readers;
 with Input_Sources.File;
@@ -41,12 +39,11 @@ with Unicode.CES.Utf8;
 
 package body Templates_Parser.XML is
 
-   use Ada;
-
    Labels_Suffix      : constant String := "_LABELS";
    Description_Suffix : constant String := "_DESCRIPTION";
 
-   package Str_Maps is new Strings_Maps (Unbounded_String, "=");
+   package Str_Map is new Containers.Indefinite_Hashed_Maps
+     (String, Unbounded_String, Strings.Hash, "=", "=");
 
    function Parse_Document (Doc : in DOM.Core.Node) return Translate_Set;
    --  Parse a document node and return the corresponding Translate_Set
@@ -58,7 +55,7 @@ package body Templates_Parser.XML is
    function Image (Translations : in Translate_Set) return Unbounded_String is
       Result : Unbounded_String;
 
-      procedure Process (Cursor : in Association_Set.Containers.Cursor);
+      procedure Process (Cursor : in Association_Map.Cursor);
       --  Iterator
 
       procedure Add (Str : in String);
@@ -81,10 +78,9 @@ package body Templates_Parser.XML is
       -- Process --
       -------------
 
-      procedure Process (Cursor : in Association_Set.Containers.Cursor) is
+      procedure Process (Cursor : in Association_Map.Cursor) is
 
-         Item : constant Association :=
-                  Association_Set.Containers.Element (Cursor);
+         Item : constant Association := Association_Map.Element (Cursor);
          --  Current item
 
          Var  : constant String := To_Utf8 (Item.Variable);
@@ -112,14 +108,11 @@ package body Templates_Parser.XML is
          procedure Add_Description (Var : in String) is
             Var_Description : constant String := Var & Description_Suffix;
          begin
-            if Association_Set.Containers.Contains
-              (Translations.Set.all, Var_Description)
-            then
+            if Translations.Set.Contains (Var_Description) then
                --  There is probably a label encoded into this set
                declare
-                  Description : constant Association
-                    := Association_Set.Containers.Element
-                        (Translations.Set.all, Var_Description);
+                  Description : constant Association :=
+                                  Translations.Set.Element (Var_Description);
                begin
                   if Description.Kind = Std
                     and then Description.Value /= ""
@@ -143,9 +136,8 @@ package body Templates_Parser.XML is
               and then
                 Var (Var'Last - Description_Suffix'Length + 1 .. Var'Last)
                   = Description_Suffix
-              and then Association_Set.Containers.Contains
-              (Translations.Set.all,
-               Var (Var'First .. Var'Last - Description_Suffix'Length))
+              and then Translations.Set.Contains
+                (Var (Var'First .. Var'Last - Description_Suffix'Length))
             then
                return True;
             end if;
@@ -172,8 +164,7 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Description_Suffix
-                 and then Association_Set.Containers.Contains
-                   (Translations.Set.all, Var (Var'First .. L));
+                 and then Translations.Set.Contains (Var (Var'First .. L));
             end if;
          end Is_Description;
 
@@ -204,8 +195,7 @@ package body Templates_Parser.XML is
                end loop;
 
                return Var (N .. Var'Last) = Labels_Suffix
-                 and then Association_Set.Containers.Contains
-                   (Translations.Set.all, Var (Var'First .. L));
+                 and then Translations.Set.Contains (Var (Var'First .. L));
             end if;
          end Is_Labels;
 
@@ -313,13 +303,10 @@ package body Templates_Parser.XML is
                   Label_Var : constant String
                     := Var & "_DIM" & Image (K) & Labels_Suffix;
                begin
-                  if Association_Set.Containers.Contains
-                    (Translations.Set.all, Label_Var)
-                  then
+                  if Translations.Set.Contains (Label_Var) then
                      declare
-                        Item : constant Association
-                          := Association_Set.Containers.Element
-                            (Translations.Set.all, Label_Var);
+                        Item : constant Association :=
+                                 Translations.Set.Element (Label_Var);
                      begin
                         if Item.Kind = Composite
                           and then Item.Comp_Value.Data.Nested_Level = 1
@@ -381,8 +368,7 @@ package body Templates_Parser.XML is
       Add ("<?xml version=""1.0"" encoding=""UTF-8"" ?>");
       Add ("<Tagged xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">");
 
-      Association_Set.Containers.Iterate
-        (Translations.Set.all, Process'Access);
+      Translations.Set.Iterate (Process'Access);
 
       --  XML footer
 
@@ -539,7 +525,7 @@ package body Templates_Parser.XML is
          Name        : Unbounded_String; -- current tag name
          Description : Unbounded_String; -- current tag description
 
-         Data        : Str_Maps.Containers.Map;
+         Data        : Str_Map.Map;
          --  All data inserted into this map from Entry nodes, the key is the
          --  indexes separated with '_'.
 
@@ -561,25 +547,23 @@ package body Templates_Parser.XML is
             -----------
 
             function B_Tag (Key : in String; N : in Positive) return Tag is
-               use type Str_Maps.Containers.Cursor;
+               use type Str_Map.Cursor;
                Max_Key : constant String := Image (N) & "_MAX";
-               Cursor  : Str_Maps.Containers.Cursor;
+               Cursor  : Str_Map.Cursor;
                Max     : Natural;
                T       : Tag;
             begin
-               Cursor := Str_Maps.Containers.Find (Data, Max_Key);
+               Cursor := Data.Find (Max_Key);
 
-               Max := Natural'Value
-                 (To_String (Str_Maps.Containers.Element (Cursor)));
+               Max := Natural'Value (To_String (Str_Map.Element (Cursor)));
 
                if N = Level then
                   --  We have reached the last level
 
                   for K in 1 .. Max loop
-                     Cursor := Str_Maps.Containers.Find
-                       (Data, Key & "_" & Image (K));
-                     exit when Cursor = Str_Maps.Containers.No_Element;
-                     T := T & Str_Maps.Containers.Element (Cursor);
+                     Cursor := Data.Find (Key & "_" & Image (K));
+                     exit when Cursor = Str_Map.No_Element;
+                     T := T & Str_Map.Element (Cursor);
                   end loop;
 
                else
@@ -614,14 +598,14 @@ package body Templates_Parser.XML is
               (N : in DOM.Core.Node)
                return Translate_Set
             is
-               use Str_Maps;
+               use Str_Map;
                C       : DOM.Core.Node := First_Child (N);
                Result  : Translate_Set;
                T       : Tag;
                Max     : Natural := 0;
-               Map     : Str_Maps.Containers.Map;
+               Map     : Str_Map.Map;
                K       : Positive;
-               Cursor  : Str_Maps.Containers.Cursor;
+               Cursor  : Str_Map.Cursor;
                Success : Boolean;
             begin
                while C /= null loop
@@ -637,9 +621,8 @@ package body Templates_Parser.XML is
                            K   := Positive'Value (Node_Value (Item (Atts, 0)));
                            Max := Natural'Max (Max, K);
 
-                           Str_Maps.Containers.Insert
-                             (Map,
-                              Node_Value (Item (Atts, 0)),
+                           Map.Insert
+                             (Node_Value (Item (Atts, 0)),
                               To_Unbounded_String
                                 (Get_Value (DOM.Core.Nodes.First_Child (C))),
                               Cursor,
@@ -668,10 +651,10 @@ package body Templates_Parser.XML is
                   declare
                      K_Img : constant String := Image (K);
                   begin
-                     Cursor := Str_Maps.Containers.Find (Map, K_Img);
+                     Cursor := Map.Find (K_Img);
 
-                     if Str_Maps.Containers.Has_Element (Cursor) then
-                        T := T & Str_Maps.Containers.Element (Cursor);
+                     if Str_Map.Has_Element (Cursor) then
+                        T := T & Str_Map.Element (Cursor);
                      else
                         T := T & "";
                      end if;
@@ -747,7 +730,7 @@ package body Templates_Parser.XML is
             --  key inside Data map.
 
             C     : DOM.Core.Node;
-            Map   : Str_Maps.Containers.Map;
+            Map   : Str_Map.Map;
             V     : Unbounded_String;
             Max   : Natural := 0;
             Count : Natural := 0;
@@ -758,11 +741,10 @@ package body Templates_Parser.XML is
 
             procedure Insert (Key, Value : in String) is
                Max_Key : constant String := Key & "_MAX";
-               Cursor  : Str_Maps.Containers.Cursor;
+               Cursor  : Str_Map.Cursor;
                Success : Boolean;
             begin
-               Str_Maps.Containers.Insert
-                 (Map, Key, To_Unbounded_String (Value), Cursor, Success);
+               Map.Insert (Key, To_Unbounded_String (Value), Cursor, Success);
 
                if not Success then
                   Error (C, "Duplicate attribute found for n " & Key);
@@ -770,24 +752,23 @@ package body Templates_Parser.XML is
 
                --  Set Max
 
-               Cursor := Str_Maps.Containers.Find (Data, Max_Key);
+               Cursor := Data.Find (Max_Key);
 
-               if Str_Maps.Containers.Has_Element (Cursor) then
+               if Str_Map.Has_Element (Cursor) then
                   declare
-                     Item : constant Natural
-                       := Natural'Value
-                           (To_String (Str_Maps.Containers.Element (Cursor)));
+                     Item : constant Natural :=
+                              Natural'Value
+                                (To_String (Str_Map.Element (Cursor)));
                   begin
-                     Str_Maps.Containers.Replace_Element
-                       (Data, Cursor,
+                     Data.Replace_Element
+                       (Cursor,
                         To_Unbounded_String
                           (Image (Natural'Max (Item, Natural'Value (Value)))));
                   end;
 
                else
-                  Str_Maps.Containers.Insert
-                    (Data, Max_Key,
-                     To_Unbounded_String (Value), Cursor, Success);
+                  Data.Insert
+                    (Max_Key, To_Unbounded_String (Value), Cursor, Success);
                end if;
             end Insert;
 
@@ -870,19 +851,16 @@ package body Templates_Parser.XML is
 
             declare
                Key     : Unbounded_String;
-               Cursor  : Str_Maps.Containers.Cursor;
+               Cursor  : Str_Map.Cursor;
                Success : Boolean;
             begin
                for K in 1 .. Level loop
-                  Cursor := Str_Maps.Containers.Find (Map, Image (K));
+                  Cursor := Map.Find (Image (K));
 
-                  Append
-                    (Key,
-                     "_" & To_String (Str_Maps.Containers.Element (Cursor)));
+                  Append (Key, "_" & To_String (Str_Map.Element (Cursor)));
                end loop;
 
-               Str_Maps.Containers.Insert
-                 (Data, To_String (Key), V, Cursor, Success);
+               Data.Insert (To_String (Key), V, Cursor, Success);
 
                if not Success then
                   Error (N, "Duplicate entry found");

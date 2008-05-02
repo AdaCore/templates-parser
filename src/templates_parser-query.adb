@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003-2006                          --
+--                         Copyright (C) 2003-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -27,8 +27,6 @@
 ------------------------------------------------------------------------------
 
 package body Templates_Parser.Query is
-
-   use Ada;
 
    ---------------
    -- Composite --

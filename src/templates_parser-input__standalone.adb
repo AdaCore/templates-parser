@@ -35,7 +35,6 @@ with Ada.Unchecked_Deallocation;
 
 package body Templates_Parser.Input is
 
-   use Ada;
    use Ada.Exceptions;
    use Ada.Streams;
 

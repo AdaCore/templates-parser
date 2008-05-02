@@ -26,19 +26,21 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Fixed;
+with Ada.Strings.Hash;
 with Templates_Parser.Configuration;
-
-with Strings_Maps;
 
 separate (Templates_Parser)
 package body Filter is
 
    --  User's defined filter
 
-   package Filter_Map is new Strings_Maps (User_CB);
+   package Filter_Map is
+     new Containers.Indefinite_Hashed_Maps
+       (String, User_CB, Strings.Hash, "=", "=");
 
-   User_Filters : Filter_Map.Containers.Map;
+   User_Filters : Filter_Map.Map;
 
    --  Filter tokens
 
@@ -812,18 +814,17 @@ package body Filter is
    procedure Free_Filters is
       procedure Unchecked_Free is new Ada.Unchecked_Deallocation
          (User_Filter'Class, User_Filter_Access);
-      C : Filter_Map.Containers.Cursor :=
-            Filter_Map.Containers.First (User_Filters);
+      C : Filter_Map.Cursor := Filter_Map.First (User_Filters);
       U : User_CB;
    begin
-      while Filter_Map.Containers.Has_Element (C) loop
-         if Filter_Map.Containers.Element (C).Typ = As_Tagged then
-            U := Filter_Map.Containers.Element (C);
+      while Filter_Map.Has_Element (C) loop
+         if Filter_Map.Element (C).Typ = As_Tagged then
+            U := Filter_Map.Element (C);
             Unchecked_Free (U.CBT);
          end if;
-         Filter_Map.Containers.Next (C);
+         Filter_Map.Next (C);
       end loop;
-      Filter_Map.Containers.Clear (User_Filters);
+      Filter_Map.Clear (User_Filters);
    end Free_Filters;
 
    ------------
@@ -1082,7 +1083,7 @@ package body Filter is
 
       --  Not found in the table of built-in filters, look for a user's one
 
-      if Filter_Map.Containers.Contains (User_Filters, Name) then
+      if User_Filters.Contains (Name) then
          return User_Defined;
       end if;
 
@@ -1393,34 +1394,31 @@ package body Filter is
      (Name    : in String;
       Handler : in Templates_Parser.Callback)
    is
-      Position : Filter_Map.Containers.Cursor;
+      Position : Filter_Map.Cursor;
       Success  : Boolean;
    begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (With_Param, Handler), Position, Success);
+      User_Filters.Insert (Name, (With_Param, Handler), Position, Success);
    end Register;
 
    procedure Register
      (Name    : in String;
       Handler : in Callback_No_Param)
    is
-      Position : Filter_Map.Containers.Cursor;
+      Position : Filter_Map.Cursor;
       Success  : Boolean;
    begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (No_Param, Handler), Position, Success);
+      User_Filters.Insert (Name, (No_Param, Handler), Position, Success);
    end Register;
 
    procedure Register
      (Name    : in String;
       Handler : access User_Filter'Class)
    is
-      Position : Filter_Map.Containers.Cursor;
+      Position : Filter_Map.Cursor;
       Success  : Boolean;
    begin
-      Filter_Map.Containers.Insert
-        (User_Filters, Name, (As_Tagged, User_Filter_Access (Handler)),
-         Position, Success);
+      User_Filters.Insert
+        (Name, (As_Tagged, User_Filter_Access (Handler)), Position, Success);
    end Register;
 
    -------------
@@ -1774,7 +1772,7 @@ package body Filter is
 
    function User_Handle (Name : in String) return User_CB is
    begin
-      return Filter_Map.Containers.Element (User_Filters, Name);
+      return User_Filters.Element (Name);
    end User_Handle;
 
    -----------
@@ -1786,7 +1784,7 @@ package body Filter is
       Translations : in Translate_Set;
       I_Params     : in Include_Parameters) return String
    is
-      Pos : Association_Set.Containers.Cursor;
+      Pos : Association_Map.Cursor;
    begin
       if Str'Length > 0
         and then Str (Str'First) = '$'
@@ -1805,12 +1803,11 @@ package body Filter is
          return Str;
 
       else
-         Pos := Association_Set.Containers.Find (Translations.Set.all, Str);
+         Pos := Translations.Set.Find (Str);
 
-         if Association_Set.Containers.Has_Element (Pos) then
+         if Association_Map.Has_Element (Pos) then
             declare
-               Tk : constant Association :=
-                      Association_Set.Containers.Element (Pos);
+               Tk : constant Association := Association_Map.Element (Pos);
             begin
                if Tk.Kind = Std then
                   return To_String (Tk.Value);

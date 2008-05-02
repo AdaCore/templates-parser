@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2007                          --
+--                         Copyright (C) 1999-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -29,7 +29,8 @@
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
 
-with Strings_Maps;
+private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Strings.Hash;
 
 package Templates_Parser is
 
@@ -423,6 +424,7 @@ package Templates_Parser is
 
 private
 
+   use Ada;
    type Integer_Access is access Integer;
 
    ------------------
@@ -513,10 +515,11 @@ private
    --  Translate_Set --
    --------------------
 
-   package Association_Set is new Strings_Maps (Association, "=");
-   use Association_Set;
+   package Association_Map is
+     new Containers.Indefinite_Hashed_Maps
+       (String, Association, Strings.Hash, "=", "=");
 
-   type Map_Access is access Containers.Map;
+   type Map_Access is access Association_Map.Map;
 
    type Translate_Set is new Ada.Finalization.Controlled with record
       Ref_Count : Integer_Access;

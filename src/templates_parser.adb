@@ -44,7 +44,6 @@ with Templates_Parser.Tasking;
 
 package body Templates_Parser is
 
-   use Ada;
    use Ada.Exceptions;
    use Ada.Strings;
 
@@ -730,8 +729,10 @@ package body Templates_Parser is
       function Parse (Line : in String) return Tree;
       --  Returns a defintion data
 
-      package Def_Map is new Strings_Maps (Node);
-      subtype Map is Def_Map.Containers.Map;
+      package Def_Map is new
+        Containers.Indefinite_Hashed_Maps
+          (String, Node, Ada.Strings.Hash, "=", "=");
+      subtype Map is Def_Map.Map;
 
       procedure Print_Tree (D : in Tree);
       --  Decend the text tree and print it to the standard output
@@ -1974,7 +1975,7 @@ package body Templates_Parser is
      (Set      : in Translate_Set;
       Variable : in String) return Boolean is
    begin
-      return Association_Set.Containers.Contains (Set.Set.all, Variable);
+      return Set.Set.Contains (Variable);
    end Exists;
 
    ----------
@@ -2159,7 +2160,7 @@ package body Templates_Parser is
 
    procedure Finalize (Set : in out Translate_Set) is
       procedure Free is new Unchecked_Deallocation
-        (Association_Set.Containers.Map, Map_Access);
+        (Association_Map.Map, Map_Access);
    begin
       if Set.Ref_Count /= null then
          Tasking.Lock;
@@ -2229,15 +2230,15 @@ package body Templates_Parser is
    ---------------------------
 
    procedure For_Every_Association (Set : in Translate_Set) is
-      Pos  : Association_Set.Containers.Cursor;
+      Pos  : Association_Map.Cursor;
       Quit : Boolean := False;
    begin
-      Pos := Association_Set.Containers.First (Set.Set.all);
+      Pos := Set.Set.First;
 
-      while Association_Set.Containers.Has_Element (Pos) loop
-         Action (Association_Set.Containers.Element (Pos), Quit);
+      while Association_Map.Has_Element (Pos) loop
+         Action (Association_Map.Element (Pos), Quit);
          exit when Quit;
-         Pos := Association_Set.Containers.Next (Pos);
+         Pos := Association_Map.Next (Pos);
       end loop;
    end For_Every_Association;
 
@@ -2249,12 +2250,12 @@ package body Templates_Parser is
      (Set  : in Translate_Set;
       Name : in String) return Association
    is
-      Pos : Association_Set.Containers.Cursor;
+      Pos : Association_Map.Cursor;
    begin
-      Pos := Association_Set.Containers.Find (Set.Set.all, Name);
+      Pos := Set.Set.all.Find (Name);
 
-      if Association_Set.Containers.Has_Element (Pos) then
-         return Association_Set.Containers.Element (Pos);
+      if Association_Map.Has_Element (Pos) then
+         return Association_Map.Element (Pos);
       else
          return Null_Association;
       end if;
@@ -2339,7 +2340,7 @@ package body Templates_Parser is
    procedure Initialize (Set : in out Translate_Set) is
    begin
       Set.Ref_Count := new Integer'(1);
-      Set.Set       := new Association_Set.Containers.Map;
+      Set.Set       := new Association_Map.Map;
    end Initialize;
 
    procedure Initialize (T : in out Tag) is
@@ -2358,18 +2359,17 @@ package body Templates_Parser is
 
    procedure Insert (Set : in out Translate_Set; Item : in Association) is
    begin
-      Association_Set.Containers.Include
-        (Set.Set.all, To_String (Item.Variable), Item);
+      Set.Set.Include (To_String (Item.Variable), Item);
    end Insert;
 
    procedure Insert (Set : in out Translate_Set; Items : in Translate_Set) is
-      Pos : Association_Set.Containers.Cursor;
+      Pos : Association_Map.Cursor;
    begin
-      Pos := Association_Set.Containers.First (Items.Set.all);
+      Pos := Items.Set.First;
 
-      while Association_Set.Containers.Has_Element (Pos) loop
-         Insert (Set, Association_Set.Containers.Element (Pos));
-         Pos := Association_Set.Containers.Next (Pos);
+      while Association_Map.Has_Element (Pos) loop
+         Insert (Set, Association_Map.Element (Pos));
+         Pos := Association_Map.Next (Pos);
       end loop;
    end Insert;
 
@@ -3859,7 +3859,7 @@ package body Templates_Parser is
         (T     : in Tree;
          State : in Parse_State)
       is
-         use type Association_Set.Containers.Cursor;
+         use type Association_Map.Cursor;
          use type Data.Tree;
 
          function Analyze (E : in Expr.Tree) return String;
@@ -4729,18 +4729,18 @@ package body Templates_Parser is
             use type Data.Tree;
             C        : aliased Filter.Filter_Context :=
                          (Translations, Lazy_Tag, State.F_Params);
-            D_Pos    : Definitions.Def_Map.Containers.Cursor;
-            Pos      : Association_Set.Containers.Cursor;
+            D_Pos    : Definitions.Def_Map.Cursor;
+            Pos      : Association_Map.Cursor;
             Up_Value : Natural := 0;
          begin
-            D_Pos := Definitions.Def_Map.Containers.Find
+            D_Pos := Definitions.Def_Map.Find
               (D_Map, To_String (Var.Name));
 
-            if Definitions.Def_Map.Containers.Has_Element (D_Pos) then
+            if Definitions.Def_Map.Has_Element (D_Pos) then
                --  We have a definition for this variable in the template
                declare
                   N : Definitions.Node
-                    := Definitions.Def_Map.Containers.Element (D_Pos);
+                    := Definitions.Def_Map.Element (D_Pos);
                   V : Tag_Var := Var;
                begin
                   case N.Kind is
@@ -5035,17 +5035,15 @@ package body Templates_Parser is
             when Set_Stmt =>
                declare
                   Name    : constant String := To_String (T.Def.Name);
-                  Pos     : Definitions.Def_Map.Containers.Cursor;
+                  Pos     : Definitions.Def_Map.Cursor;
                   Success : Boolean;
                begin
-                  Pos := Definitions.Def_Map.Containers.Find (D_Map, Name);
+                  Pos := D_Map.Find (Name);
 
-                  if Definitions.Def_Map.Containers.Has_Element (Pos) then
-                     Definitions.Def_Map.Containers.Replace_Element
-                       (D_Map, Pos, New_Item => T.Def.N);
+                  if Definitions.Def_Map.Has_Element (Pos) then
+                     D_Map.Replace_Element (Pos, New_Item => T.Def.N);
                   else
-                     Definitions.Def_Map.Containers.Insert
-                       (D_Map, Name, T.Def.N, Pos, Success);
+                     D_Map.Insert (Name, T.Def.N, Pos, Success);
                   end if;
                end;
 
@@ -5245,12 +5243,12 @@ package body Templates_Parser is
       function Get_Association (Var : in Tag_Var) return Association is
          use type Dynamic.Lazy_Tag_Access;
          Name : constant String := To_String (Var.Name);
-         Pos  : Association_Set.Containers.Cursor;
+         Pos  : Association_Map.Cursor;
       begin
-         Pos := Association_Set.Containers.Find (Translations.Set.all, Name);
+         Pos := Translations.Set.Find (Name);
 
-         if Association_Set.Containers.Has_Element (Pos) then
-            return  Association_Set.Containers.Element (Pos);
+         if Association_Map.Has_Element (Pos) then
+            return  Association_Map.Element (Pos);
 
          elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
            and then not Filter.Is_No_Dynamic (Var.Filters)
@@ -5258,10 +5256,10 @@ package body Templates_Parser is
          then
             --  Look into the Lazy_Set for the cached value
 
-            Pos := Association_Set.Containers.Find (Lazy_Set.Set.all, Name);
+            Pos := Lazy_Set.Set.Find (Name);
 
-            if Association_Set.Containers.Has_Element (Pos) then
-               return  Association_Set.Containers.Element (Pos);
+            if Association_Map.Has_Element (Pos) then
+               return  Association_Map.Element (Pos);
 
             else
                --  Check for Lazy tag
@@ -5464,8 +5462,8 @@ package body Templates_Parser is
 
    procedure Remove (Set : in out Translate_Set; Name : in String) is
    begin
-      if Association_Set.Containers.Contains (Set.Set.all, Name) then
-         Association_Set.Containers.Delete (Set.Set.all, Name);
+      if Set.Set.Contains (Name) then
+         Set.Set.Delete (Name);
       end if;
    end Remove;
 
@@ -5568,17 +5566,15 @@ package body Templates_Parser is
       ---------------
 
       function Translate (Var : in Tag_Var) return String is
-         Pos : Association_Set.Containers.Cursor;
+         Pos : Association_Map.Cursor;
          C   : aliased Filter.Filter_Context :=
                  (Translations, null, Filter.No_Include_Parameters);
       begin
-         Pos := Association_Set.Containers.Find
-           (Translations.Set.all, To_String (Var.Name));
+         Pos := Translations.Set.Find (To_String (Var.Name));
 
-         if Association_Set.Containers.Has_Element (Pos) then
+         if Association_Map.Has_Element (Pos) then
             declare
-               Item : constant Association :=
-                        Association_Set.Containers.Element (Pos);
+               Item : constant Association := Association_Map.Element (Pos);
             begin
                case Item.Kind is
                   when Std =>

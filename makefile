@@ -129,7 +129,7 @@ install_dirs:
 	$(MKDIR) -p $(I_DOC)
 
 install: install_dirs
-	$(CP) src/*.ad* include/*.ad* $(I_INC)
+	$(CP) src/*.ad* $(I_INC)
 	$(CP) $(BDIR)/lib/* $(I_LIB)
 	$(CP) $(BDIR)/bin/* $(I_BIN)
 	$(CP) config/templates_parser.gpr $(I_GPR)
@@ -152,7 +152,7 @@ clean:
 distrib:
 	-rm templates_parser-?.?.tar*
 	tar cf templates_parser-$(VERSION).tar src/templates_parser*ad[sb] \
-		include/*.ad* config tools docs xsrc/*.ad* tp_shared.gpr \
+		config tools docs xsrc/*.ad* tp_shared.gpr \
 		makefile \
 		templates_parser.gpr
 	gzip -9 templates_parser-$(VERSION).tar

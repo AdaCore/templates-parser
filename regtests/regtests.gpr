@@ -27,14 +27,14 @@
 ------------------------------------------------------------------------------
 
 with "../templates_parser";
-with "../shared";
+with "../tp_shared";
 
 project Regtests is
 
    for Languages use ("Ada", "Project file");
 
-   for Object_Dir use "../" & Shared'Exec_Dir & "/robj";
-   for Exec_Dir use "../" & Shared'Exec_Dir & "/rbin";
+   for Object_Dir use "../" & TP_Shared'Exec_Dir & "/robj";
+   for Exec_Dir use "../" & TP_Shared'Exec_Dir & "/rbin";
 
    --------------
    -- Compiler --

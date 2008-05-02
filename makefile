@@ -130,7 +130,7 @@ clean:
 distrib:
 	-rm templates_parser-?.?.tar*
 	tar cf templates_parser-$(VERSION).tar src/templates_parser*ad[sb] \
-		include/*.ad* config tools docs xsrc/*.ad* shared.gpr \
+		include/*.ad* config tools docs xsrc/*.ad* tp_shared.gpr \
 		makefile \
 		templates_parser.gpr
 	gzip -9 templates_parser-$(VERSION).tar

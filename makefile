@@ -136,6 +136,9 @@ install: install_dirs
 	$(CP) config/tp_shared.gpr $(I_TGP)
 	$(CP) tp_xmlada.gpr $(I_TGP)
 	$(CP) $(CONFGPR) $(I_TGP)
+	$(CP) docs/templates_parser*html $(I_DOC)
+	$(CP) docs/templates_parser*pdf $(I_DOC)
+	$(CP) docs/templates_parser*info* $(I_DOC)
 ifeq ($(TP_XMLADA), Installed)
 	$(CP) xsrc/*.ad* $(I_INC)
 endif

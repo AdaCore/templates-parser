@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2007                          --
+--                         Copyright (C) 1999-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -146,7 +146,7 @@ package body Templates_Parser is
          --  Divide the given parameter to the string
 
          Exist,
-         --  Returns "TRUE" if var is not empty and "FALSE" otherwise.
+         --  Returns "TRUE" if var is not empty and "FALSE" otherwise
 
          File_Exists,
          --  Returns "TRUE" if var is the name of an existing file and "FALSE"
@@ -172,7 +172,7 @@ package body Templates_Parser is
          --  Replaces all LF character to <BR> HTML tag
 
          Lower,
-         --  Lower case.
+         --  Lower case
 
          Match,
          --  Returns "TRUE" if var match the pattern passed as argument
@@ -280,7 +280,7 @@ package body Templates_Parser is
       type Parameter_Mode is (Void, Str, Regexp, Regpat, Slice, User_Callback);
 
       function Parameter (Mode : in Filter.Mode) return Parameter_Mode;
-      --  Returns the parameter mode for the given filter.
+      --  Returns the parameter mode for the given filter
 
       type Pattern_Matcher_Access is access GNAT.Regpat.Pattern_Matcher;
 
@@ -379,7 +379,7 @@ package body Templates_Parser is
       function User_Handle (Name : in String) return User_CB;
       --  Returns the registered user's callback for the given filter name
 
-      --  filter functions, see above.
+      --  filter functions, see above
 
       procedure Check_Null_Parameter (P : in Parameter_Data);
       --  Raises Template_Error if P is not equal to Null_Parameter
@@ -751,19 +751,19 @@ package body Templates_Parser is
                    O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
 
       function Image (O : in Ops) return String;
-      --  Returns Ops string representation.
+      --  Returns Ops string representation
 
       type U_Ops is (O_Not);
 
       function Image (O : in U_Ops) return String;
-      --  Returns U_Ops string representation.
+      --  Returns U_Ops string representation
 
       type Node;
       type Tree is access Node;
 
       type NKind is (Value, Var, Op, U_Op);
       --  The node is a value, a variable a binary operator or an unary
-      --  operator
+      --  operator.
 
       type Node (Kind : NKind) is record
          case Kind is
@@ -784,7 +784,7 @@ package body Templates_Parser is
       end record;
 
       function Parse (Expression : in String) return Tree;
-      --  Parse Expression and returns the corresponding tree representation.
+      --  Parse Expression and returns the corresponding tree representation
 
       procedure Print_Tree (E : in Tree);
       --  Decend the expression's tree and print the expression. It outputs the
@@ -792,7 +792,7 @@ package body Templates_Parser is
       --  expression has been parsed.
 
       procedure Release (E : in out Tree);
-      --  Release all associated memory with the tree.
+      --  Release all associated memory with the tree
 
    end Expr;
 
@@ -811,7 +811,7 @@ package body Templates_Parser is
                   Include_Stmt,  --  an INCLUDE tag statement
                   Inline_Stmt);  --  an INLINE tag statement
 
-   --  A template line is coded as a suite of Data and Var element.
+   --  A template line is coded as a suite of Data and Var element
 
    --  The first node in the tree is of type Info and should never be release
    --  and changed. This ensure that included tree will always be valid
@@ -2475,7 +2475,7 @@ package body Templates_Parser is
 
       function EOF return Boolean;
       pragma Inline (EOF);
-      --  Returns True if the end of file has been reach.
+      --  Returns True if the end of file has been reach
 
       function Load_Include_Parameters
         (Parameters : in String) return Include_Parameters;
@@ -2498,7 +2498,7 @@ package body Templates_Parser is
          In_If   : in Boolean;
          No_Read : in Boolean := False)
          return Tree;
-      --  Get a line in File and returns the Tree.
+      --  Get a line in File and returns the Tree
 
       --------------------------
       -- Count_Tag_Attributes --
@@ -2621,7 +2621,7 @@ package body Templates_Parser is
                           and then Buffer (First .. First + 3) /= "@@--");
 
                if Input.End_Of_File (File) then
-                  --  We have reached the end of file, exit now.
+                  --  We have reached the end of file, exit now
                   Last := 0;
                   return True;
                end if;
@@ -3619,7 +3619,7 @@ package body Templates_Parser is
                   end if;
 
                   if Get_Next_Line then
-                     --  Nothing more, returns the result now.
+                     --  Nothing more, returns the result now
                      return Root;
                   end if;
 

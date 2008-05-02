@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2002 - 2005                        --
+--                          Copyright (C) 2002-2008                         --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -96,10 +96,10 @@ package body Templates_Parser.Input is
       Last   :    out Natural)
    is
       C : Character;
-      --  Current character.
+      --  Current character
 
       procedure Next_Char;
-      --  Set C with next character in the file, update Resource.Last.
+      --  Set C with next character in the file, update Resource.Last
 
       ---------------
       -- Next_Char --

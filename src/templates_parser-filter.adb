@@ -1,7 +1,7 @@
------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003-2007                          --
+--                         Copyright (C) 2003-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -743,7 +743,7 @@ package body Filter is
       TS : constant String := Strings.Fixed.Trim (S, Both);
 
       function Is_Number return Boolean;
-      --  Returns true if S is a number.
+      --  Returns true if S is a number
 
       Point : Natural := 0;
 

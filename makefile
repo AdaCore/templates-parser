@@ -91,6 +91,8 @@ ifeq ($(TP_XMLADA), Installed)
 else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 endif
+	$(MKDIR) -p $(BDIR)/obj
+	$(MKDIR) -p $(BDIR)/lib
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)

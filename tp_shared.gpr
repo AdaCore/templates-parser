@@ -26,7 +26,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-project Shared is
+project TP_Shared is
 
    for Source_Dirs use ();
 
@@ -131,4 +131,4 @@ project Shared is
       for VCS_Kind use "Subversion";
    end Ide;
 
-end Shared;
+end TP_Shared;

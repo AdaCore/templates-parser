@@ -125,7 +125,7 @@ procedure Table_If is
    --  the Device is available and thus can be ordered.
 
    procedure Add (Device, Price : in String);
-   --  Add the device into the list to be displayed.
+   --  Add the device into the list to be displayed
 
    Devices   : Templates_Parser.Tag;
    Prices    : Templates_Parser.Tag;
@@ -178,8 +178,7 @@ procedure Matrix is
 
    package TP renames Templates_Parser;
 
-   use type TP.Vector_Tag;
-   use type TP.Matrix_Tag;
+   use type TP.Tag;
 
    V1 : constant TP.Vector_Tag := +"A1.1" & "A1.2";
    V2 : constant TP.Vector_Tag := +"A2.1" & "A2.2";

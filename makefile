@@ -29,7 +29,7 @@
 .SILENT:
 
 MODE	= RELEASE
-VERSION	= 11.0
+VERSION	= 11.1
 GNAT	= gnat
 
 PRJ_BUILD    = Debug
@@ -142,15 +142,17 @@ install: install_dirs
 ifeq ($(TP_XMLADA), Installed)
 	$(CP) xsrc/*.ad* $(I_INC)
 endif
+	$(RM) -f $(I_LIB)/../../libtemplates_parser$(SOEXT)
 ifeq ($(LIBRARY_TYPE), relocatable)
 	$(LN) $(I_LIB)/libtemplates_parser$(SOEXT) $(I_LIB)/../../
 endif
 
 clean:
 	$(GNAT) clean -Ptemplates_parser
-	$(GNAT) clean -Ptools
-	$(MAKE) -C docs clean
-	$(MAKE) -C regtests clean
+	$(GNAT) clean -Ptools/tools
+	$(MAKE) -C docs clean $(ALL_OPTIONS)
+	$(MAKE) -C regtests clean $(ALL_OPTIONS)
+	$(RM) -fr .build
 
 distrib:
 	-rm templates_parser-?.?.tar*

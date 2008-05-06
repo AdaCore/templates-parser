@@ -143,7 +143,7 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
-	$(GNAT) make -q -Pdocs $(EXEFILES)
+	$(GNAT) make -p -q -Pdocs $(EXEFILES)
 
 %.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res

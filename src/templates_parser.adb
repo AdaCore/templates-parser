@@ -2085,8 +2085,8 @@ package body Templates_Parser is
          return Result;
       end Image;
 
-      C       : Natural;
-      P       : Natural;
+      C       : Natural := 0;
+      P       : Natural := 0;
       R       : Tag_Node_Access;
       Inlined : Boolean := False;
    begin

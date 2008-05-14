@@ -4,7 +4,7 @@ Templates_Parser
 
 To build:
 
-   $ make build
+   $ make setup build
 
 To install:
 

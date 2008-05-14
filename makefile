@@ -37,7 +37,9 @@ TP_TASKING   = Standard_Tasking
 TP_XMLADA    = Disabled
 LIBRARY_TYPE = relocatable
 
-DR_BUILD       = $(shell echo $(PRJ_BUILD) | tr "[[:upper:]]" "[[:lower:]]")
+TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
+			else echo tr; fi)
+DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
 BDIR           = .build/$(DR_BUILD)/$(LIBRARY_TYPE)
 
 INSTALL = $(dir $(shell which gnatls))..

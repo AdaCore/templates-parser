@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2007                          --
+--                         Copyright (C) 1999-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -172,7 +172,7 @@ package body Expr is
          Start_Index := Index;
 
          if Index > Expression'Last then
-            --  No more data to read.
+            --  No more data to read
             Current_Token := (Kind => End_Expr);
 
          --  Check symbolic operators

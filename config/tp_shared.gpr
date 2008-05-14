@@ -39,8 +39,8 @@ project TP_Shared is
    Tasking : Tasking_Type := TP_Config.Tasking;
 
    type Library_Kind is ("relocatable", "static");
-   Library_Type : Library_Kind := 
-      external ("LIBRARY_TYPE", TP_Config.Default_Library_Type);   
+   Library_Type : Library_Kind :=
+      external ("LIBRARY_TYPE", TP_Config.Default_Library_Type);
 
    ------------
    -- Naming --

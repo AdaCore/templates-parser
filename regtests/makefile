@@ -167,6 +167,10 @@ ifeq ($(TP_XMLADA), Installed)
 endif
 	echo "### Any line displayed after this line indicate a problem in Templates_Parser"
 	cat alldiffs
+	test ! -s alldiffs
+
+test_result:
+	test ! -s alldiffs
 
 clean:
 	-$(GNAT) clean -Pregtests

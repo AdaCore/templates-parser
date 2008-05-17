@@ -32,9 +32,6 @@ project TP_Shared is
 
    for Source_Dirs use ();
 
-   type Build_Type is ("Debug", "Release");
-   Build : Build_Type := external ("PRJ_BUILD", "Debug");
-
    type Tasking_Type is ("No_Tasking", "Standard_Tasking");
    Tasking : Tasking_Type := TP_Config.Tasking;
 

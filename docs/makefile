@@ -143,7 +143,7 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
-	$(GNAT) make -p -q -Pdocs $(EXEFILES)
+	$(GNAT) make -p -q -XLIBRARY_TYPE=static -Pdocs $(EXEFILES)
 
 %.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res
@@ -180,7 +180,7 @@ ada.sed: makefile
 force:
 
 clean-tmp:
-	-$(GNAT) clean -q -Pdocs $(EXEFILES)
+	-$(GNAT) clean -q -XLIBRARY_TYPE=static -Pdocs $(EXEFILES)
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
 		*.exe templates_parser*.ads.texi ada.sed \

@@ -65,12 +65,12 @@ EXP_TESTS      = regtst2 regtst3 $(XTESTS)
 
 MAIN_TESTS     = testme print_tree filter
 
-EXECP          = ../$(BDIR)/rbin
+EXECP          = ../$(BDIR)/$(LIBRARY_TYPE)/rbin
 
 # Add relocatable DLL into the PATH for Windows
 
 ifeq (${OS}, Windows_NT)
-export PATH := $(EXECP)/../lib:../$(BDIR)/lib:${PATH}
+export PATH := $(EXECP)/../lib:../$(BDIR)/$(LIBRARY_TYPE)/lib:${PATH}
 endif
 
 DIFF_ARGS = -c -w

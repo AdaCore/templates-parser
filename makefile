@@ -35,17 +35,23 @@ GNAT	= gnat
 PRJ_BUILD    = Debug
 TP_TASKING   = Standard_Tasking
 TP_XMLADA    = Disabled
-LIBRARY_TYPE = relocatable
+LIBRARY_TYPE = static
 
 TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
 			else echo tr; fi)
 DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
-BDIR           = .build/$(DR_BUILD)/$(LIBRARY_TYPE)
+BDIR           = .build/$(DR_BUILD)
 
 INSTALL = $(dir $(shell which gnatls))..
+
+ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
+		-Pconfig/test_shared/test_shared 2>/dev/null && echo "true")
+
+-include makefile.setup
+
 I_BIN	= $(INSTALL)/bin
 I_INC	= $(INSTALL)/include/templates_parser
-I_LIB	= $(INSTALL)/lib/templates_parser/$(LIBRARY_TYPE)
+I_LIB	= $(INSTALL)/lib/templates_parser
 I_GPR	= $(INSTALL)/lib/gnat
 I_TGP	= $(INSTALL)/lib/gnat/templates_parser
 I_DOC	= $(INSTALL)/share/doc/templates_parser
@@ -73,27 +79,26 @@ endif
 
 CONFGPR	= config/tp_config.gpr
 
+ifeq ($(DEFAULT_LIBRARY_TYPE),)
+DEFAULT_LIBRARY_TYPE=static
+endif
+
+ifeq ($(LIBRARY_TYPE),)
+LIBRARY_TYPE=static
+endif
+
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
-		BDIR="$(BDIR)"
+		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
+		ENABLE_SHARED="$(ENABLE_SHARED)"
 
-all:
-	echo ""
-	echo "Targets:"
-	echo ""
-	echo "build     : build package"
-	echo "install   : install package (default INSTALL="$(INSTALL)")"
-	echo "test      : run a regression test"
-	echo "doc       : build documentation"
-	echo "distrib   : build tarball distribution"
-	echo ""
-
-force:
-
-build: setup_config force tp_xmlada.gpr
-	$(GNAT) make -p -Ptemplates_parser
-	$(GNAT) make -p -Ptools/tools
+build: setup_config tp_xmlada.gpr
+	$(GNAT) make -p -XLIBRARY_TYPE=static -Ptemplates_parser
+	$(GNAT) make -p -XLIBRARY_TYPE=static -Ptools/tools
+ifeq ($(ENABLE_SHARED), true)
+	$(GNAT) make -p -XLIBRARY_TYPE=relocatable -Ptemplates_parser
+endif
 
 test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
@@ -112,49 +117,66 @@ ifeq ($(TP_XMLADA), Installed)
 else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 endif
-	$(MKDIR) -p $(BDIR)/obj
-	$(MKDIR) -p $(BDIR)/lib
+	$(MKDIR) -p $(BDIR)/static/obj
+	$(MKDIR) -p $(BDIR)/static/lib
+ifeq ($(ENABLE_SHARED), true)
+	$(MKDIR) -p $(BDIR)/relocatable/obj
+	$(MKDIR) -p $(BDIR)/relocatable/lib
+endif
+	echo "INSTALL=$(INSTALL)" > makefile.setup
+	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
+	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)
 	echo '   for Source_Dirs use ();' >> $(CONFGPR)
-	echo '   Default_Library_Type := "$(LIBRARY_TYPE)";' >> $(CONFGPR)
+	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
+		>> $(CONFGPR)
 	echo '   Tasking := "$(TP_TASKING)";' >> $(CONFGPR)
 	echo 'end TP_Config;' >> $(CONFGPR)
 
 install_dirs:
 	$(MKDIR) -p $(I_BIN)
 	$(MKDIR) -p $(I_INC)
-	$(MKDIR) -p $(I_LIB)
+	$(MKDIR) -p $(I_LIB)/static
+ifeq ($(ENABLE_SHARED), true)
+	$(MKDIR) -p $(I_LIB)/relocatable
+endif
 	$(MKDIR) -p $(I_GPR)
 	$(MKDIR) -p $(I_TGP)
 	$(MKDIR) -p $(I_DOC)
 
 install: install_dirs
 	$(CP) src/*.ad* $(I_INC)
-	$(CP) $(BDIR)/lib/* $(I_LIB)
-	$(CP) $(BDIR)/bin/* $(I_BIN)
+	$(CP) $(BDIR)/static/lib/* $(I_LIB)/static
+ifeq ($(ENABLE_SHARED), true)
+	$(CP) $(BDIR)/relocatable/lib/* $(I_LIB)/relocatable
+endif
+	$(CP) $(BDIR)/static/bin/* $(I_BIN)
 	$(CP) config/templates_parser.gpr $(I_GPR)
 	$(CP) config/tp_shared.gpr $(I_TGP)
 	$(CP) tp_xmlada.gpr $(I_TGP)
 	$(CP) $(CONFGPR) $(I_TGP)
-	$(CP) docs/templates_parser*html $(I_DOC)
-	$(CP) docs/templates_parser*pdf $(I_DOC)
-	$(CP) docs/templates_parser*info* $(I_DOC)
 ifeq ($(TP_XMLADA), Installed)
 	$(CP) xsrc/*.ad* $(I_INC)
 endif
-	$(RM) -f $(I_LIB)/../../libtemplates_parser$(SOEXT)
-ifeq ($(LIBRARY_TYPE), relocatable)
-	$(LN) $(I_LIB)/libtemplates_parser$(SOEXT) $(I_LIB)/../../
+	$(RM) -f $(I_LIB)/../libtemplates_parser$(SOEXT)
+ifeq ($(ENABLE_SHARED), true)
+	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(I_LIB)/../
 endif
+	-$(CP) docs/templates_parser*html $(I_DOC)
+	-$(CP) docs/templates_parser*pdf $(I_DOC)
+	-$(CP) docs/templates_parser*info* $(I_DOC)
 
 clean:
-	$(GNAT) clean -Ptemplates_parser
-	$(GNAT) clean -Ptools/tools
-	$(MAKE) -C docs clean $(ALL_OPTIONS)
-	$(MAKE) -C regtests clean $(ALL_OPTIONS)
-	$(RM) -fr .build
+	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptemplates_parser
+	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptools/tools
+ifeq ($(ENABLE_SHARED), true)
+	-$(GNAT) clean -XLIBRARY_TYPE=relocatable -Ptemplates_parser
+endif
+	-$(MAKE) -C docs clean $(ALL_OPTIONS)
+	-$(MAKE) -C regtests clean $(ALL_OPTIONS)
+	$(RM) -fr .build makefile.setup
 
 distrib:
 	-rm templates_parser-?.?.tar*

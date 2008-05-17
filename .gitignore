@@ -8,6 +8,7 @@ docs/templates_parser.html
 docs/templates_parser.info
 docs/templates_parser.pdf
 docs/templates_parser.txt
+makefile.setup
 obj
 regtests/*.ali
 regtests/*.exe

@@ -32,6 +32,13 @@ with Ada.Strings.Unbounded;
 private with Ada.Containers.Indefinite_Hashed_Maps;
 private with Ada.Strings.Hash;
 
+with Templates_Parser_Tasking;
+pragma Elaborate_All (Templates_Parser_Tasking);
+pragma Warnings (Off, Templates_Parser_Tasking);
+--  This unit is not used in the spec but is placed here to force proper
+--  finalization order. This with clause should be moved into the body when
+--  this issue is fixed.
+
 package Templates_Parser is
 
    use Ada.Strings.Unbounded;

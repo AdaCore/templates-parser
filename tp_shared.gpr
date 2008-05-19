@@ -75,11 +75,11 @@ project TP_Shared is
 
       case Tasking is
          when "No_Tasking" =>
-            for Implementation ("Templates_Parser.Tasking")
-              use "templates_parser-tasking__no_tasking.adb";
+            for Implementation ("Templates_Parser_Tasking")
+              use "templates_parser_tasking__no_tasking.adb";
          when "Standard_Tasking" =>
-            for Implementation ("Templates_Parser.Tasking")
-              use "templates_parser-tasking__standard_tasking.adb";
+            for Implementation ("Templates_Parser_Tasking")
+              use "templates_parser_tasking__standard_tasking.adb";
       end case;
 
    end Naming;

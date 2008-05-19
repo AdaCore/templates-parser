@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
+--                         Copyright (C) 2005-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -26,17 +26,24 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-package Templates_Parser.Tasking is
+package body Templates_Parser_Tasking is
 
-   --  Implements a simple semaphore. There is two implementations for this
-   --  unit, one that is based on protected object that is required for
-   --  tasking applications and one that does nothing (the tasking runtime is
-   --  not dragged in this configuration).
+   ----------
+   -- Lock --
+   ----------
 
-   procedure Lock;
-   --  Lock all tasks
+   procedure Lock is
+   begin
+      null;
+   end Lock;
 
-   procedure Unlock;
-   --  Unlock tasks
+   ------------
+   -- Unlock --
+   ------------
 
-end Templates_Parser.Tasking;
+   procedure Unlock is
+   begin
+      null;
+   end Unlock;
+
+end Templates_Parser_Tasking;

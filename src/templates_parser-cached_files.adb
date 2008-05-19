@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2007                          --
+--                         Copyright (C) 1999-2008                          --
 --                                 AdaCore                                  --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
@@ -25,8 +25,6 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
-
-with Templates_Parser.Tasking;
 
 separate (Templates_Parser)
 
@@ -248,7 +246,7 @@ package body Cached_Files is
    procedure Release (T : in out Static_Tree) is
    begin
       pragma Assert (T.C_Info /= null);
-      Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
 
       Update_Used_Counter (T, Mode => Released);
 
@@ -256,10 +254,10 @@ package body Cached_Files is
          pragma Assert (T.Info.Next /= T.C_Info);
          Release (T.C_Info, Include => False);
       end if;
-      Tasking.Unlock;
+      Templates_Parser_Tasking.Unlock;
    exception
       when others =>
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
          raise;
    end Release;
 
@@ -269,7 +267,7 @@ package body Cached_Files is
 
    procedure Release is
    begin
-      Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
 
       for K in 1 .. Index loop
          --  We do not want to release the include files, each include file as
@@ -279,10 +277,10 @@ package body Cached_Files is
 
       Index := 0;
 
-      Tasking.Unlock;
+      Templates_Parser_Tasking.Unlock;
    exception
       when others =>
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
          raise;
    end Release;
 

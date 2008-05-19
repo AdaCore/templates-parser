@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                 AdaCore                                  --
+--                          Copyright (C) 2005-2008                         --
+--                                  AdaCore                                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -26,7 +26,22 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-package body Templates_Parser.Tasking is
+with Ada.Task_Identification;
+
+package body Templates_Parser_Tasking is
+
+   use Ada.Task_Identification;
+
+   --  Simple semaphore
+
+   protected Semaphore is
+      entry Lock;
+      procedure Unlock;
+   private
+      entry Lock_Internal;
+      TID        : Task_Id := Null_Task_Id;
+      Lock_Count : Natural := 0;
+   end Semaphore;
 
    ----------
    -- Lock --
@@ -34,8 +49,52 @@ package body Templates_Parser.Tasking is
 
    procedure Lock is
    begin
-      null;
+      Semaphore.Lock;
    end Lock;
+
+   ---------------
+   -- Semaphore --
+   ---------------
+
+   protected body Semaphore is
+
+      ----------
+      -- Lock --
+      ----------
+
+      entry Lock when True is
+      begin
+         if TID = Lock'Caller then
+            Lock_Count := Lock_Count + 1;
+         else
+            requeue Lock_Internal;
+         end if;
+      end Lock;
+
+      -------------------
+      -- Lock_Internal --
+      -------------------
+
+      entry Lock_Internal when Lock_Count = 0 is
+      begin
+         TID := Lock_Internal'Caller;
+         Lock_Count := 1;
+      end Lock_Internal;
+
+      ------------
+      -- Unlock --
+      ------------
+
+      procedure Unlock is
+      begin
+         if TID = Current_Task then
+            Lock_Count := Lock_Count - 1;
+         else
+            raise Tasking_Error;
+         end if;
+      end Unlock;
+
+   end Semaphore;
 
    ------------
    -- Unlock --
@@ -43,7 +102,7 @@ package body Templates_Parser.Tasking is
 
    procedure Unlock is
    begin
-      null;
+      Semaphore.Unlock;
    end Unlock;
 
-end Templates_Parser.Tasking;
+end Templates_Parser_Tasking;

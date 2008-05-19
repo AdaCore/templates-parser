@@ -40,7 +40,6 @@ with GNAT.Regpat;
 
 with Templates_Parser.Input;
 with Templates_Parser.Configuration;
-with Templates_Parser.Tasking;
 
 package body Templates_Parser is
 
@@ -1211,17 +1210,17 @@ package body Templates_Parser is
    procedure Adjust (Set : in out Translate_Set) is
    begin
       if Set.Ref_Count /= null then
-         Tasking.Lock;
+         Templates_Parser_Tasking.Lock;
          Set.Ref_Count.all := Set.Ref_Count.all + 1;
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
       end if;
    end Adjust;
 
    procedure Adjust (T : in out Tag) is
    begin
-      Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
       T.Ref_Count.all := T.Ref_Count.all + 1;
-      Tasking.Unlock;
+      Templates_Parser_Tasking.Unlock;
    end Adjust;
 
    ------------
@@ -2163,25 +2162,25 @@ package body Templates_Parser is
         (Association_Map.Map, Map_Access);
    begin
       if Set.Ref_Count /= null then
-         Tasking.Lock;
+         Templates_Parser_Tasking.Lock;
          Set.Ref_Count.all := Set.Ref_Count.all - 1;
 
          if Set.Ref_Count.all = 0 then
             Free (Set.Ref_Count);
             Free (Set.Set);
          end if;
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
       end if;
    end Finalize;
 
    procedure Finalize (T : in out Tag) is
    begin
-      Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
 
       T.Ref_Count.all := T.Ref_Count.all - 1;
 
       if T.Ref_Count.all = 0 then
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
 
          declare
             procedure Free is new Ada.Unchecked_Deallocation
@@ -2221,7 +2220,7 @@ package body Templates_Parser is
          end;
 
       else
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
       end if;
    end Finalize;
 
@@ -3652,14 +3651,14 @@ package body Templates_Parser is
       Old   : Tree;
 
    begin
-      Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
 
       if Cached then
          Cached_Files.Get (Filename, Result => T);
 
          if T /= Null_Static_Tree then
             pragma Assert (T.C_Info /= null);
-            Tasking.Unlock;
+            Templates_Parser_Tasking.Unlock;
             return T;
          end if;
       end if;
@@ -3710,15 +3709,15 @@ package body Templates_Parser is
          pragma Assert (Old /= null);
       end if;
 
-      Tasking.Unlock;
+      Templates_Parser_Tasking.Unlock;
       return Static_Tree'(New_T, Old);
 
    exception
       when E : Internal_Error =>
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
          Fatal_Error (Exceptions.Exception_Message (E));
       when others =>
-         Tasking.Unlock;
+         Templates_Parser_Tasking.Unlock;
          raise;
    end Load;
 

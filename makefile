@@ -29,7 +29,7 @@
 .SILENT:
 
 MODE	= RELEASE
-VERSION	= 11.1
+VERSION	= 11.2
 GNAT	= gnat
 
 PRJ_BUILD    = Debug

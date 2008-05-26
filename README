@@ -7,7 +7,7 @@ Some make variables can be adjusted to change the default setup:
    DEFAULT_LIBRARY_TYPE=[static|relocatable]
         (default is static)
 
-   INSTALL=<install directory>
+   prefix=<install directory>
         (default to compiler root directory)
 
    ENABLE_SHARED=[true|false]
@@ -21,7 +21,7 @@ default setup:
 To setup the default library as relocatable and change the installation
 directory:
 
-   $ make DEFAULT_LIBRARY_TYPE=relocatable INSTALL=/opt/templates_parser setup
+   $ make DEFAULT_LIBRARY_TYPE=relocatable prefix=/opt/templates_parser setup
    $ make
 
 To install:
@@ -30,11 +30,11 @@ To install:
 
 Note that the installation will be done into your current GNAT root
 directory by default. It is possible to change this default by setting the
-INSTALL make variable, for example:
+prefix make variable, for example:
 
-   $ make INSTALL=/opt/templates_parser install
+   $ make prefix=/opt/templates_parser install
 
 or using the setup step:
 
-   $ make INSTALL=/opt/templates_parser setup
+   $ make prefix=/opt/templates_parser setup
    $ make && make install

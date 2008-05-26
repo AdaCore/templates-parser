@@ -42,19 +42,19 @@ TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
 DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
 BDIR           = .build/$(DR_BUILD)
 
-INSTALL = $(dir $(shell which gnatls))..
+prefix	= $(dir $(shell which gnatls))..
 
 ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
 		-Pconfig/test_shared/test_shared 2>/dev/null && echo "true")
 
 -include makefile.setup
 
-I_BIN	= $(INSTALL)/bin
-I_INC	= $(INSTALL)/include/templates_parser
-I_LIB	= $(INSTALL)/lib/templates_parser
-I_GPR	= $(INSTALL)/lib/gnat
-I_TGP	= $(INSTALL)/lib/gnat/templates_parser
-I_DOC	= $(INSTALL)/share/doc/templates_parser
+I_BIN	= $(prefix)/bin
+I_INC	= $(prefix)/include/templates_parser
+I_LIB	= $(prefix)/lib/templates_parser
+I_GPR	= $(prefix)/lib/gnat
+I_TGP	= $(prefix)/lib/gnat/templates_parser
+I_DOC	= $(prefix)/share/doc/templates_parser
 
 CP	= cp -p
 MKDIR	= mkdir -p
@@ -123,7 +123,7 @@ ifeq ($(ENABLE_SHARED), true)
 	$(MKDIR) -p $(BDIR)/relocatable/obj
 	$(MKDIR) -p $(BDIR)/relocatable/lib
 endif
-	echo "INSTALL=$(INSTALL)" > makefile.setup
+	echo "prefix=$(prefix)" > makefile.setup
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 

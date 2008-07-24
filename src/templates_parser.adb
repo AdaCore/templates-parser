@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 1999-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -1907,9 +1906,8 @@ package body Templates_Parser is
 
       else
          declare
-            K : constant Natural
-              := Fixed.Index (Filename, Dir_Seps,
-                              Going => Strings.Backward);
+            K : constant Natural :=
+                  Fixed.Index (Filename, Dir_Seps, Going => Strings.Backward);
          begin
             if K = 0 then
                return Include_Filename;

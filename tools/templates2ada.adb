@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2006-2008, AdaCore                 --
+--                     Copyright (C) 2006-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -111,7 +111,7 @@ procedure Templates2Ada is
 
    procedure Foreach_Template (Relative_Directory : in String);
    --  Process each template in Directory (recursively if global options are
-   --  set appropriately)
+   --  set appropriately).
 
    procedure Process_Template (Relative_Name : in String);
    --  Process a given templates file
@@ -137,7 +137,7 @@ procedure Templates2Ada is
       Pattern : in String;
       Forward : in Boolean := True) return Integer;
    --  Search the first occurrence of Pattern after Index. Return Integer'First
-   --  if not found
+   --  if not found.
 
    ----------------------
    -- Foreach_Template --
@@ -318,6 +318,7 @@ procedure Templates2Ada is
    procedure Process_Template (Relative_Name : in String) is
       use Ada.Streams, Ada.Streams.Stream_IO;
       use Sets;
+
       Result                     : Unbounded_String;
       File                       : Ada.Streams.Stream_IO.File_Type;
       Seen, Include, HTTP, URL   : Sets.Set;
@@ -333,10 +334,14 @@ procedure Templates2Ada is
       procedure Process_Tag (Str : String; S : in out Integer);
       --  Process some text surrounded by @_..._@, and add it to the proper
       --  output tags. S points to the "@_" in Str, and is modified to
-      --  point after the closing "_@"
+      --  point after the closing "_@".
 
       procedure Process_Tags (Str : String; First, Last : Integer);
       --  Process all tags referenced in Str (First .. Last)
+
+      -----------------
+      -- Process_Tag --
+      -----------------
 
       procedure Process_Tag (Str : String; S : in out Integer) is
          First : Integer := S + 2;
@@ -382,7 +387,7 @@ procedure Templates2Ada is
          end loop;
 
          --  Remove attributes (can't be done in the loop above, because
-         --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS
+         --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS.
 
          for F in reverse First .. Last - 1 loop
             if Str (F) = ''' then
@@ -472,7 +477,7 @@ procedure Templates2Ada is
 
                --  The value of the variable could be either static or come
                --  from one or more other tags. We need to parse it, as a
-               --  result
+               --  result.
 
                S := Next_Line (Str, Last + 1);
                Process_Tags (Str, Last + 1, S - 1);
@@ -487,7 +492,7 @@ procedure Templates2Ada is
 
                --  We could either have "@@INCLUDE@@ static_name.html"
                --  or "@@INCLUDE@@ @_TAG_@". In the latter case we need to
-               --  handle the tag as usual
+               --  handle the tag as usual.
 
                Process_Tags (Str, First, Last);
                Insert
@@ -517,14 +522,14 @@ procedure Templates2Ada is
               and then Str (S .. S + 8) = "<a name="""
             then
                --  Ignored, just so that we do not generate an HTTP entry for
-               --  it
+               --  it.
                S := S + 9;
 
             elsif S + 11 < Str'Last
               and then Str (S .. S + 11) = "<form name="""
             then
                --  Ignored, just so that we do not generate an HTTP entry for
-               --  it
+               --  it.
                S := S + 12;
 
             elsif S + 5 < Str'Last
@@ -541,13 +546,13 @@ procedure Templates2Ada is
                --  If the name contains some tags, this isn't a constant name.
                --  This is generally used for checkbox names, since the names
                --  need to be unique in such a case. In that case, try to find
-               --  a prefix or a suffix as appropriate
+               --  a prefix or a suffix as appropriate.
 
                Last_Save := Last - 1;
                Last      := Last_Save;
 
                --  The name might be something like "@_A_@:@_B_@:name", for
-               --  which we will generate Name_Suffix
+               --  which we will generate Name_Suffix.
 
                while First <= Str'Last and then Str (First) = '@' loop
                   First := Search (Str, First, "_@") + 2;
@@ -560,7 +565,7 @@ procedure Templates2Ada is
                end loop;
 
                --  It might also be something like "name:@_A_@:@_B_@" for which
-               --  we will generate Name_Prefix
+               --  we will generate Name_Prefix.
 
                while Last >= Str'First and then Str (Last) = '@' loop
                   Last := Search (Str, Last, "@_", Forward => False) - 1;
@@ -677,6 +682,7 @@ procedure Templates2Ada is
 
             Result := Result + 1;
          end loop;
+
       else
          Result := Index - Pattern'Length + 1;
          while Result >= Str'First loop

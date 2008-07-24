@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2006-2008                          --
---                                 AdaCore                                  --
+--                         Copyright (C) 2006-2008, AdaCore                 --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -256,17 +255,17 @@ procedure Templates2Ada is
       Set_Var, Set_Val : Tag;
    begin
       while Has_Element (C) loop
-         Variables   := Variables   & Element (C).Variables;
-         Filenames   := Filenames   & Element (C).Filename;
-         Bases       := Bases       & Key (C);
-         Includes    := Includes    & Element (C).Included;
-         HTTPS       := HTTPS       & Element (C).HTTP;
-         From_Get    := From_Get    & Element (C).From_Get;
-         URLs        := URLs        & Element (C).URL;
-         Ajax_Event  := Ajax_Event  & Element (C).Ajax_Event;
-         Ajax_Action := Ajax_Action & Element (C).Ajax_Action;
-         Set_Var     := Set_Var     & Element (C).Set_Var;
-         Set_Val     := Set_Val     & Element (C).Set_Val;
+         Append (Variables,   Element (C).Variables);
+         Append (Filenames,   Element (C).Filename);
+         Append (Bases,       Key (C));
+         Append (Includes,    Element (C).Included);
+         Append (HTTPS,       Element (C).HTTP);
+         Append (From_Get,    Element (C).From_Get);
+         Append (URLs,        Element (C).URL);
+         Append (Ajax_Event,  Element (C).Ajax_Event);
+         Append (Ajax_Action, Element (C).Ajax_Action);
+         Append (Set_Var,     Element (C).Set_Var);
+         Append (Set_Val,     Element (C).Set_Val);
          Next (C);
       end loop;
 
@@ -329,8 +328,78 @@ procedure Templates2Ada is
       Set_Var, Set_Val           : Tag;
       C                          : Sets.Cursor;
       Inserted                   : Boolean;
-      Parents_Nesting            : Natural;
       pragma Unreferenced (Result);
+
+      procedure Process_Tag (Str : String; S : in out Integer);
+      --  Process some text surrounded by @_..._@, and add it to the proper
+      --  output tags. S points to the "@_" in Str, and is modified to
+      --  point after the closing "_@"
+
+      procedure Process_Tag (Str : String; S : in out Integer) is
+         First : Integer := S + 2;
+         Last  : Integer := First;
+         Parents_Nesting : Natural := 0;
+      begin
+         while Last < Str'Last loop
+            if Str (Last) = ':' then
+               First := Last + 1;
+            elsif Str (Last .. Last + 1) = "_@" then
+               exit;
+            end if;
+            Last := Last + 1;
+         end loop;
+
+         --  Special case: a convention is that user-defined scripts
+         --  might accept arguments that reference other tags, by using
+         --  the syntax @_FILTER(@param):..._@, ie the parameter starts
+         --  with a single @ sign. In this case, we want to make sure
+         --  there is a entry made for the argument as well. Such
+         --  filters might have multiple arguments. Multiple arguments
+         --  must be comma-separated.
+
+         for A in S + 2 .. Last - 1 loop
+            if Str (A) = '(' then
+               Parents_Nesting := Parents_Nesting + 1;
+            elsif Str (A) = ')' then
+               Parents_Nesting := Parents_Nesting - 1;
+            elsif Str (A) = '@'
+               and then Parents_Nesting > 0
+               and then (Str (A - 1) = ',' or else Str (A - 1) = '(')
+            then
+               for B in A + 1 .. Last - 1 loop
+                  if Str (B) = ',' or else Str (B) = ')' then
+                     Insert (Seen, Str (A + 1 .. B - 1), C, Inserted);
+                     Insert
+                        (All_Variables, Str (A + 1 .. B - 1),
+                         C, Inserted);
+                     exit;
+                  end if;
+               end loop;
+            end if;
+         end loop;
+
+         --  Remove attributes (can't be done in the loop above, because
+         --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS
+
+         for F in reverse First .. Last - 1 loop
+            if Str (F) = ''' then
+               Last := F;
+               exit;
+            end if;
+         end loop;
+
+         if Str (First) /= '$'
+           and then Str (First .. Last - 1) /= "TABLE_LINE"
+           and then Str (First .. Last - 1) /= "UP_TABLE_LINE"
+           and then Str (First .. Last - 1) /= "NUMBER_LINE"
+         then
+            Insert (Seen, Str (First .. Last - 1), C, Inserted);
+            Insert (All_Variables, Str (First .. Last - 1), C, Inserted);
+         end if;
+
+         S := Last + 2;
+      end Process_Tag;
+
    begin
       --  We cannot use the templates parser, since it wouldn't process
       --  correctly the @@IF@@ statements, and would only see one branch of
@@ -373,12 +442,12 @@ procedure Templates2Ada is
               and then Str (S .. S + 11) = "@@SET@@ SET_"
             then
                Next_Word (Str, S + 7, First, Last);
-               Set_Var := Set_Var & Str (First .. Last);
+               Append (Set_Var, Str (First .. Last));
                S := Last + 1;
                Next_Word (Str, S, First, Last);
                S := Last + 1;
                Next_Word (Str, S, First, Last);
-               Set_Val := Set_Val & Str (First .. Last);
+               Append (Set_Val, Str (First .. Last));
 
             elsif S + 6 <= Str'Last
               and then Str (S .. S + 6) = "@@SET@@"
@@ -388,78 +457,26 @@ procedure Templates2Ada is
                S := Next_Line (Str, Last + 1);
 
             elsif Str (S .. S + 1) = "@_" then
-               First := S + 2;
-               Last  := First;
-
-               while Last < Str'Last loop
-                  if Str (Last) = ':' then
-                     First := Last + 1;
-                  elsif Str (Last .. Last + 1) = "_@" then
-                     exit;
-                  end if;
-                  Last := Last + 1;
-               end loop;
-
-               --  Special case: a convention is that user-defined scripts
-               --  might accept arguments that reference other tags, by using
-               --  the syntax @_FILTER(@param):..._@, ie the parameter starts
-               --  with a single @ sign. In this case, we want to make sure
-               --  there is a entry made for the argument as well. Such
-               --  filters might have multiple arguments. Multiple arguments
-               --  must be comma-separated.
-
-               Parents_Nesting := 0;
-
-               for A in S + 2 .. Last - 1 loop
-                  if Str (A) = '(' then
-                     Parents_Nesting := Parents_Nesting + 1;
-                  elsif Str (A) = ')' then
-                     Parents_Nesting := Parents_Nesting - 1;
-                  elsif Str (A) = '@'
-                     and then Parents_Nesting > 0
-                     and then (Str (A - 1) = ',' or else Str (A - 1) = '(')
-                  then
-                     for B in A + 1 .. Last - 1 loop
-                        if Str (B) = ',' or else Str (B) = ')' then
-                           Insert (Seen, Str (A + 1 .. B - 1), C, Inserted);
-                           Insert
-                              (All_Variables, Str (A + 1 .. B - 1),
-                               C, Inserted);
-                           exit;
-                        end if;
-                     end loop;
-                  end if;
-               end loop;
-
-               --  Remove attributes (can't be done in the loop above, because
-               --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS
-
-               for F in reverse First .. Last - 1 loop
-                  if Str (F) = ''' then
-                     Last := F;
-                     exit;
-                  end if;
-               end loop;
-
-               if Str (First) /= '$'
-                 and then Str (First .. Last - 1) /= "TABLE_LINE"
-                 and then Str (First .. Last - 1) /= "UP_TABLE_LINE"
-                 and then Str (First .. Last - 1) /= "NUMBER_LINE"
-               then
-                  Insert (Seen, Str (First .. Last - 1), C, Inserted);
-                  Insert (All_Variables, Str (First .. Last - 1), C, Inserted);
-               end if;
-
-               S := Last + 2;
+               Process_Tag (Str, S);
 
             elsif S + 10 < Str'Last
               and then Str (S .. S + 10) = "@@INCLUDE@@"
             then
                Next_Word (Str, S + 12, First, Last);
-               Insert
-                 (Include,
-                  Directories.Base_Name (Str (First .. Last)), C, Inserted);
-               S := Last + 2;
+
+               --  We could either have "@@INCLUDE@@ static_name.html"
+               --  or "@@INCLUDE@@ @_TAG_@". In the latter case we need to
+               --  handle the tag as usual
+
+               if Str (First .. First + 1) = "@_" then
+                  Process_Tag (Str, First);
+                  S := First;
+               else
+                  Insert
+                    (Include,
+                     Directories.Base_Name (Str (First .. Last)), C, Inserted);
+                  S := Last + 2;
+               end if;
 
                --  Check for AWS/Ajax actions. AWS/Ajax is based on include
                --  files whose name is starting with "aws_action_". The first

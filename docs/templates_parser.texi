@@ -1224,6 +1224,10 @@ include commands are identical:
 The file name can also be a tag. In this case the file loading is deferred at
 the parsing time.
 
+@noindent
+For security reasons the filename can't be a full pathname. If a full
+pathname is passed then the leading directory separator is removed.
+
 @c -----------------------------------------------------------------------
 @node IF statement
 @section IF statement

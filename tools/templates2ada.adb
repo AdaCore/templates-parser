@@ -454,7 +454,20 @@ procedure Templates2Ada is
             then
                Next_Word (Str, S + 7, First, Last);
                Insert (To_Ignore, Str (First .. Last), C, Inserted);
+
+               --  The value of the variable could be either static or come
+               --  from one or more other tags. We need to parse it, as a
+               --  result
+
                S := Next_Line (Str, Last + 1);
+               First := Last + 1;
+               while First < S loop
+                  if Str (First .. First + 1) = "@_" then
+                     Process_Tag (Str, First);
+                  else
+                     First := First + 1;
+                  end if;
+               end loop;
 
             elsif Str (S .. S + 1) = "@_" then
                Process_Tag (Str, S);

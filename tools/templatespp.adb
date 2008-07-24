@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2008                            --
---                                 AdaCore                                  --
+--                            Copyright (C) 2008, AdaCore                   --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -59,7 +58,7 @@ procedure TemplatesPP is
       Text_IO.Put_Line ("Pre-processor based on the templates parser");
       Text_IO.Put_Line (Command_Name & " [-o output] file");
       Text_IO.Put_Line
-         ("   Parses file and generate output file (or display on stdin");
+         ("   Parses file and generate output file (or display on stdout)");
    end Help;
 
    -------------

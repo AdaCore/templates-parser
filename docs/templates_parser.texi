@@ -1220,6 +1220,10 @@ include commands are identical:
 @@@@INCLUDE@@@@ another.tmplt (one, two, 3 => three, 4 => four, 5 => "a text")
 @@@@INCLUDE@@@@ another.tmplt (one, 5 => "a text", 3 => three, 2 => two, 4 => four)}
 
+@noindent
+The file name can also be a tag. In this case the file loading is deferred at
+the parsing time.
+
 @c -----------------------------------------------------------------------
 @node IF statement
 @section IF statement

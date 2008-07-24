@@ -335,6 +335,9 @@ procedure Templates2Ada is
       --  output tags. S points to the "@_" in Str, and is modified to
       --  point after the closing "_@"
 
+      procedure Process_Tags (Str : String; First, Last : Integer);
+      --  Process all tags referenced in Str (First .. Last)
+
       procedure Process_Tag (Str : String; S : in out Integer) is
          First : Integer := S + 2;
          Last  : Integer := First;
@@ -400,6 +403,18 @@ procedure Templates2Ada is
          S := Last + 2;
       end Process_Tag;
 
+      procedure Process_Tags (Str : String; First, Last : Integer) is
+         S : Integer := First;
+      begin
+         while S <= Last loop
+            if Str (S .. S + 1) = "@_" then
+               Process_Tag (Str, S);
+            else
+               S := S + 1;
+            end if;
+         end loop;
+      end Process_Tags;
+
    begin
       --  We cannot use the templates parser, since it wouldn't process
       --  correctly the @@IF@@ statements, and would only see one branch of
@@ -460,14 +475,7 @@ procedure Templates2Ada is
                --  result
 
                S := Next_Line (Str, Last + 1);
-               First := Last + 1;
-               while First < S loop
-                  if Str (First .. First + 1) = "@_" then
-                     Process_Tag (Str, First);
-                  else
-                     First := First + 1;
-                  end if;
-               end loop;
+               Process_Tags (Str, Last + 1, S - 1);
 
             elsif Str (S .. S + 1) = "@_" then
                Process_Tag (Str, S);
@@ -481,15 +489,11 @@ procedure Templates2Ada is
                --  or "@@INCLUDE@@ @_TAG_@". In the latter case we need to
                --  handle the tag as usual
 
-               if Str (First .. First + 1) = "@_" then
-                  Process_Tag (Str, First);
-                  S := First;
-               else
-                  Insert
-                    (Include,
-                     Directories.Base_Name (Str (First .. Last)), C, Inserted);
-                  S := Last + 2;
-               end if;
+               Process_Tags (Str, First, Last);
+               Insert
+                 (Include,
+                  Directories.Base_Name (Str (First .. Last)), C, Inserted);
+               S := Last + 2;
 
                --  Check for AWS/Ajax actions. AWS/Ajax is based on include
                --  files whose name is starting with "aws_action_". The first
@@ -501,11 +505,11 @@ procedure Templates2Ada is
                if Index (Str (First .. Last), "aws_action_") /= 0 then
                   --  First parameter is the event
                   Next_Word (Str, S, First, Last);
-                  Ajax_Event := Ajax_Event & Str (First .. Last);
+                  Append (Ajax_Event, Str (First .. Last));
                   S := Last + 1;
                   --  Second parameter is the action
                   Next_Word (Str, S, First, Last);
-                  Ajax_Action := Ajax_Action & Str (First .. Last);
+                  Append (Ajax_Action, Str (First .. Last));
                   S := Last + 1;
                end if;
 

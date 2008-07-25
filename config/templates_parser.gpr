@@ -40,4 +40,6 @@ project Templates_Parser is
    for Library_Kind use TP_Shared.Library_Type;
    for Externally_Built use "true";
 
+   package Naming renames TP_Shared.Naming;
+
 end Templates_Parser;

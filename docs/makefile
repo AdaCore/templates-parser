@@ -180,7 +180,9 @@ ada.sed: makefile
 force:
 
 clean-tmp:
+ifeq ($(AWS),)
 	-$(GNAT) clean -q -XLIBRARY_TYPE=static -Pdocs $(EXEFILES)
+endif
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
 		*.exe templates_parser*.ads.texi ada.sed \

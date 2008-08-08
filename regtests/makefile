@@ -173,7 +173,9 @@ test_result:
 	test ! -s alldiffs
 
 clean:
+ifeq ($(AWS),)
 	-$(GNAT) clean -Pregtests
+endif
 	-rm -f *.res *.o *.ali b~*.ad[sb] *.exe *~ check_mem.run* run1 run2
 	-rm -f $(ALL_EXEC) gmem.out alldiffs
 	-rm -f ts.xml tsr.xml m.xml ts.f.xml tsr.f.xml

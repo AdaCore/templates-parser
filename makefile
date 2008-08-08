@@ -91,7 +91,7 @@ ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
-		ENABLE_SHARED="$(ENABLE_SHARED)"
+		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
 build: setup_config tp_xmlada.gpr
 	$(GNAT) make -p -XLIBRARY_TYPE=static -Ptemplates_parser
@@ -169,10 +169,12 @@ endif
 	-$(CP) docs/templates_parser*info* $(I_DOC)
 
 clean:
+ifeq ($(AWS),)
 	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptemplates_parser
 	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
 	-$(GNAT) clean -XLIBRARY_TYPE=relocatable -Ptemplates_parser
+endif
 endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)

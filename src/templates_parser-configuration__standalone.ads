@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                 AdaCore                                  --
+--                      Copyright (C) 2005-2008, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -32,7 +31,7 @@ package Templates_Parser.Configuration is
 
    subtype Time_Stamp is GNAT.OS_Lib.OS_Time;
 
-   function "="
+   overriding function "="
      (T1, T2 : in Time_Stamp)
       return Boolean
       renames GNAT.OS_Lib."=";

@@ -1206,7 +1206,7 @@ package body Templates_Parser is
    -- Adjust --
    ------------
 
-   procedure Adjust (Set : in out Translate_Set) is
+   overriding procedure Adjust (Set : in out Translate_Set) is
    begin
       if Set.Ref_Count /= null then
          Templates_Parser_Tasking.Lock;
@@ -1215,7 +1215,7 @@ package body Templates_Parser is
       end if;
    end Adjust;
 
-   procedure Adjust (T : in out Tag) is
+   overriding procedure Adjust (T : in out Tag) is
    begin
       Templates_Parser_Tasking.Lock;
       T.Ref_Count.all := T.Ref_Count.all + 1;
@@ -2155,7 +2155,7 @@ package body Templates_Parser is
    -- Finalize --
    --------------
 
-   procedure Finalize (Set : in out Translate_Set) is
+   overriding procedure Finalize (Set : in out Translate_Set) is
       procedure Free is new Unchecked_Deallocation
         (Association_Map.Map, Map_Access);
    begin
@@ -2171,7 +2171,7 @@ package body Templates_Parser is
       end if;
    end Finalize;
 
-   procedure Finalize (T : in out Tag) is
+   overriding procedure Finalize (T : in out Tag) is
    begin
       Templates_Parser_Tasking.Lock;
 
@@ -2334,13 +2334,13 @@ package body Templates_Parser is
    -- Initialize --
    ----------------
 
-   procedure Initialize (Set : in out Translate_Set) is
+   overriding procedure Initialize (Set : in out Translate_Set) is
    begin
       Set.Ref_Count := new Integer'(1);
       Set.Set       := new Association_Map.Map;
    end Initialize;
 
-   procedure Initialize (T : in out Tag) is
+   overriding procedure Initialize (T : in out Tag) is
    begin
       T.Ref_Count         := new Integer'(1);
       T.Data              := new Tag_Data;

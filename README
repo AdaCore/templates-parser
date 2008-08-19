@@ -13,6 +13,9 @@ Some make variables can be adjusted to change the default setup:
    ENABLE_SHARED=[true|false]
 	(default yes on platforms supporting shared libraries)
 
+   DEBUG=[true|false]
+        (default false)
+
 To build both the static and shared version (if supported) using the
 default setup:
 

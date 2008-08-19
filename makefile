@@ -1,8 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                         Copyright (C) 2003-2008                          #
-#                                 AdaCore                                  #
+#                     Copyright (C) 2003-2008, AdaCore                     #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -28,11 +27,10 @@
 
 .SILENT:
 
-MODE	= RELEASE
 VERSION	= 11.2
 GNAT	= gnat
 
-PRJ_BUILD    = Debug
+DEBUG        = false
 TP_TASKING   = Standard_Tasking
 TP_XMLADA    = Disabled
 LIBRARY_TYPE = static
@@ -87,17 +85,26 @@ ifeq ($(LIBRARY_TYPE),)
 LIBRARY_TYPE=static
 endif
 
-ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" MODE="$(MODE)" \
+ifeq ($(DEBUG), true)
+PRJ_BUILD=Debug
+else
+PRJ_BUILD=Release
+endif
+
+ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
 build: setup_config tp_xmlada.gpr
-	$(GNAT) make -p -XLIBRARY_TYPE=static -Ptemplates_parser
-	$(GNAT) make -p -XLIBRARY_TYPE=static -Ptools/tools
+	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptemplates_parser
+	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	$(GNAT) make -p -XLIBRARY_TYPE=relocatable -Ptemplates_parser
+	$(GNAT) make -p -XLIBRARY_TYPE=relocatable -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptemplates_parser
 endif
 
 test: build
@@ -126,6 +133,7 @@ endif
 	echo "prefix=$(prefix)" > makefile.setup
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
+	echo "DEBUG=$(DEBUG)" >> makefile.setup
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)

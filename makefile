@@ -34,6 +34,7 @@ DEBUG        = false
 TP_TASKING   = Standard_Tasking
 TP_XMLADA    = Disabled
 LIBRARY_TYPE = static
+CJOBS        = 2
 
 TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
 			else echo tr; fi)
@@ -98,13 +99,13 @@ ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
 build: setup_config tp_xmlada.gpr
-	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
-		-Ptemplates_parser
-	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
-		-Ptools/tools
+	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=static \
+		-XPRJ_BUILD=$(PRJ_BUILD) -Ptemplates_parser
+	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=static \
+		-XPRJ_BUILD=$(PRJ_BUILD) -Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	$(GNAT) make -p -XLIBRARY_TYPE=relocatable -XPRJ_BUILD=$(PRJ_BUILD) \
-		-Ptemplates_parser
+	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=relocatable \
+		-XPRJ_BUILD=$(PRJ_BUILD) -Ptemplates_parser
 endif
 
 test: build
@@ -134,6 +135,7 @@ endif
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
+	echo "CJOBS=$(CJOBS)" >> makefile.setup
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)

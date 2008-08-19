@@ -16,6 +16,10 @@ Some make variables can be adjusted to change the default setup:
    DEBUG=[true|false]
         (default false)
 
+   CJOBS=N
+        Number of parallel compilations
+        (default 2)
+
 To build both the static and shared version (if supported) using the
 default setup:
 

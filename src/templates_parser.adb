@@ -998,7 +998,7 @@ package body Templates_Parser is
    function "&" (T : in Tag; Value : in String) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'
-          (Templates_Parser.Value, null, To_Unbounded_String (Value));
+          (Templates_Parser.Value, null, V => To_Unbounded_String (Value));
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
@@ -1015,7 +1015,7 @@ package body Templates_Parser is
             Last         => Item,
             Tag_Nodes    => null);
 
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+         return (Ada.Finalization.Controlled with T.Ref_Count, Data => T.Data);
 
       else
          T.Data.Last.Next := Item;
@@ -1029,14 +1029,15 @@ package body Templates_Parser is
             Last         => Item,
             Tag_Nodes    => null);
 
-         return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
+         return (Ada.Finalization.Controlled with T.Ref_Count, Data => T.Data);
       end if;
    end "&";
 
    function "&" (Value : in String; T : in Tag) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'
-          (Templates_Parser.Value, T.Data.Head, To_Unbounded_String (Value));
+          (Templates_Parser.Value, T.Data.Head,
+           V => To_Unbounded_String (Value));
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
@@ -1158,7 +1159,8 @@ package body Templates_Parser is
    function "+" (Value : in String) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'(Templates_Parser.Value,
-                         null, To_Unbounded_String (Value));
+                         null,
+                         V => To_Unbounded_String (Value));
    begin
       return (Ada.Finalization.Controlled with
               Ref_Count    => new Integer'(1),
@@ -1301,8 +1303,8 @@ package body Templates_Parser is
    begin
       return Association'
         (Std,
-         To_Unbounded_String (Variable),
-         To_Unbounded_String (Value));
+         Variable => To_Unbounded_String (Variable),
+         Value    => To_Unbounded_String (Value));
    end Assoc;
 
    function Assoc
@@ -1342,7 +1344,9 @@ package body Templates_Parser is
          Set_Separator  (T, Separator);
       end if;
 
-      return Association'(Composite, To_Unbounded_String (Variable), T);
+      return Association'(Composite,
+                          Variable   => To_Unbounded_String (Variable),
+                          Comp_Value => T);
    end Assoc;
 
    -----------
@@ -1636,6 +1640,7 @@ package body Templates_Parser is
 
             else
                declare
+                  use GNAT.Regpat;
                   Name : constant String := Filter (Filter'First .. P1 - 1);
                   Mode : constant F.Mode := F.Mode_Value (Name);
 
@@ -1647,9 +1652,9 @@ package body Templates_Parser is
                         return (F.Handle (Mode),
                                 F.Parameter_Data'
                                   (F.Regexp,
-                                   To_Unbounded_String (Parameter),
-                                   new GNAT.Regpat.Pattern_Matcher'
-                                     (GNAT.Regpat.Compile (Parameter))));
+                                   R_Str  => To_Unbounded_String (Parameter),
+                                   Regexp => new Pattern_Matcher'
+                                                   (Compile (Parameter))));
 
                      when F.Regpat =>
                         declare
@@ -1661,25 +1666,30 @@ package body Templates_Parser is
                               return (F.Handle (Mode),
                                       F.Parameter_Data'
                                         (F.Regpat,
-                                         To_Unbounded_String (Parameter),
-                                         new GNAT.Regpat.Pattern_Matcher'
-                                           (GNAT.Regpat.Compile (Parameter)),
-                                         To_Unbounded_String ("\1")));
+                                         P_Str  => To_Unbounded_String
+                                                     (Parameter),
+                                         Regpat => new Pattern_Matcher'
+                                                         (Compile (Parameter)),
+                                         Param => To_Unbounded_String ("\1")));
                            else
                               return (F.Handle (Mode),
                                       F.Parameter_Data'
                                         (F.Regpat,
-                                         To_Unbounded_String
-                                           (Parameter
-                                              (Parameter'First .. K - 1)),
-                                         new GNAT.Regpat.Pattern_Matcher'
-                                           (GNAT.Regpat.Compile
-                                              (Parameter
-                                                 (Parameter'First .. K - 1))),
-                                         To_Unbounded_String
-                                           (Unescape
-                                              (Parameter
-                                                 (K + 1 .. Parameter'Last)))));
+                                         P_Str => To_Unbounded_String
+                                                    (Parameter
+                                                       (Parameter'First
+                                                        .. K - 1)),
+                                         Regpat => new Pattern_Matcher'
+                                                     (Compile
+                                                        (Parameter
+                                                           (Parameter'First
+                                                            .. K - 1))),
+                                         Param =>
+                                           To_Unbounded_String
+                                             (Unescape
+                                                (Parameter
+                                                   (K + 1
+                                                    .. Parameter'Last)))));
                            end if;
                         end;
 
@@ -1697,14 +1707,14 @@ package body Templates_Parser is
                         return (F.Handle (Mode),
                                 F.Parameter_Data'
                                   (F.Str,
-                                   To_Unbounded_String (Parameter)));
+                                   S => To_Unbounded_String (Parameter)));
 
                      when F.User_Callback =>
                         return (F.Handle (Mode),
                                 F.Parameter_Data'
                                   (F.User_Callback,
                                    F.User_Handle (Name),
-                                   To_Unbounded_String (Parameter)));
+                                   P => To_Unbounded_String (Parameter)));
 
                      when F.Void =>
                         pragma Warnings (Off);
@@ -5201,33 +5211,36 @@ package body Templates_Parser is
                end if;
 
                Analyze (T.File.Info,
-                        Parse_State'(State.Cursor,
-                                     State.Max_Lines, State.Max_Expand,
-                                     State.Reverse_Index,
-                                     State.Table_Level,
-                                     State.Inline_Sep,
-                                     State.Filename,
-                                     State.Blocks_Count,
-                                     T.I_Params,
-                                     Flatten_Parameters (T.I_Params),
-                                     State.Block,
-                                     L_State'Unchecked_Access));
+                        Parse_State'(Cursor        => State.Cursor,
+                                     Max_Lines     => State.Max_Lines,
+                                     Max_Expand    => State.Max_Expand,
+                                     Reverse_Index => State.Reverse_Index,
+                                     Table_Level   => State.Table_Level,
+                                     Inline_Sep    => State.Inline_Sep,
+                                     Filename      => State.Filename,
+                                     Blocks_Count  => State.Blocks_Count,
+                                     I_Params      => T.I_Params,
+                                     F_Params      => Flatten_Parameters
+                                                        (T.I_Params),
+                                     Block         => State.Block,
+                                     Parent      => L_State'Unchecked_Access));
                Analyze (T.Next, State);
 
             when Inline_Stmt =>
                Add (To_String (T.Before));
                Analyze (T.I_Block,
-                        Parse_State'(State.Cursor,
-                                     State.Max_Lines, State.Max_Expand,
-                                     State.Reverse_Index,
-                                     State.Table_Level,
-                                     T.Sep,
-                                     State.Filename,
-                                     State.Blocks_Count,
-                                     State.I_Params,
-                                     State.F_Params,
-                                     State.Block,
-                                     L_State'Unchecked_Access));
+                        Parse_State'(Cursor        => State.Cursor,
+                                     Max_Lines     => State.Max_Lines,
+                                     Max_Expand    => State.Max_Expand,
+                                     Reverse_Index => State.Reverse_Index,
+                                     Table_Level   => State.Table_Level,
+                                     Inline_Sep    => T.Sep,
+                                     Filename      => State.Filename,
+                                     Blocks_Count  => State.Blocks_Count,
+                                     I_Params      => State.I_Params,
+                                     F_Params      => State.F_Params,
+                                     Block         => State.Block,
+                                     Parent      => L_State'Unchecked_Access));
                Add (To_String (T.After));
                Analyze (T.Next, State);
          end case;

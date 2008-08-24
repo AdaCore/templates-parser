@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2007                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 1999-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -59,7 +58,9 @@ package body Data is
 
             if Start = 0 then
                --  No more tag
-               return new Node'(Text, null, To_Unbounded_String (Line));
+               return new Node'(Text,
+                                Next  => null,
+                                Value => To_Unbounded_String (Line));
 
             else
                Stop := Strings.Fixed.Index (Line, End_Tag);
@@ -75,15 +76,16 @@ package body Data is
                      --  The first token in Line is a variable
                      return new Node'
                        (Var,
-                        Build (Line (Stop + 1 .. Line'Last)),
-                        Build (Line (Start .. Stop)));
+                        Next => Build (Line (Stop + 1 .. Line'Last)),
+                        Var  => Build (Line (Start .. Stop)));
 
                   else
                      --  We have some text before the tag
                      return new Node'
                        (Text,
-                        Build (Line (Start .. Line'Last)),
-                        To_Unbounded_String (Line (Line'First .. Start - 1)));
+                        Next  => Build (Line (Start .. Line'Last)),
+                        Value => To_Unbounded_String
+                                   (Line (Line'First .. Start - 1)));
                   end if;
                end if;
             end if;

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 1999-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -332,13 +331,15 @@ package body Expr is
                Stop  := Current_Token.Stop;
                Next_Token;
                return new Node'
-                 (Value, To_Unbounded_String (Expression (Start .. Stop)));
+                 (Value,
+                  V => To_Unbounded_String (Expression (Start .. Stop)));
 
             when Var =>
                Start := Current_Token.Start;
                Stop  := Current_Token.Stop;
                Next_Token;
-               return new Node'(Var, Build (Expression (Start .. Stop)));
+               return new Node'(Var,
+                                Var => Build (Expression (Start .. Stop)));
 
             --  Errors
 
@@ -389,7 +390,7 @@ package body Expr is
          if Current_Token.Kind = Unary_Op then
             O := Current_Token.Un_Op;
             Next_Token;
-            return new Node'(U_Op, O, Primary);
+            return new Node'(U_Op, U_O => O, Next => Primary);
          else
             return Primary;
          end if;

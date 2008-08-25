@@ -2372,6 +2372,10 @@ package body Templates_Parser is
    procedure Insert (Set : in out Translate_Set; Items : in Translate_Set) is
       Pos : Association_Map.Cursor;
    begin
+      if Items.Set = null then
+         return;
+      end if;
+
       Pos := Items.Set.First;
 
       while Association_Map.Has_Element (Pos) loop

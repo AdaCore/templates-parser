@@ -180,10 +180,13 @@ endif
 
 clean:
 ifeq ($(AWS),)
-	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptemplates_parser
-	-$(GNAT) clean -XLIBRARY_TYPE=static -Ptools/tools
+	-$(GNAT) clean -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptemplates_parser
+	-$(GNAT) clean -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	-$(GNAT) clean -XLIBRARY_TYPE=relocatable -Ptemplates_parser
+	-$(GNAT) clean -XLIBRARY_TYPE=relocatable -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Ptemplates_parser
 endif
 endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)

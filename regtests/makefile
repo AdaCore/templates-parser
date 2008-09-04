@@ -88,13 +88,15 @@ force:
 
 $(STD_TESTS): force
 	echo $@
-	$(GNAT) make -q -p -Pregtests $@
+	$(GNAT) make -q -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Pregtests $@
 	-$(EXECP)/$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
 $(EXP_TESTS): force
 	echo $@
-	$(GNAT) make -q -p -Pregtests $@ -bargs -E
+	$(GNAT) make -q -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Pregtests $@ -bargs -E
 	-$(EXECP)/$@ > $@.res 2>&1
 	-diff $(DIFF_ARGS) $@.out $@.res >> alldiffs
 
@@ -111,7 +113,8 @@ print_tree: force
 
 testcat: force
 	echo $@
-	$(GNAT) make -q -p -Pregtests testcat
+	$(GNAT) make -q -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Pregtests testcat
 	-$(EXECP)/testcat
 	-diff $(DIFF_ARGS) testcat.out testcat.res >> alldiffs
 
@@ -154,7 +157,8 @@ $(TESTS_TREE_RUN):
 
 init:
 	-rm -f alldiffs
-	$(GNAT) make -q -p -Pregtests $(MAIN_TESTS)
+	$(GNAT) make -q -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Pregtests $(MAIN_TESTS)
 
 test:  init $(EXECP)/testme $(EXECP)/print_tree $(STANDALONE_TESTS) \
 	$(STD_TESTS) $(EXP_TESTS) \
@@ -174,7 +178,7 @@ test_result:
 
 clean:
 ifeq ($(AWS),)
-	-$(GNAT) clean -Pregtests
+	-$(GNAT) clean -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
 endif
 	-rm -f *.res *.o *.ali b~*.ad[sb] *.exe *~ check_mem.run* run1 run2
 	-rm -f $(ALL_EXEC) gmem.out alldiffs

@@ -180,7 +180,8 @@ force:
 
 clean:
 ifeq ($(AWS),)
-	-$(GNAT) clean -q -XLIBRARY_TYPE=static -Pdocs $(EXEFILES)
+	-$(GNAT) clean -q -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-Pdocs $(EXEFILES)
 endif
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \

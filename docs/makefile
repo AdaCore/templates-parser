@@ -68,7 +68,7 @@ ALLDEPS = $(ADBFILES) $(ADSFILES) $(EXEFILES) $(TEXIFILES) $(TMPLTTEXI) \
 
 doc: $(ALLDEPS) $(DOCS)
 
-%.dvi: %.texi
+%.dvi: %.texi $(ADBFILES)
 ifneq (${TEXI2DVI},)
 	echo Building $@
 	-${TEXI2DVI} --expand --clean --quiet $<
@@ -78,7 +78,7 @@ else
 	@echo "--------------------------------------------------------"
 endif
 
-%.pdf: %.texi
+%.pdf: %.texi $(ADBFILES)
 ifneq (${TEXI2DVI},)
 ifneq (${PDFTEX},)
 	echo Building $@
@@ -104,7 +104,7 @@ else
 	@echo "------------------------------------------------------"
 endif
 
-%.info: %.texi
+%.info: %.texi $(ADBFILES)
 ifneq (${MAKEINFO},)
 	echo Building $@
 	-${MAKEINFO} $<
@@ -114,7 +114,7 @@ else
 	@echo "---------------------------------------------------"
 endif
 
-%.html: %.texi
+%.html: %.texi $(ADBFILES)
 ifneq (${MAKEINFO},)
 	echo Building $@
 	-${MAKEINFO} --html --no-split --css-include=tp.css --ifinfo $<
@@ -124,7 +124,7 @@ else
 	@echo "---------------------------------------------------"
 endif
 
-%.txt: %.texi
+%.txt: %.texi $(ADBFILES)
 ifneq (${MAKEINFO},)
 	echo Building $@
 	-${MAKEINFO} --plaintext --no-headers $< --output $@

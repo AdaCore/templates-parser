@@ -66,7 +66,7 @@ APIFILES    = ../src/templates_parser.ads.texi \
 ALLDEPS = $(ADBFILES) $(ADSFILES) $(EXEFILES) $(TEXIFILES) $(TMPLTTEXI) \
 	$(RESFILES) $(APIFILES)
 
-doc: $(ALLDEPS) $(DOCS) clean-tmp
+doc: $(ALLDEPS) $(DOCS)
 
 %.dvi: %.texi
 ifneq (${TEXI2DVI},)
@@ -178,7 +178,7 @@ ada.sed: makefile
 
 force:
 
-clean-tmp:
+clean:
 ifeq ($(AWS),)
 	-$(GNAT) clean -q -XLIBRARY_TYPE=static -Pdocs $(EXEFILES)
 endif
@@ -186,7 +186,5 @@ endif
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
 		*.exe templates_parser*.ads.texi ada.sed \
 		templates_parser.tar.gz
-
-clean: clean-tmp
 	-rm -f templates_parser.html templates_parser.pdf \
 		templates_parser.info* templates_parser.txt

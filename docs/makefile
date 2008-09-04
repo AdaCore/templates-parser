@@ -135,9 +135,7 @@ else
 endif
 
 $(ADBFILES) $(ADSFILES): all_sources.ada
-	tail +3 all_sources.ada > sources.ada
-	$(GNAT) chop -w sources.ada
-	rm sources.ada
+	$(GNAT) chop -w all_sources.ada
 
 ../tp_xmlada.gpr:
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr

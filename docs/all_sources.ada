@@ -1,6 +1,3 @@
-
---  $Id$
-
 with Ada.Text_IO;
 with Templates_Parser;
 

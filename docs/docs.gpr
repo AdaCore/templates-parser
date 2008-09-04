@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2005-2008                          --
---                                 AdaCore                                  --
+--                      Copyright (C) 2005-2008, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -32,6 +31,9 @@ with "../tp_shared.gpr";
 project Docs is
 
    for Languages use ("Ada", "Project file");
+
+   for Object_Dir use "../" & TP_Shared'Exec_Dir & "/dobj";
+   for Exec_Dir use ".";
 
    for Main use ("build.adb");
 

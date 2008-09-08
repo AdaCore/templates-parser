@@ -245,8 +245,8 @@ package body Cached_Files is
 
    procedure Release (T : in out Static_Tree) is
    begin
-      pragma Assert (T.C_Info /= null);
       Templates_Parser_Tasking.Lock;
+      pragma Assert (T.C_Info /= null);
 
       Update_Used_Counter (T, Mode => Released);
 

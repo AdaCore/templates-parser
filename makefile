@@ -27,7 +27,7 @@
 
 .SILENT:
 
-VERSION	= 11.2
+VERSION	= 11.3
 GNAT	= gnat
 
 DEBUG        = false

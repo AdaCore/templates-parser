@@ -35,12 +35,14 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
 	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
 	testme65 testme66 testme67 testme68 testme69 testme70 testme71 \
-	testme72 testme73 testme74 testme75
+	testme72 testme73 testme74 testme75 testme76
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \
 	testme30 testme31 testme32 testme38 blocks3 blocks4 blocks6 testme53 \
 	testme54 testme59 testme64
+
+TESTS_CACHE = testme76
 
 STANDALONE_TESTS := test_templates_if testcat testme9_run testme10_run
 
@@ -55,8 +57,9 @@ else
 XTESTS	=
 endif
 
-TESTS_RUN      = ${TESTS:%=%_run}
-TESTS_TREE_RUN = ${TESTS_TREE:%=%_run}
+TESTS_RUN      	= ${TESTS:%=%_run}
+TESTS_TREE_RUN	= ${TESTS_TREE:%=%_run}
+TESTS_CACHE_RUN = ${TESTS_CACHE:%=%_crun}
 
 STD_TESTS      = tag_demo tcache regtst1 include tess test_templates_if \
 		ts_assoc not_initialized include2 regtst4 dynamic \
@@ -148,6 +151,11 @@ $(TESTS_RUN):
 	-$(EXECP)/testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
 	-diff $(DIFF_ARGS) ${@:%_run=%}.out ${@:%_run=%}.res >> alldiffs
 
+$(TESTS_CACHE_RUN):
+	echo $@
+	-$(EXECP)/testme ${@:%_crun=%}.tmplt cache > ${@:%_crun=%}.res 2>&1
+	-diff $(DIFF_ARGS) ${@:%_crun=%}.out ${@:%_crun=%}.res >> alldiffs
+
 $(TESTS_TREE_RUN):
 	echo $@
 	-$(EXECP)/testme ${@:%_run=%}.tmplt > ${@:%_run=%}.res 2>&1
@@ -162,7 +170,7 @@ init:
 
 test:  init $(EXECP)/testme $(EXECP)/print_tree $(STANDALONE_TESTS) \
 	$(STD_TESTS) $(EXP_TESTS) \
-	$(TESTS_RUN) $(TESTS_TREE_RUN)
+	$(TESTS_RUN) $(TESTS_TREE_RUN) $(TESTS_CACHE_RUN)
 ifeq ($(TP_XMLADA), Installed)
 	-rm -f ts.f.xml tsr.f.xml
 	$(EXECP)/filter < ts.xml | sort > ts.f.xml

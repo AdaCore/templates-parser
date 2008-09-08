@@ -101,6 +101,8 @@ package body Test_Callback is
          L.N := L.N + 1;
       elsif Var = "DYN_VECT" then
          Insert (S, Assoc ("DYN_VECT", +"12" & "89" & "90" & "2"));
+      elsif Var = "TMPLT_NAME" then
+         Insert (S, Assoc (Var, +"incl.tmplt"));
       end if;
    end Value;
 

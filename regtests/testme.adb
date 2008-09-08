@@ -48,6 +48,9 @@ procedure Testme is
    KUT : Boolean := False;
    --  Keep Unknown Tags
 
+   Cached : Boolean := False;
+   --  Set to true if cache must be activated
+
    S1 : constant TP.Vector_Tag := +"single_value";
 
    V1 : constant TP.Vector_Tag := +"A1.1" & "A1.2" & "A1.3";
@@ -157,15 +160,18 @@ procedure Testme is
         );
 
 begin
-   if Command_Line.Argument_Count = 2
-     and then Command_Line.Argument (2) = "kut"
-   then
-      KUT := True;
+   if Command_Line.Argument_Count = 2 then
+     if Command_Line.Argument (2) = "kut" then
+        KUT := True;
+     elsif Command_Line.Argument (2) = "cache" then
+        Cached := True;
+     end if;
    end if;
 
    declare
       Result : constant String :=
         TP.Parse (Command_Line.Argument (1), Translations,
+                  Cached            => Cached,
                   Keep_Unknown_Tags => KUT,
                   Lazy_Tag          => L_Tag'Unchecked_Access,
                   Cursor_Tag        => C_Tag'Unchecked_Access);

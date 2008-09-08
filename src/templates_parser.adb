@@ -5205,11 +5205,16 @@ package body Templates_Parser is
                                   (To_String (State.Filename), Filename),
                                 Cached, True);
 
-                     if Cached then
-                        Cached_Files.Release (T.File);
-                     else
-                        Release (T.File.Info);
+                     if S_File /= T.File then
+                        if Cached then
+                           if T.File.C_Info /= null then
+                              Cached_Files.Release (T.File);
+                           end if;
+                        else
+                           Release (T.File.Info);
+                        end if;
                      end if;
+
                      T.File := S_File;
                   end;
                end if;

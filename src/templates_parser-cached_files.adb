@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 1999-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -328,6 +327,9 @@ package body Cached_Files is
       P : Tree;
    begin
       --  Mark current tree
+      if T.Info = null then
+         return;
+      end if;
 
       case Mode is
          when Used =>

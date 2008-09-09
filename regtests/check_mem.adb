@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -63,8 +62,10 @@ procedure Check_Mem is
       TC := T1;
 
       Translations :=
-        (Assoc ("VAR", "Value"),
-         Assoc ("T1", T1), Assoc ("T2", T2), Assoc ("T", T));
+        (1 => Assoc ("VAR", "Value"),
+         2 => Assoc ("T1", T1),
+         3 => Assoc ("T2", T2),
+         4 => Assoc ("T", T));
 
       Result := Parse ("check_mem.tmplt", Translations);
 

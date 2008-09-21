@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2006                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -62,7 +61,7 @@ package body Templates_Parser.XML is
       pragma Inline (Add);
       --  Add a new line (str) into Result, a LF is added at the end of Str
 
-      function To_Utf8 (Str : Unbounded_String) return String;
+      function To_Utf8 (Str : in Unbounded_String) return String;
       --  Convert Str to UTF8
 
       ---------
@@ -356,7 +355,7 @@ package body Templates_Parser.XML is
       -- To_Utf8 --
       -------------
 
-      function To_Utf8 (Str : Unbounded_String) return String is
+      function To_Utf8 (Str : in Unbounded_String) return String is
          use Unicode.CES;
       begin
          return Utf8.From_Utf32 (Basic_8bit.To_Utf32 (To_String (Str)));

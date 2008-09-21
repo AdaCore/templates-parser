@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2003-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -1839,9 +1838,9 @@ package body Filter is
       Code   : Natural;
 
       procedure Append_To_Result
-        (Str  : String;
-         From : Integer;
-         To   : Integer);
+        (Str  : in String;
+         From : in Integer;
+         To   : in Integer);
       --  Append S (From .. To) to Result if not empty concatenated with Str
       --  and update Last.
 
@@ -1850,9 +1849,9 @@ package body Filter is
       ----------------------
 
       procedure Append_To_Result
-        (Str  : String;
-         From : Integer;
-         To   : Integer) is
+        (Str  : in String;
+         From : in Integer;
+         To   : in Integer) is
       begin
          if From <= To then
             Append (Result, S (From .. To) & Str);
@@ -1902,9 +1901,9 @@ package body Filter is
       Last   : Integer := S'First;
 
       procedure Append_To_Result
-        (Str  : String;
-         From : Integer;
-         To   : Integer);
+        (Str  : in String;
+         From : in Integer;
+         To   : in Integer);
       --  Append S (From .. To) to Result if not empty concatenated with Str
       --  and update Last.
 
@@ -1913,9 +1912,9 @@ package body Filter is
       ----------------------
 
       procedure Append_To_Result
-        (Str  : String;
-         From : Integer;
-         To   : Integer) is
+        (Str  : in String;
+         From : in Integer;
+         To   : in Integer) is
       begin
          if From <= To then
             Append (Result, S (From .. To) & Str);

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004 - 2005                        --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -40,14 +39,14 @@ package body Templates_Parser.Debug is
 
    procedure Print (T : in Tag) is
 
-      procedure Print (T : in Tag; K : Natural);
+      procedure Print (T : in Tag; K : in Natural);
       --  Print tag T, K is the indent level
 
       -----------
       -- Print --
       -----------
 
-      procedure Print (T : in Tag; K : Natural) is
+      procedure Print (T : in Tag; K : in Natural) is
          Indent : constant String := K * ' ';
          N      : Tag_Node_Access := T.Data.Head;
       begin

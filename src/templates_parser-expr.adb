@@ -101,7 +101,7 @@ package body Expr is
 
       Current_Token : Token;
 
-      procedure Error (Mess : String);
+      procedure Error (Mess : in String);
       pragma No_Return (Error);
       --  Raises Internal_Error with the column of the condition
 
@@ -121,7 +121,7 @@ package body Expr is
       -- Error --
       -----------
 
-      procedure Error (Mess : String) is
+      procedure Error (Mess : in String) is
       begin
          raise Internal_Error
            with "col" & Integer'Image (Start_Index) & " condition, " & Mess;

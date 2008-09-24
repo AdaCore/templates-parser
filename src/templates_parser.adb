@@ -1979,8 +1979,7 @@ package body Templates_Parser is
    ------------
 
    function Exists
-     (Set      : in Translate_Set;
-      Variable : in String) return Boolean is
+     (Set : in Translate_Set; Variable : in String) return Boolean is
    begin
       return Set.Set.Contains (Variable);
    end Exists;
@@ -5514,6 +5513,11 @@ package body Templates_Parser is
    function Size (T : in Tag) return Natural is
    begin
       return T.Data.Count;
+   end Size;
+
+   function Size (Set : in Translate_Set) return Natural is
+   begin
+      return Natural (Set.Set.Length);
    end Size;
 
    ------------

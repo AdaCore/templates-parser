@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 1999-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 1999-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -135,34 +134,34 @@ package Templates_Parser is
      (Variable : in String;
       Value    : in String) return Association;
    --  Build an Association (Variable = Value) to be added to a
-   --  Translate_Table. This is a standard association, value is a string.
+   --  Translate_Set. This is a standard association, value is a string.
 
    function Assoc
      (Variable : in String;
       Value    : in Unbounded_String) return Association;
    --  Build an Association (Variable = Value) to be added to a
-   --  Translate_Table. This is a standard association, value is an
+   --  Translate_Set. This is a standard association, value is an
    --  Unbounded_String.
 
    function Assoc
      (Variable : in String;
       Value    : in Integer) return Association;
    --  Build an Association (Variable = Value) to be added to a
-   --  Translate_Table. This is a standard association, value is an Integer.
+   --  Translate_Set. This is a standard association, value is an Integer.
    --  It will be displayed without leading space if positive.
 
    function Assoc
      (Variable : in String;
       Value    : in Boolean) return Association;
    --  Build an Association (Variable = Value) to be added to a
-   --  Translate_Table. It set the variable to TRUE or FALSE depending on
+   --  Translate_Set. It set the variable to TRUE or FALSE depending on
    --  value.
 
    function Assoc
      (Variable  : in String;
       Value     : in Tag;
       Separator : in String := Default_Separator) return Association;
-   --  Build an Association (Variable = Value) to be added to Translate_Table.
+   --  Build an Association (Variable = Value) to be added to Translate_Set.
    --  This is a tag association. Separator will be used when outputting the
    --  a flat representation of the Tag (outside a table statement).
 
@@ -213,15 +212,15 @@ package Templates_Parser is
    --  Returns the association named Name in the Set. Returns Null_Association
    --  is no such association if found in Set.
 
+   function Size (Set : in Translate_Set) return Natural;
+   --  Returns size of the translate set
+
    function Exists
-     (Set      : in Translate_Set;
-      Variable : in String) return Boolean;
+     (Set : in Translate_Set; Variable : in String) return Boolean;
    --  Returns True if an association for Variable exists into the Set
 
    generic
-      with procedure Action
-        (Item : in     Association;
-         Quit : in out Boolean);
+      with procedure Action (Item : in Association; Quit : in out Boolean);
    procedure For_Every_Association (Set : in Translate_Set);
    --  Iterates through all associations in the set, call Action for each one.
    --  Set Quit to True to stop the iteration.

@@ -1152,6 +1152,25 @@ package body Templates_Parser is
       return Image (Value) & T;
    end "&";
 
+   function "&"
+     (Left : in Association; Right : in Association) return Translate_Set
+   is
+      T : Translate_Set;
+   begin
+      Insert (T, Left);
+      Insert (T, Right);
+      return T;
+   end "&";
+
+   function "&"
+     (Set : in Translate_Set; Item : in Association) return Translate_Set
+   is
+      T : Translate_Set := Set;
+   begin
+      Insert (T, Item);
+      return T;
+   end "&";
+
    ---------
    -- "+" --
    ---------

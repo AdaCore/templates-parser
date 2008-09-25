@@ -204,6 +204,19 @@ package Templates_Parser is
    --  Add Items into the translate set. If an association for variables in
    --  Items already exists it just replaces it by the new one.
 
+   function "&"
+     (Left : in Association; Right : in Association) return Translate_Set;
+   pragma Inline ("&");
+   --  Returns new translate set created from 2 accosiations. If names of the
+   --  associations is the same, created translate set have only Right one.
+
+   function "&"
+     (Set : in Translate_Set; Item : in Association) return Translate_Set;
+   pragma Inline ("&");
+   --  Returns new translate set with one more accosiation added.
+   --  If an association for variables in Items already exists it just
+   --  replaces it by the new one.
+
    procedure Remove (Set : in out Translate_Set; Name : in String);
    --  Removes association named Name from the Set. Does nothing if there is
    --  not such association in the set.

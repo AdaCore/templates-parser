@@ -217,6 +217,10 @@ package Templates_Parser is
    --  If an association for variables in Items already exists it just
    --  replaces it by the new one.
 
+   function "+" (Item : in Association) return Translate_Set;
+   pragma Inline ("+");
+   --  Create translate set from one association
+
    procedure Remove (Set : in out Translate_Set; Name : in String);
    --  Removes association named Name from the Set. Does nothing if there is
    --  not such association in the set.

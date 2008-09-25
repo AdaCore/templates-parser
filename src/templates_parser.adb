@@ -1223,6 +1223,13 @@ package body Templates_Parser is
       return Result;
    end "+";
 
+   function "+" (Item : in Association) return Translate_Set is
+      T : Translate_Set;
+   begin
+      Insert (T, Item);
+      return T;
+   end "+";
+
    ------------
    -- Adjust --
    ------------

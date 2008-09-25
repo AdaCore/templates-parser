@@ -207,15 +207,16 @@ package Templates_Parser is
    function "&"
      (Left : in Association; Right : in Association) return Translate_Set;
    pragma Inline ("&");
-   --  Returns new translate set created from 2 accosiations. If names of the
-   --  associations is the same, created translate set have only Right one.
+   --  Returns new translate set created from 2 associations. If names of
+   --  both associations are the same, the returned translate set will
+   --  contain only Right.
 
    function "&"
      (Set : in Translate_Set; Item : in Association) return Translate_Set;
    pragma Inline ("&");
-   --  Returns new translate set with one more accosiation added.
-   --  If an association for variables in Items already exists it just
-   --  replaces it by the new one.
+   --  Returns new translate set with one more association added.
+   --  If an association with the same name already exists in Set it is
+   --  replaced by the new one.
 
    function "+" (Item : in Association) return Translate_Set;
    pragma Inline ("+");

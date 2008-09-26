@@ -78,7 +78,7 @@ package Templates_Parser is
    --  Add Value at the end of the tag, note that "&" will modify its
    --  first parameter. It is intended to be used as [T := T & "val"],
    --  doing [T1 := T2 & "val"] will add val to T2 and set T1 as an
-   --  alias. This is design this way for efficiency.
+   --  alias. This is designed this way for efficiency.
 
    function "&" (Value : in String;           T : in Tag) return Tag;
    function "&" (Value : in Character;        T : in Tag) return Tag;
@@ -214,9 +214,11 @@ package Templates_Parser is
    function "&"
      (Set : in Translate_Set; Item : in Association) return Translate_Set;
    pragma Inline ("&");
-   --  Returns new translate set with one more association added.
-   --  If an association with the same name already exists in Set it is
-   --  replaced by the new one.
+   --  Adds Item into Set. If an association with the same name already exists
+   --  in Set it is replaced by the new one. Note that "&" will modify its
+   --  first parameter. It is intended to be used as [T := T & Assoc],
+   --  doing [T1 := T2 & Assoc] will add Assoc into T2 and set T1 as an
+   --  alias. This is designed this way for efficiency.
 
    function "+" (Item : in Association) return Translate_Set;
    pragma Inline ("+");

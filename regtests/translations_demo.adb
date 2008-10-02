@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2008, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -70,4 +69,12 @@ begin
    TSR := XML.Load ("ts.xml");
 
    XML.Save ("tsr.xml", TSR);
+
+   Ada.Text_IO.Put_Line
+     (Integer'Image (Size (TS)) & Integer'Image (Size (TSR)));
+
+   TS := TSR & Assoc ("ONE", 1) &  Assoc ("TWO", 2) & Assoc ("THREE", 3);
+
+   Ada.Text_IO.Put_Line
+     (Integer'Image (Size (TS)) & Integer'Image (Size (TSR)));
 end Translations_Demo;

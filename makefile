@@ -172,7 +172,9 @@ ifeq ($(TP_XMLADA), Installed)
 endif
 	$(RM) -f $(I_LIB)/../libtemplates_parser$(SOEXT)
 ifeq ($(ENABLE_SHARED), true)
-	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(I_LIB)/../
+ifeq ($(OS), Windows_NT)
+	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(I_BIN)
+endif
 endif
 	-$(CP) docs/templates_parser*html $(I_DOC)
 	-$(CP) docs/templates_parser*pdf $(I_DOC)

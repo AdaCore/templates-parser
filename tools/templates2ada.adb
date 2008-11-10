@@ -52,7 +52,7 @@ procedure Templates2Ada is
    package String_Lists is new Ada.Containers.Indefinite_Doubly_Linked_Lists
      (String);
 
-   Opt_Output    : Unbounded_String := +"templates.ads";
+   Opt_Output         : Unbounded_String := +"templates.ads";
    --  Output file name
 
    Opt_Templates_Dir  : Unbounded_String := +"resources/templates";
@@ -331,19 +331,19 @@ procedure Templates2Ada is
       Inserted                   : Boolean;
       pragma Unreferenced (Result);
 
-      procedure Process_Tag (Str : String; S : in out Integer);
+      procedure Process_Tag (Str : in String; S : in out Integer);
       --  Process some text surrounded by @_..._@, and add it to the proper
       --  output tags. S points to the "@_" in Str, and is modified to
       --  point after the closing "_@".
 
-      procedure Process_Tags (Str : String; First, Last : Integer);
+      procedure Process_Tags (Str : in String; First, Last : in Integer);
       --  Process all tags referenced in Str (First .. Last)
 
       -----------------
       -- Process_Tag --
       -----------------
 
-      procedure Process_Tag (Str : String; S : in out Integer) is
+      procedure Process_Tag (Str : in String; S : in out Integer) is
          First : Integer := S + 2;
          Last  : Integer := First;
          Parents_Nesting : Natural := 0;
@@ -408,7 +408,7 @@ procedure Templates2Ada is
          S := Last + 2;
       end Process_Tag;
 
-      procedure Process_Tags (Str : String; First, Last : Integer) is
+      procedure Process_Tags (Str : in String; First, Last : in Integer) is
          S : Integer := First;
       begin
          while S <= Last loop

@@ -411,7 +411,7 @@ procedure Templates2Ada is
       procedure Process_Tags (Str : in String; First, Last : in Integer) is
          S : Integer := First;
       begin
-         while S <= Last loop
+         while S < Last loop
             if Str (S .. S + 1) = "@_" then
                Process_Tag (Str, S);
             else

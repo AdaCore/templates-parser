@@ -742,6 +742,7 @@ package body Filter is
    is
       pragma Unreferenced (C);
       TS : constant String := Strings.Fixed.Trim (S, Both);
+      Separator : Character := ' ';
 
       function Is_Number return Boolean;
       --  Returns true if S is a number
@@ -773,7 +774,14 @@ package body Filter is
       Count  : Natural := 0;
 
    begin
-      Check_Null_Parameter (P);
+      if P.Mode = Str then
+         declare
+            Param : constant String :=
+              Value (To_String (P.S), C.Translations, C.I_Parameters);
+         begin
+            Separator := Param (Param'First);
+         end;
+      end if;
 
       if Is_Number then
 
@@ -789,7 +797,7 @@ package body Filter is
             Count := Count + 1;
 
             if Count mod 3 = 0 and then P /= TS'First then
-               Result (K) := ' ';
+               Result (K) := Separator;
                K := K - 1;
             end if;
          end loop;

@@ -613,12 +613,15 @@ By default,  date pads numeric fields with zeroes. GNU date recognizes the follo
 @end itemize
 @end itemize
 
-@item FORMAT_NUMBER
+@item FORMAT_NUMBER([@i{DIGITSEP}])
 @cindex Filter, FORMAT_NUMBER
 
-Returns the number with a space added between each 3 digits
+Returns the number with a separator added between each 3 digits
 blocks. The decimal part is not transformed. If the data is not a
-number nothing is done.
+number nothing is done. The default separator is a space, although you can
+specify any separator (a single character) you wish. DIGITSEP can also be
+the name of another tag, whose value (or the first character of it) will be
+used as a separator.
 
 @item IS_EMPTY
 @cindex Filter, IS_EMPTY

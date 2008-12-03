@@ -740,7 +740,6 @@ package body Filter is
       C : not null access Filter_Context;
       P : in Parameter_Data := No_Parameter) return String
    is
-      pragma Unreferenced (C);
       TS : constant String := Strings.Fixed.Trim (S, Both);
       Separator : Character := ' ';
 

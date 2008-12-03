@@ -740,7 +740,7 @@ package body Filter is
       C : not null access Filter_Context;
       P : in Parameter_Data := No_Parameter) return String
    is
-      TS : constant String := Strings.Fixed.Trim (S, Both);
+      TS        : constant String := Strings.Fixed.Trim (S, Both);
       Separator : Character := ' ';
 
       function Is_Number return Boolean;
@@ -776,7 +776,7 @@ package body Filter is
       if P.Mode = Str then
          declare
             Param : constant String :=
-              Value (To_String (P.S), C.Translations, C.I_Parameters);
+                      Value (To_String (P.S), C.Translations, C.I_Parameters);
          begin
             Separator := Param (Param'First);
          end;

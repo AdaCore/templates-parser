@@ -2719,10 +2719,57 @@ package body Templates_Parser is
       -----------------------
 
       function Get_Tag_Parameter (N : in Positive) return String is
+
          I_Last : constant Natural :=
                     Strings.Fixed.Index (Buffer (First .. Last), ")@@");
-         F, L   : Natural;
-         Level  : Natural;
+
+         function Find_Matching
+           (From : in Natural; Char : in Character) return Natural;
+         --  Returns the position of Char in Buffer, handle escaped characters
+
+         -------------------
+         -- Find_Matching --
+         -------------------
+
+         function Find_Matching
+           (From : in Natural; Char : in Character) return Natural
+         is
+            K      : Natural := From;
+            Level  : Integer;
+            Escape : Integer := 0;
+         begin
+            if Char = ')' and then Buffer (K) = '(' then
+               Level := 0;
+            elsif Char = '(' then
+               Level := -1;
+            else
+               Level := 1;
+            end if;
+
+            Look_For_Char : while K < I_Last loop
+               if Buffer (K) = '\' and then Escape = 0 then
+                  Escape := 2;
+               elsif Escape /= 0 then
+                  Escape := Escape - 1;
+               end if;
+
+               if Escape = 0 then
+                  if Buffer (K) = '(' then
+                     Level := Level + 1;
+                  elsif Buffer (K) = ')' then
+                     Level := Level - 1;
+                  end if;
+                  exit Look_For_Char when Buffer (K) = Char and then Level = 0;
+               end if;
+
+               K := K + 1;
+            end loop Look_For_Char;
+
+            return K;
+         end Find_Matching;
+
+         F, L : Natural;
+
       begin
          if I_Last = 0 then
             Fatal_Error ("No tag parameter");
@@ -2732,26 +2779,14 @@ package body Templates_Parser is
             L := First - 1;
 
             for K in 1 .. N loop
-               F := Strings.Fixed.Index (Buffer (L + 1 .. I_Last), "(");
+               F := Find_Matching (L + 1, '(');
 
                if F = 0 then
                   Fatal_Error ("Missing parenthesis in tag command");
 
                else
                   --  Look for matching closing parenthesis
-                  Level := 0;
-                  L     := F + 1;
-
-                  while L < I_Last loop
-                     if Buffer (L) = '(' then
-                        Level := Level + 1;
-                     elsif Buffer (L) = ')' then
-                        exit when Level = 0;
-                        Level := Level - 1;
-                     end if;
-
-                     L := L + 1;
-                  end loop;
+                  L := Find_Matching (F, ')');
 
                   if Buffer (L) /= ')' then
                      Fatal_Error
@@ -2773,18 +2808,28 @@ package body Templates_Parser is
                     Strings.Fixed.Index (Buffer (First .. Last), ")@@");
          Count  : Natural := 0;
          Level  : Natural := 0;
+         Escape : Integer := 0;
       begin
          if I_Last = 0 then
             return 0;
+
          else
             for K in First .. I_Last loop
-               if Buffer (K) = '(' then
-                  if Level = 0 then
-                     Count := Count + 1;
+               if Buffer (K) = '\' and then Escape = 0 then
+                  Escape := 2;
+               elsif Escape /= 0 then
+                  Escape := Escape - 1;
+               end if;
+
+               if Escape = 0 then
+                  if Buffer (K) = '(' then
+                     if Level = 0 then
+                        Count := Count + 1;
+                     end if;
+                     Level := Level + 1;
+                  elsif Buffer (K) = ')' then
+                     Level := Level - 1;
                   end if;
-                  Level := Level + 1;
-               elsif Buffer (K) = ')' then
-                  Level := Level - 1;
                end if;
             end loop;
 

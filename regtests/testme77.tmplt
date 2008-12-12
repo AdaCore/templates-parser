@@ -1,0 +1,6 @@
+start1
+@@INLINE(\()()(\))@@
+@@INCLUDE@@ single_line.incl
+@@END_INLINE@@
+
+end1

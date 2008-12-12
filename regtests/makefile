@@ -1,8 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                         Copyright (C) 2003-2008                          #
-#                                 AdaCore                                  #
+#                     Copyright (C) 2003-2008, AdaCore                     #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -35,7 +34,7 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
 	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
 	testme65 testme66 testme67 testme68 testme69 testme70 testme71 \
-	testme72 testme73 testme74 testme75 testme76
+	testme72 testme73 testme74 testme75 testme76 testme77
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \

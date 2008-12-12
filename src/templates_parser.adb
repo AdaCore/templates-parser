@@ -3583,7 +3583,8 @@ package body Templates_Parser is
 
                            when others =>
                               K := K + 1;
-                              R (K) := P (N);
+                              R (K) := P (N + 1);
+                              N := N + 1;
                         end case;
 
                      else

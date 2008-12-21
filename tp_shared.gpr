@@ -127,8 +127,11 @@ project TP_Shared is
    -- Ide --
    ---------
 
+   type VCS_Type is ("Subversion", "Git");
+   VCS_Kind : VCS_Type := external ("PRJ_VCS", "Subversion");
+
    package Ide is
-      for VCS_Kind use "Subversion";
+      for VCS_Kind use VCS_Kind;
    end Ide;
 
 end TP_Shared;

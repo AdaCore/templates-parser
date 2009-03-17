@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2008, AdaCore                     --
+--                     Copyright (C) 1999-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -1236,11 +1236,18 @@ package body Templates_Parser is
 
    overriding procedure Adjust (Set : in out Translate_Set) is
    begin
-      if Set.Ref_Count /= null then
-         Templates_Parser_Tasking.Lock;
+      Templates_Parser_Tasking.Lock;
+
+      if Set.Ref_Count = null then
+         --  This is a not yet initialized null set. This case happens when
+         --  assigning Null_Set to a Translate_Set variable for example.
+         Initialize (Set);
+
+      else
          Set.Ref_Count.all := Set.Ref_Count.all + 1;
-         Templates_Parser_Tasking.Unlock;
       end if;
+
+      Templates_Parser_Tasking.Unlock;
    end Adjust;
 
    overriding procedure Adjust (T : in out Tag) is

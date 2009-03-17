@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2008, AdaCore                     --
+--                     Copyright (C) 1999-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -360,7 +360,7 @@ package Templates_Parser is
    type User_Filter is abstract tagged private;
    type User_Filter_Access is access all User_Filter'Class;
    function Execute
-     (Filter     : access User_Filter;
+     (Filter     : not null access User_Filter;
       Value      : in String;
       Parameters : in String;
       Context    : in Filter_Context) return String is abstract;
@@ -373,7 +373,7 @@ package Templates_Parser is
 
    procedure Register_Filter
      (Name   : in String;
-      Filter : access User_Filter'Class);
+      Filter : not null access User_Filter'Class);
    --  Register a new filter. Filter must not be freed by the caller, since no
    --  copy is made.
 

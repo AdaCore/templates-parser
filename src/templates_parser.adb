@@ -369,7 +369,7 @@ package body Templates_Parser is
 
       procedure Register
         (Name    : in String;
-         Handler : access User_Filter'Class);
+         Handler : not null access User_Filter'Class);
 
       procedure Free_Filters;
 
@@ -5436,7 +5436,7 @@ package body Templates_Parser is
 
    procedure Register_Filter
      (Name   : in String;
-      Filter : access User_Filter'Class) renames Filter.Register;
+      Filter : not null access User_Filter'Class) renames Filter.Register;
 
    procedure Free_Filters renames Filter.Free_Filters;
 

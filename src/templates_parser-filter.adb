@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2008, AdaCore                     --
+--                     Copyright (C) 2003-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -1418,7 +1418,7 @@ package body Filter is
 
    procedure Register
      (Name    : in String;
-      Handler : access User_Filter'Class)
+      Handler : not null access User_Filter'Class)
    is
       Position : Filter_Map.Cursor;
       Success  : Boolean;

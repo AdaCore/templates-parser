@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                          Copyright (C) 2005-2007                         --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -36,7 +35,7 @@ package body Test_Callback is
 
    overriding function Dimension
      (C   : not null access Cursor_Tag;
-      Var : in String) return Natural is
+      Var : String) return Natural is
    begin
       if Var = "CURSOR" then
          return 2;
@@ -53,8 +52,8 @@ package body Test_Callback is
 
    overriding function Length
      (C    : not null access Cursor_Tag;
-      Var  : in String;
-      Path : in Templates_Parser.Dynamic.Path) return Natural is
+      Var  : String;
+      Path : Templates_Parser.Dynamic.Path) return Natural is
    begin
       if Var = "CURSOR" then
          if Path'Length = 1 then
@@ -87,7 +86,7 @@ package body Test_Callback is
 
    overriding procedure Value
      (L   : not null access Lazy_Tag;
-      Var : in String;
+      Var : String;
       S   : in out Templates_Parser.Translate_Set)
    is
       use Templates_Parser;
@@ -108,7 +107,7 @@ package body Test_Callback is
 
    overriding procedure Value
      (L   : not null access Log_Context;
-      Var : in String;
+      Var : String;
       S   : in out Templates_Parser.Translate_Set)
    is
       pragma Unreferenced (L, S);
@@ -118,8 +117,8 @@ package body Test_Callback is
 
    overriding function Value
      (C    : not null access Cursor_Tag;
-      Var  : in String;
-      Path : in Templates_Parser.Dynamic.Path) return String is
+      Var  : String;
+      Path : Templates_Parser.Dynamic.Path) return String is
    begin
       if Var = "CURSOR" then
          if Path'Length = 2 then

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -34,8 +33,8 @@ procedure Tcache is
    use Ada.Text_IO;
    use Templates_Parser;
 
-   procedure Set (Filename   : in String;
-                  C1, C2, C3 : in String := "")
+   procedure Set (Filename   : String;
+                  C1, C2, C3 : String := "")
    is
       File : File_Type;
    begin

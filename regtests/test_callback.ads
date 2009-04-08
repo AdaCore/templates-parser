@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                          Copyright (C) 2005-2007                         --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -34,31 +33,31 @@ package Test_Callback is
 
    overriding procedure Value
      (L   : not null access Lazy_Tag;
-      Var : in String;
+      Var : String;
       S   : in out Templates_Parser.Translate_Set);
 
    type Log_Context is new Templates_Parser.Dynamic.Lazy_Tag with null record;
 
    overriding procedure Value
      (L   : not null access Log_Context;
-      Var : in String;
+      Var : String;
       S   : in out Templates_Parser.Translate_Set);
 
    type Cursor_Tag is new Templates_Parser.Dynamic.Cursor_Tag with null record;
 
    overriding function Dimension
      (C   : not null access Cursor_Tag;
-      Var : in String) return Natural;
+      Var : String) return Natural;
 
    overriding function Length
      (C    : not null access Cursor_Tag;
-      Var  : in String;
-      Path : in Templates_Parser.Dynamic.Path) return Natural;
+      Var  : String;
+      Path : Templates_Parser.Dynamic.Path) return Natural;
 
    overriding function Value
      (C    : not null access Cursor_Tag;
-      Var  : in String;
-      Path : in Templates_Parser.Dynamic.Path) return String;
+      Var  : String;
+      Path : Templates_Parser.Dynamic.Path) return String;
 
 private
 

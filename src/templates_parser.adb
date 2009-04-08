@@ -276,7 +276,7 @@ package body Templates_Parser is
 
       type Parameter_Mode is (Void, Str, Regexp, Regpat, Slice, User_Callback);
 
-      function Parameter (Mode : in Filter.Mode) return Parameter_Mode;
+      function Parameter (Mode : Filter.Mode) return Parameter_Mode;
       --  Returns the parameter mode for the given filter
 
       type Pattern_Matcher_Access is access GNAT.Regpat.Pattern_Matcher;
@@ -310,7 +310,7 @@ package body Templates_Parser is
 
       No_Parameter : constant Parameter_Data := Parameter_Data'(Mode => Void);
 
-      function Image (P : in Parameter_Data) return String;
+      function Image (P : Parameter_Data) return String;
       --  Returns parameter string representation
 
       procedure Release (P : in out Parameter_Data);
@@ -333,9 +333,9 @@ package body Templates_Parser is
       end record;
 
       type Callback is access function
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
       --  P is the filter parameter, no parameter by default. Parameter are
       --  untyped and will be parsed by the filter function if needed.
 
@@ -360,271 +360,271 @@ package body Templates_Parser is
       --  User's filter
 
       procedure Register
-        (Name    : in String;
-         Handler : in Templates_Parser.Callback);
+        (Name    : String;
+         Handler : Templates_Parser.Callback);
 
       procedure Register
-        (Name    : in String;
-         Handler : in Callback_No_Param);
+        (Name    : String;
+         Handler : Callback_No_Param);
 
       procedure Register
-        (Name    : in String;
+        (Name    : String;
          Handler : not null access User_Filter'Class);
 
       procedure Free_Filters;
 
-      function User_Handle (Name : in String) return User_CB;
+      function User_Handle (Name : String) return User_CB;
       --  Returns the registered user's callback for the given filter name
 
       --  filter functions, see above
 
-      procedure Check_Null_Parameter (P : in Parameter_Data);
+      procedure Check_Null_Parameter (P : Parameter_Data);
       --  Raises Template_Error if P is not equal to Null_Parameter
 
       function Absolute
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Add_Param
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function BR_2_EOL
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function BR_2_LF
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Capitalize
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Clean_Text
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Coma_2_Point
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Contract
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Del_Param
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Exist
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function File_Exists
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Format_Date
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Format_Number
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Is_Empty
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function LF_2_BR
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Lower
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Match
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Max
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Min
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Neg
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function No_Digit
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function No_Dynamic
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function No_Letter
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function No_Space
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Oui_Non
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Point_2_Coma
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Repeat
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Replace
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Replace_All
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Replace_Param
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Reverse_Data
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Size
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Slice
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Trim
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Upper
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function User_Defined
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Web_Encode
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Web_Escape
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Web_NBSP
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Wrap
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Yes_No
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Plus
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Minus
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Divide
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Multiply
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
       function Modulo
-        (S : in String;
+        (S : String;
          C : not null access Filter_Context;
-         P : in Parameter_Data := No_Parameter) return String;
+         P : Parameter_Data := No_Parameter) return String;
 
-      function Handle (Name : in String) return Callback;
+      function Handle (Name : String) return Callback;
       --  Returns the filter function for the given filter name
 
-      function Handle (Mode : in Filter.Mode) return Callback;
+      function Handle (Mode : Filter.Mode) return Callback;
       --  Returns the filter function for the given filter mode
 
-      function Mode_Value (Name : in String) return Mode;
+      function Mode_Value (Name : String) return Mode;
       --  Returns the Mode for filter named Name. This is the internal
       --  representation for this filter name.
 
-      function Name (Handle : in Callback) return String;
+      function Name (Handle : Callback) return String;
       --  Returns the filter name for the given filter function
 
-      function Is_No_Dynamic (Filters : in Set_Access) return Boolean;
+      function Is_No_Dynamic (Filters : Set_Access) return Boolean;
       --  Returns True if Filters contains NO_CONTEXT
 
    end Filter;
@@ -652,20 +652,20 @@ package body Templates_Parser is
       Internal  : Internal_Tag;      -- Set to No if not an internal variable
    end record;
 
-   function Is_Include_Variable (T : in Tag_Var) return Boolean;
+   function Is_Include_Variable (T : Tag_Var) return Boolean;
    pragma Inline (Is_Include_Variable);
    --  Returns True if T is an include variable (Name is $<n>)
 
-   function Build (Str : in String) return Tag_Var;
+   function Build (Str : String) return Tag_Var;
    --  Create a Tag from Str. A tag is composed of a name and a set of
    --  filters.
 
-   function Image (T : in Tag_Var) return String;
+   function Image (T : Tag_Var) return String;
    --  Returns string representation for the Tag variable
 
    function Translate
-     (T       : in Tag_Var;
-      Value   : in String;
+     (T       : Tag_Var;
+      Value   : String;
       Context : not null access Filter.Filter_Context) return String;
    --  Returns the result of Value after applying all filters for tag T
 
@@ -693,10 +693,10 @@ package body Templates_Parser is
          end case;
       end record;
 
-      function Parse (Line : in String) return Tree;
+      function Parse (Line : String) return Tree;
       --  Parse text line and returns the corresponding tree representation
 
-      procedure Print_Tree (D : in Tree);
+      procedure Print_Tree (D : Tree);
       --  Decend the text tree and print it to the standard output
 
       procedure Release (D : in out Tree);
@@ -724,7 +724,7 @@ package body Templates_Parser is
 
       type Tree is access Def;
 
-      function Parse (Line : in String) return Tree;
+      function Parse (Line : String) return Tree;
       --  Returns a defintion data
 
       package Def_Map is new
@@ -732,7 +732,7 @@ package body Templates_Parser is
           (String, Node, Ada.Strings.Hash, "=", "=");
       subtype Map is Def_Map.Map;
 
-      procedure Print_Tree (D : in Tree);
+      procedure Print_Tree (D : Tree);
       --  Decend the text tree and print it to the standard output
 
       procedure Release (D : in out Tree);
@@ -749,12 +749,12 @@ package body Templates_Parser is
       type Ops is (O_And, O_Or, O_Xor,
                    O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
 
-      function Image (O : in Ops) return String;
+      function Image (O : Ops) return String;
       --  Returns Ops string representation
 
       type U_Ops is (O_Not);
 
-      function Image (O : in U_Ops) return String;
+      function Image (O : U_Ops) return String;
       --  Returns U_Ops string representation
 
       type Node;
@@ -782,10 +782,10 @@ package body Templates_Parser is
          end case;
       end record;
 
-      function Parse (Expression : in String) return Tree;
+      function Parse (Expression : String) return Tree;
       --  Parse Expression and returns the corresponding tree representation
 
-      procedure Print_Tree (E : in Tree);
+      procedure Print_Tree (E : Tree);
       --  Decend the expression's tree and print the expression. It outputs the
       --  expression with all parenthesis to show without ambiguity the way the
       --  expression has been parsed.
@@ -893,7 +893,7 @@ package body Templates_Parser is
       end case;
    end record;
 
-   procedure Release (T : in out Tree; Include : in Boolean := True);
+   procedure Release (T : in out Tree; Include : Boolean := True);
    --  Release all memory associated with the tree
 
    procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
@@ -910,8 +910,8 @@ package body Templates_Parser is
    package Cached_Files is
 
       procedure Add
-        (Filename : in     String;
-         T        : in     Tree;
+        (Filename : String;
+         T        : Tree;
          Old      :    out Tree);
       --  Add Filename/T to the list of cached files. If Filename is
       --  already in the list, replace the current tree with T. Furthermore
@@ -920,7 +920,7 @@ package body Templates_Parser is
       --  for current tree).
 
       procedure Get
-        (Filename : in     String;
+        (Filename : String;
          Result   :    out Static_Tree);
       --  Returns the Tree for Filename or Null_Static_Tree if Filename has
       --  not been cached or is obsolete.
@@ -941,30 +941,30 @@ package body Templates_Parser is
    ---------
 
    procedure Field
-     (T      : in     Tag;
-      N      : in     Positive;
+     (T      : Tag;
+      N      : Positive;
       Result :    out Tag_Node_Access;
       Found  :    out Boolean);
    --  Returns the Nth item in Tag
 
    procedure Field
-     (T        : in     Tag;
-      Cursor   : in     Indices;
-      Up_Value : in     Natural;
+     (T        : Tag;
+      Cursor   : Indices;
+      Up_Value : Natural;
       Result   :    out Unbounded_String;
       Found    :    out Boolean);
    --  Returns Value in Tag at position Cursor. Found is set to False if
    --  there is no such value in Tag.
 
-   function No_Quote (Str : in String) return String;
+   function No_Quote (Str : String) return String;
    --  Removes quotes around Str. If Str (Str'First) and Str (Str'Last)
    --  are quotes return Str (Str'First + 1 ..  Str'Last - 1) otherwise
    --  return Str as-is.
 
-   function Quote (Str : in String) return String;
+   function Quote (Str : String) return String;
    --  Returns Str quoted if it contains spaces, otherwise just returns Str
 
-   function Is_Number (S : in String) return Boolean;
+   function Is_Number (S : String) return Boolean;
    pragma Inline (Is_Number);
    --  Returns True if S is a decimal number
 
@@ -974,28 +974,28 @@ package body Templates_Parser is
      new Unchecked_Deallocation (Tag_Node_Arr, Tag_Node_Arr_Access);
 
    function Build_Include_Pathname
-     (Filename, Include_Filename : in String) return String;
+     (Filename, Include_Filename : String) return String;
    --  Returns the full pathname to the include file (Include_Filename). It
    --  returns Include_Filename if there is a pathname specified, or the
    --  pathname of the main template file as a prefix of the include
    --  filename.
 
    function Load
-     (Filename     : in String;
-      Cached       : in Boolean := False;
-      Include_File : in Boolean := False) return Static_Tree;
+     (Filename     : String;
+      Cached       : Boolean := False;
+      Include_File : Boolean := False) return Static_Tree;
    --  Load a template file and returns the semantic tree. The template file is
    --  cached if Cached is set to true. If cached next Load will use the
    --  preparsed tree.
 
-   procedure Print_Tree (T : in Tree; Level : in Natural := 0);
+   procedure Print_Tree (T : Tree; Level : Natural := 0);
    --  Print the semantic tree, this is mostly for debugging purpose
 
    ---------
    -- "&" --
    ---------
 
-   function "&" (T : in Tag; Value : in String) return Tag is
+   function "&" (T : Tag; Value : String) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'
           (Templates_Parser.Value, null, V => To_Unbounded_String (Value));
@@ -1033,7 +1033,7 @@ package body Templates_Parser is
       end if;
    end "&";
 
-   function "&" (Value : in String; T : in Tag) return Tag is
+   function "&" (Value : String; T : Tag) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'
           (Templates_Parser.Value, T.Data.Head,
@@ -1071,7 +1071,7 @@ package body Templates_Parser is
       end if;
    end "&";
 
-   function "&" (T : in Tag; Value : in Tag) return Tag is
+   function "&" (T : Tag; Value : Tag) return Tag is
       Item   : constant Tag_Node_Access
         := new Tag_Node'(Value_Set, null, new Tag'(Value));
       T_Size : constant Natural := Size (Value);
@@ -1112,48 +1112,48 @@ package body Templates_Parser is
       end if;
    end "&";
 
-   function "&" (T : in Tag; Value : in Character) return Tag is
+   function "&" (T : Tag; Value : Character) return Tag is
    begin
       return T & String'(1 => Value);
    end "&";
 
-   function "&" (T : in Tag; Value : in Boolean) return Tag is
+   function "&" (T : Tag; Value : Boolean) return Tag is
    begin
       return T & Boolean'Image (Value);
    end "&";
 
-   function "&" (T : in Tag; Value : in Unbounded_String) return Tag is
+   function "&" (T : Tag; Value : Unbounded_String) return Tag is
    begin
       return T & To_String (Value);
    end "&";
 
-   function "&" (T : in Tag; Value : in Integer) return Tag is
+   function "&" (T : Tag; Value : Integer) return Tag is
    begin
       return T & Image (Value);
    end "&";
 
-   function "&" (Value : in Character; T : in Tag) return Tag is
+   function "&" (Value : Character; T : Tag) return Tag is
    begin
       return String'(1 => Value) & T;
    end "&";
 
-   function "&" (Value : in Boolean; T : in Tag) return Tag is
+   function "&" (Value : Boolean; T : Tag) return Tag is
    begin
       return Boolean'Image (Value) & T;
    end "&";
 
-   function "&" (Value : in Unbounded_String; T : in Tag) return Tag is
+   function "&" (Value : Unbounded_String; T : Tag) return Tag is
    begin
       return To_String (Value) & T;
    end "&";
 
-   function "&" (Value : in Integer; T : in Tag) return Tag is
+   function "&" (Value : Integer; T : Tag) return Tag is
    begin
       return Image (Value) & T;
    end "&";
 
    function "&"
-     (Left : in Association; Right : in Association) return Translate_Set
+     (Left : Association; Right : Association) return Translate_Set
    is
       T : Translate_Set;
    begin
@@ -1163,7 +1163,7 @@ package body Templates_Parser is
    end "&";
 
    function "&"
-     (Set : in Translate_Set; Item : in Association) return Translate_Set
+     (Set : Translate_Set; Item : Association) return Translate_Set
    is
       T : Translate_Set := Set;
    begin
@@ -1175,7 +1175,7 @@ package body Templates_Parser is
    -- "+" --
    ---------
 
-   function "+" (Value : in String) return Tag is
+   function "+" (Value : String) return Tag is
       Item : constant Tag_Node_Access
         := new Tag_Node'(Templates_Parser.Value,
                          null,
@@ -1194,27 +1194,27 @@ package body Templates_Parser is
                  Tag_Nodes    => null));
    end "+";
 
-   function "+" (Value : in Character) return Tag is
+   function "+" (Value : Character) return Tag is
    begin
       return +String'(1 => Value);
    end "+";
 
-   function "+" (Value : in Boolean) return Tag is
+   function "+" (Value : Boolean) return Tag is
    begin
       return +Boolean'Image (Value);
    end "+";
 
-   function "+" (Value : in Unbounded_String) return Tag is
+   function "+" (Value : Unbounded_String) return Tag is
    begin
       return +To_String (Value);
    end "+";
 
-   function "+" (Value : in Integer) return Tag is
+   function "+" (Value : Integer) return Tag is
    begin
       return +Image (Value);
    end "+";
 
-   function "+" (Value : in Tag) return Tag is
+   function "+" (Value : Tag) return Tag is
       Result : Tag;
    begin
       Result := Result & Value;
@@ -1223,7 +1223,7 @@ package body Templates_Parser is
       return Result;
    end "+";
 
-   function "+" (Item : in Association) return Translate_Set is
+   function "+" (Item : Association) return Translate_Set is
       T : Translate_Set;
    begin
       Insert (T, Item);
@@ -1261,7 +1261,7 @@ package body Templates_Parser is
    -- Append --
    ------------
 
-   procedure Append (T : in out Tag; Value : in Tag) is
+   procedure Append (T : in out Tag; Value : Tag) is
       Item   : constant Tag_Node_Access :=
                  new Tag_Node'(Value_Set, null, new Tag'(Value));
       T_Size : constant Natural := Size (Value);
@@ -1285,7 +1285,7 @@ package body Templates_Parser is
       T.Data.Last      := Item;
    end Append;
 
-   procedure Append (T : in out Tag; Value : in Unbounded_String) is
+   procedure Append (T : in out Tag; Value : Unbounded_String) is
       Item : constant Tag_Node_Access :=
                new Tag_Node'(Templates_Parser.Value, null, Value);
    begin
@@ -1306,22 +1306,22 @@ package body Templates_Parser is
       T.Data.Last      := Item;
    end Append;
 
-   procedure Append (T : in out Tag; Value : in String) is
+   procedure Append (T : in out Tag; Value : String) is
    begin
       Append (T, To_Unbounded_String (Value));
    end Append;
 
-   procedure Append (T : in out Tag; Value : in Character) is
+   procedure Append (T : in out Tag; Value : Character) is
    begin
       Append (T, To_Unbounded_String (String'(1 => Value)));
    end Append;
 
-   procedure Append (T : in out Tag; Value : in Boolean) is
+   procedure Append (T : in out Tag; Value : Boolean) is
    begin
       Append (T, To_Unbounded_String (Boolean'Image (Value)));
    end Append;
 
-   procedure Append (T : in out Tag; Value : in Integer) is
+   procedure Append (T : in out Tag; Value : Integer) is
    begin
       Append (T, To_Unbounded_String (Image (Value)));
    end Append;
@@ -1331,8 +1331,8 @@ package body Templates_Parser is
    -----------
 
    function Assoc
-     (Variable : in String;
-      Value    : in String) return Association is
+     (Variable : String;
+      Value    : String) return Association is
    begin
       return Association'
         (Std,
@@ -1341,23 +1341,23 @@ package body Templates_Parser is
    end Assoc;
 
    function Assoc
-     (Variable : in String;
-      Value    : in Ada.Strings.Unbounded.Unbounded_String)
+     (Variable : String;
+      Value    : Ada.Strings.Unbounded.Unbounded_String)
       return Association is
    begin
       return Assoc (Variable, To_String (Value));
    end Assoc;
 
    function Assoc
-     (Variable : in String;
-      Value    : in Integer) return Association is
+     (Variable : String;
+      Value    : Integer) return Association is
    begin
       return Assoc (Variable, Image (Value));
    end Assoc;
 
    function Assoc
-     (Variable : in String;
-      Value    : in Boolean) return Association is
+     (Variable : String;
+      Value    : Boolean) return Association is
    begin
       if Value then
          return Assoc (Variable, "TRUE");
@@ -1367,9 +1367,9 @@ package body Templates_Parser is
    end Assoc;
 
    function Assoc
-     (Variable  : in String;
-      Value     : in Tag;
-      Separator : in String := Default_Separator) return Association
+     (Variable  : String;
+      Value     : Tag;
+      Separator : String := Default_Separator) return Association
    is
       T : Tag := Value;
    begin
@@ -1386,20 +1386,20 @@ package body Templates_Parser is
    -- Build --
    -----------
 
-   function Build (Str : in String) return Tag_Var is
+   function Build (Str : String) return Tag_Var is
 
-      function Get_Var_Name (Tag : in String) return String;
+      function Get_Var_Name (Tag : String) return String;
       --  Given a Tag name, it returns the variable name only. It removes
       --  the tag separator and the filters.
 
-      function Get_Filter_Set (Tag : in String) return Filter.Set_Access;
+      function Get_Filter_Set (Tag : String) return Filter.Set_Access;
       --  Given a tag name, it retruns a set of filter to apply to this
       --  variable when translated.
 
-      function Get_Attribute (Tag : in String) return Attribute_Data;
+      function Get_Attribute (Tag : String) return Attribute_Data;
       --  Returns attribute for the given tag
 
-      function Is_Internal (Name : in String) return Internal_Tag;
+      function Is_Internal (Name : String) return Internal_Tag;
       --  Returns True if Name is an internal tag
 
       F_Sep : constant Natural
@@ -1414,7 +1414,7 @@ package body Templates_Parser is
       -- Get_Attribute --
       -------------------
 
-      function Get_Attribute (Tag : in String) return Attribute_Data is
+      function Get_Attribute (Tag : String) return Attribute_Data is
          Start, Stop : Natural;
       begin
          if A_Sep = 0 then
@@ -1478,7 +1478,7 @@ package body Templates_Parser is
       -- Get_Filter_Set --
       --------------------
 
-      function Get_Filter_Set (Tag : in String) return Filter.Set_Access is
+      function Get_Filter_Set (Tag : String) return Filter.Set_Access is
 
          use type Filter.Callback;
 
@@ -1490,22 +1490,22 @@ package body Templates_Parser is
          K     : Positive := FS'First;
 
          function Name_Parameter
-           (Filter : in String) return Templates_Parser.Filter.Routine;
+           (Filter : String) return Templates_Parser.Filter.Routine;
          --  Given a Filter description, returns the filter handle and
          --  parameter.
 
-         procedure Get_Slice (Slice : in String; First, Last : out Integer);
+         procedure Get_Slice (Slice : String; First, Last : out Integer);
          --  Returns the First and Last slice index as parsed into the Slice
          --  string. Returns First and Last set to 0 if there is not valid
          --  slice definition in Slice.
 
-         function Find_Slash (Str : in String) return Natural;
+         function Find_Slash (Str : String) return Natural;
          --  Returns the first slash index in Str, skip espaced slashes
 
          function Find
-           (Str   : in String;
-            Start : in Positive;
-            C     : in Character) return Natural;
+           (Str   : String;
+            Start : Positive;
+            C     : Character) return Natural;
          --  Look backward for character C in Str starting at position Start.
          --  This procedure skips quoted strings and parenthesis. Returns 0 if
          --  the character if not found otherwize it returns the positon of C
@@ -1516,9 +1516,9 @@ package body Templates_Parser is
          ----------
 
          function Find
-           (Str   : in String;
-            Start : in Positive;
-            C     : in Character) return Natural
+           (Str   : String;
+            Start : Positive;
+            C     : Character) return Natural
          is
             Pos   : Natural := Start;
             Count : Integer := 0;
@@ -1549,7 +1549,7 @@ package body Templates_Parser is
          -- Find_Slash --
          ----------------
 
-         function Find_Slash (Str : in String) return Natural is
+         function Find_Slash (Str : String) return Natural is
             Escaped : Boolean := False;
          begin
             for K in Str'Range loop
@@ -1571,7 +1571,7 @@ package body Templates_Parser is
          -- Get_Slice --
          ---------------
 
-         procedure Get_Slice (Slice : in String; First, Last : out Integer) is
+         procedure Get_Slice (Slice : String; First, Last : out Integer) is
             P1 : constant Natural := Fixed.Index (Slice, "..");
          begin
             First := 0;
@@ -1591,13 +1591,13 @@ package body Templates_Parser is
          --------------------
 
          function Name_Parameter
-           (Filter : in String) return Templates_Parser.Filter.Routine
+           (Filter : String) return Templates_Parser.Filter.Routine
          is
             package F renames Templates_Parser.Filter;
 
             use type F.Mode;
 
-            function Unescape (Str : in String) return String;
+            function Unescape (Str : String) return String;
             --  Unespace characters Str, to be used with regpat replacement
             --  pattern.
 
@@ -1605,7 +1605,7 @@ package body Templates_Parser is
             -- Unescape --
             --------------
 
-            function Unescape (Str : in String) return String is
+            function Unescape (Str : String) return String is
                S : String (Str'Range);
                I : Natural  := S'First - 1;
                K : Positive := Str'First;
@@ -1800,7 +1800,7 @@ package body Templates_Parser is
       -- Get_Var_Name --
       ------------------
 
-      function Get_Var_Name (Tag : in String) return String is
+      function Get_Var_Name (Tag : String) return String is
          Start, Stop : Natural;
       begin
          if A_Sep = 0 then
@@ -1824,7 +1824,7 @@ package body Templates_Parser is
       -- Is_Internal --
       -----------------
 
-      function Is_Internal (Name : in String) return Internal_Tag is
+      function Is_Internal (Name : String) return Internal_Tag is
       begin
          case Name (Name'First) is
             when 'D' =>
@@ -1934,7 +1934,7 @@ package body Templates_Parser is
    ----------------------------
 
    function Build_Include_Pathname
-     (Filename, Include_Filename : in String) return String
+     (Filename, Include_Filename : String) return String
    is
       Dir_Seps : constant Maps.Character_Set := Maps.To_Set ("/\");
    begin
@@ -1982,7 +1982,7 @@ package body Templates_Parser is
    -- Composite --
    ---------------
 
-   function Composite (T : in Tag; N : in Positive) return Tag is
+   function Composite (T : Tag; N : Positive) return Tag is
       Result : Tag;
       Found  : Boolean;
    begin
@@ -2012,7 +2012,7 @@ package body Templates_Parser is
    ------------
 
    function Exists
-     (Set : in Translate_Set; Variable : in String) return Boolean is
+     (Set : Translate_Set; Variable : String) return Boolean is
    begin
       return Set.Set.Contains (Variable);
    end Exists;
@@ -2028,8 +2028,8 @@ package body Templates_Parser is
    -----------
 
    procedure Field
-     (T      : in     Tag;
-      N      : in     Positive;
+     (T      : Tag;
+      N      : Positive;
       Result :    out Tag_Node_Access;
       Found  :    out Boolean) is
    begin
@@ -2061,8 +2061,8 @@ package body Templates_Parser is
    end Field;
 
    procedure Field
-     (T      : in     Tag;
-      N      : in     Positive;
+     (T      : Tag;
+      N      : Positive;
       Result :    out Tag;
       Found  :    out Boolean)
    is
@@ -2079,30 +2079,30 @@ package body Templates_Parser is
    end Field;
 
    procedure Field
-     (T        : in     Tag;
-      Cursor   : in     Indices;
-      Up_Value : in     Natural;
+     (T        : Tag;
+      Cursor   : Indices;
+      Up_Value : Natural;
       Result   :    out Unbounded_String;
       Found    :    out Boolean)
    is
 
-      function Image (T : in Tag) return Unbounded_String;
+      function Image (T : Tag) return Unbounded_String;
       --  Returns T string representation
 
       -----------
       -- Image --
       -----------
 
-      function Image (T : in Tag) return Unbounded_String is
+      function Image (T : Tag) return Unbounded_String is
 
-         function Image (N : in Tag_Node) return Unbounded_String;
+         function Image (N : Tag_Node) return Unbounded_String;
          --  Returns N string representation
 
          -----------
          -- Image --
          -----------
 
-         function Image (N : in Tag_Node) return Unbounded_String is
+         function Image (N : Tag_Node) return Unbounded_String is
          begin
             if N.Kind = Value then
                return N.V;
@@ -2268,7 +2268,7 @@ package body Templates_Parser is
    -- For_Every_Association --
    ---------------------------
 
-   procedure For_Every_Association (Set : in Translate_Set) is
+   procedure For_Every_Association (Set : Translate_Set) is
       Pos  : Association_Map.Cursor;
       Quit : Boolean := False;
    begin
@@ -2286,8 +2286,8 @@ package body Templates_Parser is
    ---------
 
    function Get
-     (Set  : in Translate_Set;
-      Name : in String) return Association
+     (Set  : Translate_Set;
+      Name : String) return Association
    is
       Pos : Association_Map.Cursor;
    begin
@@ -2300,7 +2300,7 @@ package body Templates_Parser is
       end if;
    end Get;
 
-   function Get (Assoc : in Association) return Tag is
+   function Get (Assoc : Association) return Tag is
    begin
       if Assoc.Kind = Composite then
          return Assoc.Comp_Value;
@@ -2309,7 +2309,7 @@ package body Templates_Parser is
       end if;
    end Get;
 
-   function Get (Assoc : in Association) return String is
+   function Get (Assoc : Association) return String is
    begin
       if Assoc.Kind = Std then
          return To_String (Assoc.Value);
@@ -2322,7 +2322,7 @@ package body Templates_Parser is
    -- Image --
    -----------
 
-   function Image (N : in Integer) return String is
+   function Image (N : Integer) return String is
       N_Img : constant String := Integer'Image (N);
    begin
       if N_Img (N_Img'First) = '-' then
@@ -2332,7 +2332,7 @@ package body Templates_Parser is
       end if;
    end Image;
 
-   function Image (T : in Tag_Var) return String is
+   function Image (T : Tag_Var) return String is
       use type Filter.Set_Access;
       R : Unbounded_String;
    begin
@@ -2396,12 +2396,12 @@ package body Templates_Parser is
    -- Insert --
    ------------
 
-   procedure Insert (Set : in out Translate_Set; Item : in Association) is
+   procedure Insert (Set : in out Translate_Set; Item : Association) is
    begin
       Set.Set.Include (To_String (Item.Variable), Item);
    end Insert;
 
-   procedure Insert (Set : in out Translate_Set; Items : in Translate_Set) is
+   procedure Insert (Set : in out Translate_Set; Items : Translate_Set) is
       Pos : Association_Map.Cursor;
    begin
       if Items.Set = null then
@@ -2420,7 +2420,7 @@ package body Templates_Parser is
    -- Is_Include_Variable --
    -------------------------
 
-   function Is_Include_Variable (T : in Tag_Var) return Boolean is
+   function Is_Include_Variable (T : Tag_Var) return Boolean is
    begin
       return T.N /= -1;
    end Is_Include_Variable;
@@ -2429,7 +2429,7 @@ package body Templates_Parser is
    -- Is_Number --
    ---------------
 
-   function Is_Number (S : in String) return Boolean is
+   function Is_Number (S : String) return Boolean is
       use Strings.Maps;
    begin
       return S'Length > 0
@@ -2442,7 +2442,7 @@ package body Templates_Parser is
    -- Item --
    ----------
 
-   function Item (T : in Tag; N : in Positive) return String is
+   function Item (T : Tag; N : Positive) return String is
       Result : Unbounded_String;
       Found  : Boolean;
    begin
@@ -2460,9 +2460,9 @@ package body Templates_Parser is
    ----------
 
    function Load
-     (Filename     : in String;
-      Cached       : in Boolean := False;
-      Include_File : in Boolean := False) return Static_Tree
+     (Filename     : String;
+      Cached       : Boolean := False;
+      Include_File : Boolean := False) return Static_Tree
    is
       use type Definitions.NKind;
 
@@ -2481,7 +2481,7 @@ package body Templates_Parser is
 
       --  Line handling
 
-      procedure Fatal_Error (Message : in String);
+      procedure Fatal_Error (Message : String);
       pragma No_Return (Fatal_Error);
       --  raise Template_Error exception with message
 
@@ -2500,17 +2500,17 @@ package body Templates_Parser is
       function Count_Tag_Attributes return Natural;
       --  Returns the number of tag attributes present
 
-      function Get_Tag_Attribute (N : in Positive) return String;
+      function Get_Tag_Attribute (N : Positive) return String;
       --  Returns the Nth tag attribute
 
-      function Get_Tag_Parameter (N : in Positive) return String;
+      function Get_Tag_Parameter (N : Positive) return String;
       --  Returns the Nth tag parameter found between parenthesis
 
       function Get_Tag_Parameter_Count return Natural;
       --  Returns the number of parameter
 
       function Is_Stmt
-        (Stmt : in String; Extended : in Boolean := False) return Boolean;
+        (Stmt : String; Extended : Boolean := False) return Boolean;
       pragma Inline (Is_Stmt);
       --  Returns True is Stmt is found at the begining of the current line
       --  ignoring leading blank characters. If Extended is True it recognize
@@ -2521,7 +2521,7 @@ package body Templates_Parser is
       --  Returns True if the end of file has been reach
 
       function Load_Include_Parameters
-        (Parameters : in String) return Include_Parameters;
+        (Parameters : String) return Include_Parameters;
       --  Returns the include parameters found by parsing Parameters
 
       type Parse_Mode is
@@ -2537,9 +2537,9 @@ package body Templates_Parser is
         );
 
       function Parse
-        (Mode    : in Parse_Mode;
-         In_If   : in Boolean;
-         No_Read : in Boolean := False)
+        (Mode    : Parse_Mode;
+         In_If   : Boolean;
+         No_Read : Boolean := False)
          return Tree;
       --  Get a line in File and returns the Tree
 
@@ -2568,7 +2568,7 @@ package body Templates_Parser is
       -- Fatal_Error --
       -----------------
 
-      procedure Fatal_Error (Message : in String) is
+      procedure Fatal_Error (Message : String) is
       begin
          if Message (Message'Last) /= '.' then
             raise Template_Error
@@ -2700,7 +2700,7 @@ package body Templates_Parser is
       -- Get_Tag_Attribute --
       -----------------------
 
-      function Get_Tag_Attribute (N : in Positive) return String is
+      function Get_Tag_Attribute (N : Positive) return String is
          S : Positive := First + 2;
          L : constant Natural :=
                Strings.Fixed.Index (Buffer (S .. Last), "@@");
@@ -2725,13 +2725,13 @@ package body Templates_Parser is
       -- Get_Tag_Parameter --
       -----------------------
 
-      function Get_Tag_Parameter (N : in Positive) return String is
+      function Get_Tag_Parameter (N : Positive) return String is
 
          I_Last : constant Natural :=
                     Strings.Fixed.Index (Buffer (First .. Last), ")@@");
 
          function Find_Matching
-           (From : in Natural; Char : in Character) return Natural;
+           (From : Natural; Char : Character) return Natural;
          --  Returns the position of Char in Buffer, handle escaped characters
 
          -------------------
@@ -2739,7 +2739,7 @@ package body Templates_Parser is
          -------------------
 
          function Find_Matching
-           (From : in Natural; Char : in Character) return Natural
+           (From : Natural; Char : Character) return Natural
          is
             K      : Natural := From;
             Level  : Integer;
@@ -2849,7 +2849,7 @@ package body Templates_Parser is
       -------------
 
       function Is_Stmt
-        (Stmt : in String; Extended : in Boolean := False) return Boolean
+        (Stmt : String; Extended : Boolean := False) return Boolean
       is
          Offset : Natural := 0;
       begin
@@ -2872,16 +2872,16 @@ package body Templates_Parser is
       -----------------------------
 
       function Load_Include_Parameters
-        (Parameters : in String)
+        (Parameters : String)
          return Include_Parameters
       is
-         procedure Load_Include_Named_Parameters (Parameters : in String);
+         procedure Load_Include_Named_Parameters (Parameters : String);
          --  Load parameters specified with a name:
          --  (param_a, 5 => param_b, 3 => param_c)
          --  Set Result variable accordingly.
 
          procedure Get_Next_Parameter
-           (Parameters : in     String;
+           (Parameters : String;
             First      : in out Positive;
             Last       :    out Natural;
             Next_Last  :    out Natural);
@@ -2899,7 +2899,7 @@ package body Templates_Parser is
          ------------------------
 
          procedure Get_Next_Parameter
-           (Parameters : in     String;
+           (Parameters : String;
             First      : in out Positive;
             Last       :    out Natural;
             Next_Last  :    out Natural) is
@@ -2955,9 +2955,9 @@ package body Templates_Parser is
          -- Load_Include_Named_Parameters --
          -----------------------------------
 
-         procedure Load_Include_Named_Parameters (Parameters : in String) is
+         procedure Load_Include_Named_Parameters (Parameters : String) is
 
-            procedure Parse (Parameter : in String);
+            procedure Parse (Parameter : String);
             --  Parse one parameter
 
             Named       : Boolean := False;
@@ -2967,7 +2967,7 @@ package body Templates_Parser is
             -- Parse --
             -----------
 
-            procedure Parse (Parameter : in String) is
+            procedure Parse (Parameter : String) is
                use type Data.Tree;
                Sep : constant Natural := Strings.Fixed.Index (Parameter, "=>");
                Ind : Natural;
@@ -3089,22 +3089,22 @@ package body Templates_Parser is
       -----------
 
       function Parse
-        (Mode    : in Parse_Mode;
-         In_If   : in Boolean;
-         No_Read : in Boolean := False) return Tree
+        (Mode    : Parse_Mode;
+         In_If   : Boolean;
+         No_Read : Boolean := False) return Tree
       is
          use type Data.NKind;
          use type Data.Tree;
 
-         function Count_Sections (T : in Tree) return Natural;
+         function Count_Sections (T : Tree) return Natural;
          pragma Inline (Count_Sections);
          --  Returns the number of sections in T (Section_Stmt)
 
-         function Count_Blocks (T : in Tree) return Natural;
+         function Count_Blocks (T : Tree) return Natural;
          pragma Inline (Count_Blocks);
          --  Returns the number of sections in T (Table_Stmt)
 
-         procedure Rewrite_Inlined_Block (T : in Tree; Sep : in String);
+         procedure Rewrite_Inlined_Block (T : Tree; Sep : String);
          --  Recursive procedure that rewrite all text nodes in an inlined
          --  block. In such a block the spaces before and after text are
          --  meaningless and LF are replaced by the given separator.
@@ -3113,7 +3113,7 @@ package body Templates_Parser is
          -- Count_Blocks --
          ------------------
 
-         function Count_Blocks (T : in Tree) return Natural is
+         function Count_Blocks (T : Tree) return Natural is
             C : Natural := 0;
             S : Tree    := T;
          begin
@@ -3128,7 +3128,7 @@ package body Templates_Parser is
          -- Count_Sections --
          --------------------
 
-         function Count_Sections (T : in Tree) return Natural is
+         function Count_Sections (T : Tree) return Natural is
             C : Natural := 0;
             S : Tree    := T;
          begin
@@ -3143,16 +3143,16 @@ package body Templates_Parser is
          -- Rewrite_Inlined_Block --
          ---------------------------
 
-         procedure Rewrite_Inlined_Block (T : in Tree; Sep : in String) is
+         procedure Rewrite_Inlined_Block (T : Tree; Sep : String) is
 
-            procedure Rewrite (T : in Tree; Last, In_Table : in Boolean);
+            procedure Rewrite (T : Tree; Last, In_Table : Boolean);
             --  Last is set to True if we are checking the last node
 
             -------------
             -- Rewrite --
             -------------
 
-            procedure Rewrite (T : in Tree; Last, In_Table : in Boolean) is
+            procedure Rewrite (T : Tree; Last, In_Table : Boolean) is
                use type Data.Tree;
                N : Tree := T;
                D : Data.Tree;
@@ -3595,7 +3595,7 @@ package body Templates_Parser is
 
             declare
                function Inline_Parameter
-                 (Index : in Positive) return Unbounded_String;
+                 (Index : Positive) return Unbounded_String;
                --  Returns Inline_Parameter with the given index
 
                ----------------------
@@ -3603,7 +3603,7 @@ package body Templates_Parser is
                ----------------------
 
                function Inline_Parameter
-                 (Index : in Positive) return Unbounded_String
+                 (Index : Positive) return Unbounded_String
                is
                   P : constant String := Get_Tag_Parameter (Index);
                   N : Natural := P'First;
@@ -3815,7 +3815,7 @@ package body Templates_Parser is
    -- No_Quote --
    --------------
 
-   function No_Quote (Str : in String) return String is
+   function No_Quote (Str : String) return String is
    begin
       if Str'Length > 1
         and then Str (Str'First) = '"'
@@ -3832,12 +3832,12 @@ package body Templates_Parser is
    -----------
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Table       := No_Translation;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Table       := No_Translation;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String is
    begin
       return To_String
@@ -3846,12 +3846,12 @@ package body Templates_Parser is
    end Parse;
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Table       := No_Translation;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Table       := No_Translation;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String is
    begin
       return Parse
@@ -3860,12 +3860,12 @@ package body Templates_Parser is
    end Parse;
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Set;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Set;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String is
    begin
       return To_String
@@ -3874,12 +3874,12 @@ package body Templates_Parser is
    end Parse;
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Set;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Set;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String
    is
       Max_Nested_Levels : constant := 10;
@@ -3930,12 +3930,12 @@ package body Templates_Parser is
       Lazy_Set : Translate_Set;
 
       procedure Analyze
-        (T     : in Tree;
-         State : in Parse_State);
+        (T     : Tree;
+         State : Parse_State);
       --  Parse T and build results file. State is needed for Vector_Tag and
       --  Matrix_Tag expansion.
 
-      function Get_Association (Var : in Tag_Var) return Association;
+      function Get_Association (Var : Tag_Var) return Association;
       --  Returns association for Name or Null_Association if not found. This
       --  routine also handles lazy tags by calling the appropriate callback
       --  routine. Lazy tag values are then recorded into Lazy_Set.
@@ -3945,25 +3945,25 @@ package body Templates_Parser is
       -------------
 
       procedure Analyze
-        (T     : in Tree;
-         State : in Parse_State)
+        (T     : Tree;
+         State : Parse_State)
       is
          use type Association_Map.Cursor;
          use type Data.Tree;
 
-         function Analyze (E : in Expr.Tree) return String;
+         function Analyze (E : Expr.Tree) return String;
          --  Analyse the expression tree and returns the result as a boolean
          --  The conditional expression must be equal to either TRUE or
          --  FALSE. Note that a string is True if it is equal to string "TRUE"
          --  and False otherwise.
 
-         procedure Analyze (D : in Data.Tree);
+         procedure Analyze (D : Data.Tree);
          --  Analyse the data tree and replace all variables by the
          --  correspinding value specified in Translations. This procedure
          --  catenate the result into Results variable.
 
          procedure Get_Max
-           (T          : in     Tree;
+           (T          : Tree;
             Max_Lines  :    out Natural;
             Max_Expand :    out Natural);
          --  Returns the maximum number of lines (Max_Lines) into the
@@ -3974,21 +3974,21 @@ package body Templates_Parser is
          --  (Max_Expand), this is equal to Max_Lines + offset to terminate
          --  the sections.
 
-         function Is_True (Str : in String) return Boolean;
+         function Is_True (Str : String) return Boolean;
          pragma Inline (Is_True);
          --  Return True if Str is one of "TRUE" or "T", the test is not
          --  case sensitive.
 
          function Translate
-           (Var : in Tag_Var; State : in Parse_State) return String;
+           (Var : Tag_Var; State : Parse_State) return String;
          --  Translate Tag variable using Translation table and apply all
          --  Filters and Atribute recorded for this variable.
 
          function I_Translate
-           (Var : in Tag_Var; State : in Parse_State) return String;
+           (Var : Tag_Var; State : Parse_State) return String;
          --  As above but for an include variable
 
-         procedure Add (S : in String; Sep : in Boolean := False);
+         procedure Add (S : String; Sep : Boolean := False);
          --  Add S into Results (using Buffer cache if possible). If Sep is
          --  true S is a separator. We keep track of this as we do not want to
          --  have two separators side by side.
@@ -3998,24 +3998,24 @@ package body Templates_Parser is
          --  Flush buffer to Results
 
          function Flatten_Parameters
-           (I : in Include_Parameters) return Filter.Include_Parameters;
+           (I : Include_Parameters) return Filter.Include_Parameters;
          --  Returns a flat representation of the include parameters, only the
          --  name or the value are kept. The tree are replaced by an empty
          --  value.
 
          function Inline_Cursor_Tag
-           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
-            Var_Name   : in String;
-            Dim        : in Positive;
-            Path       : in Dynamic.Path) return Unbounded_String;
+           (Cursor_Tag : Dynamic.Cursor_Tag_Access;
+            Var_Name   : String;
+            Dim        : Positive;
+            Path       : Dynamic.Path) return Unbounded_String;
          --  Returns the Cursor_Tag Var_Name inlined for all dimensions
          --  starting from Path.
 
-         procedure Push_Sep (State : in Parse_State);
+         procedure Push_Sep (State : Parse_State);
          pragma Inline (Push_Sep);
          --  Append a separator into the current buffer
 
-         procedure Pop_Sep (State : in Parse_State);
+         procedure Pop_Sep (State : Parse_State);
          pragma Inline (Pop_Sep);
          --  Remove the separator if it is the last input into the buffer
 
@@ -4025,7 +4025,7 @@ package body Templates_Parser is
          -- Add --
          ---------
 
-         procedure Add (S : in String; Sep : in Boolean := False) is
+         procedure Add (S : String; Sep : Boolean := False) is
          begin
             if Last + S'Length > Buffer'Last then
                --  Not enough cache space, flush buffer
@@ -4046,7 +4046,7 @@ package body Templates_Parser is
          -- Analyze --
          -------------
 
-         procedure Analyze (D : in Data.Tree) is
+         procedure Analyze (D : Data.Tree) is
             use type Data.Tree;
 
             T : Data.Tree := D;
@@ -4075,29 +4075,29 @@ package body Templates_Parser is
          -- Analyze --
          -------------
 
-         function Analyze (E : in Expr.Tree) return String is
+         function Analyze (E : Expr.Tree) return String is
 
-            type Ops_Fct is access function (L, R : in String) return String;
+            type Ops_Fct is access function (L, R : String) return String;
 
-            function F_And  (L, R : in String) return String;
-            function F_Or   (L, R : in String) return String;
-            function F_Xor  (L, R : in String) return String;
-            function F_Sup  (L, R : in String) return String;
-            function F_Esup (L, R : in String) return String;
-            function F_Einf (L, R : in String) return String;
-            function F_Inf  (L, R : in String) return String;
-            function F_Equ  (L, R : in String) return String;
-            function F_Diff (L, R : in String) return String;
+            function F_And  (L, R : String) return String;
+            function F_Or   (L, R : String) return String;
+            function F_Xor  (L, R : String) return String;
+            function F_Sup  (L, R : String) return String;
+            function F_Esup (L, R : String) return String;
+            function F_Einf (L, R : String) return String;
+            function F_Inf  (L, R : String) return String;
+            function F_Equ  (L, R : String) return String;
+            function F_Diff (L, R : String) return String;
 
-            type U_Ops_Fct is access function (N : in String) return String;
+            type U_Ops_Fct is access function (N : String) return String;
 
-            function F_Not (N : in String) return String;
+            function F_Not (N : String) return String;
 
             -----------
             -- F_And --
             -----------
 
-            function F_And (L, R : in String) return String is
+            function F_And (L, R : String) return String is
             begin
                if Is_True (L) and Is_True (R) then
                   return "TRUE";
@@ -4110,7 +4110,7 @@ package body Templates_Parser is
             -- F_Diff --
             ------------
 
-            function F_Diff (L, R : in String) return String is
+            function F_Diff (L, R : String) return String is
             begin
                if L /= R then
                   return "TRUE";
@@ -4123,7 +4123,7 @@ package body Templates_Parser is
             -- F_Einf --
             ------------
 
-            function F_Einf (L, R : in String) return String is
+            function F_Einf (L, R : String) return String is
             begin
                if Integer'Value (L) <= Integer'Value (R) then
                   return "TRUE";
@@ -4143,7 +4143,7 @@ package body Templates_Parser is
             -- F_Equ --
             -----------
 
-            function F_Equ (L, R : in String) return String is
+            function F_Equ (L, R : String) return String is
             begin
                if L = R then
                   return "TRUE";
@@ -4156,7 +4156,7 @@ package body Templates_Parser is
             -- F_Esup --
             ------------
 
-            function F_Esup (L, R : in String) return String is
+            function F_Esup (L, R : String) return String is
             begin
                if Integer'Value (L) >= Integer'Value (R) then
                   return "TRUE";
@@ -4176,7 +4176,7 @@ package body Templates_Parser is
             -- F_Inf --
             -----------
 
-            function F_Inf (L, R : in String) return String is
+            function F_Inf (L, R : String) return String is
             begin
                if Integer'Value (L) < Integer'Value (R) then
                   return "TRUE";
@@ -4196,7 +4196,7 @@ package body Templates_Parser is
             -- F_Not --
             -----------
 
-            function F_Not (N : in String) return String is
+            function F_Not (N : String) return String is
             begin
                if Is_True (N) then
                   return "FALSE";
@@ -4209,7 +4209,7 @@ package body Templates_Parser is
             -- F_Or --
             ----------
 
-            function F_Or (L, R : in String) return String is
+            function F_Or (L, R : String) return String is
             begin
                if Is_True (L) or Is_True (R) then
                   return "TRUE";
@@ -4222,7 +4222,7 @@ package body Templates_Parser is
             -- F_Sup --
             -----------
 
-            function F_Sup (L, R : in String) return String is
+            function F_Sup (L, R : String) return String is
             begin
                --  ??? remove exception handler
                if Integer'Value (L) > Integer'Value (R) then
@@ -4243,7 +4243,7 @@ package body Templates_Parser is
             -- F_Xor --
             -----------
 
-            function F_Xor (L, R : in String) return String is
+            function F_Xor (L, R : String) return String is
             begin
                if Is_True (L) xor Is_True (R) then
                   return "TRUE";
@@ -4291,7 +4291,7 @@ package body Templates_Parser is
          ------------------------
 
          function Flatten_Parameters
-           (I : in Include_Parameters) return Filter.Include_Parameters
+           (I : Include_Parameters) return Filter.Include_Parameters
          is
             use type Data.Tree;
             F : Filter.Include_Parameters;
@@ -4327,13 +4327,13 @@ package body Templates_Parser is
          -------------
 
          procedure Get_Max
-           (T          : in     Tree;
+           (T          : Tree;
             Max_Lines  :    out Natural;
             Max_Expand :    out Natural)
          is
 
             function Get_Max_Lines
-              (T : in Tree; N : in Positive) return Natural;
+              (T : Tree; N : Positive) return Natural;
             --  Recursivelly descends the tree and compute the max lines that
             --  will be displayed into the table. N is the variable embedded
             --  level regarding the table statement. N=1 means that the
@@ -4345,20 +4345,20 @@ package body Templates_Parser is
             -------------------
 
             function Get_Max_Lines
-              (T : in Tree; N : in Positive) return Natural
+              (T : Tree; N : Positive) return Natural
             is
 
-               function Check (T : in Data.Tree) return Natural;
+               function Check (T : Data.Tree) return Natural;
                --  Returns the length of the largest vector tag found on the
                --  subtree.
 
-               function Check (T : in Expr.Tree) return Natural;
+               function Check (T : Expr.Tree) return Natural;
                --  Idem for an expression subtree as found in a condition
 
-               function Check (T : in Tag_Var) return Natural;
+               function Check (T : Tag_Var) return Natural;
                --  Returns the length of Tag T for the current context
 
-               function Check (I : in Include_Parameters) return Natural;
+               function Check (I : Include_Parameters) return Natural;
                --  Returns the length of the largest vector tag found on the
                --  include parameters.
 
@@ -4366,7 +4366,7 @@ package body Templates_Parser is
                -- Check --
                -----------
 
-               function Check (T : in Tag_Var) return Natural is
+               function Check (T : Tag_Var) return Natural is
 
                   Table_Level : constant Positive := State.Table_Level + 1;
                   --  This is the current table level, State.Table_Level is
@@ -4376,11 +4376,11 @@ package body Templates_Parser is
                   --  This is the variable nested table level. O means that the
                   --  variable is not inside a table statement.
 
-                  function Max (T : in Tag; N : in Natural) return Natural;
+                  function Max (T : Tag; N : Natural) return Natural;
                   --  Returns the maximum number of items for the Nth Tag level
 
                   function Max
-                    (Name : in String; N : in Natural; Path : in Dynamic.Path)
+                    (Name : String; N : Natural; Path : Dynamic.Path)
                      return Natural;
                   --  Idem for a Cursor_Tag
 
@@ -4388,7 +4388,7 @@ package body Templates_Parser is
                   -- Max --
                   ---------
 
-                  function Max (T : in Tag; N : in Natural) return Natural is
+                  function Max (T : Tag; N : Natural) return Natural is
                      Result : Natural := 0;
                      P      : Tag_Node_Access := T.Data.Head;
                   begin
@@ -4408,7 +4408,7 @@ package body Templates_Parser is
                   end Max;
 
                   function Max
-                    (Name : in String; N : in Natural; Path : in Dynamic.Path)
+                    (Name : String; N : Natural; Path : Dynamic.Path)
                      return Natural
                   is
                      use type Dynamic.Path;
@@ -4536,7 +4536,7 @@ package body Templates_Parser is
                   return 0;
                end Check;
 
-               function Check (T : in Data.Tree) return Natural is
+               function Check (T : Data.Tree) return Natural is
                   use type Data.Tree;
                   use type Data.NKind;
                   Iteration : Natural := Natural'First;
@@ -4555,7 +4555,7 @@ package body Templates_Parser is
                   return Iteration;
                end Check;
 
-               function Check (T : in Expr.Tree) return Natural is
+               function Check (T : Expr.Tree) return Natural is
                begin
                   case T.Kind is
                      when Expr.Var   =>
@@ -4569,7 +4569,7 @@ package body Templates_Parser is
                   end case;
                end Check;
 
-               function Check (I : in Include_Parameters) return Natural is
+               function Check (I : Include_Parameters) return Natural is
                   use type Data.Tree;
                   Iteration : Natural := Natural'First;
                begin
@@ -4663,8 +4663,8 @@ package body Templates_Parser is
          -----------------
 
          function I_Translate
-           (Var   : in Tag_Var;
-            State : in Parse_State) return String
+           (Var   : Tag_Var;
+            State : Parse_State) return String
          is
             use type Data.Tree;
             use type Data.NKind;
@@ -4744,10 +4744,10 @@ package body Templates_Parser is
          -----------------------
 
          function Inline_Cursor_Tag
-           (Cursor_Tag : in Dynamic.Cursor_Tag_Access;
-            Var_Name   : in String;
-            Dim        : in Positive;
-            Path       : in Dynamic.Path) return Unbounded_String
+           (Cursor_Tag : Dynamic.Cursor_Tag_Access;
+            Var_Name   : String;
+            Dim        : Positive;
+            Path       : Dynamic.Path) return Unbounded_String
          is
             use type Dynamic.Path;
             Result : Unbounded_String;
@@ -4779,7 +4779,7 @@ package body Templates_Parser is
          -- Is_True --
          -------------
 
-         function Is_True (Str : in String) return Boolean is
+         function Is_True (Str : String) return Boolean is
             L_Str : constant String := Characters.Handling.To_Upper (Str);
          begin
             return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
@@ -4789,7 +4789,7 @@ package body Templates_Parser is
          -- Pop_Sep --
          -------------
 
-         procedure Pop_Sep (State : in Parse_State) is
+         procedure Pop_Sep (State : Parse_State) is
          begin
             if Last_Was_Sep then
                Last := Last - Length (State.Inline_Sep);
@@ -4801,7 +4801,7 @@ package body Templates_Parser is
          -- Push_Sep --
          --------------
 
-         procedure Push_Sep (State : in Parse_State) is
+         procedure Push_Sep (State : Parse_State) is
          begin
             if State.Inline_Sep /= Null_Unbounded_String then
                Add (To_String (State.Inline_Sep), Sep => True);
@@ -4813,7 +4813,7 @@ package body Templates_Parser is
          ---------------
 
          function Translate
-           (Var : in Tag_Var; State : in Parse_State) return String
+           (Var : Tag_Var; State : Parse_State) return String
          is
             use type Data.Tree;
             C        : aliased Filter.Filter_Context :=
@@ -5337,7 +5337,7 @@ package body Templates_Parser is
       -- Get_Association --
       ---------------------
 
-      function Get_Association (Var : in Tag_Var) return Association is
+      function Get_Association (Var : Tag_Var) return Association is
          use type Dynamic.Lazy_Tag_Access;
          Name : constant String := To_String (Var.Name);
          Pos  : Association_Map.Cursor;
@@ -5398,9 +5398,9 @@ package body Templates_Parser is
    -- Print_Tree --
    ----------------
 
-   procedure Print_Tree (T : in Tree; Level : in Natural := 0) is separate;
+   procedure Print_Tree (T : Tree; Level : Natural := 0) is separate;
 
-   procedure Print_Tree (Filename : in String) is
+   procedure Print_Tree (Filename : String) is
       T : Static_Tree;
    begin
       T := Load (Filename);
@@ -5412,7 +5412,7 @@ package body Templates_Parser is
    -- Quote --
    -----------
 
-   function Quote (Str : in String) return String is
+   function Quote (Str : String) return String is
       K : constant Natural := Strings.Fixed.Index (Str, " ");
    begin
       if K = 0 then
@@ -5427,15 +5427,15 @@ package body Templates_Parser is
    ---------------------
 
    procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback) renames Filter.Register;
+     (Name    : String;
+      Handler : Callback) renames Filter.Register;
 
    procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback_No_Param) renames Filter.Register;
+     (Name    : String;
+      Handler : Callback_No_Param) renames Filter.Register;
 
    procedure Register_Filter
-     (Name   : in String;
+     (Name   : String;
       Filter : not null access User_Filter'Class) renames Filter.Register;
 
    procedure Free_Filters renames Filter.Free_Filters;
@@ -5455,7 +5455,7 @@ package body Templates_Parser is
       end if;
    end Release;
 
-   procedure Release (T : in out Tree; Include : in Boolean := True) is
+   procedure Release (T : in out Tree; Include : Boolean := True) is
       use type Data.Tree;
    begin
       if T = null then
@@ -5557,7 +5557,7 @@ package body Templates_Parser is
    -- Remove --
    ------------
 
-   procedure Remove (Set : in out Translate_Set; Name : in String) is
+   procedure Remove (Set : in out Translate_Set; Name : String) is
    begin
       if Set.Set.Contains (Name) then
          Set.Set.Delete (Name);
@@ -5568,7 +5568,7 @@ package body Templates_Parser is
    -- Set_Separator --
    -------------------
 
-   procedure Set_Separator (T : in out Tag; Separator : in String) is
+   procedure Set_Separator (T : in out Tag; Separator : String) is
    begin
       T.Data.Separator := To_Unbounded_String (Separator);
    end Set_Separator;
@@ -5578,8 +5578,8 @@ package body Templates_Parser is
    ------------------------
 
    procedure Set_Tag_Separators
-     (Start_With : in String := Default_Begin_Tag;
-      Stop_With  : in String := Default_End_Tag) is
+     (Start_With : String := Default_Begin_Tag;
+      Stop_With  : String := Default_End_Tag) is
    begin
       Begin_Tag := To_Unbounded_String (Start_With);
       End_Tag   := To_Unbounded_String (Stop_With);
@@ -5589,12 +5589,12 @@ package body Templates_Parser is
    -- Size --
    ----------
 
-   function Size (T : in Tag) return Natural is
+   function Size (T : Tag) return Natural is
    begin
       return T.Data.Count;
    end Size;
 
-   function Size (Set : in Translate_Set) return Natural is
+   function Size (Set : Translate_Set) return Natural is
    begin
       return Natural (Set.Set.Length);
    end Size;
@@ -5603,7 +5603,7 @@ package body Templates_Parser is
    -- To_Set --
    ------------
 
-   function To_Set (Table : in Translate_Table) return Translate_Set is
+   function To_Set (Table : Translate_Table) return Translate_Set is
       Set : Translate_Set;
    begin
       for K in Table'Range loop
@@ -5617,8 +5617,8 @@ package body Templates_Parser is
    ---------------
 
    function Translate
-     (T       : in Tag_Var;
-      Value   : in String;
+     (T       : Tag_Var;
+      Value   : String;
       Context : not null access Filter.Filter_Context) return String
    is
       use type Filter.Set_Access;
@@ -5645,29 +5645,29 @@ package body Templates_Parser is
    ---------------
 
    function Translate
-     (Template     : in String;
-      Translations : in Translate_Table := No_Translation) return String is
+     (Template     : String;
+      Translations : Translate_Table := No_Translation) return String is
    begin
       return Translate (Template, To_Set (Translations));
    end Translate;
 
    function Translate
-     (Template     : in String;
-      Translations : in Translate_Set) return String
+     (Template     : String;
+      Translations : Translate_Set) return String
    is
       T : Data.Tree := Data.Parse (Template);
       P : Data.Tree := T;
 
       Results : Unbounded_String;
 
-      function Translate (Var : in Tag_Var) return String;
+      function Translate (Var : Tag_Var) return String;
       --  Returns translation for Var
 
       ---------------
       -- Translate --
       ---------------
 
-      function Translate (Var : in Tag_Var) return String is
+      function Translate (Var : Tag_Var) return String is
          Pos : Association_Map.Cursor;
          C   : aliased Filter.Filter_Context :=
                  (Translations, null, Filter.No_Include_Parameters);

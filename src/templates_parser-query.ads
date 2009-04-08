@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003 - 2005                        --
---                                 AdaCore                                  --
+--                     Copyright (C) 2003-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -29,22 +28,22 @@
 package Templates_Parser.Query is
 
    function Kind
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return Association_Kind;
    --  Returns the kind for this association
 
    function Variable
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return String;
    --  Returns the variable name for Association
 
    function Composite
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return Tag;
    --  Returns the vector tag for this association, raises Constraint_Error
    --  if it is not a vector.
 
-   function Nested_Level (T : in Tag) return Positive;
+   function Nested_Level (T : Tag) return Positive;
    --  Returns the nested level for tag T, 1 means that this is a vector tag,
    --  2 that it is a matrix.
 

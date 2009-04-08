@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2008, AdaCore                   --
+--                     Copyright (C) 2008-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -46,7 +46,7 @@ procedure TemplatesPP is
    procedure Help;
    --  Print help message
 
-   procedure Process (In_File : in String; Output : in Text_IO.File_Type);
+   procedure Process (In_File : String; Output : Text_IO.File_Type);
    --  Parses In_File, and print the result to Output
 
    ----------
@@ -65,7 +65,7 @@ procedure TemplatesPP is
    -- Process --
    -------------
 
-   procedure Process (In_File : in String; Output : in Text_IO.File_Type) is
+   procedure Process (In_File : String; Output : Text_IO.File_Type) is
    begin
       Text_IO.Put_Line (Output, Templates_Parser.Parse (In_File));
    end Process;

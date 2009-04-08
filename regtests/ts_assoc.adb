@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -39,7 +38,7 @@ procedure TS_Assoc is
 
    procedure Display is
 
-      procedure Output (A : in Association; Quit : in out Boolean) is
+      procedure Output (A : Association; Quit : in out Boolean) is
       begin
          Put_Line (">" & Query.Variable (A));
       end Output;

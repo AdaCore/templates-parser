@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                          Copyright (C) 2002-2008                         --
---                                 AdaCore                                  --
+--                     Copyright (C) 2002-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -75,7 +74,7 @@ package body Templates_Parser.Input is
    -- End_Of_File --
    -----------------
 
-   function End_Of_File (File : in File_Type) return Boolean is
+   function End_Of_File (File : File_Type) return Boolean is
    begin
       if File = null then
          raise Stream_IO.Status_Error;
@@ -90,7 +89,7 @@ package body Templates_Parser.Input is
    --------------
 
    procedure Get_Line
-     (File   : in     File_Type;
+     (File   : File_Type;
       Buffer :    out String;
       Last   :    out Natural)
    is
@@ -162,7 +161,7 @@ package body Templates_Parser.Input is
    -- LF_Terminated --
    -------------------
 
-   function LF_Terminated (File : in File_Type) return Boolean is
+   function LF_Terminated (File : File_Type) return Boolean is
    begin
       if File = null then
          raise Stream_IO.Status_Error;
@@ -177,8 +176,8 @@ package body Templates_Parser.Input is
 
    procedure Open
      (File : in out File_Type;
-      Name : in     String;
-      Form : in     String    := "") is
+      Name : String;
+      Form : String    := "") is
    begin
       if File /= null then
          Close (File);

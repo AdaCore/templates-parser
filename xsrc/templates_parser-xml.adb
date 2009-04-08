@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2008, AdaCore                     --
+--                     Copyright (C) 2004-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -44,31 +44,31 @@ package body Templates_Parser.XML is
    package Str_Map is new Containers.Indefinite_Hashed_Maps
      (String, Unbounded_String, Strings.Hash, "=", "=");
 
-   function Parse_Document (Doc : in DOM.Core.Node) return Translate_Set;
+   function Parse_Document (Doc : DOM.Core.Node) return Translate_Set;
    --  Parse a document node and return the corresponding Translate_Set
 
    -----------
    -- Image --
    -----------
 
-   function Image (Translations : in Translate_Set) return Unbounded_String is
+   function Image (Translations : Translate_Set) return Unbounded_String is
       Result : Unbounded_String;
 
-      procedure Process (Cursor : in Association_Map.Cursor);
+      procedure Process (Cursor : Association_Map.Cursor);
       --  Iterator
 
-      procedure Add (Str : in String);
+      procedure Add (Str : String);
       pragma Inline (Add);
       --  Add a new line (str) into Result, a LF is added at the end of Str
 
-      function To_Utf8 (Str : in Unbounded_String) return String;
+      function To_Utf8 (Str : Unbounded_String) return String;
       --  Convert Str to UTF8
 
       ---------
       -- Add --
       ---------
 
-      procedure Add (Str : in String) is
+      procedure Add (Str : String) is
       begin
          Append (Result, Str & ASCII.LF);
       end Add;
@@ -77,7 +77,7 @@ package body Templates_Parser.XML is
       -- Process --
       -------------
 
-      procedure Process (Cursor : in Association_Map.Cursor) is
+      procedure Process (Cursor : Association_Map.Cursor) is
 
          Item : constant Association := Association_Map.Element (Cursor);
          --  Current item
@@ -91,7 +91,7 @@ package body Templates_Parser.XML is
          procedure Process_Composite;
          --  Handles composite variables
 
-         procedure Add_Description (Var : in String);
+         procedure Add_Description (Var : String);
          --  Add var description for Var if found in the translation set
 
          function Is_Labels return Boolean;
@@ -104,7 +104,7 @@ package body Templates_Parser.XML is
          -- Add_Description --
          ---------------------
 
-         procedure Add_Description (Var : in String) is
+         procedure Add_Description (Var : String) is
             Var_Description : constant String := Var & Description_Suffix;
          begin
             if Translations.Set.Contains (Var_Description) then
@@ -206,11 +206,11 @@ package body Templates_Parser.XML is
 
             Null_Indice : constant Indices := (2 .. 1 => 0);
 
-            procedure Output_Tag (T : in Tag; Pos : in Indices := Null_Indice);
+            procedure Output_Tag (T : Tag; Pos : Indices := Null_Indice);
             --  Output recursively tag T, Pos is the current indices for the
             --  parsed items.
 
-            procedure Output_Axis (N : in Positive; T : in Tag);
+            procedure Output_Axis (N : Positive; T : Tag);
             --  Output labels and description for axis number N. Labels are
             --  found in tag T. T must be a vector tag (Nested_Level = 1).
 
@@ -218,7 +218,7 @@ package body Templates_Parser.XML is
             -- Output_Axis --
             -----------------
 
-            procedure Output_Axis (N : in Positive; T : in Tag) is
+            procedure Output_Axis (N : Positive; T : Tag) is
                P : Tag_Node_Access := T.Data.Head;
                K : Positive := 1;
             begin
@@ -244,19 +244,19 @@ package body Templates_Parser.XML is
             ----------------
 
             procedure Output_Tag
-              (T   : in Tag;
-               Pos : in Indices := Null_Indice)
+              (T   : Tag;
+               Pos : Indices := Null_Indice)
             is
                use type Indices;
 
-               procedure Output_Value (Pos : in Indices; Value : in String);
+               procedure Output_Value (Pos : Indices; Value : String);
                --  Output value whose Tag indices is given by Pos
 
                ------------------
                -- Output_Value --
                ------------------
 
-               procedure Output_Value (Pos : in Indices; Value : in String) is
+               procedure Output_Value (Pos : Indices; Value : String) is
                   V : Unbounded_String;
                begin
                   Append (V, "      <Entry>");
@@ -355,7 +355,7 @@ package body Templates_Parser.XML is
       -- To_Utf8 --
       -------------
 
-      function To_Utf8 (Str : in Unbounded_String) return String is
+      function To_Utf8 (Str : Unbounded_String) return String is
          use Unicode.CES;
       begin
          return Utf8.From_Utf32 (Basic_8bit.To_Utf32 (To_String (Str)));
@@ -380,7 +380,7 @@ package body Templates_Parser.XML is
    -- Load --
    ----------
 
-   function Load (Filename : in String) return Translate_Set is
+   function Load (Filename : String) return Translate_Set is
       use DOM.Core;
       use DOM.Core.Nodes;
       use DOM.Readers;
@@ -414,7 +414,7 @@ package body Templates_Parser.XML is
    --------------------
 
    function Parse_Document
-     (Doc : in DOM.Core.Node)
+     (Doc : DOM.Core.Node)
       return Translate_Set is
 
       use DOM.Core;
@@ -423,38 +423,38 @@ package body Templates_Parser.XML is
       use Input_Sources;
       use Sax.Readers;
 
-      procedure Error (Node : in DOM.Core.Node; Message : in String);
+      procedure Error (Node : DOM.Core.Node; Message : String);
       pragma No_Return (Error);
       --  Raises Constraint_Error with the Message as exception message
 
-      function First_Child (Parent : in DOM.Core.Node) return DOM.Core.Node;
+      function First_Child (Parent : DOM.Core.Node) return DOM.Core.Node;
       --  Returns first child, skips #text node
 
-      function Next_Sibling (N : in DOM.Core.Node) return DOM.Core.Node;
+      function Next_Sibling (N : DOM.Core.Node) return DOM.Core.Node;
       --  Returns next sibling, skip #text nodes
 
-      function Parse_Tagged (N : in DOM.Core.Node) return Translate_Set;
+      function Parse_Tagged (N : DOM.Core.Node) return Translate_Set;
       --  Parse tagged entity
 
-      function Parse_SimpleTag (N : in DOM.Core.Node) return Translate_Set;
+      function Parse_SimpleTag (N : DOM.Core.Node) return Translate_Set;
       --  Parse a SimpleTag entity
 
-      function Parse_CompositeTag (N : in DOM.Core.Node) return Translate_Set;
+      function Parse_CompositeTag (N : DOM.Core.Node) return Translate_Set;
       --  Parse CompositeTag entity
 
       procedure Parse_Tag
-        (N                 : in     DOM.Core.Node;
+        (N                 : DOM.Core.Node;
          Name, Description :    out Unbounded_String);
       --  Parse a Tag node, set Name and Description
 
-      function Get_Value (N : in DOM.Core.Node) return String;
+      function Get_Value (N : DOM.Core.Node) return String;
       --  Returns N value or the empty string if N is null
 
       -----------
       -- Error --
       -----------
 
-      procedure Error (Node : in DOM.Core.Node; Message : in String) is
+      procedure Error (Node : DOM.Core.Node; Message : String) is
          Name : constant String := Local_Name (Node);
       begin
          raise Constraint_Error with Name & " - " & Message;
@@ -464,7 +464,7 @@ package body Templates_Parser.XML is
       -- First_Child --
       -----------------
 
-      function First_Child (Parent : in DOM.Core.Node) return DOM.Core.Node is
+      function First_Child (Parent : DOM.Core.Node) return DOM.Core.Node is
          N : DOM.Core.Node;
       begin
          N := DOM.Core.Nodes.First_Child (Parent);
@@ -480,7 +480,7 @@ package body Templates_Parser.XML is
       -- Get_Value --
       ---------------
 
-      function Get_Value (N : in DOM.Core.Node) return String is
+      function Get_Value (N : DOM.Core.Node) return String is
          use Unicode.CES;
       begin
          if N = null then
@@ -494,7 +494,7 @@ package body Templates_Parser.XML is
       -- Next_Sibling --
       ------------------
 
-      function Next_Sibling (N : in DOM.Core.Node) return DOM.Core.Node is
+      function Next_Sibling (N : DOM.Core.Node) return DOM.Core.Node is
          M : DOM.Core.Node := N;
       begin
          loop
@@ -510,12 +510,12 @@ package body Templates_Parser.XML is
       ------------------------
 
       function Parse_CompositeTag
-        (N : in DOM.Core.Node) return Translate_Set
+        (N : DOM.Core.Node) return Translate_Set
       is
-         function Parse_Dim (N : in DOM.Core.Node) return Translate_Set;
+         function Parse_Dim (N : DOM.Core.Node) return Translate_Set;
          --  Parse a Dim node
 
-         procedure Parse_Entry (N : in DOM.Core.Node);
+         procedure Parse_Entry (N : DOM.Core.Node);
          --  Parse an Entry node
 
          function Build_Tag return Tag;
@@ -537,7 +537,7 @@ package body Templates_Parser.XML is
 
          function Build_Tag return Tag is
 
-            function B_Tag (Key : in String; N : in Positive) return Tag;
+            function B_Tag (Key : String; N : Positive) return Tag;
             --  Recursive routine, will build the Tag in the right order with
             --  the right nested levels.
 
@@ -545,7 +545,7 @@ package body Templates_Parser.XML is
             -- B_Tag --
             -----------
 
-            function B_Tag (Key : in String; N : in Positive) return Tag is
+            function B_Tag (Key : String; N : Positive) return Tag is
                use type Str_Map.Cursor;
                Max_Key : constant String := Image (N) & "_MAX";
                Cursor  : Str_Map.Cursor;
@@ -582,9 +582,9 @@ package body Templates_Parser.XML is
          -- Parse_Dim --
          ---------------
 
-         function Parse_Dim (N : in DOM.Core.Node) return Translate_Set is
+         function Parse_Dim (N : DOM.Core.Node) return Translate_Set is
 
-            function Parse_Labels (N : in DOM.Core.Node) return Translate_Set;
+            function Parse_Labels (N : DOM.Core.Node) return Translate_Set;
             --  Parse Labels node
 
             D : Positive; -- current Dim level
@@ -594,7 +594,7 @@ package body Templates_Parser.XML is
             ------------------
 
             function Parse_Labels
-              (N : in DOM.Core.Node)
+              (N : DOM.Core.Node)
                return Translate_Set
             is
                use Str_Map;
@@ -722,9 +722,9 @@ package body Templates_Parser.XML is
          -- Parse_Entry --
          -----------------
 
-         procedure Parse_Entry (N : in DOM.Core.Node) is
+         procedure Parse_Entry (N : DOM.Core.Node) is
 
-            procedure Insert (Key, Value : in String);
+            procedure Insert (Key, Value : String);
             --  Insert key/value into Map and keep Max value found for this
             --  key inside Data map.
 
@@ -738,7 +738,7 @@ package body Templates_Parser.XML is
             -- Insert --
             ------------
 
-            procedure Insert (Key, Value : in String) is
+            procedure Insert (Key, Value : String) is
                Max_Key : constant String := Key & "_MAX";
                Cursor  : Str_Map.Cursor;
                Success : Boolean;
@@ -935,7 +935,7 @@ package body Templates_Parser.XML is
       -- Parse_SimpleTag --
       ---------------------
 
-      function Parse_SimpleTag (N : in DOM.Core.Node) return Translate_Set is
+      function Parse_SimpleTag (N : DOM.Core.Node) return Translate_Set is
          C           : DOM.Core.Node;
          Name        : Unbounded_String;
          Description : Unbounded_String;
@@ -979,7 +979,7 @@ package body Templates_Parser.XML is
       ---------------
 
       procedure Parse_Tag
-        (N                 : in     DOM.Core.Node;
+        (N                 : DOM.Core.Node;
          Name, Description :    out Unbounded_String)
       is
          C : DOM.Core.Node := First_Child (N);
@@ -1010,7 +1010,7 @@ package body Templates_Parser.XML is
       -- Parse_Tagged --
       ------------------
 
-      function Parse_Tagged (N : in DOM.Core.Node) return Translate_Set is
+      function Parse_Tagged (N : DOM.Core.Node) return Translate_Set is
          C : DOM.Core.Node;
          T : Translate_Set;
       begin
@@ -1051,7 +1051,7 @@ package body Templates_Parser.XML is
    -- Save --
    ----------
 
-   procedure Save (Filename : in String; Translations : in Translate_Set) is
+   procedure Save (Filename : String; Translations : Translate_Set) is
       File : Text_IO.File_Type;
    begin
       Text_IO.Create (File, Text_IO.Out_File, Filename);
@@ -1063,7 +1063,7 @@ package body Templates_Parser.XML is
    -- Value --
    -----------
 
-   function Value (Translations : in String) return Translate_Set is
+   function Value (Translations : String) return Translate_Set is
       use DOM.Core.Nodes;
       use DOM.Readers;
 
@@ -1092,7 +1092,7 @@ package body Templates_Parser.XML is
       return Result;
    end Value;
 
-   function Value (Translations : in Unbounded_String) return Translate_Set is
+   function Value (Translations : Unbounded_String) return Translate_Set is
       use DOM.Core.Nodes;
       use DOM.Readers;
 

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -32,10 +31,10 @@ package Templates_Parser.Utils is
 
    use Ada;
 
-   function Image (T : in Tag) return String;
+   function Image (T : Tag) return String;
    --  Returns a string representation for this tag
 
-   function Value (T : in String) return Tag;
+   function Value (T : String) return Tag;
    --  Give a string representation of a tag (as encoded with Image above),
    --  build the corresponding Tag object. Raises Constraint_Error if T is
    --  not a valid tag representation.

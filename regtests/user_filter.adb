@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                          Copyright (C) 2006-2007                         --
---                                  AdaCore                                 --
+--                     Copyright (C) 2006-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -40,7 +39,7 @@ procedure User_Filter is
 
       procedure Value
         (Lazy_Tag     : not null access Local_Tag;
-         Var_Name     : in String;
+         Var_Name     : String;
          Translations : in out Translate_Set);
 
    end LT;
@@ -48,18 +47,18 @@ procedure User_Filter is
    Lazy : aliased LT.Local_Tag;
 
    function F1
-     (S : in String;
-      C : in Filter_Context) return String;
+     (S : String;
+      C : Filter_Context) return String;
 
    function F2
-     (S : in String;
-      P : in String;
-      C : in Filter_Context) return String;
+     (S : String;
+      P : String;
+      C : Filter_Context) return String;
 
    function Selected
-     (S : in String;
-      P : in String;
-      C : in Filter_Context) return String;
+     (S : String;
+      P : String;
+      C : Filter_Context) return String;
 
    --------
    -- LT --
@@ -69,7 +68,7 @@ procedure User_Filter is
 
       procedure Value
         (Lazy_Tag     : not null access Local_Tag;
-         Var_Name     : in String;
+         Var_Name     : String;
          Translations : in out Translate_Set) is
       begin
          Insert (Translations, Assoc (Var_Name, "//" & Var_Name & "\\"));
@@ -82,8 +81,8 @@ procedure User_Filter is
    --------
 
    function F1
-     (S : in String;
-      C : in Filter_Context) return String is
+     (S : String;
+      C : Filter_Context) return String is
    begin
       return "[F1=" & S & "]";
    end F1;
@@ -93,9 +92,9 @@ procedure User_Filter is
    --------
 
    function F2
-     (S : in String;
-      P : in String;
-      C : in Filter_Context) return String is
+     (S : String;
+      P : String;
+      C : Filter_Context) return String is
    begin
       return "[F2=" & S & "/" & P & "+"
         & Get (Get (C.Translations, "STAG")) & "]";
@@ -106,9 +105,9 @@ procedure User_Filter is
    --------------
 
    function Selected
-     (S : in String;
-      P : in String;
-      C : in Filter_Context) return String
+     (S : String;
+      P : String;
+      C : Filter_Context) return String
    is
       T : Translate_Set;
    begin

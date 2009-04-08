@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004 - 2005                        --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -80,20 +79,20 @@
 
 package Templates_Parser.XML is
 
-   function Image (Translations : in Translate_Set) return Unbounded_String;
+   function Image (Translations : Translate_Set) return Unbounded_String;
    --  Returns a string representation encoded in XML for this
    --  translate table.
 
-   function Value (Translations : in String) return Translate_Set;
+   function Value (Translations : String) return Translate_Set;
    --  Returns a translate set for this string representation
 
-   function Value (Translations : in Unbounded_String) return Translate_Set;
+   function Value (Translations : Unbounded_String) return Translate_Set;
    --  Save as above but based on an Ubounded_String
 
-   function Load (Filename : in String) return Translate_Set;
+   function Load (Filename : String) return Translate_Set;
    --  Read XML document Filename and create the corresponding Translate_set
 
-   procedure Save (Filename : in String; Translations : in Translate_Set);
+   procedure Save (Filename : String; Translations : Translate_Set);
    --  Write the translate table into filename
 
 end Templates_Parser.XML;

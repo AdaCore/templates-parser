@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -60,7 +59,7 @@ procedure Testcache is
 
    Right       : Unbounded_String;
 
-   procedure Run (Filename : in String; Cached : in Boolean) is
+   procedure Run (Filename : String; Cached : Boolean) is
       Current : Unbounded_String;
    begin
       Text_IO.Put_Line ("Cached " & Boolean'Image (Cached));

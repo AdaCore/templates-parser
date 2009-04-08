@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2003-2008                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2003-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -33,7 +32,7 @@ package body Templates_Parser.Query is
    ---------------
 
    function Composite
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return Tag is
    begin
       if Association.Kind = Composite then
@@ -49,7 +48,7 @@ package body Templates_Parser.Query is
    ----------
 
    function Kind
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return Association_Kind is
    begin
       return Association.Kind;
@@ -59,7 +58,7 @@ package body Templates_Parser.Query is
    -- Nested_Level --
    ------------------
 
-   function Nested_Level (T : in Tag) return Positive is
+   function Nested_Level (T : Tag) return Positive is
    begin
       return T.Data.Nested_Level;
    end Nested_Level;
@@ -69,7 +68,7 @@ package body Templates_Parser.Query is
    --------------
 
    function Variable
-     (Association : in Templates_Parser.Association)
+     (Association : Templates_Parser.Association)
       return String is
    begin
       return To_String (Association.Variable);

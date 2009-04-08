@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -36,11 +35,11 @@ procedure Filter is
    use Ada.Strings.Fixed;
    use Ada.Strings.Unbounded;
 
-   procedure Set_Start (Str : in String);
+   procedure Set_Start (Str : String);
 
-   function Is_End (Str : in String) return Boolean;
+   function Is_End (Str : String) return Boolean;
 
-   procedure Append (Str : in String);
+   procedure Append (Str : String);
 
    procedure Output;
 
@@ -56,7 +55,7 @@ procedure Filter is
    -- Set_Start --
    ---------------
 
-   procedure Set_Start (Str : in String) is
+   procedure Set_Start (Str : String) is
    begin
       if Index (Str, "SimpleTag") /= 0 then
          Current := Simple_Tag;
@@ -71,7 +70,7 @@ procedure Filter is
    -- Is_End --
    ------------
 
-   function Is_End (Str : in String) return Boolean is
+   function Is_End (Str : String) return Boolean is
    begin
       case Current is
          when Simple_Tag    => return Index (Str, "</SimpleTag>") /= 0;
@@ -84,7 +83,7 @@ procedure Filter is
    -- Append --
    ------------
 
-   procedure Append (Str : in String) is
+   procedure Append (Str : String) is
    begin
       for K in Str'Range loop
          if Str (K) /= ' ' then

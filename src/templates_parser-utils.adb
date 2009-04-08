@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2007                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -51,17 +50,17 @@ package body Templates_Parser.Utils is
 
    function Get_Program_Directory return String is
 
-      function Locate_On_Path (Filename : in String) return String;
+      function Locate_On_Path (Filename : String) return String;
       --  Returns the full pathname for filename or the empty string if not
       --  found.
 
-      function Is_Full_Pathname (Filename : in String) return Boolean;
+      function Is_Full_Pathname (Filename : String) return Boolean;
       --  Returns True is Filename is a full pathname
 
       function Get_Command_Name return String;
       --  Returns the normalized command string
 
-      function Containing_Directory (Filename : in String) return String;
+      function Containing_Directory (Filename : String) return String;
       --  Containing directory without directory separator, this can happen
       --  with GNAT when returning the current working directory?
 
@@ -69,7 +68,7 @@ package body Templates_Parser.Utils is
       -- Containing_Directory --
       --------------------------
 
-      function Containing_Directory (Filename : in String) return String is
+      function Containing_Directory (Filename : String) return String is
          CD : constant String := Directories.Containing_Directory (Filename);
       begin
          if CD (CD'Last) = Directory_Separator then
@@ -100,7 +99,7 @@ package body Templates_Parser.Utils is
       -- Is_Full_Pathname --
       ----------------------
 
-      function Is_Full_Pathname (Filename : in String) return Boolean is
+      function Is_Full_Pathname (Filename : String) return Boolean is
          F : String renames Filename;
       begin
          return F (F'First) = Directory_Separator
@@ -116,7 +115,7 @@ package body Templates_Parser.Utils is
       -- Locate_On_Path --
       --------------------
 
-      function Locate_On_Path (Filename : in String) return String is
+      function Locate_On_Path (Filename : String) return String is
          PATH        : constant String := Environment_Variables.Value ("PATH");
          First, Last : Natural;
          Idx         : Natural;
@@ -194,9 +193,9 @@ package body Templates_Parser.Utils is
    -- Image --
    -----------
 
-   function Image (T : in Tag) return String is
+   function Image (T : Tag) return String is
 
-      function Quote (Str : in String) return String;
+      function Quote (Str : String) return String;
       pragma Inline (Quote);
       --  Quote Str and double quote inside Str if needed
 
@@ -204,7 +203,7 @@ package body Templates_Parser.Utils is
       -- Quote --
       -----------
 
-      function Quote (Str : in String) return String is
+      function Quote (Str : String) return String is
          Result : Unbounded_String;
       begin
          Append (Result, """");
@@ -241,12 +240,12 @@ package body Templates_Parser.Utils is
    -- Value --
    -----------
 
-   function Value (T : in String) return Tag is
+   function Value (T : String) return Tag is
 
-      function Value (T : in String) return Tag;
+      function Value (T : String) return Tag;
       --  Returns the Tag for T string
 
-      function Clear_Quote (Str : in String) return String;
+      function Clear_Quote (Str : String) return String;
       pragma Inline (Clear_Quote);
       --  Removes double quote in Str
 
@@ -254,7 +253,7 @@ package body Templates_Parser.Utils is
       -- Clear_Quote --
       -----------------
 
-      function Clear_Quote (Str : in String) return String is
+      function Clear_Quote (Str : String) return String is
          Result : Unbounded_String;
       begin
          for K in Str'Range loop
@@ -271,7 +270,7 @@ package body Templates_Parser.Utils is
       -- Value --
       -----------
 
-      function Value (T : in String) return Tag is
+      function Value (T : String) return Tag is
          Result : Tag;
          K      : Natural := T'First;
          N      : Natural;

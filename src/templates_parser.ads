@@ -49,8 +49,8 @@ package Templates_Parser is
    Default_Separator : constant String := ", ";
 
    procedure Set_Tag_Separators
-     (Start_With : in String := Default_Begin_Tag;
-      Stop_With  : in String := Default_End_Tag);
+     (Start_With : String := Default_Begin_Tag;
+      Stop_With  : String := Default_End_Tag);
    --  Set the tag separators for the whole session. This should be changed as
    --  the very first API call and should not be changed after.
 
@@ -61,41 +61,41 @@ package Templates_Parser is
    type Tag is private;
    --  A tag is using a by reference semantic
 
-   function "+" (Value : in String)           return Tag;
-   function "+" (Value : in Character)        return Tag;
-   function "+" (Value : in Boolean)          return Tag;
-   function "+" (Value : in Unbounded_String) return Tag;
-   function "+" (Value : in Integer)          return Tag;
-   function "+" (Value : in Tag)              return Tag;
+   function "+" (Value : String)           return Tag;
+   function "+" (Value : Character)        return Tag;
+   function "+" (Value : Boolean)          return Tag;
+   function "+" (Value : Unbounded_String) return Tag;
+   function "+" (Value : Integer)          return Tag;
+   function "+" (Value : Tag)              return Tag;
    --  Tag constructors
 
-   function "&" (T : in Tag; Value : in String)           return Tag;
-   function "&" (T : in Tag; Value : in Character)        return Tag;
-   function "&" (T : in Tag; Value : in Boolean)          return Tag;
-   function "&" (T : in Tag; Value : in Unbounded_String) return Tag;
-   function "&" (T : in Tag; Value : in Integer)          return Tag;
-   function "&" (T : in Tag; Value : in Tag)              return Tag;
+   function "&" (T : Tag; Value : String)           return Tag;
+   function "&" (T : Tag; Value : Character)        return Tag;
+   function "&" (T : Tag; Value : Boolean)          return Tag;
+   function "&" (T : Tag; Value : Unbounded_String) return Tag;
+   function "&" (T : Tag; Value : Integer)          return Tag;
+   function "&" (T : Tag; Value : Tag)              return Tag;
    --  Add Value at the end of the tag, note that "&" will modify its
    --  first parameter. It is intended to be used as [T := T & "val"],
    --  doing [T1 := T2 & "val"] will add val to T2 and set T1 as an
    --  alias. This is designed this way for efficiency.
 
-   function "&" (Value : in String;           T : in Tag) return Tag;
-   function "&" (Value : in Character;        T : in Tag) return Tag;
-   function "&" (Value : in Boolean;          T : in Tag) return Tag;
-   function "&" (Value : in Unbounded_String; T : in Tag) return Tag;
-   function "&" (Value : in Integer;          T : in Tag) return Tag;
+   function "&" (Value : String;           T : Tag) return Tag;
+   function "&" (Value : Character;        T : Tag) return Tag;
+   function "&" (Value : Boolean;          T : Tag) return Tag;
+   function "&" (Value : Unbounded_String; T : Tag) return Tag;
+   function "&" (Value : Integer;          T : Tag) return Tag;
    --  Add Value at the front of the tag, see note above
 
-   procedure Append (T : in out Tag; Value : in String);
-   procedure Append (T : in out Tag; Value : in Character);
-   procedure Append (T : in out Tag; Value : in Boolean);
-   procedure Append (T : in out Tag; Value : in Unbounded_String);
-   procedure Append (T : in out Tag; Value : in Integer);
-   procedure Append (T : in out Tag; Value : in Tag);
+   procedure Append (T : in out Tag; Value : String);
+   procedure Append (T : in out Tag; Value : Character);
+   procedure Append (T : in out Tag; Value : Boolean);
+   procedure Append (T : in out Tag; Value : Unbounded_String);
+   procedure Append (T : in out Tag; Value : Integer);
+   procedure Append (T : in out Tag; Value : Tag);
    --  Add Value at the end of tag
 
-   procedure Set_Separator (T : in out Tag; Separator : in String);
+   procedure Set_Separator (T : in out Tag; Separator : String);
    --  Set separator to be used when building a flat representation of
    --  a composite tag.
 
@@ -104,14 +104,14 @@ package Templates_Parser is
    --  the returned object is separated (not using the same reference) than
    --  the original one.
 
-   function Size (T : in Tag) return Natural;
+   function Size (T : Tag) return Natural;
    --  Returns the number of value into T
 
-   function Item (T : in Tag; N : in Positive) return String;
+   function Item (T : Tag; N : Positive) return String;
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 
-   function Composite (T : in Tag; N : in Positive) return Tag;
+   function Composite (T : Tag; N : Positive) return Tag;
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 
@@ -131,47 +131,47 @@ package Templates_Parser is
    --  tag or a Matrix tag.
 
    function Assoc
-     (Variable : in String;
-      Value    : in String) return Association;
+     (Variable : String;
+      Value    : String) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Set. This is a standard association, value is a string.
 
    function Assoc
-     (Variable : in String;
-      Value    : in Unbounded_String) return Association;
+     (Variable : String;
+      Value    : Unbounded_String) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Set. This is a standard association, value is an
    --  Unbounded_String.
 
    function Assoc
-     (Variable : in String;
-      Value    : in Integer) return Association;
+     (Variable : String;
+      Value    : Integer) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Set. This is a standard association, value is an Integer.
    --  It will be displayed without leading space if positive.
 
    function Assoc
-     (Variable : in String;
-      Value    : in Boolean) return Association;
+     (Variable : String;
+      Value    : Boolean) return Association;
    --  Build an Association (Variable = Value) to be added to a
    --  Translate_Set. It set the variable to TRUE or FALSE depending on
    --  value.
 
    function Assoc
-     (Variable  : in String;
-      Value     : in Tag;
-      Separator : in String := Default_Separator) return Association;
+     (Variable  : String;
+      Value     : Tag;
+      Separator : String := Default_Separator) return Association;
    --  Build an Association (Variable = Value) to be added to Translate_Set.
    --  This is a tag association. Separator will be used when outputting the
    --  a flat representation of the Tag (outside a table statement).
 
-   function Get (Assoc : in Association) return Tag;
+   function Get (Assoc : Association) return Tag;
    --  Returns the Tag in Assoc, raise Constraint_Error if Assoc is not
    --  containing a Tag (Association_Kind is Std).
    --  See also the Templates_Parser.Query package for other functions to
    --  manipulate associations.
 
-   function Get (Assoc : in Association) return String;
+   function Get (Assoc : Association) return String;
    --  Returns the value in Assoc, raise Constraint_Error if Assoc is not
    --  containing a simple value (Association_Kind is Composite).
    --  See also the Templates_Parser.Query package for other functions to
@@ -196,23 +196,23 @@ package Templates_Parser is
 
    Null_Set : constant Translate_Set;
 
-   procedure Insert (Set : in out Translate_Set; Item : in Association);
+   procedure Insert (Set : in out Translate_Set; Item : Association);
    --  Add Item into the translate set. If an association for this variable
    --  already exists it just replaces it by the new item.
 
-   procedure Insert (Set : in out Translate_Set; Items : in Translate_Set);
+   procedure Insert (Set : in out Translate_Set; Items : Translate_Set);
    --  Add Items into the translate set. If an association for variables in
    --  Items already exists it just replaces it by the new one.
 
    function "&"
-     (Left : in Association; Right : in Association) return Translate_Set;
+     (Left : Association; Right : Association) return Translate_Set;
    pragma Inline ("&");
    --  Returns new translate set created from 2 associations. If names of
    --  both associations are the same, the returned translate set will
    --  contain only Right.
 
    function "&"
-     (Set : in Translate_Set; Item : in Association) return Translate_Set;
+     (Set : Translate_Set; Item : Association) return Translate_Set;
    pragma Inline ("&");
    --  Adds Item into Set. If an association with the same name already exists
    --  in Set it is replaced by the new one. Note that "&" will modify its
@@ -220,32 +220,32 @@ package Templates_Parser is
    --  doing [T1 := T2 & Assoc] will add Assoc into T2 and set T1 as an
    --  alias. This is designed this way for efficiency.
 
-   function "+" (Item : in Association) return Translate_Set;
+   function "+" (Item : Association) return Translate_Set;
    pragma Inline ("+");
    --  Create translate set from one association
 
-   procedure Remove (Set : in out Translate_Set; Name : in String);
+   procedure Remove (Set : in out Translate_Set; Name : String);
    --  Removes association named Name from the Set. Does nothing if there is
    --  not such association in the set.
 
-   function Get (Set : in Translate_Set; Name : in String) return Association;
+   function Get (Set : Translate_Set; Name : String) return Association;
    --  Returns the association named Name in the Set. Returns Null_Association
    --  is no such association if found in Set.
 
-   function Size (Set : in Translate_Set) return Natural;
+   function Size (Set : Translate_Set) return Natural;
    --  Returns size of the translate set
 
    function Exists
-     (Set : in Translate_Set; Variable : in String) return Boolean;
+     (Set : Translate_Set; Variable : String) return Boolean;
    --  Returns True if an association for Variable exists into the Set
 
    generic
-      with procedure Action (Item : in Association; Quit : in out Boolean);
-   procedure For_Every_Association (Set : in Translate_Set);
+      with procedure Action (Item : Association; Quit : in out Boolean);
+   procedure For_Every_Association (Set : Translate_Set);
    --  Iterates through all associations in the set, call Action for each one.
    --  Set Quit to True to stop the iteration.
 
-   function To_Set (Table : in Translate_Table) return Translate_Set;
+   function To_Set (Table : Translate_Table) return Translate_Set;
    --  Convert a Translate_Table into a Translate_Set
 
    -------------
@@ -263,7 +263,7 @@ package Templates_Parser is
 
       procedure Value
         (Lazy_Tag     : not null access Dynamic.Lazy_Tag;
-         Var_Name     : in String;
+         Var_Name     : String;
          Translations : in out Translate_Set) is abstract;
       --  Value is called by the Parse routines below if a tag variable was not
       --  found in the set of translations. This routine must then add the
@@ -287,7 +287,7 @@ package Templates_Parser is
 
       function Dimension
         (Cursor_Tag : not null access Dynamic.Cursor_Tag;
-         Var_Name   : in String) return Natural is abstract;
+         Var_Name   : String) return Natural is abstract;
       --  Must return the number of dimensions for the given variable name. For
       --  a matrix this routine should return 2 for example.
 
@@ -296,8 +296,8 @@ package Templates_Parser is
 
       function Length
         (Cursor_Tag : not null access Dynamic.Cursor_Tag;
-         Var_Name   : in String;
-         Path       : in Dynamic.Path) return Natural is abstract;
+         Var_Name   : String;
+         Path       : Dynamic.Path) return Natural is abstract;
       --  Must return the number of item for the given path. The first
       --  dimension is given by the Path (1), for the second column the Path is
       --  (1, 2). Note that each dimension can have a different length. For
@@ -305,8 +305,8 @@ package Templates_Parser is
 
       function Value
         (Cursor_Tag : not null access Dynamic.Cursor_Tag;
-         Var_Name   : in String;
-         Path       : in Dynamic.Path) return String is abstract;
+         Var_Name   : String;
+         Path       : Dynamic.Path) return String is abstract;
       --  Must return the value for the variable at the given Path. Note that
       --  this routine will be called only for valid items as given by the
       --  Dimension and Length above.
@@ -337,33 +337,33 @@ package Templates_Parser is
    end record;
 
    type Callback is access function
-     (Value      : in String;
-      Parameters : in String;
-      Context    : in Filter_Context) return String;
+     (Value      : String;
+      Parameters : String;
+      Context    : Filter_Context) return String;
    --  User's filter callback
 
    type Callback_No_Param is access function
-     (Value   : in String;
-      Context : in Filter_Context) return String;
+     (Value   : String;
+      Context : Filter_Context) return String;
    --  User's filter callback
 
    procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback);
+     (Name    : String;
+      Handler : Callback);
    --  Register user's filter Name using the specified Handler
 
    procedure Register_Filter
-     (Name    : in String;
-      Handler : in Callback_No_Param);
+     (Name    : String;
+      Handler : Callback_No_Param);
    --  Register user's filter Name using the specified Handler
 
    type User_Filter is abstract tagged private;
    type User_Filter_Access is access all User_Filter'Class;
    function Execute
      (Filter     : not null access User_Filter;
-      Value      : in String;
-      Parameters : in String;
-      Context    : in Filter_Context) return String is abstract;
+      Value      : String;
+      Parameters : String;
+      Context    : Filter_Context) return String is abstract;
    --  User filters can also be implemented through a tagged type, which allows
    --  you to add your own user data and reuse a filter in several
    --  applications, perhaps with a slightly different behavior each time.
@@ -372,7 +372,7 @@ package Templates_Parser is
    --  Callback might happen.
 
    procedure Register_Filter
-     (Name   : in String;
+     (Name   : String;
       Filter : not null access User_Filter'Class);
    --  Register a new filter. Filter must not be freed by the caller, since no
    --  copy is made.
@@ -386,12 +386,12 @@ package Templates_Parser is
    -----------------------------
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Table       := No_Translation;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Table       := No_Translation;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String;
    --  Parse the Template_File replacing variables' occurrences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
@@ -402,45 +402,45 @@ package Templates_Parser is
    --  False.
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Table       := No_Translation;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Table       := No_Translation;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String;
    --  Idem but returns an Unbounded_String
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Set;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Set;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return String;
    --  Idem with a Translation_Set
 
    function Parse
-     (Filename          : in String;
-      Translations      : in Translate_Set;
-      Cached            : in Boolean               := False;
-      Keep_Unknown_Tags : in Boolean               := False;
-      Lazy_Tag          : in Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : in Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+     (Filename          : String;
+      Translations      : Translate_Set;
+      Cached            : Boolean               := False;
+      Keep_Unknown_Tags : Boolean               := False;
+      Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
       return Unbounded_String;
    --  Idem with a Translation_Set
 
    function Translate
-     (Template     : in String;
-      Translations : in Translate_Table := No_Translation) return String;
+     (Template     : String;
+      Translations : Translate_Table := No_Translation) return String;
    --  Just translate the discrete variables in the Template string using the
    --  Translations table. This function does not parse the command tag (TABLE,
    --  IF, INCLUDE). All composite tags are replaced by the empty string.
 
    function Translate
-     (Template     : in String;
-      Translations : in Translate_Set) return String;
+     (Template     : String;
+      Translations : Translate_Set) return String;
    --  Idem with a Translation_Set
 
    procedure Release_Cache;
@@ -504,8 +504,8 @@ private
    --  Used by the parser.
 
    procedure Field
-     (T      : in     Tag;
-      N      : in     Positive;
+     (T      : Tag;
+      N      : Positive;
       Result :    out Tag;
       Found  :    out Boolean);
    --  Returns the N'th item in Tag. Found is set to False is there is no
@@ -532,7 +532,7 @@ private
 
    No_Translation : constant Translate_Table := (2 .. 1 => Null_Association);
 
-   procedure Print_Tree (Filename : in String);
+   procedure Print_Tree (Filename : String);
    --  Use for debugging purpose only, it will output the internal tree
    --  representation.
 
@@ -555,7 +555,7 @@ private
    procedure Finalize   (Set : in out Translate_Set);
    procedure Adjust     (Set : in out Translate_Set);
 
-   function Image (N : in Integer) return String;
+   function Image (N : Integer) return String;
    pragma Inline (Image);
    --  Returns N image without leading blank
 

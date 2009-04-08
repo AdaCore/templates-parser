@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2004-2006                          --
---                                 AdaCore                                  --
+--                     Copyright (C) 2004-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -36,7 +35,7 @@ package body Definitions is
    -- Parse --
    -----------
 
-   function Parse (Line : in String) return Tree is
+   function Parse (Line : String) return Tree is
       --  Format to parse: <name> = <ref|value>['|'<value>]
       K, L  : Natural;
       Name  : Unbounded_String;
@@ -94,7 +93,7 @@ package body Definitions is
    -- Print_Tree --
    ----------------
 
-   procedure Print_Tree (D : in Tree) is
+   procedure Print_Tree (D : Tree) is
       N : constant Node := D.N;
    begin
       Text_IO.Put (To_String (D.Name) & " = ");

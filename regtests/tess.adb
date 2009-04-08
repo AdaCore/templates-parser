@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -33,7 +32,7 @@ with Templates_Parser; use Templates_Parser;
 procedure Tess is
 
    function "+"
-     (Str : in String )
+     (Str : String)
       return Unbounded_String
       renames To_Unbounded_String;
 

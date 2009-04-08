@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -36,10 +35,14 @@ procedure Tag_Demo is
    use Ada.Text_IO;
    use Templates_Parser;
 
-   procedure Check_IV (Name : in String; T : in Tag);
+   procedure Check_IV (Name : String; T : Tag);
    --  Check Image/Value convertion
 
-   procedure Check_IV (Name : in String; T : in Tag) is
+   --------------
+   -- Check_IV --
+   --------------
+
+   procedure Check_IV (Name : String; T : Tag) is
       Img : constant String := Utils.Image (T);
       NT  : constant Tag := Utils.Value (Img);
    begin
@@ -52,7 +55,6 @@ procedure Tag_Demo is
          Put_Line ("   NOk");
       end if;
    end Check_IV;
-
 
    T1 : Tag;
    T2 : Tag;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2008, AdaCore                     --
+--                     Copyright (C) 1999-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -41,17 +41,17 @@ package body Cached_Files is
    procedure Growth;
    --  Growth the size (by Growing_Size places) of Files array
 
-   function Get (Filename : in String) return Natural;
+   function Get (Filename : String) return Natural;
    --  Look for Filename into the set and return its index. Returns 0 if
    --  filename was not found.
 
-   function Up_To_Date (T : in Tree) return Boolean;
+   function Up_To_Date (T : Tree) return Boolean;
    --  Returns True if the file tree is up to date (the templates files
    --  have not been modified on disk) or False otherwise.
 
    type Mark_Mode is (Used, Released);
 
-   procedure Update_Used_Counter (T : in out Static_Tree; Mode : in Mark_Mode);
+   procedure Update_Used_Counter (T : in out Static_Tree; Mode : Mark_Mode);
    --  Update C_Info used counter according to Mode
 
    ---------
@@ -59,8 +59,8 @@ package body Cached_Files is
    ---------
 
    procedure Add
-     (Filename : in     String;
-      T        : in     Tree;
+     (Filename : String;
+      T        : Tree;
       Old      :    out Tree)
    is
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
@@ -163,7 +163,7 @@ package body Cached_Files is
    ---------
 
    procedure Get
-     (Filename : in     String;
+     (Filename : String;
       Result   :    out Static_Tree)
    is
       N : constant Natural := Get (Filename);
@@ -178,7 +178,7 @@ package body Cached_Files is
       end if;
    end Get;
 
-   function Get (Filename : in String) return Natural is
+   function Get (Filename : String) return Natural is
 
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
 
@@ -287,7 +287,7 @@ package body Cached_Files is
    -- Up_To_Date --
    ----------------
 
-   function Up_To_Date (T : in Tree) return Boolean is
+   function Up_To_Date (T : Tree) return Boolean is
       use Configuration;
 
       P      : Tree;
@@ -322,7 +322,7 @@ package body Cached_Files is
    -------------------------
 
    procedure Update_Used_Counter
-     (T : in out Static_Tree; Mode : in Mark_Mode)
+     (T : in out Static_Tree; Mode : Mark_Mode)
    is
       P : Tree;
    begin

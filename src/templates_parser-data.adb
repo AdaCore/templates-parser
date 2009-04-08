@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2008, AdaCore                     --
+--                     Copyright (C) 1999-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -35,19 +35,19 @@ package body Data is
    -- Parse --
    -----------
 
-   function Parse (Line : in String) return Tree is
+   function Parse (Line : String) return Tree is
 
       Begin_Tag : constant String := To_String (Templates_Parser.Begin_Tag);
       End_Tag   : constant String := To_String (Templates_Parser.End_Tag);
 
-      function Build (Line : in String) return Tree;
+      function Build (Line : String) return Tree;
       --  Recursive function to build the tree
 
       -----------
       -- Build --
       -----------
 
-      function Build (Line : in String) return Tree is
+      function Build (Line : String) return Tree is
          Start, Stop : Natural;
       begin
          if Line = "" then
@@ -100,7 +100,7 @@ package body Data is
    -- Print_Tree --
    ----------------
 
-   procedure Print_Tree (D : in Tree) is
+   procedure Print_Tree (D : Tree) is
       N  : Tree := D;
       NL : Boolean := False;
    begin

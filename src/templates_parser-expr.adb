@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2008, AdaCore                     --
+--                     Copyright (C) 1999-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -51,7 +51,7 @@ package body Expr is
    -- Image --
    -----------
 
-   function Image (O : in Ops) return String is
+   function Image (O : Ops) return String is
    begin
       case O is
          when O_And   => return "and";
@@ -66,7 +66,7 @@ package body Expr is
       end case;
    end Image;
 
-   function Image (O : in U_Ops) return String is
+   function Image (O : U_Ops) return String is
    begin
       case O is
          when O_Not => return "not";
@@ -77,7 +77,7 @@ package body Expr is
    -- Parse --
    -----------
 
-   function Parse (Expression : in String) return Tree is
+   function Parse (Expression : String) return Tree is
 
       Start_Index : Natural := Expression'First;
       Index       : Natural := Expression'First;
@@ -101,7 +101,7 @@ package body Expr is
 
       Current_Token : Token;
 
-      procedure Error (Mess : in String);
+      procedure Error (Mess : String);
       pragma No_Return (Error);
       --  Raises Internal_Error with the column of the condition
 
@@ -121,7 +121,7 @@ package body Expr is
       -- Error --
       -----------
 
-      procedure Error (Mess : in String) is
+      procedure Error (Mess : String) is
       begin
          raise Internal_Error
            with "col" & Integer'Image (Start_Index) & " condition, " & Mess;
@@ -420,7 +420,7 @@ package body Expr is
    -- Print_Tree --
    ----------------
 
-   procedure Print_Tree (E : in Tree) is
+   procedure Print_Tree (E : Tree) is
    begin
       case E.Kind is
          when Value =>

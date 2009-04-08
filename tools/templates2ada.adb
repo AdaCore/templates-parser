@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2006-2008, AdaCore                     --
+--                     Copyright (C) 2006-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -109,33 +109,33 @@ procedure Templates2Ada is
    All_Templates : Maps.Map;
    All_Variables : Sets.Set;
 
-   procedure Foreach_Template (Relative_Directory : in String);
+   procedure Foreach_Template (Relative_Directory : String);
    --  Process each template in Directory (recursively if global options are
    --  set appropriately).
 
-   procedure Process_Template (Relative_Name : in String);
+   procedure Process_Template (Relative_Name : String);
    --  Process a given templates file
 
    procedure Output_File;
    --  Create the output file
 
    procedure Next_Word
-     (Str       : in     String;
-      Index     : in     Integer;
+     (Str       : String;
+      Index     : Integer;
       Starts_At :    out Integer;
       Ends_At   :    out Integer);
    --  Find the next word. This will skip all blank spaces at Index (and
    --  update Starts_At appropriately), then move Ends_At to the last
    --  non-blank character in the word.
 
-   function Next_Line (Str : in String; Index : in Integer) return Integer;
+   function Next_Line (Str : String; Index : Integer) return Integer;
    --  Return the first character on the next line
 
    function Search
-     (Str     : in String;
-      Index   : in Integer;
-      Pattern : in String;
-      Forward : in Boolean := True) return Integer;
+     (Str     : String;
+      Index   : Integer;
+      Pattern : String;
+      Forward : Boolean := True) return Integer;
    --  Search the first occurrence of Pattern after Index. Return Integer'First
    --  if not found.
 
@@ -143,7 +143,7 @@ procedure Templates2Ada is
    -- Foreach_Template --
    ----------------------
 
-   procedure Foreach_Template (Relative_Directory : in String) is
+   procedure Foreach_Template (Relative_Directory : String) is
       use type Directories.File_Kind;
       Search  : Directories.Search_Type;
       Dir_Ent : Directories.Directory_Entry_Type;
@@ -201,7 +201,7 @@ procedure Templates2Ada is
    -- Next_Line --
    ---------------
 
-   function Next_Line (Str : in String; Index : in Integer) return Integer is
+   function Next_Line (Str : String; Index : Integer) return Integer is
       Result : Integer := Index;
    begin
       while Result <= Str'Last
@@ -217,8 +217,8 @@ procedure Templates2Ada is
    ---------------
 
    procedure Next_Word
-     (Str       : in     String;
-      Index     : in     Integer;
+     (Str       : String;
+      Index     : Integer;
       Starts_At :    out Integer;
       Ends_At   :    out Integer) is
    begin
@@ -315,7 +315,7 @@ procedure Templates2Ada is
    -- Process_Template --
    ----------------------
 
-   procedure Process_Template (Relative_Name : in String) is
+   procedure Process_Template (Relative_Name : String) is
       use Ada.Streams, Ada.Streams.Stream_IO;
       use Sets;
 
@@ -331,19 +331,19 @@ procedure Templates2Ada is
       Inserted                   : Boolean;
       pragma Unreferenced (Result);
 
-      procedure Process_Tag (Str : in String; S : in out Integer);
+      procedure Process_Tag (Str : String; S : in out Integer);
       --  Process some text surrounded by @_..._@, and add it to the proper
       --  output tags. S points to the "@_" in Str, and is modified to
       --  point after the closing "_@".
 
-      procedure Process_Tags (Str : in String; First, Last : in Integer);
+      procedure Process_Tags (Str : String; First, Last : Integer);
       --  Process all tags referenced in Str (First .. Last)
 
       -----------------
       -- Process_Tag --
       -----------------
 
-      procedure Process_Tag (Str : in String; S : in out Integer) is
+      procedure Process_Tag (Str : String; S : in out Integer) is
          First : Integer := S + 2;
          Last  : Integer := First;
          Parents_Nesting : Natural := 0;
@@ -408,7 +408,7 @@ procedure Templates2Ada is
          S := Last + 2;
       end Process_Tag;
 
-      procedure Process_Tags (Str : in String; First, Last : in Integer) is
+      procedure Process_Tags (Str : String; First, Last : Integer) is
          S : Integer := First;
       begin
          while S < Last loop
@@ -666,10 +666,10 @@ procedure Templates2Ada is
    ------------
 
    function Search
-     (Str     : in String;
-      Index   : in Integer;
-      Pattern : in String;
-      Forward : in Boolean := True) return Integer
+     (Str     : String;
+      Index   : Integer;
+      Pattern : String;
+      Forward : Boolean := True) return Integer
    is
       Result : Integer;
    begin

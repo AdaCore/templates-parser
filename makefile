@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2008, AdaCore                     #
+#                     Copyright (C) 2003-2009, AdaCore                     #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -108,16 +108,14 @@ ifeq ($(ENABLE_SHARED), true)
 		-XPRJ_BUILD=$(PRJ_BUILD) -Ptemplates_parser
 endif
 
+tp_xmlada.gpr: setup
+
 test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
-doc:
+doc: tp_xmlada.gpr
 	$(MAKE) -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
-
-# If tp_xmlada.gpr does not exist, use the dummy one (no XML/Ada required)
-tp_xmlada.gpr:
-	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 
 setup:
 ifeq ($(TP_XMLADA), Installed)

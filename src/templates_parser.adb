@@ -5123,20 +5123,32 @@ package body Templates_Parser is
 
             when Set_Stmt =>
                declare
-                  Name    : constant String := To_String (T.Def.Name);
-                  Pos     : Definitions.Def_Map.Cursor;
-                  Success : Boolean;
+                  N : Tree := T;
                begin
-                  Pos := D_Map.Find (Name);
+                  begin
+                     --  Handles all consecutive Set nodes
 
-                  if Definitions.Def_Map.Has_Element (Pos) then
-                     D_Map.Replace_Element (Pos, New_Item => T.Def.N);
-                  else
-                     D_Map.Insert (Name, T.Def.N, Pos, Success);
-                  end if;
+                     while N /= null and then N.Kind = Set_Stmt loop
+                        Handle_Set : declare
+                           Name    : constant String := To_String (N.Def.Name);
+                           Pos     : Definitions.Def_Map.Cursor;
+                           Success : Boolean;
+                        begin
+                           Pos := D_Map.Find (Name);
+
+                           if Definitions.Def_Map.Has_Element (Pos) then
+                              D_Map.Replace_Element (Pos, New_Item => N.Def.N);
+                           else
+                              D_Map.Insert (Name, N.Def.N, Pos, Success);
+                           end if;
+                        end Handle_Set;
+
+                        N := N.Next;
+                     end loop;
+                  end;
+
+                  Analyze (N, State);
                end;
-
-               Analyze (T.Next, State);
 
             when If_Stmt  =>
                if Is_True (Analyze (T.Cond)) then

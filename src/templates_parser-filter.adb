@@ -280,7 +280,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      if S = "" or not Is_Number (S) then
+      if S = "" or else not Is_Number (S) then
          return "";
       else
          return Image (abs Integer'Value (S));
@@ -1190,7 +1190,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      if S = "" or not Is_Number (S) then
+      if S = "" or else not Is_Number (S) then
          return "";
       else
          return Image (Integer'Value (S) * (-1));

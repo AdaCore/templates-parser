@@ -1556,7 +1556,7 @@ package body Templates_Parser is
                if Str (K) = '\' then
                   Escaped := not Escaped;
 
-               elsif Str (K) = '/' and not Escaped then
+               elsif Str (K) = '/' and then not Escaped then
                   return K;
 
                else
@@ -4099,7 +4099,7 @@ package body Templates_Parser is
 
             function F_And (L, R : String) return String is
             begin
-               if Is_True (L) and Is_True (R) then
+               if Is_True (L) and then Is_True (R) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4211,7 +4211,7 @@ package body Templates_Parser is
 
             function F_Or (L, R : String) return String is
             begin
-               if Is_True (L) or Is_True (R) then
+               if Is_True (L) or else Is_True (R) then
                   return "TRUE";
                else
                   return "FALSE";

@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2008, AdaCore                     #
+#                     Copyright (C) 2003-2009, AdaCore                     #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -138,10 +138,12 @@ check_mem: force
 	echo $@
 	$(GNAT) make -q -p -Pregtests check_mem -largs -lgmem
 	$(EXECP)/check_mem 2 > check_mem.res
-	gnatmem 3 -i gmem.out ./check_mem$(EXEEXT) 2 1248 > check_mem.run1
+	gnatmem 3 -i gmem.out $(EXECP)/check_mem$(EXEEXT) 2 1248 \
+		> check_mem.run1
 	grep "   Final" check_mem.run1 > run1
 	$(EXECP)/check_mem 30 >> check_mem.res
-	gnatmem 3 -i gmem.out ./check_mem$(EXEEXT) 30 1249 > check_mem.run2
+	gnatmem 3 -i gmem.out $(EXECP)/check_mem$(EXEEXT) 30 1249 \
+		> check_mem.run2
 	grep "   Final" check_mem.run2 > run2
 	-diff -c -w run1 run2 1>> alldiffs 2>> alldiffs
 

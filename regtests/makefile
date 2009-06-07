@@ -69,7 +69,7 @@ MAIN_TESTS     = testme print_tree filter
 
 EXECP          = ../$(BDIR)/$(LIBRARY_TYPE)/rbin
 
-# Add relocatable DLL into the PATH for Windows
+#  Add relocatable DLL into the PATH for Windows
 
 ifeq (${OS}, Windows_NT)
 export PATH := $(EXECP)/../lib:../$(BDIR)/$(LIBRARY_TYPE)/lib:${PATH}

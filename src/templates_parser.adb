@@ -996,9 +996,10 @@ package body Templates_Parser is
    ---------
 
    function "&" (T : Tag; Value : String) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'
-          (Templates_Parser.Value, null, V => To_Unbounded_String (Value));
+      Item : constant Tag_Node_Access :=
+               new Tag_Node'
+                 (Templates_Parser.Value, null,
+                  V => To_Unbounded_String (Value));
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
@@ -1034,10 +1035,10 @@ package body Templates_Parser is
    end "&";
 
    function "&" (Value : String; T : Tag) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'
-          (Templates_Parser.Value, T.Data.Head,
-           V => To_Unbounded_String (Value));
+      Item : constant Tag_Node_Access :=
+               new Tag_Node'
+                 (Templates_Parser.Value, T.Data.Head,
+                  V => To_Unbounded_String (Value));
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
@@ -1072,8 +1073,8 @@ package body Templates_Parser is
    end "&";
 
    function "&" (T : Tag; Value : Tag) return Tag is
-      Item   : constant Tag_Node_Access
-        := new Tag_Node'(Value_Set, null, new Tag'(Value));
+      Item   : constant Tag_Node_Access :=
+                 new Tag_Node'(Value_Set, null, new Tag'(Value));
       T_Size : constant Natural := Size (Value);
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
@@ -1176,10 +1177,10 @@ package body Templates_Parser is
    ---------
 
    function "+" (Value : String) return Tag is
-      Item : constant Tag_Node_Access
-        := new Tag_Node'(Templates_Parser.Value,
-                         null,
-                         V => To_Unbounded_String (Value));
+      Item : constant Tag_Node_Access :=
+               new Tag_Node'(Templates_Parser.Value,
+                             null,
+                             V => To_Unbounded_String (Value));
    begin
       return (Ada.Finalization.Controlled with
               Ref_Count    => new Integer'(1),
@@ -1377,9 +1378,10 @@ package body Templates_Parser is
          Set_Separator  (T, Separator);
       end if;
 
-      return Association'(Composite,
-                          Variable   => To_Unbounded_String (Variable),
-                          Comp_Value => T);
+      return Association'
+        (Composite,
+         Variable   => To_Unbounded_String (Variable),
+         Comp_Value => T);
    end Assoc;
 
    -----------
@@ -1402,12 +1404,12 @@ package body Templates_Parser is
       function Is_Internal (Name : String) return Internal_Tag;
       --  Returns True if Name is an internal tag
 
-      F_Sep : constant Natural
-        := Strings.Fixed.Index (Str, ":", Strings.Backward);
+      F_Sep : constant Natural :=
+                Strings.Fixed.Index (Str, ":", Strings.Backward);
       --  Last filter separator
 
-      A_Sep : Natural
-        := Strings.Fixed.Index (Str, "'", Strings.Backward);
+      A_Sep : Natural :=
+                Strings.Fixed.Index (Str, "'", Strings.Backward);
       --  Attribute separator
 
       -------------------
@@ -1425,8 +1427,8 @@ package body Templates_Parser is
          end if;
 
          declare
-            A_Name : constant String
-              := Characters.Handling.To_Lower (Tag (Start .. Stop));
+            A_Name : constant String :=
+                       Characters.Handling.To_Lower (Tag (Start .. Stop));
          begin
             if A_Name = "length" then
                return (Length, 0);
@@ -1524,8 +1526,7 @@ package body Templates_Parser is
             Count : Integer := 0;
          begin
             while Pos > Str'First
-              and then
-                (Str (Pos) /= C or else Count /= 0)
+              and then (Str (Pos) /= C or else Count /= 0)
             loop
                if Pos > Str'First and then Str (Pos - 1) /= '\' then
                   --  This is not a quoted character
@@ -1677,8 +1678,8 @@ package body Templates_Parser is
                   Name : constant String := Filter (Filter'First .. P1 - 1);
                   Mode : constant F.Mode := F.Mode_Value (Name);
 
-                  Parameter : constant String
-                    := No_Quote (Filter (P1 + 1 .. P2 - 1));
+                  Parameter : constant String :=
+                                No_Quote (Filter (P1 + 1 .. P2 - 1));
                begin
                   case F.Parameter (Mode) is
                      when F.Regexp =>
@@ -2230,9 +2231,6 @@ package body Templates_Parser is
               (Tag, Tag_Access);
 
             procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Node_Access, Access_Tag_Node_Access);
-
-            procedure Free is new Ada.Unchecked_Deallocation
               (Tag_Data, Tag_Data_Access);
 
             P, N : Tag_Node_Access;
@@ -2434,8 +2432,7 @@ package body Templates_Parser is
    begin
       return S'Length > 0
         and then Is_Subset
-          (To_Set (S),
-           Constants.Decimal_Digit_Set or To_Set ("-"));
+          (To_Set (S), Constants.Decimal_Digit_Set or To_Set ("-"));
    end Is_Number;
 
    ----------
@@ -2539,8 +2536,7 @@ package body Templates_Parser is
       function Parse
         (Mode    : Parse_Mode;
          In_If   : Boolean;
-         No_Read : Boolean := False)
-         return Tree;
+         No_Read : Boolean := False) return Tree;
       --  Get a line in File and returns the Tree
 
       --------------------------
@@ -2872,8 +2868,7 @@ package body Templates_Parser is
       -----------------------------
 
       function Load_Include_Parameters
-        (Parameters : String)
-         return Include_Parameters
+        (Parameters : String) return Include_Parameters
       is
          procedure Load_Include_Named_Parameters (Parameters : String);
          --  Load parameters specified with a name:
@@ -2989,10 +2984,10 @@ package body Templates_Parser is
                   Named := True;
 
                   declare
-                     Ind_Str     : constant String
-                       := Strings.Fixed.Trim
-                           (Parameter (Parameter'First .. Sep - 1),
-                            Strings.Both);
+                     Ind_Str     : constant String :=
+                                     Strings.Fixed.Trim
+                                       (Parameter (Parameter'First .. Sep - 1),
+                                        Strings.Both);
                      First, Last : Natural;
                      Next_Last   : Natural;
                      pragma Unreferenced (Next_Last);
@@ -3153,7 +3148,6 @@ package body Templates_Parser is
             -------------
 
             procedure Rewrite (T : Tree; Last, In_Table : Boolean) is
-               use type Data.Tree;
                N : Tree := T;
                D : Data.Tree;
             begin
@@ -3235,9 +3229,9 @@ package body Templates_Parser is
 
       begin
          if not No_Read
-           and then (Mode /= Parse_Section
-                     and then Mode /= Parse_Elsif
-                     and then Mode /= Parse_Block)
+           and then Mode /= Parse_Section
+           and then Mode /= Parse_Elsif
+           and then Mode /= Parse_Block
          then
             if Get_Next_Line then
                return null;
@@ -3494,7 +3488,7 @@ package body Templates_Parser is
 
             if T.Terminate_Sections and then T.Blocks_Count >= 1 then
                declare
-                  Size : Natural := T.Blocks.Sections_Count;
+                  Size : constant Natural := T.Blocks.Sections_Count;
                   Max  : Natural := Size;
                   B    : Tree    := T.Blocks.Next;
                begin
@@ -3910,11 +3904,11 @@ package body Templates_Parser is
          Parent        : Parse_State_Access;
       end record;
 
-      Empty_State : constant Parse_State
-        := ((1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
-            Null_Unbounded_String, Null_Unbounded_String, 0,
-            No_Parameter, Filter.No_Include_Parameters,
-            Empty_Block_State, null);
+      Empty_State : constant Parse_State :=
+                      ((1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
+                       Null_Unbounded_String, Null_Unbounded_String, 0,
+                       No_Parameter, Filter.No_Include_Parameters,
+                       Empty_Block_State, null);
 
       Results : Unbounded_String := Null_Unbounded_String;
 
@@ -4047,10 +4041,7 @@ package body Templates_Parser is
          -------------
 
          procedure Analyze (D : Data.Tree) is
-            use type Data.Tree;
-
             T : Data.Tree := D;
-
          begin
             while T /= null loop
 
@@ -4327,20 +4318,20 @@ package body Templates_Parser is
                end if;
             end F_Xor;
 
-            Op_Table : constant array (Expr.Ops) of Ops_Fct
-              := (Expr.O_And   => F_And'Access,
-                  Expr.O_Or    => F_Or'Access,
-                  Expr.O_Xor   => F_Xor'Access,
-                  Expr.O_Sup   => F_Sup'Access,
-                  Expr.O_Inf   => F_Inf'Access,
-                  Expr.O_Esup  => F_Esup'Access,
-                  Expr.O_Einf  => F_Einf'Access,
-                  Expr.O_Equal => F_Equ'Access,
-                  Expr.O_Diff  => F_Diff'Access,
-                  Expr.O_In    => F_In'Access);
+            Op_Table : constant array (Expr.Ops) of Ops_Fct :=
+                         (Expr.O_And   => F_And'Access,
+                          Expr.O_Or    => F_Or'Access,
+                          Expr.O_Xor   => F_Xor'Access,
+                          Expr.O_Sup   => F_Sup'Access,
+                          Expr.O_Inf   => F_Inf'Access,
+                          Expr.O_Esup  => F_Esup'Access,
+                          Expr.O_Einf  => F_Einf'Access,
+                          Expr.O_Equal => F_Equ'Access,
+                          Expr.O_Diff  => F_Diff'Access,
+                          Expr.O_In    => F_In'Access);
 
-            U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct
-              := (Expr.O_Not => F_Not'Access);
+            U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
+                           (Expr.O_Not => F_Not'Access);
 
          begin
             case E.Kind is
@@ -4369,7 +4360,6 @@ package body Templates_Parser is
          function Flatten_Parameters
            (I : Include_Parameters) return Filter.Include_Parameters
          is
-            use type Data.Tree;
             F : Filter.Include_Parameters;
          begin
             for K in I'Range loop
@@ -4613,7 +4603,6 @@ package body Templates_Parser is
                end Check;
 
                function Check (T : Data.Tree) return Natural is
-                  use type Data.Tree;
                   use type Data.NKind;
                   Iteration : Natural := Natural'First;
                   D         : Data.Tree := T;
@@ -4646,7 +4635,6 @@ package body Templates_Parser is
                end Check;
 
                function Check (I : Include_Parameters) return Natural is
-                  use type Data.Tree;
                   Iteration : Natural := Natural'First;
                begin
                   for K in I'Range loop
@@ -4742,7 +4730,6 @@ package body Templates_Parser is
            (Var   : Tag_Var;
             State : Parse_State) return String
          is
-            use type Data.Tree;
             use type Data.NKind;
          begin
             pragma Assert (Var.N /= -1);
@@ -4891,11 +4878,9 @@ package body Templates_Parser is
          function Translate
            (Var : Tag_Var; State : Parse_State) return String
          is
-            use type Data.Tree;
             C        : aliased Filter.Filter_Context :=
                          (Translations, Lazy_Tag, State.F_Params);
             D_Pos    : Definitions.Def_Map.Cursor;
-            Pos      : Association_Map.Cursor;
             Up_Value : Natural := 0;
          begin
             D_Pos := Definitions.Def_Map.Find
@@ -4904,8 +4889,8 @@ package body Templates_Parser is
             if Definitions.Def_Map.Has_Element (D_Pos) then
                --  We have a definition for this variable in the template
                declare
-                  N : Definitions.Node
-                    := Definitions.Def_Map.Element (D_Pos);
+                  N : constant Definitions.Node :=
+                        Definitions.Def_Map.Element (D_Pos);
                   V : Tag_Var := Var;
                begin
                   case N.Kind is
@@ -5374,10 +5359,9 @@ package body Templates_Parser is
                   begin
                      Last := 0; --  Removes include filename from the buffer
 
-                     S_File
-                       := Load (Build_Include_Pathname
-                                  (To_String (State.Filename), Filename),
-                                Cached, True);
+                     S_File := Load (Build_Include_Pathname
+                                     (To_String (State.Filename), Filename),
+                                     Cached, True);
 
                      if S_File /= T.File then
                         if Cached then

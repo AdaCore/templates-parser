@@ -104,8 +104,7 @@ procedure Testme is
          TP.Assoc ("VAR2",
                    +"a table" & "with" & "many" & "values" & "to" & "be"
                    & "displayed" & "one" & "by" & "one"),
-         TP.Assoc ("VAR3",
-                   +"one" & "two" & "three"),
+         TP.Assoc ("VAR3", +"one" & "two" & "three"),
          TP.Assoc ("VAR4", ""),
          TP.Assoc ("VAR5", "T R uE"),
          TP.Assoc ("VAR6", "A"),

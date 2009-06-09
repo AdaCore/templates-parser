@@ -255,8 +255,8 @@ package body Expr is
             end loop;
 
             declare
-               Token_Image : constant String
-                 := To_Lower (Expression (I .. Index - 1));
+               Token_Image : constant String :=
+                               To_Lower (Expression (I .. Index - 1));
             begin
                if Token_Image = "not" then
                   Current_Token := (Kind => Unary_Op, Un_Op => O_Not);

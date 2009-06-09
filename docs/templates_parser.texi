@@ -840,9 +840,9 @@ Here is the templates parser API for defining your own custom filters:
 
 @TPEXP{      @b{type} Filter_Context @b{is record}
       Translations : Translate_Set;
-      Lazy_Tag     : Dynamic.Lazy_Tag_Access;      
+      Lazy_Tag     : Dynamic.Lazy_Tag_Access;
    @b{end record};
-   
+
    @b{type} Callback @b{is access function}
      (Value      : @b{in} String;
       Parameters : @b{in} String;
@@ -853,7 +853,7 @@ Here is the templates parser API for defining your own custom filters:
      (Value   : @b{in} String;
       Context : @b{in} Filter_Context) @b{return} String;
    @i{--  User's filter callback}
-   
+
    @b{procedure} Register_Filter
      (Name    : @b{in} String;
       Handler : @b{in} Callback);
@@ -1254,11 +1254,11 @@ This is the conditional statement. The complete form is:
 
 @noindent
 The part1 one will be parsed if expression1 evaluate to TRUE, part2
-will be parsed if expression2 evaluate to TRUE and the part3 will 
+will be parsed if expression2 evaluate to TRUE and the part3 will
 be parse in any other case. The @code{ELSIF} and @code{ELSE} parts are
 optional.
 
-The expression here is composed of Boolean variables 
+The expression here is composed of Boolean variables
 and/or Boolean expression. Recognized operators are:
 
 @cindex Command, IF expression
@@ -1489,7 +1489,7 @@ has a level value of 2.  It will be replaced by 0 outside a table statement.
 @end table
 
 @noindent
-Let's have a look at a more complex example with mixed IF and TABLE 
+Let's have a look at a more complex example with mixed IF and TABLE
 statements.
 
 @noindent
@@ -1519,7 +1519,7 @@ Let's see what happens for a matrix tag:
 
 @enumerate
 
-@item Inside a table of level 2 (a TABLE statement inside a TABLE 
+@item Inside a table of level 2 (a TABLE statement inside a TABLE
 statement).
 
 @noindent
@@ -1824,7 +1824,6 @@ generate the following Ada package from this example:
    Status : @b{constant} String := "STATUS";
 @b{end} Templates.Block1;}
 
-
 @c --------------------------------------------------------------------------
 @c -- Templates2Ada -- Running templates2ada
 @c --------------------------------------------------------------------------
@@ -1951,7 +1950,7 @@ This documentation is not duplicated here
 @code{templatespp} is a pre-processor based on the template parser. It is
 generally used from scripts to process files and generate other files. One
 of the possible uses, for instance, is to write the CSS (style-sheet) of a
-web site as a template file (for instance @file{mycss.tcss}), and use 
+web site as a template file (for instance @file{mycss.tcss}), and use
 template parser structures in there. This is a good way to share colors for
 instance, or to name constants, as is often done in Ada code.
 

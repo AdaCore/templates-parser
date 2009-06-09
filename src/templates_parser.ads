@@ -471,8 +471,6 @@ private
       end case;
    end record;
 
-   type Access_Tag_Node_Access is access Tag_Node_Access;
-
    type Tag_Node_Arr is array (Positive range <>) of Tag_Node_Access;
    type Tag_Node_Arr_Access is access Tag_Node_Arr;
 
@@ -527,8 +525,8 @@ private
       end case;
    end record;
 
-   Null_Association : constant Association
-     := (Std, Null_Unbounded_String, Null_Unbounded_String);
+   Null_Association : constant Association :=
+                        (Std, Null_Unbounded_String, Null_Unbounded_String);
 
    No_Translation : constant Translate_Table := (2 .. 1 => Null_Association);
 

@@ -446,7 +446,7 @@ package body Filter is
 
    procedure Check_Null_Parameter (P : Parameter_Data) is
    begin
-      if P.Mode /= Void then
+      if P /= No_Parameter then
          raise Template_Error with "no parameter allowed in this filter";
       end if;
    end Check_Null_Parameter;
@@ -854,17 +854,21 @@ package body Filter is
 
    function Image (P : Parameter_Data) return String is
    begin
-      case P.Mode is
-         when Void         => return "";
-         when Str          => return '(' & To_String (P.S) & ')';
-         when Regexp       => return '(' & To_String (P.R_Str) & ')';
-         when Regpat       =>
-            return '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
-         when Slice  =>
-            return '(' & Image (P.First) & " .. " & Image (P.Last) & ')';
-         when User_Callback =>
-            return '(' & To_String (P.P) & ')';
-      end case;
+      if P = No_Parameter then
+         return "";
+
+      else
+         case P.Mode is
+            when Str          => return '(' & To_String (P.S) & ')';
+            when Regexp       => return '(' & To_String (P.R_Str) & ')';
+            when Regpat       => return
+                 '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
+            when Slice        =>
+               return '(' & Image (P.First) & " .. " & Image (P.Last) & ')';
+            when User_Callback =>
+               return '(' & To_String (P.P) & ')';
+         end case;
+      end if;
    end Image;
 
    --------------

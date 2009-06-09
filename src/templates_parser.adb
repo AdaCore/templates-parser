@@ -274,18 +274,15 @@ package body Templates_Parser is
          end case;
       end record;
 
-      type Parameter_Mode is (Void, Str, Regexp, Regpat, Slice, User_Callback);
+      type Parameter_Mode is (Str, Regexp, Regpat, Slice, User_Callback);
 
       function Parameter (Mode : Filter.Mode) return Parameter_Mode;
       --  Returns the parameter mode for the given filter
 
       type Pattern_Matcher_Access is access GNAT.Regpat.Pattern_Matcher;
 
-      type Parameter_Data (Mode : Parameter_Mode := Void) is record
+      type Parameter_Data (Mode : Parameter_Mode := Slice) is record
          case Mode is
-            when Void =>
-               null;
-
             when Str =>
                S : Unbounded_String;
 
@@ -308,7 +305,8 @@ package body Templates_Parser is
          end case;
       end record;
 
-      No_Parameter : constant Parameter_Data := Parameter_Data'(Mode => Void);
+      No_Parameter : constant Parameter_Data :=
+                       Parameter_Data'(Slice, 0, -1);
 
       function Image (P : Parameter_Data) return String;
       --  Returns parameter string representation
@@ -1676,7 +1674,7 @@ package body Templates_Parser is
                                        P       => Null_Unbounded_String));
                else
                   return (F.Handle (Filter),
-                          F.Parameter_Data'(Mode => F.Void));
+                          Templates_Parser.Filter.No_Parameter);
                end if;
 
             else
@@ -1756,10 +1754,6 @@ package body Templates_Parser is
                                   (F.User_Callback,
                                    F.User_Handle (Name),
                                    P => To_Unbounded_String (Parameter)));
-
-                     when F.Void =>
-                        pragma Warnings (Off);
-                        null;
                   end case;
                end;
             end if;

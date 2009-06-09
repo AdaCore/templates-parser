@@ -493,9 +493,9 @@ private
       Data      : Tag_Data_Access;
    end record;
 
-   procedure Initialize (T : in out Tag);
-   procedure Finalize   (T : in out Tag);
-   procedure Adjust     (T : in out Tag);
+   overriding procedure Initialize (T : in out Tag);
+   overriding procedure Finalize   (T : in out Tag);
+   overriding procedure Adjust     (T : in out Tag);
 
    subtype Indices is Dynamic.Path;
    --  Set of indices that reference a specific item into a composite tag.
@@ -549,9 +549,9 @@ private
       Set       : Map_Access;
    end record;
 
-   procedure Initialize (Set : in out Translate_Set);
-   procedure Finalize   (Set : in out Translate_Set);
-   procedure Adjust     (Set : in out Translate_Set);
+   overriding procedure Initialize (Set : in out Translate_Set);
+   overriding procedure Finalize   (Set : in out Translate_Set);
+   overriding procedure Adjust     (Set : in out Translate_Set);
 
    function Image (N : Integer) return String;
    pragma Inline (Image);

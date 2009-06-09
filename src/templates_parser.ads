@@ -29,6 +29,7 @@ with Ada.Finalization;
 with Ada.Strings.Unbounded;
 
 private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Indefinite_Hashed_Sets;
 private with Ada.Strings.Hash;
 
 with Templates_Parser_Tasking;
@@ -474,6 +475,11 @@ private
    type Tag_Node_Arr is array (Positive range <>) of Tag_Node_Access;
    type Tag_Node_Arr_Access is access Tag_Node_Arr;
 
+   package Tag_Values is new Containers.Indefinite_Hashed_Sets
+     (String, Strings.Hash, "=");
+   type Tag_Values_Access is access Tag_Values.Set;
+   --  Map for all tag values to speed-up "in" operator
+
    type Tag_Data is record
       Count        : Natural;  -- Number of items
       Min, Max     : Natural;  -- Min/Max item's sizes, equal to 1 if leaf
@@ -484,6 +490,7 @@ private
       Tag_Nodes    : Tag_Node_Arr_Access;
       --  This array will be setup during parsing to ensure fast iteration
       --  in reverse order.
+      Values       : Tag_Values_Access;
    end record;
 
    type Tag_Data_Access is access Tag_Data;

@@ -1014,7 +1014,8 @@ package body Templates_Parser is
             Separator    => To_Unbounded_String (Default_Separator),
             Head         => Item,
             Last         => Item,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, Data => T.Data);
 
@@ -1028,7 +1029,8 @@ package body Templates_Parser is
             Separator    => T.Data.Separator,
             Head         => T.Data.Head,
             Last         => Item,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, Data => T.Data);
       end if;
@@ -1053,7 +1055,8 @@ package body Templates_Parser is
             Separator    => To_Unbounded_String (Default_Separator),
             Head         => Item,
             Last         => Item,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
 
@@ -1066,7 +1069,8 @@ package body Templates_Parser is
             Separator    => T.Data.Separator,
             Head         => Item,
             Last         => T.Data.Last,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
       end if;
@@ -1090,7 +1094,8 @@ package body Templates_Parser is
             Separator    => To_Unbounded_String ((1 => ASCII.LF)),
             Head         => Item,
             Last         => Item,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
 
@@ -1107,7 +1112,8 @@ package body Templates_Parser is
             Separator    => T.Data.Separator,
             Head         => T.Data.Head,
             Last         => Item,
-            Tag_Nodes    => null);
+            Tag_Nodes    => null,
+            Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
       end if;
@@ -1192,7 +1198,8 @@ package body Templates_Parser is
                  Separator    => To_Unbounded_String (Default_Separator),
                  Head         => Item,
                  Last         => Item,
-                 Tag_Nodes    => null));
+                 Tag_Nodes    => null,
+                 Values       => null));
    end "+";
 
    function "+" (Value : Character) return Tag is
@@ -2233,6 +2240,9 @@ package body Templates_Parser is
             procedure Free is new Ada.Unchecked_Deallocation
               (Tag_Data, Tag_Data_Access);
 
+            procedure Free is new Ada.Unchecked_Deallocation
+              (Tag_Values.Set, Tag_Values_Access);
+
             P, N : Tag_Node_Access;
          begin
             P := T.Data.Head;
@@ -2254,6 +2264,7 @@ package body Templates_Parser is
 
             Free (T.Ref_Count);
             Free (T.Data.Tag_Nodes);
+            Free (T.Data.Values);
             Free (T.Data);
          end;
 
@@ -4175,35 +4186,39 @@ package body Templates_Parser is
             function F_In   (L, R : Expr.Tree) return String is
                use type Expr.NKind;
 
-               function Check
-                 (Value : String; N : Tag_Node_Access) return Boolean;
+               procedure Build_Set (Data : in out Tag_Data);
                --  Returns TRUE or FALSE depending if Value is found in the tag
 
-               -----------
-               -- Check --
-               -----------
+               ---------------
+               -- Build_Set --
+               ---------------
 
-               function Check
-                 (Value : String; N : Tag_Node_Access) return Boolean
-               is
-                  L : Tag_Node_Access := N;
-               begin
-                  while L /= null loop
-                     if L.Kind = Templates_Parser.Value
-                       and then Value = To_String (L.V)
-                     then
-                        return True;
+               procedure Build_Set (Data : in out Tag_Data) is
 
-                     elsif L.Kind = Value_Set then
-                        if Check (Value, L.VS.Data.Head) then
-                           return True;
+                  procedure Process (N : Tag_Node_Access);
+                  --  Insert all values pointed to by N
+
+                  -------------
+                  -- Process --
+                  -------------
+
+                  procedure Process (N : Tag_Node_Access) is
+                     L : Tag_Node_Access := N;
+                  begin
+                     while L /= null loop
+                        if L.Kind = Templates_Parser.Value then
+                           Data.Values.Include (To_String (L.V));
+
+                        elsif L.Kind = Value_Set then
+                           Process (L.VS.Data.Head);
                         end if;
-                     end if;
-                     L := L.Next;
-                  end loop;
+                        L := L.Next;
+                     end loop;
+                  end Process;
 
-                  return False;
-               end Check;
+               begin
+                  Process (Data.Head);
+               end Build_Set;
 
             begin
                if R.Kind = Expr.Var then
@@ -4220,7 +4235,13 @@ package body Templates_Parser is
                            end if;
 
                         when Composite =>
-                           if Check (LL, Tk.Comp_Value.Data.Head) then
+                           if Tk.Comp_Value.Data.Values = null then
+                              --  Build map of values for fast test
+                              Tk.Comp_Value.Data.Values := new Tag_Values.Set;
+                              Build_Set (Tk.Comp_Value.Data.all);
+                           end if;
+
+                           if Tk.Comp_Value.Data.Values.Contains (LL) then
                               return "TRUE";
                            else
                               return "FALSE";

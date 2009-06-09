@@ -1,0 +1,61 @@
+
+@@SET@@ VALUE = "A4.2"
+@@SET@@ NOWHERE = "XxX"
+@@SET@@ SONE = "1"
+@@SET@@ STWO = "two"
+
+@@IF@@ @_ONE_@ in @_INV_@
+  ONE in INV : OK
+@@ELSE@@
+  ONE in INV : NOK
+@@END_IF@@
+
+@@IF@@ @_SONE_@ in @_INV_@
+  SONE in INV : OK
+@@ELSE@@
+  SONE in INV : NOK
+@@END_IF@@
+
+@@IF@@ @_ONE_@ in @_V5_@
+  ONE in V5 : NOK
+@@ELSE@@
+  ONE in V5 : OK
+@@END_IF@@
+
+@@IF@@ @_STWO_@ in @_V5_@
+  STWO in V5 : OK
+@@ELSE@@
+  STWO in V5 : NOK
+@@END_IF@@
+
+@@IF@@ @_STWO_@ in @_V6_@
+  STWO in V6 : NOK
+@@ELSE@@
+  STWO in V6 : OK
+@@END_IF@@
+
+@@IF@@ @_VALUE_@ in @_MAT_@
+  VALUE in MAT : OK
+@@ELSE@@
+  VALUE in MAT : NOK
+@@END_IF@@
+
+@@IF@@ "A3.3" in @_MAT_@
+  A3.3 in MAT : OK
+@@ELSE@@
+  A3.3 in MAT : NOK
+@@END_IF@@
+
+@@IF@@ @_NOWHERE_@ in @_MAT_@
+  NOWHERE in MAT : NOK
+@@ELSE@@
+  NOWHERE in MAT : OK
+@@END_IF@@
+
+@@TABLE@@
+  @@IF@@ @_VAR7_@ in @_MAT_@
+    @_VAR7_@ found
+  @@ELSE@@
+    @_VAR7_@ not found
+  @@END_IF@@
+@@END_TABLE@@

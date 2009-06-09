@@ -42,7 +42,7 @@ package body Expr is
    --  <logic_op> ::= "and" | "or" | "xor"
    --  <comp_op>  ::= "<" | "<=" | "=" | ">=" | ">" | "/="
 
-   subtype Comp_Op  is Ops range O_Sup .. O_Diff;
+   subtype Comp_Op  is Ops range O_Sup .. O_In;
    subtype Logic_Op is Ops range O_And .. O_Xor;
 
    Separator : constant Character_Set := Blank or To_Set ("<>=/()");
@@ -63,6 +63,7 @@ package body Expr is
          when O_Einf  => return "<=";
          when O_Equal => return "=";
          when O_Diff  => return "/=";
+         when O_In    => return "in";
       end case;
    end Image;
 
@@ -268,6 +269,9 @@ package body Expr is
 
                elsif Token_Image = "xor" then
                   Current_Token := (Kind => Binary_Op, Bin_Op => O_Xor);
+
+               elsif Token_Image = "in" then
+                  Current_Token := (Kind => Binary_Op, Bin_Op => O_In);
 
                elsif Token_Image'Length > Length (Begin_Tag)
                  and then

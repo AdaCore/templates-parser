@@ -1292,6 +1292,11 @@ Returns TRUE if A or B is TRUE and FALSE otherwise.
 @item A xor B
 Returns TRUE if either A or B (but not both) is TRUE and FALSE otherwise.
 
+@item A in B
+Returns TRUE if A is found into the composite tag B and FALSE
+otherwise. B must be a tag. If B contains a single value then this
+expression is equivalent to (A = B).
+
 @item not A
 Returns TRUE if either A is FALSE and FALSE otherwise.
 @end table

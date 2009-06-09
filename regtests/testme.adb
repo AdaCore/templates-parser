@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                      Copyright (C) 2005-2009, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -110,6 +109,7 @@ procedure Testme is
          TP.Assoc ("VAR4", ""),
          TP.Assoc ("VAR5", "T R uE"),
          TP.Assoc ("VAR6", "A"),
+         TP.Assoc ("VAR7", +"ZZ" & "A3.4" & "A4.2" & "again!" & "A2.2" & "!"),
          TP.Assoc ("CLASS", C),
          TP.Assoc ("MEMBER", MF),
          TP.Assoc ("COND1", False),

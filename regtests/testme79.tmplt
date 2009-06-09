@@ -1,0 +1,4 @@
+
+@@IF@@ @_ONE_@ in "toto"
+ error
+@@END_IF@@

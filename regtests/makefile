@@ -34,12 +34,12 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 	testme47 testme48 testme49 testme50 testme51 testme52 testme55 \
 	testme56 testme57 testme58 testme60 testme61 testme62 testme63 \
 	testme65 testme66 testme67 testme68 testme69 testme70 testme71 \
-	testme72 testme73 testme74 testme75 testme76 testme77
+	testme72 testme73 testme74 testme75 testme76 testme77 testme79
 
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \
 	testme30 testme31 testme32 testme38 blocks3 blocks4 blocks6 testme53 \
-	testme54 testme59 testme64
+	testme54 testme59 testme64 testme78
 
 TESTS_CACHE = testme76
 

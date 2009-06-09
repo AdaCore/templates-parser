@@ -747,7 +747,7 @@ package body Templates_Parser is
    package Expr is
 
       type Ops is (O_And, O_Or, O_Xor,
-                   O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff);
+                   O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff, O_In);
 
       function Image (O : Ops) return String;
       --  Returns Ops string representation
@@ -4088,6 +4088,7 @@ package body Templates_Parser is
             function F_Inf  (L, R : Expr.Tree) return String;
             function F_Equ  (L, R : Expr.Tree) return String;
             function F_Diff (L, R : Expr.Tree) return String;
+            function F_In   (L, R : Expr.Tree) return String;
 
             type U_Ops_Fct is access function (N : Expr.Tree) return String;
 
@@ -4175,6 +4176,72 @@ package body Templates_Parser is
                      return "FALSE";
                   end if;
             end F_Esup;
+
+            ----------
+            -- F_In --
+            ----------
+
+            function F_In   (L, R : Expr.Tree) return String is
+               use type Expr.NKind;
+
+               function Check
+                 (Value : String; N : Tag_Node_Access) return Boolean;
+               --  Returns TRUE or FALSE depending if Value is found in the tag
+
+               -----------
+               -- Check --
+               -----------
+
+               function Check
+                 (Value : String; N : Tag_Node_Access) return Boolean
+               is
+                  L : Tag_Node_Access := N;
+               begin
+                  while L /= null loop
+                     if L.Kind = Templates_Parser.Value
+                       and then Value = To_String (L.V)
+                     then
+                        return True;
+
+                     elsif L.Kind = Value_Set then
+                        if Check (Value, L.VS.Data.Head) then
+                           return True;
+                        end if;
+                     end if;
+                     L := L.Next;
+                  end loop;
+
+                  return False;
+               end Check;
+
+            begin
+               if R.Kind = Expr.Var then
+                  declare
+                     LL : constant String := Analyze (L);
+                     Tk : constant Association := Get_Association (R.Var);
+                  begin
+                     case Tk.Kind is
+                        when Std =>
+                           if LL = To_String (Tk.Value) then
+                              return "TRUE";
+                           else
+                              return "FALSE";
+                           end if;
+
+                        when Composite =>
+                           if Check (LL, Tk.Comp_Value.Data.Head) then
+                              return "TRUE";
+                           else
+                              return "FALSE";
+                           end if;
+                     end case;
+                  end;
+
+               else
+                  raise Template_Error
+                    with "in operator right operand must be a tag";
+               end if;
+            end F_In;
 
             -----------
             -- F_Inf --
@@ -4269,7 +4336,8 @@ package body Templates_Parser is
                   Expr.O_Esup  => F_Esup'Access,
                   Expr.O_Einf  => F_Einf'Access,
                   Expr.O_Equal => F_Equ'Access,
-                  Expr.O_Diff  => F_Diff'Access);
+                  Expr.O_Diff  => F_Diff'Access,
+                  Expr.O_In    => F_In'Access);
 
             U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct
               := (Expr.O_Not => F_Not'Access);
@@ -5159,11 +5227,19 @@ package body Templates_Parser is
                end;
 
             when If_Stmt  =>
-               if Is_True (Analyze (T.Cond)) then
-                  Analyze (T.N_True, State);
-               else
-                  Analyze (T.N_False, State);
-               end if;
+               begin
+                  if Is_True (Analyze (T.Cond)) then
+                     Analyze (T.N_True, State);
+                  else
+                     Analyze (T.N_False, State);
+                  end if;
+               exception
+                  when E : others =>
+                     raise Template_Error
+                       with "In " & Filename
+                         & " at line" & Natural'Image (T.Line) & ", "
+                         & Exceptions.Exception_Message (E) & '.';
+               end;
 
                Analyze (T.Next, State);
 

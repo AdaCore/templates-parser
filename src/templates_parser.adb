@@ -4077,29 +4077,29 @@ package body Templates_Parser is
 
          function Analyze (E : Expr.Tree) return String is
 
-            type Ops_Fct is access function (L, R : String) return String;
+            type Ops_Fct is access function (L, R : Expr.Tree) return String;
 
-            function F_And  (L, R : String) return String;
-            function F_Or   (L, R : String) return String;
-            function F_Xor  (L, R : String) return String;
-            function F_Sup  (L, R : String) return String;
-            function F_Esup (L, R : String) return String;
-            function F_Einf (L, R : String) return String;
-            function F_Inf  (L, R : String) return String;
-            function F_Equ  (L, R : String) return String;
-            function F_Diff (L, R : String) return String;
+            function F_And  (L, R : Expr.Tree) return String;
+            function F_Or   (L, R : Expr.Tree) return String;
+            function F_Xor  (L, R : Expr.Tree) return String;
+            function F_Sup  (L, R : Expr.Tree) return String;
+            function F_Esup (L, R : Expr.Tree) return String;
+            function F_Einf (L, R : Expr.Tree) return String;
+            function F_Inf  (L, R : Expr.Tree) return String;
+            function F_Equ  (L, R : Expr.Tree) return String;
+            function F_Diff (L, R : Expr.Tree) return String;
 
-            type U_Ops_Fct is access function (N : String) return String;
+            type U_Ops_Fct is access function (N : Expr.Tree) return String;
 
-            function F_Not (N : String) return String;
+            function F_Not (N : Expr.Tree) return String;
 
             -----------
             -- F_And --
             -----------
 
-            function F_And (L, R : String) return String is
+            function F_And (L, R : Expr.Tree) return String is
             begin
-               if Is_True (L) and then Is_True (R) then
+               if Is_True (Analyze (L)) and then Is_True (Analyze (R)) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4110,9 +4110,9 @@ package body Templates_Parser is
             -- F_Diff --
             ------------
 
-            function F_Diff (L, R : String) return String is
+            function F_Diff (L, R : Expr.Tree) return String is
             begin
-               if L /= R then
+               if Analyze (L) /= Analyze (R) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4123,16 +4123,18 @@ package body Templates_Parser is
             -- F_Einf --
             ------------
 
-            function F_Einf (L, R : String) return String is
+            function F_Einf (L, R : Expr.Tree) return String is
+               LL : constant String := Analyze (L);
+               LR : constant String := Analyze (R);
             begin
-               if Integer'Value (L) <= Integer'Value (R) then
+               if Integer'Value (LL) <= Integer'Value (LR) then
                   return "TRUE";
                else
                   return "FALSE";
                end if;
             exception
                when others =>
-                  if L <= R then
+                  if LL <= LR then
                      return "TRUE";
                   else
                      return "FALSE";
@@ -4143,9 +4145,9 @@ package body Templates_Parser is
             -- F_Equ --
             -----------
 
-            function F_Equ (L, R : String) return String is
+            function F_Equ (L, R : Expr.Tree) return String is
             begin
-               if L = R then
+               if Analyze (L) = Analyze (R) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4156,16 +4158,18 @@ package body Templates_Parser is
             -- F_Esup --
             ------------
 
-            function F_Esup (L, R : String) return String is
+            function F_Esup (L, R : Expr.Tree) return String is
+               LL : constant String := Analyze (L);
+               LR : constant String := Analyze (R);
             begin
-               if Integer'Value (L) >= Integer'Value (R) then
+               if Integer'Value (LL) >= Integer'Value (LR) then
                   return "TRUE";
                else
                   return "FALSE";
                end if;
             exception
                when others =>
-                  if L >= R then
+                  if LL >= LR then
                      return "TRUE";
                   else
                      return "FALSE";
@@ -4176,16 +4180,18 @@ package body Templates_Parser is
             -- F_Inf --
             -----------
 
-            function F_Inf (L, R : String) return String is
+            function F_Inf (L, R : Expr.Tree) return String is
+               LL : constant String := Analyze (L);
+               LR : constant String := Analyze (R);
             begin
-               if Integer'Value (L) < Integer'Value (R) then
+               if Integer'Value (LL) < Integer'Value (LR) then
                   return "TRUE";
                else
                   return "FALSE";
                end if;
             exception
                when others =>
-                  if L < R then
+                  if LL < LR then
                      return "TRUE";
                   else
                      return "FALSE";
@@ -4196,9 +4202,9 @@ package body Templates_Parser is
             -- F_Not --
             -----------
 
-            function F_Not (N : String) return String is
+            function F_Not (N : Expr.Tree) return String is
             begin
-               if Is_True (N) then
+               if Is_True (Analyze (N)) then
                   return "FALSE";
                else
                   return "TRUE";
@@ -4209,9 +4215,9 @@ package body Templates_Parser is
             -- F_Or --
             ----------
 
-            function F_Or (L, R : String) return String is
+            function F_Or (L, R : Expr.Tree) return String is
             begin
-               if Is_True (L) or else Is_True (R) then
+               if Is_True (Analyze (L)) or else Is_True (Analyze (R)) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4222,17 +4228,19 @@ package body Templates_Parser is
             -- F_Sup --
             -----------
 
-            function F_Sup (L, R : String) return String is
+            function F_Sup (L, R : Expr.Tree) return String is
+               LL : constant String := Analyze (L);
+               LR : constant String := Analyze (R);
             begin
                --  ??? remove exception handler
-               if Integer'Value (L) > Integer'Value (R) then
+               if Integer'Value (LL) > Integer'Value (LR) then
                   return "TRUE";
                else
                   return "FALSE";
                end if;
             exception
                when others =>
-                  if L > R then
+                  if LL > LR then
                      return "TRUE";
                   else
                      return "FALSE";
@@ -4243,9 +4251,9 @@ package body Templates_Parser is
             -- F_Xor --
             -----------
 
-            function F_Xor (L, R : String) return String is
+            function F_Xor (L, R : Expr.Tree) return String is
             begin
-               if Is_True (L) xor Is_True (R) then
+               if Is_True (Analyze (L)) xor Is_True (Analyze (R)) then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4279,10 +4287,10 @@ package body Templates_Parser is
                   end if;
 
                when Expr.Op =>
-                  return Op_Table (E.O) (Analyze (E.Left), Analyze (E.Right));
+                  return Op_Table (E.O) (E.Left, E.Right);
 
                when Expr.U_Op =>
-                  return U_Op_Table (E.U_O) (Analyze (E.Next));
+                  return U_Op_Table (E.U_O) (E.Next);
             end case;
          end Analyze;
 

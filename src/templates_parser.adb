@@ -2708,7 +2708,7 @@ package body Templates_Parser is
          E : Natural;
       begin
          for I in 1 .. N loop
-            S := Strings.Fixed.Index (Buffer (S .. L), "'");
+            S := Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
          end loop;
 
          --  Check for the end of this attribute

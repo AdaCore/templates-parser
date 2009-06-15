@@ -79,6 +79,7 @@ package body Templates_Parser is
    End_Inline_Token           : constant String := "@@END_INLINE@@";
    A_Terminate_Sections_Token : constant String := "TERMINATE_SECTIONS";
    A_Reverse_Token            : constant String := "REVERSE";
+   A_Terse_Token              : constant String := "TERSE";
 
    ------------
    -- Filter --
@@ -867,6 +868,7 @@ package body Templates_Parser is
          when Table_Stmt =>
             Terminate_Sections : Boolean;
             Reverse_Index      : Boolean;
+            Terse              : Boolean;
             Blocks             : Tree;
             Blocks_Count       : Natural;     -- Number if blocks
 
@@ -3450,6 +3452,7 @@ package body Templates_Parser is
 
             T.Terminate_Sections := False;
             T.Reverse_Index      := False;
+            T.Terse              := False;
 
             --  Check if first parameter is @@TERMINATE_SECTION@@, note that
             --  this is an obsolescent feature. It is better now to use the
@@ -3475,8 +3478,12 @@ package body Templates_Parser is
                begin
                   if Att = A_Terminate_Sections_Token then
                      T.Terminate_Sections := True;
+
                   elsif Att = A_Reverse_Token then
                      T.Reverse_Index := True;
+
+                  elsif Att = A_Terse_Token then
+                     T.Terse := True;
                   else
                      Fatal_Error ("Unknown table attributes " & Att);
                   end if;
@@ -3906,6 +3913,7 @@ package body Templates_Parser is
          I_Params      : Include_Parameters;
          F_Params      : Filter.Include_Parameters;
          Block         : Block_State;
+         Terse_Table   : Boolean;
          Parent        : Parse_State_Access;
       end record;
 
@@ -3913,7 +3921,7 @@ package body Templates_Parser is
                       ((1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
                        Null_Unbounded_String, Null_Unbounded_String, 0,
                        No_Parameter, Filter.No_Include_Parameters,
-                       Empty_Block_State, null);
+                       Empty_Block_State, False, null);
 
       Results : Unbounded_String := Null_Unbounded_String;
 
@@ -3927,6 +3935,8 @@ package body Templates_Parser is
       Now      : Calendar.Time;
       D_Map    : Definitions.Map;
       Lazy_Set : Translate_Set;
+      Output   : Boolean;
+      Mark     : Natural;
 
       procedure Analyze
         (T     : Tree;
@@ -3979,7 +3989,9 @@ package body Templates_Parser is
          --  case sensitive.
 
          function Translate
-           (Var : Tag_Var; State : Parse_State) return String;
+           (Var          : Tag_Var;
+            State        : Parse_State;
+            Is_Composite : access Boolean) return String;
          --  Translate Tag variable using Translation table and apply all
          --  Filters and Atribute recorded for this variable.
 
@@ -3995,6 +4007,15 @@ package body Templates_Parser is
          procedure Flush;
          pragma Inline (Flush);
          --  Flush buffer to Results
+
+         procedure Mark;
+         pragma Inline (Mark);
+         --  Mark the current text buffer
+
+         procedure Commit_Rollback;
+         pragma Inline (Commit_Rollback);
+         --  Commit or rollback added texts for terse output. If no text added
+         --  from the vector tag we rollback otherwise we commit the result.
 
          function Flatten_Parameters
            (I : Include_Parameters) return Filter.Include_Parameters;
@@ -4058,8 +4079,26 @@ package body Templates_Parser is
                   when Data.Var =>
                      if Is_Include_Variable (T.Var) then
                         Add (I_Translate (T.Var, State));
+
                      else
-                        Add (Translate (T.Var, State));
+                        declare
+                           Is_Composite : aliased Boolean;
+                           Value        : constant String :=
+                                            Translate (T.Var, State,
+                                                       Is_Composite'Access);
+                        begin
+                           --  Only adds to the buffer if variable value is not
+                           --  empty. This is needed as we want to track empty
+                           --  values to be able to rollback if necessary on
+                           --  the terse mode. Note that we handle only
+                           --  composite tags which are part of the table
+                           --  expansion.
+
+                           if Value /= "" then
+                              Add (Value);
+                              Output := Is_Composite;
+                           end if;
+                        end;
                      end if;
                end case;
 
@@ -4333,20 +4372,22 @@ package body Templates_Parser is
                end if;
             end F_Xor;
 
-            Op_Table : constant array (Expr.Ops) of Ops_Fct :=
-                         (Expr.O_And   => F_And'Access,
-                          Expr.O_Or    => F_Or'Access,
-                          Expr.O_Xor   => F_Xor'Access,
-                          Expr.O_Sup   => F_Sup'Access,
-                          Expr.O_Inf   => F_Inf'Access,
-                          Expr.O_Esup  => F_Esup'Access,
-                          Expr.O_Einf  => F_Einf'Access,
-                          Expr.O_Equal => F_Equ'Access,
-                          Expr.O_Diff  => F_Diff'Access,
-                          Expr.O_In    => F_In'Access);
+            Op_Table   : constant array (Expr.Ops) of Ops_Fct :=
+                           (Expr.O_And   => F_And'Access,
+                            Expr.O_Or    => F_Or'Access,
+                            Expr.O_Xor   => F_Xor'Access,
+                            Expr.O_Sup   => F_Sup'Access,
+                            Expr.O_Inf   => F_Inf'Access,
+                            Expr.O_Esup  => F_Esup'Access,
+                            Expr.O_Einf  => F_Einf'Access,
+                            Expr.O_Equal => F_Equ'Access,
+                            Expr.O_Diff  => F_Diff'Access,
+                            Expr.O_In    => F_In'Access);
 
-            U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
-                           (Expr.O_Not => F_Not'Access);
+            U_Op_Table   : constant array (Expr.U_Ops) of U_Ops_Fct :=
+                             (Expr.O_Not => F_Not'Access);
+
+            Is_Composite : aliased Boolean;
 
          begin
             case E.Kind is
@@ -4357,7 +4398,7 @@ package body Templates_Parser is
                   if Is_Include_Variable (E.Var) then
                      return I_Translate (E.Var, State);
                   else
-                     return Translate (E.Var, State);
+                     return Translate (E.Var, State, Is_Composite'Access);
                   end if;
 
                when Expr.Op =>
@@ -4368,6 +4409,44 @@ package body Templates_Parser is
             end case;
          end Analyze;
 
+         ---------------------
+         -- Commit_Rollback --
+         ---------------------
+
+         procedure Commit_Rollback is
+         begin
+            if not Output then
+               --  Rollback
+
+               Rollback : declare
+                  To_Delete : constant Natural :=
+                                Length (Results) + Last - Parse.Mark;
+               begin
+                  if To_Delete > 0 then
+                     if Last >= To_Delete then
+                        --  Enough data into the buffer, remove from it
+                        Last := Last - To_Delete;
+
+                     else
+                        --  Remove remaining data from results
+                        Delete
+                          (Results,
+                           From    => Length (Results) - To_Delete + Last + 1,
+                           Through => Length (Results));
+
+                        --  Clear buffer
+
+                        Last := 0;
+                     end if;
+                  end if;
+               end Rollback;
+            end if;
+
+            --  Clear mark
+
+            Parse.Mark := 0;
+         end Commit_Rollback;
+
          ------------------------
          -- Flatten_Parameter  --
          ------------------------
@@ -4375,7 +4454,8 @@ package body Templates_Parser is
          function Flatten_Parameters
            (I : Include_Parameters) return Filter.Include_Parameters
          is
-            F : Filter.Include_Parameters;
+            F            : Filter.Include_Parameters;
+            Is_Composite : aliased Boolean;
          begin
             for K in I'Range loop
                if I (K) = null then
@@ -4386,7 +4466,8 @@ package body Templates_Parser is
                         F (K) := I (K).Value;
                      when Data.Var  =>
                         F (K) := To_Unbounded_String
-                                  (Translate (I (K).Var, State));
+                          (Translate
+                             (I (K).Var, State, Is_Composite'Access));
                   end case;
                end if;
             end loop;
@@ -4758,6 +4839,7 @@ package body Templates_Parser is
                   --  of the include variable.
                   C : aliased Filter.Filter_Context :=
                         (Translations, Lazy_Tag, State.F_Params);
+                  Is_Composite : aliased Boolean;
                begin
                   if T.Next = null and then T.Kind = Data.Var then
                      --  Here we have a special case where the include
@@ -4783,7 +4865,10 @@ package body Templates_Parser is
                            --  table) the state will not be used.
 
                            return Translate
-                             (Var, Translate (V, State.Parent.all), C'Access);
+                             (Var,
+                              Translate
+                                (V, State.Parent.all, Is_Composite'Access),
+                                 C'Access);
 
                         else
                            --  This variable reference a parent include
@@ -4863,6 +4948,16 @@ package body Templates_Parser is
             return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
          end Is_True;
 
+         ----------
+         -- Mark --
+         ----------
+
+         procedure Mark is
+         begin
+            Output := False;
+            Parse.Mark := Length (Results) + Last;
+         end Mark;
+
          -------------
          -- Pop_Sep --
          -------------
@@ -4891,13 +4986,17 @@ package body Templates_Parser is
          ---------------
 
          function Translate
-           (Var : Tag_Var; State : Parse_State) return String
+           (Var          : Tag_Var;
+            State        : Parse_State;
+            Is_Composite : access Boolean) return String
          is
             C        : aliased Filter.Filter_Context :=
                          (Translations, Lazy_Tag, State.F_Params);
             D_Pos    : Definitions.Def_Map.Cursor;
             Up_Value : Natural := 0;
          begin
+            Is_Composite.all := False;
+
             D_Pos := Definitions.Def_Map.Find
               (D_Map, To_String (Var.Name));
 
@@ -5023,6 +5122,7 @@ package body Templates_Parser is
                         end if;
 
                      when Composite =>
+                        Is_Composite.all := True;
                         if Tk.Comp_Value.Data.Nested_Level = 1 then
                            --  This is a vector
 
@@ -5260,6 +5360,7 @@ package body Templates_Parser is
                                         State.I_Params,
                                         State.F_Params,
                                         Empty_Block_State,
+                                        T.Terse,
                                         L_State'Unchecked_Access));
                end;
 
@@ -5275,6 +5376,10 @@ package body Templates_Parser is
                   B       : Positive;
                begin
                   for K in 1 .. State.Max_Expand loop
+                     if State.Terse_Table then
+                        Mark;
+                     end if;
+
                      declare
                         New_Cursor : Indices := State.Cursor;
                         Block      : Tree    := T;
@@ -5313,6 +5418,7 @@ package body Templates_Parser is
                                            State.I_Params,
                                            State.F_Params,
                                            Empty_Block_State,
+                                           State.Terse_Table,
                                            L_State'Unchecked_Access));
 
                            if Block.Common /= null then
@@ -5332,6 +5438,7 @@ package body Templates_Parser is
                                            State.I_Params,
                                            State.F_Params,
                                            B_State (B),
+                                           State.Terse_Table,
                                            L_State'Unchecked_Access));
 
                            Pop_Sep (State);
@@ -5341,6 +5448,10 @@ package body Templates_Parser is
                            Block := Block.Next;
                            B := B + 1;
                         end loop;
+
+                        if State.Terse_Table then
+                           Commit_Rollback;
+                        end if;
                      end;
                   end loop;
                   Pop_Sep (State);
@@ -5359,6 +5470,7 @@ package body Templates_Parser is
                                State.I_Params,
                                State.F_Params,
                                State.Block,
+                               State.Terse_Table,
                                L_State'Unchecked_Access));
 
             when Include_Stmt =>
@@ -5405,6 +5517,7 @@ package body Templates_Parser is
                                      F_Params      => Flatten_Parameters
                                                         (T.I_Params),
                                      Block         => State.Block,
+                                     Terse_Table   => State.Terse_Table,
                                      Parent      => L_State'Unchecked_Access));
                Analyze (T.Next, State);
 
@@ -5422,6 +5535,7 @@ package body Templates_Parser is
                                      I_Params      => State.I_Params,
                                      F_Params      => State.F_Params,
                                      Block         => State.Block,
+                                     Terse_Table   => State.Terse_Table,
                                      Parent      => L_State'Unchecked_Access));
                Add (To_String (T.After));
                Analyze (T.Next, State);

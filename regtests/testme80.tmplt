@@ -1,0 +1,42 @@
+
+0 ---------------------------
+
+@@TABLE@@
+  @@TABLE@@
+      @_TABLE_LINE_@> @_MATDSIZE_@
+  @@END_TABLE@@
+@@END_TABLE@@
+
+1 ---------------------------
+
+@@TABLE@@
+  @@TABLE@@
+    @@IF@@ @_MATDSIZE_@ /= ""
+      @_TABLE_LINE_@> @_MATDSIZE_@
+    @@END_IF@@
+  @@END_TABLE@@
+@@END_TABLE@@
+
+2 ---------------------------
+
+@@TABLE@@
+  @@TABLE'TERSE@@
+      @_TABLE_LINE_@> @_MATDSIZE_@
+  @@END_TABLE@@
+@@END_TABLE@@
+
+3 ---------------------------
+
+@@TABLE@@
+  @@TABLE'TERSE'REVERSE@@
+      @_TABLE_LINE_@> @_MATDSIZE_@
+  @@END_TABLE@@
+@@END_TABLE@@
+
+4 ---------------------------
+
+@@TABLE'REVERSE@@
+  @@TABLE'TERSE'REVERSE@@
+      @_TABLE_LINE_@> @_VAR1_@ @_MATDSIZE_@
+  @@END_TABLE@@
+@@END_TABLE@@

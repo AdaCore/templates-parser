@@ -39,7 +39,7 @@ TESTS = testme3 testme4 testme12 testme13 testme14 testme19 testme20 testme21\
 TESTS_TREE = testme testme2 testme5 testme6 testme7 testme8 testme11 testme15\
 	testme16 testme17 testme18 testme24 testme25 testme26 testme27 \
 	testme30 testme31 testme32 testme38 blocks3 blocks4 blocks6 testme53 \
-	testme54 testme59 testme64 testme78
+	testme54 testme59 testme64 testme78 testme80
 
 TESTS_CACHE = testme76
 

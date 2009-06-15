@@ -1367,7 +1367,8 @@ Syntax:
 
 @cindex Command, TERMINATE_SECTIONS
 @cindex Command, REVERSE
-@TPEXP{@@@@TABLE['TERMINATE_SECTIONS]['REVERSE]@@@@
+@cindex Command, TERSE
+@TPEXP{@@@@TABLE['REVERSE]['TERMINATE_SECTIONS]['TERSE]@@@@
       ...
    [@@@@BEGIN@@@@]
       ...
@@ -1421,6 +1422,10 @@ A table with sections can have attributes:
 
 @table @code
 
+@item REVERSE
+
+The items will be displayed in the reverse order.
+
 @item TERMINATE_SECTIONS
 
 This ensure that the table output will end
@@ -1428,9 +1433,12 @@ with the last section. If the number of data in the vector variable tag
 is not a multiple of the number of sections then the remaining section
 will be complete with empty tag value.
 
-@item REVERSE
+@item TERSE
 
-The items will be displayed in the reverse order.
+Empty lines won't be output. If the composite tag used into the table has
+an empty value then the corresponding line won't be output. This is
+especially important to avoid empty ending lines for table containing
+vector of different size.
 
 @end table
 

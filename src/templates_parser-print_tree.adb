@@ -111,6 +111,10 @@ begin
             Text_IO.Put (" REVERSE");
          end if;
 
+         if T.Terse then
+            Text_IO.Put (" TERSE");
+         end if;
+
          Text_IO.New_Line;
          Print_Tree (T.Blocks, Level + 1);
          Print_Indent (Level);

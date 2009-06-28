@@ -99,6 +99,7 @@ procedure Templates2Ada is
       URL              : Tag;
       Ajax_Event       : Tag;
       Ajax_Action      : Tag;
+      Ajax_File        : Tag;
       Set_Var, Set_Val : Tag;
    end record;
 
@@ -252,6 +253,7 @@ procedure Templates2Ada is
       From_Get         : Tag;
       Ajax_Event       : Tag;
       Ajax_Action      : Tag;
+      Ajax_File        : Tag;
       Set_Var, Set_Val : Tag;
    begin
       while Has_Element (C) loop
@@ -264,6 +266,7 @@ procedure Templates2Ada is
          Append (URLs,        Element (C).URL);
          Append (Ajax_Event,  Element (C).Ajax_Event);
          Append (Ajax_Action, Element (C).Ajax_Action);
+         Append (Ajax_File,   Element (C).Ajax_File);
          Append (Set_Var,     Element (C).Set_Var);
          Append (Set_Val,     Element (C).Set_Val);
          Next (C);
@@ -284,6 +287,7 @@ procedure Templates2Ada is
       Insert (T, Assoc ("URL",           URLs));
       Insert (T, Assoc ("AJAX_EVENT",    Ajax_Event));
       Insert (T, Assoc ("AJAX_ACTION",   Ajax_Action));
+      Insert (T, Assoc ("AJAX_FILE",     Ajax_File));
       Insert (T, Assoc ("SET_VAR",       Set_Var));
       Insert (T, Assoc ("SET_VAL",       Set_Val));
 
@@ -326,6 +330,7 @@ procedure Templates2Ada is
       Variables, Includes, HTTPS : Tag;
       URLs, From_Get             : Tag;
       Ajax_Event, Ajax_Action    : Tag;
+      Ajax_File                  : Tag;
       Set_Var, Set_Val           : Tag;
       C                          : Sets.Cursor;
       Inserted                   : Boolean;
@@ -407,6 +412,10 @@ procedure Templates2Ada is
 
          S := Last + 2;
       end Process_Tag;
+
+      ------------------
+      -- Process_Tags --
+      ------------------
 
       procedure Process_Tags (Str : String; First, Last : Integer) is
          S : Integer := First;
@@ -516,6 +525,10 @@ procedure Templates2Ada is
                   Next_Word (Str, S, First, Last);
                   Append (Ajax_Action, Str (First .. Last));
                   S := Last + 1;
+                  --  Record Ajax file location
+                  Append
+                    (Ajax_File,
+                     Directories.Base_Name (Relative_Name));
                end if;
 
             elsif S + 8 < Str'Last
@@ -654,7 +667,7 @@ procedure Templates2Ada is
       Maps.Insert
         (All_Templates, Directories.Base_Name (Relative_Name),
          (+Relative_Name, Variables, Includes, HTTPS, From_Get, URLs,
-          Ajax_Event, Ajax_Action, Set_Var, Set_Val));
+          Ajax_Event, Ajax_Action, Ajax_File, Set_Var, Set_Val));
 
    exception
       when Text_IO.Name_Error =>

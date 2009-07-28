@@ -31,7 +31,7 @@ package Templates_Parser.Configuration is
 
    subtype Time_Stamp is GNAT.OS_Lib.OS_Time;
 
-   overriding function "="
+   function "="
      (T1, T2 : Time_Stamp)
       return Boolean
       renames GNAT.OS_Lib."=";

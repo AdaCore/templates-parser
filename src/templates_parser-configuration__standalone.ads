@@ -31,13 +31,14 @@ package Templates_Parser.Configuration is
 
    subtype Time_Stamp is GNAT.OS_Lib.OS_Time;
 
-   pragma Warnings (Off);
-   --  Kill warning on missing overriding keyword on old GNAT versions.
+   pragma Style_Checks (Off);
+   --  Kill bogus style check on missing overriding keyword with old GNAT
+   --  versions.
    function "="
      (T1, T2 : Time_Stamp)
       return Boolean
       renames GNAT.OS_Lib."=";
-   pragma Warnings (On);
+   pragma Style_Checks (All_Checks);
 
    function Is_Regular_File
      (Filename : String)

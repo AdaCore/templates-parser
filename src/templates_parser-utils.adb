@@ -358,4 +358,59 @@ package body Templates_Parser.Utils is
       end if;
    end Value;
 
+   ----------------
+   -- Web_Escape --
+   ----------------
+
+   function Web_Escape (S : String) return String is
+
+      Result : Unbounded_String;
+      Last   : Integer := S'First;
+
+      procedure Append_To_Result (Str : String; From, To : Integer);
+      --  Append S (From .. To) to Result if not empty concatenated with Str
+      --  and update Last.
+
+      ----------------------
+      -- Append_To_Result --
+      ----------------------
+
+      procedure Append_To_Result (Str : String; From, To : Integer) is
+      begin
+         if From <= To then
+            Append (Result, S (From .. To) & Str);
+         else
+            Append (Result, Str);
+         end if;
+
+         Last := To + 2;
+      end Append_To_Result;
+
+   begin
+      for I in S'Range loop
+         case S (I) is
+            when '&' =>
+               Append_To_Result ("&amp;", Last, I - 1);
+
+            when '>' =>
+               Append_To_Result ("&gt;", Last, I - 1);
+
+            when '<' =>
+               Append_To_Result ("&lt;", Last, I - 1);
+
+            when '"' =>
+               Append_To_Result ("&quot;", Last, I - 1);
+
+            when others =>
+               null;
+         end case;
+      end loop;
+
+      if Last <= S'Last then
+         Append (Result, S (Last .. S'Last));
+      end if;
+
+      return To_String (Result);
+   end Web_Escape;
+
 end Templates_Parser.Utils;

@@ -52,6 +52,9 @@ package Templates_Parser.Utils is
    function Executable_Extension return String;
    --  Return the executable exetension for the running host
 
+   function Web_Escape (S : String) return String;
+   --  Encode all characters that cannot be used as-is into an HTML page
+
 private
 
    subtype Windows_Host is Boolean;

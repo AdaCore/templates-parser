@@ -28,6 +28,7 @@
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Fixed;
 with Ada.Strings.Hash;
+
 with Templates_Parser.Configuration;
 
 separate (Templates_Parser)

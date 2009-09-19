@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2005-2008, AdaCore                    --
+--                     Copyright (C) 2005-2009, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -37,6 +37,8 @@ project Docs is
 
    for Main use ("build.adb");
 
-   package Compiler renames TP_Shared.Compiler;
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat05");
+   end Compiler;
 
 end Docs;

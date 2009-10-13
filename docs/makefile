@@ -1,8 +1,7 @@
 ############################################################################
 #                             Templates_Parser                             #
 #                                                                          #
-#                         Copyright (C) 2003-2008                          #
-#                                 AdaCore                                  #
+#                      Copyright (C) 2003-2009, AdaCore                    #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -29,7 +28,6 @@
 .SILENT: ada.sed doc clean
 
 MAKEINFO        = $(shell which makeinfo 2> /dev/null)
-DVIPS           = $(shell which dvips 2> /dev/null)
 TEXI2DVI        = $(shell which texi2dvi 2> /dev/null)
 PDFTEX          = $(shell which pdftex 2> /dev/null)
 
@@ -51,8 +49,8 @@ TEXIFILES = $(ADBFILES:=.texi) $(ADSFILES:=.texi) $(ADAFILES_NORUN:=.texi) \
 
 GFLAGS	  = -I../src -I../include
 
-DOCS	  = templates_parser.dvi templates_parser.info templates_parser.html \
-		templates_parser.txt templates_parser.ps templates_parser.pdf
+DOCS	  = templates_parser.info templates_parser.html \
+		templates_parser.txt templates_parser.pdf
 
 ADA_KW    = use package is in out exception function with type constant \
 		private of return range procedure begin end array record \
@@ -68,16 +66,6 @@ ALLDEPS = $(ADBFILES) $(ADSFILES) $(EXEFILES) $(TEXIFILES) $(TMPLTTEXI) \
 
 doc: $(ALLDEPS) $(DOCS)
 
-%.dvi: %.texi $(ADBFILES)
-ifneq (${TEXI2DVI},)
-	echo Building $@
-	-${TEXI2DVI} --expand --clean --quiet $<
-else
-	@echo "--------------------------------------------------------"
-	@echo "texi2dvi not found, cannot build DVI or PS documentation"
-	@echo "--------------------------------------------------------"
-endif
-
 %.pdf: %.texi $(ADBFILES)
 ifneq (${TEXI2DVI},)
 ifneq (${PDFTEX},)
@@ -92,16 +80,6 @@ else
 	@echo "--------------------------------------------------"
 	@echo "texi2dvi not found, cannot build PDF documentation"
 	@echo "--------------------------------------------------"
-endif
-
-%.ps: %.dvi
-ifneq (${DVIPS},)
-	echo Building $@
-	-${DVIPS} -q $< -o $@
-else
-	@echo "------------------------------------------------------"
-	@echo "dvips not found, cannot build POSTSCRIPT documentation"
-	@echo "------------------------------------------------------"
 endif
 
 %.info: %.texi $(ADBFILES)
@@ -184,7 +162,7 @@ ifeq ($(AWS),)
 		-Pdocs $(EXEFILES)
 endif
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
-		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log *.ps \
+		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log \
 		*.exe templates_parser*.ads.texi ada.sed \
 		templates_parser.tar.gz
 	-rm -f templates_parser.html templates_parser.pdf \

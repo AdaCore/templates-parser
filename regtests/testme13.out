@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme13.tmplt at line 3 EOF found, @@END_IF@@ expected.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : EOF found, @@END_IF@@ expected, in testme13.tmplt at line 3

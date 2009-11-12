@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme49.tmplt at line 1 Can't have a positional parameter after a named one.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : Can't have a positional parameter after a named one, in testme49.tmplt at line 1

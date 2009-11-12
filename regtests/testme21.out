@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme21.tmplt at line 4, This attribute is not valid for a vector tag (@_V6'Min_Column_@).
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : This attribute is not valid for a vector tag (@_V6'Min_Column_@) In testme21.tmplt at line 4

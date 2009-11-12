@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme58.tmplt at line 5 @@END_IF@@ found, @@END_TABLE@@ expected.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : @@END_IF@@ found, @@END_TABLE@@ expected, in testme58.tmplt at line 5

@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme79.tmplt at line 2, in operator right operand must be a tag.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : in operator right operand must be a tag In testme79.tmplt at line 2

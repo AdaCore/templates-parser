@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme12.tmplt at line 3 EOF found, @@END_TABLE@@ expected.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : EOF found, @@END_TABLE@@ expected, in testme12.tmplt at line 3

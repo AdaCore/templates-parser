@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme55.tmplt at line 4 TERMINATE_SECTIONS attribute given, but no section defined.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : TERMINATE_SECTIONS attribute given, but no section defined, in testme55.tmplt at line 4

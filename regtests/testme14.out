@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : In testme14.tmplt at line 2 missing parameter.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : missing parameter, in testme14.tmplt at line 2

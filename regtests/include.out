@@ -1,2 +1,2 @@
 
-raised TEMPLATES_PARSER.TEMPLATE_ERROR : Included from include_1.html at line 2, In include_2.html at line 3 missing parameter.
+raised TEMPLATES_PARSER.TEMPLATE_ERROR : missing parameter, in include_2.html at line 3, in include_1.html at line 2

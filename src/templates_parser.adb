@@ -2575,12 +2575,12 @@ package body Templates_Parser is
       begin
          if Message (Message'Last) /= '.' then
             raise Template_Error
-              with "In " & Filename
-                & " at line" & Natural'Image (Line) & ' ' & Message & '.';
+              with Message & ", in " & Filename
+                & " at line" & Natural'Image (Line);
          else
             raise Template_Error
-              with "Included from " & Filename
-                & " at line" & Natural'Image (Line) & ", " & Message;
+              with Message & ", included from " & Filename
+                & " at line" & Natural'Image (Line);
          end if;
       end Fatal_Error;
 
@@ -5289,9 +5289,9 @@ package body Templates_Parser is
                   exception
                      when E : others =>
                         raise Template_Error
-                          with "In " & Filename
-                            & " at line" & Natural'Image (N.Line) & ", "
-                            & Exceptions.Exception_Message (E) & '.';
+                          with Exceptions.Exception_Message (E)
+                            & " In " & Filename
+                            & " at line" & Natural'Image (N.Line);
                   end;
 
                   Analyze (N, State);
@@ -5336,9 +5336,9 @@ package body Templates_Parser is
                exception
                   when E : others =>
                      raise Template_Error
-                       with "In " & Filename
-                         & " at line" & Natural'Image (T.Line) & ", "
-                         & Exceptions.Exception_Message (E) & '.';
+                       with Exceptions.Exception_Message (E)
+                         & " In " & Filename
+                         & " at line" & Natural'Image (T.Line);
                end;
 
                Analyze (T.Next, State);

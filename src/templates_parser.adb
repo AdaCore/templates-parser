@@ -5808,6 +5808,15 @@ package body Templates_Parser is
       return Natural (Set.Set.Length);
    end Size;
 
+   -------------------
+   -- Tag_From_Name --
+   -------------------
+
+   function Tag_From_Name (Name : String) return String is
+   begin
+      return To_String (Begin_Tag) & Name & To_String (End_Tag);
+   end Tag_From_Name;
+
    ------------
    -- To_Set --
    ------------

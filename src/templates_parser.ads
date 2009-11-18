@@ -55,6 +55,9 @@ package Templates_Parser is
    --  Set the tag separators for the whole session. This should be changed as
    --  the very first API call and should not be changed after.
 
+   function Tag_From_Name (Name : String) return String;
+   --  Returns the tag given the Name, default is @_NAME_@
+
    -----------------
    -- Generic Tag --
    -----------------

@@ -3587,14 +3587,38 @@ package body Templates_Parser is
             return T;
 
          elsif Is_Stmt (Set_Token) then
-            T := new Node (Set_Stmt);
+            --  We want to handle multiple SET lines to avoid deep recursion
 
-            T.Line := Line;
-            T.Def  := Definitions.Parse (Get_All_Parameters);
+            declare
+               Root, N : Tree;
+            begin
+               loop
+                  N := new Node (Set_Stmt);
 
-            T.Next := Parse (Mode, In_If);
+                  if Root = null then
+                     Root := N;
+                  else
+                     T.Next := N;
+                  end if;
 
-            return T;
+                  T      := N;
+                  T.Line := Line;
+                  T.Def  := Definitions.Parse (Get_All_Parameters);
+
+                  if Get_Next_Line then
+                     --  Nothing more, returns the result now
+                     return Root;
+                  end if;
+
+                  --  If this is not a SET statement, just call the parsing
+                  --  routine and return the root note.
+
+                  if not Is_Stmt (Set_Token) then
+                     T.Next := Parse (Mode, In_If, No_Read => True);
+                     return Root;
+                  end if;
+               end loop;
+            end;
 
          elsif Is_Stmt (Inline_Token, Extended => True) then
             T := new Node (Inline_Stmt);

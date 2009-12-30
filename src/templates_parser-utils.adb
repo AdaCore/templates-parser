@@ -151,39 +151,51 @@ package body Templates_Parser.Utils is
 
       Command_Name : constant String := Get_Command_Name;
 
-      Dir          : constant String := Containing_Directory (Command_Name);
-
    begin
-      --  On UNIX command_name doesn't include the directory name when the
-      --  command was found on the PATH. On Windows using the standard shell,
-      --  the command is never passed using a full pathname. In such a case,
-      --  which check on the PATH ourselves to find it.
-
-      if Directories.Exists (Command_Name) then
-         --  Command is found
-         if Is_Full_Pathname (Command_Name) or else Is_Full_Pathname (Dir) then
-            --  And we have a full pathname use it
-            return Dir & Directory_Separator;
-         else
-            --  A relative pathname, catenate the current directory
-            return Directories.Current_Directory
-              & Directory_Separator & Dir & Directory_Separator;
-         end if;
+      if Command_Name = "" then
+         --  Command name can be empty on OS not supporting command line
+         --  options like VxWorks.
+         return ".";
 
       else
-         --  Command does not exists, try checkin it on the PATH
          declare
-            Full_Pathname : constant String :=
-                              Locate_On_Path
-                                (Directories.Simple_Name (Command_Name));
+            Dir : constant String := Containing_Directory (Command_Name);
          begin
-            if Full_Pathname = "" then
-               --  Not found on the PATH, nothing we can do
-               return Dir;
+            --  On UNIX command_name doesn't include the directory name
+            --  when the command was found on the PATH. On Windows using
+            --  the standard shell, the command is never passed using a
+            --  full pathname. In such a case, which check on the PATH
+            --  ourselves to find it.
+
+            if Directories.Exists (Command_Name) then
+               --  Command is found
+               if Is_Full_Pathname (Command_Name)
+                 or else Is_Full_Pathname (Dir)
+               then
+                  --  And we have a full pathname use it
+                  return Dir & Directory_Separator;
+               else
+                  --  A relative pathname, catenate the current directory
+                  return Directories.Current_Directory
+                    & Directory_Separator & Dir & Directory_Separator;
+               end if;
 
             else
-               return Directories.Containing_Directory (Full_Pathname)
-                 & Directory_Separator;
+               --  Command does not exists, try checkin it on the PATH
+               declare
+                  Full_Pathname : constant String :=
+                                    Locate_On_Path
+                                      (Directories.Simple_Name (Command_Name));
+               begin
+                  if Full_Pathname = "" then
+                     --  Not found on the PATH, nothing we can do
+                     return Dir;
+
+                  else
+                     return Directories.Containing_Directory (Full_Pathname)
+                       & Directory_Separator;
+                  end if;
+               end;
             end if;
          end;
       end if;

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2008                            --
---                                 AdaCore                                  --
+--                      Copyright (C) 2008-2010, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -42,11 +41,14 @@ project TP_Shared is
    type Library_Kind is ("relocatable", "static");
    Library_Type : Library_Kind := external ("LIBRARY_TYPE", "static");
 
+   type Target_Type is ("native", "vxworks");
+   Target : Target_Type := external ("PLATFORM", "native");
+
    -----------------------
    -- Build directories --
    -----------------------
 
-   for Exec_Dir use ".build";
+   for Exec_Dir use ".build/" & Target;
 
    case Build is
       when "Debug" =>

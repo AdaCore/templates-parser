@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2009, AdaCore                     #
+#                     Copyright (C) 2003-2010, AdaCore                     #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -35,11 +35,12 @@ TP_TASKING   = Standard_Tasking
 TP_XMLADA    = Disabled
 LIBRARY_TYPE = static
 CJOBS        = 2
+PLATFORM     = native
 
 TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
 			else echo tr; fi)
 DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
-BDIR           = .build/$(DR_BUILD)
+BDIR           = .build/$(PLATFORM)/$(DR_BUILD)
 
 prefix	= $(dir $(shell which gnatls))..
 

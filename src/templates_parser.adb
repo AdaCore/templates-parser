@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2009, AdaCore                     --
+--                     Copyright (C) 1999-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -5578,7 +5578,7 @@ package body Templates_Parser is
          Pos := Translations.Set.Find (Name);
 
          if Association_Map.Has_Element (Pos) then
-            return  Association_Map.Element (Pos);
+            return Association_Map.Element (Pos);
 
          elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
            and then not Filter.Is_No_Dynamic (Var.Filters)
@@ -5589,7 +5589,7 @@ package body Templates_Parser is
             Pos := Lazy_Set.Set.Find (Name);
 
             if Association_Map.Has_Element (Pos) then
-               return  Association_Map.Element (Pos);
+               return Association_Map.Element (Pos);
 
             else
                --  Check for Lazy tag

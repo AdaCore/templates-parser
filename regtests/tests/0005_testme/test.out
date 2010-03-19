@@ -1,0 +1,383 @@
+
+This is a test for the matrix feature:
+
+Table1: 0 1 4 1
+Table2: 1 1 3 2
+A1.1
+Table2: 1 2 3 2
+A1.2
+Table2: 1 3 3 2
+A1.3
+---
+[A1.1, A1.2, A1.3]
+Table1: 0 2 4 1
+Table2: 2 1 3 2
+A2.1
+Table2: 2 2 3 2
+A2.2
+Table2: 2 3 3 2
+A2.3
+---
+[A2.1, A2.2, A2.3]
+Table1: 0 3 4 1
+Table2: 3 1 3 2
+A3.1
+Table2: 3 2 3 2
+A3.2
+Table2: 3 3 3 2
+A3.3
+---
+[A3.1, A3.2, A3.3]
+Table1: 0 4 4 1
+Table2: 4 1 3 2
+A4.1
+Table2: 4 2 3 2
+A4.2
+Table2: 4 3 3 2
+A4.3
+---
+[A4.1, A4.2, A4.3]
+
+======================================================================
+
+A table with labels (vector):
+
+
+Label: lab1
+
+Table1: 0 1 4 1
+Table2: 1 1 3 2
+A1.1
+Table2: 1 2 3 2
+A1.2
+Table2: 1 3 3 2
+A1.3
+
+Label: lab2
+
+Table1: 0 2 4 1
+Table2: 2 1 3 2
+A2.1
+Table2: 2 2 3 2
+A2.2
+Table2: 2 3 3 2
+A2.3
+
+Label: lab3
+
+Table1: 0 3 4 1
+Table2: 3 1 3 2
+A3.1
+Table2: 3 2 3 2
+A3.2
+Table2: 3 3 3 2
+A3.3
+
+Label: lab4
+
+Table1: 0 4 4 1
+Table2: 4 1 3 2
+A4.1
+Table2: 4 2 3 2
+A4.2
+Table2: 4 3 3 2
+A4.3
+
+======================================================================
+
+A matrix inside a table with labels (vectors):
+
+
+Label: lab1
+
+
+Table1: 1 1 4 2
+Table2: 1 1 3 3
+A1.1
+Table2: 1 2 3 3
+A1.2
+Table2: 1 3 3 3
+A1.3
+
+Table1: 1 2 4 2
+Table2: 2 1 3 3
+A2.1
+Table2: 2 2 3 3
+A2.2
+Table2: 2 3 3 3
+A2.3
+
+Table1: 1 3 4 2
+Table2: 3 1 3 3
+A3.1
+Table2: 3 2 3 3
+A3.2
+Table2: 3 3 3 3
+A3.3
+
+Table1: 1 4 4 2
+Table2: 4 1 3 3
+A4.1
+Table2: 4 2 3 3
+A4.2
+Table2: 4 3 3 3
+A4.3
+
+Label: lab2
+
+
+Table1: 2 1 4 2
+Table2: 1 1 3 3
+A1.1
+Table2: 1 2 3 3
+A1.2
+Table2: 1 3 3 3
+A1.3
+
+Table1: 2 2 4 2
+Table2: 2 1 3 3
+A2.1
+Table2: 2 2 3 3
+A2.2
+Table2: 2 3 3 3
+A2.3
+
+Table1: 2 3 4 2
+Table2: 3 1 3 3
+A3.1
+Table2: 3 2 3 3
+A3.2
+Table2: 3 3 3 3
+A3.3
+
+Table1: 2 4 4 2
+Table2: 4 1 3 3
+A4.1
+Table2: 4 2 3 3
+A4.2
+Table2: 4 3 3 3
+A4.3
+
+Label: lab3
+
+
+Table1: 3 1 4 2
+Table2: 1 1 3 3
+A1.1
+Table2: 1 2 3 3
+A1.2
+Table2: 1 3 3 3
+A1.3
+
+Table1: 3 2 4 2
+Table2: 2 1 3 3
+A2.1
+Table2: 2 2 3 3
+A2.2
+Table2: 2 3 3 3
+A2.3
+
+Table1: 3 3 4 2
+Table2: 3 1 3 3
+A3.1
+Table2: 3 2 3 3
+A3.2
+Table2: 3 3 3 3
+A3.3
+
+Table1: 3 4 4 2
+Table2: 4 1 3 3
+A4.1
+Table2: 4 2 3 3
+A4.2
+Table2: 4 3 3 3
+A4.3
+
+Label: lab4
+
+
+Table1: 4 1 4 2
+Table2: 1 1 3 3
+A1.1
+Table2: 1 2 3 3
+A1.2
+Table2: 1 3 3 3
+A1.3
+
+Table1: 4 2 4 2
+Table2: 2 1 3 3
+A2.1
+Table2: 2 2 3 3
+A2.2
+Table2: 2 3 3 3
+A2.3
+
+Table1: 4 3 4 2
+Table2: 3 1 3 3
+A3.1
+Table2: 3 2 3 3
+A3.2
+Table2: 3 3 3 3
+A3.3
+
+Table1: 4 4 4 2
+Table2: 4 1 3 3
+A4.1
+Table2: 4 2 3 3
+A4.2
+Table2: 4 3 3 3
+A4.3
+
+======================================================================
+
+A matrix outside a table:
+
+A1.1, A1.2, A1.3
+A2.1, A2.2, A2.3
+A3.1, A3.2, A3.3
+A4.1, A4.2, A4.3
+
+======================================================================
+
+A matrix with section:
+
+S1) A1.1
+S2) A1.2
+S1) A1.3
+S1) A2.1
+S2) A2.2
+S1) A2.3
+S1) A3.1
+S2) A3.2
+S1) A3.3
+S1) A4.1
+S2) A4.2
+S1) A4.3
+
+Idem with @@TERMINATE_SECTIONS@@
+
+S1) A1.1
+S2) A1.2
+S1) A1.3
+S2) 
+S1) A2.1
+S2) A2.2
+S1) A2.3
+S2) 
+S1) A3.1
+S2) A3.2
+S1) A3.3
+S2) 
+S1) A4.1
+S2) A4.2
+S1) A4.3
+S2) 
+
+[INFO] testme6.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] This is a test for the matrix feature:
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TEXT] @_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+      [TEXT] ---
+      [TEXT] [@_MAT_@]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A table with labels (vector):
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] 
+      [TEXT] Label: @_LABELS_@
+      [TEXT] 
+      [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TEXT] @_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix inside a table with labels (vectors):
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] 
+      [TEXT] Label: @_LABELS_@
+      [TEXT] 
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] 
+            [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+            [TABLE]
+              [BLOCK]
+                [COMMON]
+                  [TEXT] Table2: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
+                  [TEXT] @_MAT_@
+              [END_BLOCK]
+            [END_TABLE]
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix outside a table:
+[TEXT] 
+[TEXT] @_MAT_@
+[TEXT] 
+[TEXT] ======================================================================
+[TEXT] 
+[TEXT] A matrix with section:
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [SECTION]
+            [TEXT] S1) @_MAT_@
+          [SECTION]
+            [TEXT] S2) @_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Idem with @@TERMINATE_SECTIONS@@
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE] TERMINATE_SECTIONS
+        [BLOCK]
+          [SECTION]
+            [TEXT] S1) @_MAT_@
+          [SECTION]
+            [TEXT] S2) @_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]

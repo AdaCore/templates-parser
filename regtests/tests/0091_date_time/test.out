@@ -1,0 +1,12 @@
+[INFO] testme.tmplt
+[C_INFO]  1 FALSE
+[TEXT] @_DAY_NAME_@ @_MONTH_NAME_@
+[TEXT] @_YEAR_@/@_MONTH_@/@_DAY_@
+[TEXT] @_HOUR_@
+[TEXT] @_MINUTE_@
+[TEXT] @_SECOND_@
+OK L1
+OK L2
+OK L3
+OK L4
+OK L5

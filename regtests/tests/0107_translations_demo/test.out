@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Tagged xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <SimpleTag>
+      <Tag>
+         <Name>ONE</Name>
+      </Tag>
+      <V>1</V>
+   </SimpleTag>
+   <CompositeTag>
+      <Tag>
+         <Name>TABLE</Name>
+         <Description>les a et les b</Description>
+      </Tag>
+      <Dim n="1">
+         <Description>A/B</Description>
+         <Labels>
+            <Label ind="1">les A</Label>
+            <Label ind="2">les B</Label>
+         </Labels>
+      </Dim>
+      <Dim n="2">
+         <Description>Année</Description>
+         <Labels>
+            <Label ind="1">2001</Label>
+            <Label ind="2">2002</Label>
+            <Label ind="3">2003</Label>
+         </Labels>
+      </Dim>
+      <Entry><Ind n="1">1</Ind><Ind n="2">1</Ind><V>a1</V></Entry>
+      <Entry><Ind n="1">1</Ind><Ind n="2">2</Ind><V>a2</V></Entry>
+      <Entry><Ind n="1">1</Ind><Ind n="2">3</Ind><V>a3</V></Entry>
+      <Entry><Ind n="1">2</Ind><Ind n="2">1</Ind><V>b1</V></Entry>
+      <Entry><Ind n="1">2</Ind><Ind n="2">2</Ind><V>b2</V></Entry>
+      <Entry><Ind n="1">2</Ind><Ind n="2">3</Ind><V>b3</V></Entry>
+   </CompositeTag>
+   <SimpleTag>
+      <Tag>
+         <Name>VAR</Name>
+         <Description>le label</Description>
+      </Tag>
+      <V>un essai</V>
+   </SimpleTag>
+   <SimpleTag>
+      <Tag>
+         <Name>TWO</Name>
+      </Tag>
+      <V>2</V>
+   </SimpleTag>
+</Tagged>
+
+ 10 10
+ 11 11
+OK

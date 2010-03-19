@@ -1,0 +1,91 @@
+
+
+  ONE in INV : OK
+
+  SONE in INV : OK
+
+  ONE in V5 : OK
+
+  STWO in V5 : OK
+
+  STWO in V6 : OK
+
+  VALUE in MAT : OK
+
+  A3.3 in MAT : OK
+
+  NOWHERE in MAT : OK
+
+    ZZ not found
+    A3.4 not found
+    A4.2 found
+    again! not found
+    A2.2 found
+    ! not found
+
+[INFO] testme78.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[SET] VALUE = A4.2
+[SET] NOWHERE = XxX
+[SET] SONE = 1
+[SET] STWO = two
+[TEXT] 
+[IF] (@_ONE_@ in @_INV_@)
+  [TEXT]   ONE in INV : OK
+[ELSE]
+  [TEXT]   ONE in INV : NOK
+[END_IF]
+[TEXT] 
+[IF] (@_SONE_@ in @_INV_@)
+  [TEXT]   SONE in INV : OK
+[ELSE]
+  [TEXT]   SONE in INV : NOK
+[END_IF]
+[TEXT] 
+[IF] (@_ONE_@ in @_V5_@)
+  [TEXT]   ONE in V5 : NOK
+[ELSE]
+  [TEXT]   ONE in V5 : OK
+[END_IF]
+[TEXT] 
+[IF] (@_STWO_@ in @_V5_@)
+  [TEXT]   STWO in V5 : OK
+[ELSE]
+  [TEXT]   STWO in V5 : NOK
+[END_IF]
+[TEXT] 
+[IF] (@_STWO_@ in @_V6_@)
+  [TEXT]   STWO in V6 : NOK
+[ELSE]
+  [TEXT]   STWO in V6 : OK
+[END_IF]
+[TEXT] 
+[IF] (@_VALUE_@ in @_MAT_@)
+  [TEXT]   VALUE in MAT : OK
+[ELSE]
+  [TEXT]   VALUE in MAT : NOK
+[END_IF]
+[TEXT] 
+[IF] (A3.3 in @_MAT_@)
+  [TEXT]   A3.3 in MAT : OK
+[ELSE]
+  [TEXT]   A3.3 in MAT : NOK
+[END_IF]
+[TEXT] 
+[IF] (@_NOWHERE_@ in @_MAT_@)
+  [TEXT]   NOWHERE in MAT : NOK
+[ELSE]
+  [TEXT]   NOWHERE in MAT : OK
+[END_IF]
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [IF] (@_VAR7_@ in @_MAT_@)
+        [TEXT]     @_VAR7_@ found
+      [ELSE]
+        [TEXT]     @_VAR7_@ not found
+      [END_IF]
+  [END_BLOCK]
+[END_TABLE]

@@ -1,0 +1,100 @@
+ligne1
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table one
+  partie commune 3
+    dans la table "a table"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    in the table two
+  partie commune 3
+    in the table "with"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table three
+  partie commune 3
+    dans la table "many"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    in the table 
+  partie commune 3
+    in the table "values"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table 
+  partie commune 3
+    dans la table "to"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    in the table 
+  partie commune 3
+    in the table "be"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table 
+  partie commune 3
+    dans la table "displayed"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    in the table 
+  partie commune 3
+    in the table "one"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    dans la table 
+  partie commune 3
+    dans la table "by"
+  partie commune 4
+  ---
+  partie commune 1
+  partie commune 2
+    in the table 
+  partie commune 3
+    in the table "one"
+  partie commune 4
+ligne2
+[INFO] blocks3.tmplt
+[C_INFO]  1 FALSE
+[TEXT] ligne1
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT]   ---
+      [TEXT]   partie commune 1
+      [TEXT]   partie commune 2
+    [SECTION]
+      [TEXT]     dans la table @_VAR3_@
+    [SECTION]
+      [TEXT]     in the table @_VAR3_@
+  [END_BLOCK]
+  [BLOCK]
+    [COMMON]
+      [TEXT]   partie commune 3
+    [SECTION]
+      [TEXT]     dans la table "@_VAR2_@"
+    [SECTION]
+      [TEXT]     in the table "@_VAR2_@"
+  [END_BLOCK]
+  [BLOCK]
+    [COMMON]
+      [TEXT]   partie commune 4
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] ligne2

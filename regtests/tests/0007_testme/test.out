@@ -1,0 +1,184 @@
+
+Test for complex condition:
+
+1)
+OK
+
+2)
+OK
+
+3)
+OK
+
+4)
+OK
+
+5)
+OK
+
+6)
+OK
+
+7)
+OK
+
+8)
+OK
+
+8)
+OK
+
+9)
+OK
+
+10)
+OK
+
+11)
+OK
+
+12)
+OK
+
+13)
+one
+This is value two !
+three
+
+14)
+OK
+
+15)
+OK
+
+16)
+OK
+
+[INFO] testme8.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Test for complex condition:
+[TEXT] 
+[TEXT] 1)
+[IF] (@_COND1_@ or @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 2)
+[IF] (@_COND1_@ and @_COND2_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 3)
+[IF] (@_ONE_@ > @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 4)
+[IF] (@_ONE_@ >= @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 5)
+[IF] (@_ONE_@ < @_TWO_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 6)
+[IF] (@_ONE_@ <= @_TWO_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 7)
+[IF] (@_ONE_@ = @_TWO_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 8)
+[IF] (@_THREE_@ = @_THREE_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 8)
+[IF] ((@_THREE_@ = @_THREE_@) and @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 9)
+[IF] ((@_THREE_@ = @_THREE_@) or @_COND1_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 10)
+[IF] ((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@))
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 11)
+[IF] (((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@)) and @_COND1_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 12)
+[IF] (@_COND2_@ or (((@_ONE_@ <= @_TWO_@) and (@_THREE_@ > @_TWO_@)) and @_COND1_@))
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 13)
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [IF] (@_UPPER:VAR3_@ = TWO)
+        [TEXT] This is value two !
+      [ELSE]
+        [TEXT] @_VAR3_@
+      [END_IF]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] 14)
+[IF] (@_COND1_@ xor @_COND2_@)
+  [TEXT] OK
+[ELSE]
+  [TEXT] NOK
+[END_IF]
+[TEXT] 
+[TEXT] 15)
+[IF] (@_COND1_@ xor @_COND1_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]
+[TEXT] 
+[TEXT] 16)
+[IF] (@_COND2_@ xor @_COND2_@)
+  [TEXT] NOK
+[ELSE]
+  [TEXT] OK
+[END_IF]

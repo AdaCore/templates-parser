@@ -1,0 +1,210 @@
+
+Test for include with parameters with default values
+
+**********************************************************
+
+
+1) one, toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) , six
+7) , sept
+8) , huit
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) one, toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) , huit
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) , toto, TOTO
+2) two, two, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) eight, eight
+9) , neuf, Neuf
+toujours
+**********************************************************
+
+
+1) , this is P1, THIS IS P1
+2) two, this is P2, two
+3) , trois et trois
+4) , quatre
+5) , cinq
+6) six, six
+7) , sept
+8) eight, eight
+9) true, true, True
+toujours
+**********************************************************
+[INFO] testme59.tmplt
+ -> testme59.incl
+ -> testme59.incl
+ -> testme59.incl
+ -> testme59.incl
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Test for include with parameters with default values
+[TEXT] 
+[TEXT] **********************************************************
+[INCLUDE] testme59.incl
+    $0 = testme59.incl
+    $1 = one
+    $2 = two
+  [INFO] testme59.incl
+  [C_INFO]  1 FALSE
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
+  [ELSE]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
+  [TEXT] 
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
+  [TEXT] 
+  [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
+  [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
+  [TEXT] 3) @_$3_@, @_P3_@
+  [TEXT] 4) @_$4_@, @_P4_@
+  [TEXT] 5) @_$5_@, @_P5_@
+  [TEXT] 6) @_$6_@, @_P6_@
+  [TEXT] 7) @_$7_@, @_P7_@
+  [TEXT] 8) @_$8_@, @_P8_@
+  [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
+  [TEXT] @_CST_@
+[TEXT] **********************************************************
+[INCLUDE] testme59.incl
+    $0 = testme59.incl
+    $1 = one
+    $2 = two
+    $6 = six
+  [INFO] testme59.incl
+  [C_INFO]  1 FALSE
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
+  [ELSE]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
+  [TEXT] 
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
+  [TEXT] 
+  [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
+  [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
+  [TEXT] 3) @_$3_@, @_P3_@
+  [TEXT] 4) @_$4_@, @_P4_@
+  [TEXT] 5) @_$5_@, @_P5_@
+  [TEXT] 6) @_$6_@, @_P6_@
+  [TEXT] 7) @_$7_@, @_P7_@
+  [TEXT] 8) @_$8_@, @_P8_@
+  [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
+  [TEXT] @_CST_@
+[TEXT] **********************************************************
+[INCLUDE] testme59.incl
+    $0 = testme59.incl
+    $2 = two
+    $6 = six
+    $8 = eight
+  [INFO] testme59.incl
+  [C_INFO]  1 FALSE
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
+  [ELSE]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
+  [TEXT] 
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
+  [TEXT] 
+  [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
+  [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
+  [TEXT] 3) @_$3_@, @_P3_@
+  [TEXT] 4) @_$4_@, @_P4_@
+  [TEXT] 5) @_$5_@, @_P5_@
+  [TEXT] 6) @_$6_@, @_P6_@
+  [TEXT] 7) @_$7_@, @_P7_@
+  [TEXT] 8) @_$8_@, @_P8_@
+  [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
+  [TEXT] @_CST_@
+[TEXT] **********************************************************
+[INCLUDE] testme59.incl
+    $0 = testme59.incl
+    $2 = two
+    $6 = six
+    $8 = eight
+    $9 = true
+  [INFO] testme59.incl
+  [C_INFO]  1 FALSE
+  [IF] (not @_$9_@)
+    [SET] P1 = toto
+    [SET] P2 = $2 | deux
+  [ELSE]
+    [SET] P1 = "this is P1"
+    [SET] P2 = "this is P2"
+  [END_IF]
+  [TEXT] 
+  [SET] P3 = $3 | "trois et trois"
+  [SET] P4 = $4 | quatre
+  [SET] P5 = $5 | cinq
+  [SET] P6 = $6 | six
+  [SET] P7 = $7 | sept
+  [SET] P8 = $8 | huit
+  [SET] P9 = $9 | neuf
+  [SET] ALIAS = $2
+  [SET] CST = toujours
+  [TEXT] 
+  [TEXT] 1) @_$1_@, @_P1_@, @_UPPER:P1_@
+  [TEXT] 2) @_$2_@, @_P2_@, @_ALIAS_@
+  [TEXT] 3) @_$3_@, @_P3_@
+  [TEXT] 4) @_$4_@, @_P4_@
+  [TEXT] 5) @_$5_@, @_P5_@
+  [TEXT] 6) @_$6_@, @_P6_@
+  [TEXT] 7) @_$7_@, @_P7_@
+  [TEXT] 8) @_$8_@, @_P8_@
+  [TEXT] 9) @_$9_@, @_P9_@, @_CAPITALIZE:P9_@
+  [TEXT] @_CST_@
+[TEXT] **********************************************************

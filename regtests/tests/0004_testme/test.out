@@ -1,0 +1,133 @@
+
+Some text here.
+
+
+
+   one A Value
+   two A Value
+   three A Value
+
+   ONE 
+   TWO 
+   THREE 
+
+   atable
+   with
+   many
+   values
+   to
+   be
+   displayed
+   one
+   by
+   one
+
+  ok, VAR1 exist.
+
+  ok, VAR1 exist.
+
+  ok, VARx does not exist.
+
+  ok, VARx does not exist.
+
+  ok, VARx does not exist.
+
+  ok, VARx does not exist.
+
+  ok, VARx does not exist.
+
+  ok, VAR1 exist.
+
+A List : one, two, three
+
+Some text after the include.
+[INFO] testme5.tmplt
+ -> testme2.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Some text here.
+[TEXT] 
+[INCLUDE] testme2.tmplt
+    $0 = testme2.tmplt
+  [INFO] testme2.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TABLE]
+    [BLOCK]
+      [COMMON]
+        [TEXT]    @_VAR_DOES_NOT_EXIST_@
+    [END_BLOCK]
+  [END_TABLE]
+  [TEXT] 
+  [TABLE]
+    [BLOCK]
+      [COMMON]
+        [TEXT]    @_VAR3_@ @_CAPITALIZE:VAR1_@
+    [END_BLOCK]
+  [END_TABLE]
+  [TEXT] 
+  [TABLE]
+    [BLOCK]
+      [COMMON]
+        [TEXT]    @_UPPER:VAR3_@ @_VAR4_@
+    [END_BLOCK]
+  [END_TABLE]
+  [TEXT] 
+  [TABLE]
+    [BLOCK]
+      [COMMON]
+        [TEXT]    @_NO_SPACE:VAR2_@
+    [END_BLOCK]
+  [END_TABLE]
+  [TEXT] 
+  [IF] @_EXIST:VAR1_@
+    [TEXT]   ok, VAR1 exist.
+  [ELSE]
+    [TEXT]   error, VAR1 exist.
+  [END_IF]
+  [TEXT] 
+  [IF] (@_EXIST:VAR1_@ = TRUE)
+    [TEXT]   ok, VAR1 exist.
+  [ELSE]
+    [TEXT]   error, VAR1 exist.
+  [END_IF]
+  [TEXT] 
+  [IF] @_EXIST:VARx_@
+    [TEXT]   nok, VARx does not exist.
+  [ELSE]
+    [TEXT]   ok, VARx does not exist.
+  [END_IF]
+  [TEXT] 
+  [IF] (@_EXIST:VARx_@ = TRUE)
+    [TEXT]   nok, VARx does not exist.
+  [ELSE]
+    [TEXT]   ok, VARx does not exist.
+  [END_IF]
+  [TEXT] 
+  [IF] (@_EXIST:VARx_@ = FALSE)
+    [TEXT]   ok, VARx does not exist.
+  [ELSE]
+    [TEXT]   nok, VARx does not exist.
+  [END_IF]
+  [TEXT] 
+  [IF] (@_IS_EMPTY:VARx_@ = TRUE)
+    [TEXT]   ok, VARx does not exist.
+  [ELSE]
+    [TEXT]   nok, VARx does not exist.
+  [END_IF]
+  [TEXT] 
+  [IF] @_IS_EMPTY:VARx_@
+    [TEXT]   ok, VARx does not exist.
+  [ELSE]
+    [TEXT]   nok, VARx does not exist.
+  [END_IF]
+  [TEXT] 
+  [IF] @_IS_EMPTY:VAR1_@
+    [TEXT]   nok, VAR1 exist.
+  [ELSE]
+    [TEXT]   ok, VAR1 exist.
+  [END_IF]
+  [TEXT] 
+  [TEXT] A List : @_VAR3_@
+[TEXT] 
+[TEXT] Some text after the include.

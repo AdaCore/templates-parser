@@ -111,7 +111,7 @@ endif
 
 tp_xmlada.gpr: setup
 
-test: build
+run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
 doc: tp_xmlada.gpr

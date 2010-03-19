@@ -1,0 +1,46 @@
+
+
+
+Header
+
+Hello
+
+
+Footer
+
+base!
+
+[INFO] testme31.tmplt
+ -> dir/file.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[INCLUDE] dir/file.tmplt
+    $0 = dir/file.tmplt
+  [INFO] dir/file.tmplt
+ -> dir/subdir/footer.tmplt
+ -> dir/header.tmplt
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [INCLUDE] dir/header.tmplt
+      $0 = header.tmplt
+    [INFO] dir/header.tmplt
+    [C_INFO]  1 FALSE
+    [TEXT] 
+    [TEXT] Header
+  [TEXT] 
+  [TEXT] Hello
+  [TEXT] 
+  [INCLUDE] dir/subdir/footer.tmplt
+      $0 = subdir/footer.tmplt
+    [INFO] dir/subdir/footer.tmplt
+ -> base.tmplt
+    [C_INFO]  1 FALSE
+    [TEXT] 
+    [TEXT] Footer
+    [TEXT] 
+    [INCLUDE] base.tmplt
+        $0 = /base.tmplt
+      [INFO] base.tmplt
+      [C_INFO]  1 FALSE
+      [TEXT] base!
+

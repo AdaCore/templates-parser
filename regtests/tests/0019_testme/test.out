@@ -1,0 +1,66 @@
+
+a value
+[ val]
+
+a value
+[value a]
+
+a text 
+[text a]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (6   words & good   )]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (   a text with < ) 2 (   words & good   9) 3 (  chars like + > )]
+
+   a text with < 6   words & good   92  chars like + > 
+[1 (   a text with ) 2 ( 6   words & good   9) 3 (  chars like + > )]
+
+vector_tag
+tag_vector
+
+   a text with < 6   WORDs & good   92  chars like + > 
+
+     toto titi tata tata titi toto tata titi toto titi titi
+toto .... titi tata tata titi toto tata titi toto titi titi
+titi toto .... tata tata titi toto tata titi toto titi titi
+tata toto titi .... tata titi toto tata titi toto titi titi
+toto .... titi tata tata titi .... tata titi .... titi titi
+titi toto .... tata tata .... toto tata .... toto .... ....
+tata toto titi .... .... titi toto .... titi toto titi titi
+tata toto titi _\1_ _\1_ titi toto _\1_ titi toto titi titi
+[INFO] testme32.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] @_VAR1_@
+[TEXT] [@_REPLACE(a(.*)ue/\1):VAR1_@]
+[TEXT] 
+[TEXT] @_VAR1_@
+[TEXT] [@_REPLACE(^([a-z]+) ([a-z]+).*/\2 \1):VAR1_@]
+[TEXT] 
+[TEXT] @_SLICE(2 .. 8):CONTRACT:NO_DIGIT:CLEAN_TEXT:FILTER_@
+[TEXT] [@_REPLACE(^([a-z]+) ([a-z]+).*/\2 \1):SLICE(2 .. 8):CONTRACT:NO_DIGIT:CLEAN_TEXT:FILTER_@]
+[TEXT] 
+[TEXT] @_FILTER_@
+[TEXT] [@_REPLACE(^[^6]+([^9]+).*$/1 (\1)):FILTER_@]
+[TEXT] 
+[TEXT] @_FILTER_@
+[TEXT] [@_REPLACE(^(.*)6(.*)2(.*)$/1 (\1) 2 (\2) 3 (\3)):FILTER_@]
+[TEXT] 
+[TEXT] @_FILTER_@
+[TEXT] [@_REPLACE(^(.*)<(.*)2(.*)$/1 (\1) 2 (\2) 3 (\3)):FILTER_@]
+[TEXT] 
+[TEXT] @_REPLACE(([^_]+)/\1):VT_@
+[TEXT] @_REPLACE(([a-z]+)_([a-z]+)/\2_\1):VT_@
+[TEXT] 
+[TEXT] @_REPLACE(word/WORD):FILTER_@
+[TEXT] 
+[TEXT]      @_TEXT_@
+[TEXT] toto @_REPLACE(toto/....):TEXT_@
+[TEXT] titi @_REPLACE(titi/....):TEXT_@
+[TEXT] tata @_REPLACE(tata/....):TEXT_@
+[TEXT] toto @_REPLACE_ALL(toto/....):TEXT_@
+[TEXT] titi @_REPLACE_ALL(titi/....):TEXT_@
+[TEXT] tata @_REPLACE_ALL(tata/....):TEXT_@
+[TEXT] tata @_REPLACE_ALL(tata/_\1_):TEXT_@

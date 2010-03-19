@@ -1,0 +1,117 @@
+
+0 ---------------------------
+
+      1> one
+      2> two
+      3> three
+      1> (one)
+      2> (two)
+      3> 
+
+1 ---------------------------
+
+      1> one
+      2> two
+      3> three
+      1> (one)
+      2> (two)
+
+2 ---------------------------
+
+      1> one
+      2> two
+      3> three
+      1> (one)
+      2> (two)
+
+3 ---------------------------
+
+      3> three
+      2> two
+      1> one
+      2> (two)
+      1> (one)
+
+4 ---------------------------
+
+      2> a value (two)
+      1> a value (one)
+      3> a value three
+      2> a value two
+      1> a value one
+
+[INFO] testme80.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] 0 ---------------------------
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT]       @_TABLE_LINE_@> @_MATDSIZE_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] 1 ---------------------------
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [IF] (@_MATDSIZE_@ /= )
+              [TEXT]       @_TABLE_LINE_@> @_MATDSIZE_@
+            [ELSE]
+            [END_IF]
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] 2 ---------------------------
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE] TERSE
+        [BLOCK]
+          [COMMON]
+            [TEXT]       @_TABLE_LINE_@> @_MATDSIZE_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] 3 ---------------------------
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE] REVERSE TERSE
+        [BLOCK]
+          [COMMON]
+            [TEXT]       @_TABLE_LINE_@> @_MATDSIZE_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] 4 ---------------------------
+[TEXT] 
+[TABLE] REVERSE
+  [BLOCK]
+    [COMMON]
+      [TABLE] REVERSE TERSE
+        [BLOCK]
+          [COMMON]
+            [TEXT]       @_TABLE_LINE_@> @_VAR1_@ @_MATDSIZE_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                         Copyright (C) 2005-2008                          --
---                                 AdaCore                                  --
+--                      Copyright (C) 2005-2010, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -35,6 +34,7 @@ project Regtests is
 
    for Object_Dir use "../" & TP_Shared'Exec_Dir & "/robj";
    for Exec_Dir use "../" & TP_Shared'Exec_Dir & "/rbin";
+   for Main use ("testme.adb", "print_tree.adb");
 
    --------------
    -- Compiler --
@@ -51,14 +51,6 @@ project Regtests is
    package Builder is
       for Default_Switches ("Ada") use ("-m");
    end Builder;
-
-   ------------
-   -- Linker --
-   ------------
-
-   package Linker is
-      for Switches ("check_mem.adb") use ("-lgmem");
-   end Linker;
 
    ---------
    -- Ide --

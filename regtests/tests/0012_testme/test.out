@@ -1,0 +1,493 @@
+
+Test for table attributes
+
+Level 0
+
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+
+Level 1 (no expand var)
+
+
+Level 1 (with expand var)
+
+=> (one)
+
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> (two)
+
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+
+Level 2 (no expand var)
+
+
+Level 2 (with expand var) - vector level 1
+
+=> (one)
+=> (two)
+
+Level 2 (with expand var) - vector level 2
+
+
+Level 2 (with expand var) - matrix level 1
+
+=> A1.1, A1.2, A1.3
+=> A2.1, A2.2, A2.3
+=> A3.1, A3.2, A3.3
+=> A4.1, A4.2, A4.3
+
+Level 2 (with expand var) - matrix level 2
+
+=> A1.1
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A1.2
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A1.3
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+----
+=> A2.1
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A2.2
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A2.3
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+----
+=> A3.1
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A3.2
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A3.3
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+----
+=> A4.1
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A4.2
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+=> A4.3
+MAT
+4
+3
+3
+
+MATDSIZE
+2
+2
+3
+
+VAR2
+10
+
+V6
+2
+----
+
+[INFO] testme18.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Test for table attributes
+[TEXT] 
+[TEXT] Level 0
+[TEXT] 
+[TEXT] MAT
+[TEXT] @_MAT'Line_@
+[TEXT] @_MAT'Min_Column_@
+[TEXT] @_MAT'Max_Column_@
+[TEXT] 
+[TEXT] MATDSIZE
+[TEXT] @_MATDSIZE'Line_@
+[TEXT] @_MATDSIZE'Min_Column_@
+[TEXT] @_MATDSIZE'Max_Column_@
+[TEXT] 
+[TEXT] VAR2
+[TEXT] @_VAR2'Length_@
+[TEXT] 
+[TEXT] V6
+[TEXT] @_V6'Length_@
+[TEXT] 
+[TEXT] Level 1 (no expand var)
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] MAT
+      [TEXT] @_MAT'Line_@
+      [TEXT] @_MAT'Min_Column_@
+      [TEXT] @_MAT'Max_Column_@
+      [TEXT] 
+      [TEXT] MATDSIZE
+      [TEXT] @_MATDSIZE'Line_@
+      [TEXT] @_MATDSIZE'Min_Column_@
+      [TEXT] @_MATDSIZE'Max_Column_@
+      [TEXT] 
+      [TEXT] VAR2
+      [TEXT] @_VAR2'Length_@
+      [TEXT] 
+      [TEXT] V6
+      [TEXT] @_V6'Length_@
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 1 (with expand var)
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] => @_V6_@
+      [TEXT] 
+      [TEXT] MAT
+      [TEXT] @_MAT'Line_@
+      [TEXT] @_MAT'Min_Column_@
+      [TEXT] @_MAT'Max_Column_@
+      [TEXT] 
+      [TEXT] MATDSIZE
+      [TEXT] @_MATDSIZE'Line_@
+      [TEXT] @_MATDSIZE'Min_Column_@
+      [TEXT] @_MATDSIZE'Max_Column_@
+      [TEXT] 
+      [TEXT] VAR2
+      [TEXT] @_VAR2'Length_@
+      [TEXT] 
+      [TEXT] V6
+      [TEXT] @_V6'Length_@
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 2 (no expand var)
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] MAT
+            [TEXT] @_MAT'Line_@
+            [TEXT] @_MAT'Min_Column_@
+            [TEXT] @_MAT'Max_Column_@
+            [TEXT] 
+            [TEXT] MATDSIZE
+            [TEXT] @_MATDSIZE'Line_@
+            [TEXT] @_MATDSIZE'Min_Column_@
+            [TEXT] @_MATDSIZE'Max_Column_@
+            [TEXT] 
+            [TEXT] VAR2
+            [TEXT] @_VAR2'Length_@
+            [TEXT] 
+            [TEXT] V6
+            [TEXT] @_V6'Length_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 2 (with expand var) - vector level 1
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] => @_V6_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] MAT
+            [TEXT] @_MAT'Line_@
+            [TEXT] @_MAT'Min_Column_@
+            [TEXT] @_MAT'Max_Column_@
+            [TEXT] 
+            [TEXT] MATDSIZE
+            [TEXT] @_MATDSIZE'Line_@
+            [TEXT] @_MATDSIZE'Min_Column_@
+            [TEXT] @_MATDSIZE'Max_Column_@
+            [TEXT] 
+            [TEXT] VAR2
+            [TEXT] @_VAR2'Length_@
+            [TEXT] 
+            [TEXT] V6
+            [TEXT] @_V6'Length_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 2 (with expand var) - vector level 2
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] => @_V6_@
+            [TEXT] MAT
+            [TEXT] @_MAT'Line_@
+            [TEXT] @_MAT'Min_Column_@
+            [TEXT] @_MAT'Max_Column_@
+            [TEXT] 
+            [TEXT] MATDSIZE
+            [TEXT] @_MATDSIZE'Line_@
+            [TEXT] @_MATDSIZE'Min_Column_@
+            [TEXT] @_MATDSIZE'Max_Column_@
+            [TEXT] 
+            [TEXT] VAR2
+            [TEXT] @_VAR2'Length_@
+            [TEXT] 
+            [TEXT] V6
+            [TEXT] @_V6'Length_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 2 (with expand var) - matrix level 1
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] => @_MAT_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] MAT
+            [TEXT] @_MAT'Line_@
+            [TEXT] @_MAT'Min_Column_@
+            [TEXT] @_MAT'Max_Column_@
+            [TEXT] 
+            [TEXT] MATDSIZE
+            [TEXT] @_MATDSIZE'Line_@
+            [TEXT] @_MATDSIZE'Min_Column_@
+            [TEXT] @_MATDSIZE'Max_Column_@
+            [TEXT] 
+            [TEXT] VAR2
+            [TEXT] @_VAR2'Length_@
+            [TEXT] 
+            [TEXT] V6
+            [TEXT] @_V6'Length_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] Level 2 (with expand var) - matrix level 2
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] => @_MAT_@
+            [TEXT] MAT
+            [TEXT] @_MAT'Line_@
+            [TEXT] @_MAT'Min_Column_@
+            [TEXT] @_MAT'Max_Column_@
+            [TEXT] 
+            [TEXT] MATDSIZE
+            [TEXT] @_MATDSIZE'Line_@
+            [TEXT] @_MATDSIZE'Min_Column_@
+            [TEXT] @_MATDSIZE'Max_Column_@
+            [TEXT] 
+            [TEXT] VAR2
+            [TEXT] @_VAR2'Length_@
+            [TEXT] 
+            [TEXT] V6
+            [TEXT] @_V6'Length_@
+        [END_BLOCK]
+      [END_TABLE]
+      [TEXT] ----
+  [END_BLOCK]
+[END_TABLE]

@@ -1,0 +1,11 @@
+Does it match? YES
+ It definetely match !
+
+[INFO] testme38.tmplt
+[C_INFO]  1 FALSE
+[TEXT] Does it match? @_YES_NO:MATCH(Test):TEST_VAR_@
+[IF] @_MATCH(Test):TEST_VAR_@
+  [TEXT]  It definetely match !
+[ELSE]
+  [TEXT]  Hmm... Contradiction!
+[END_IF]

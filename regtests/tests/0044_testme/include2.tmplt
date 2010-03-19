@@ -1,0 +1,19 @@
+
+@@-- Include file
+@_$0_@
+
+1> @_$1_@
+
+2> @_$2'Length_@
+
+3> @_$3'Line_@
+
+4> @_$3'Min_Column_@
+
+5> @_$3'Max_Column_@
+
+@@IF@@ @_$2'Length_@ > 1
+ok
+@@ELSE@@
+nok
+@@END_IF@@

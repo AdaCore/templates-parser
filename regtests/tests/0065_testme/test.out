@@ -1,0 +1,25 @@
+
+---
+
+  1. lab1
+    2. label 2
+  1. lab3
+    2. lab4
+
+1. lab1|2. label 2|1. lab3|2. lab4
+---
+
+before
+lab1
+after
+before
+sec: lab2
+after
+before
+lab3
+after
+before
+sec: lab4
+after
+
+before, lab1, after, before, sec: lab2, after, before, lab3, after, before, sec: lab4, after

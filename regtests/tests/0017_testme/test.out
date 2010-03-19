@@ -1,0 +1,36 @@
+
+
+Test slice
+
+12 = 12
+12 = 12
+23 = 23
+23 = 23
+=
+6 = 6
+= 
+= 
+2345 = 2345
+456 = 456
+45 = 45
+=
+
+[INFO] testme30.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] 
+[TEXT] Test slice
+[TEXT] 
+[TEXT] 12 = @_SLICE(1 .. 2):NUM0_@
+[TEXT] 12 = @_SLICE(1 .. 2):NUM0_@
+[TEXT] 23 = @_SLICE(2 .. 3):NUM0_@
+[TEXT] 23 = @_SLICE(2 .. 3):NUM0_@
+[TEXT] = @_SLICE(2 .. 1):NUM0_@
+[TEXT] 6 = @_SLICE(6 .. 10):NUM0_@
+[TEXT] = @_SLICE(8 .. 15):NUM0_@
+[TEXT] = @_SLICE(18 .. 15):NUM0_@
+[TEXT] 2345 = @_SLICE(2 .. 5):NUM0_@
+[TEXT] 456 = @_SLICE(-2 .. 0):NUM0_@
+[TEXT] 45 = @_SLICE(-2 .. -1):NUM0_@
+[TEXT] = @_SLICE(-10 .. -9):NUM0_@
+

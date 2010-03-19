@@ -1,0 +1,266 @@
+
+--  Table 1
+
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+
+--  Table 2
+
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+
+--  Table 3
+
+lab1
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+lab2
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+lab3
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+lab4
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+
+--  Table 4
+
+lab1
+lab1
+  lab1:A1.1
+  lab1:A1.2
+  lab1:A1.3
+lab2
+  lab1:A2.1
+  lab1:A2.2
+  lab1:A2.3
+lab3
+  lab1:A3.1
+  lab1:A3.2
+  lab1:A3.3
+lab4
+  lab1:A4.1
+  lab1:A4.2
+  lab1:A4.3
+lab2
+lab1
+  lab2:A1.1
+  lab2:A1.2
+  lab2:A1.3
+lab2
+  lab2:A2.1
+  lab2:A2.2
+  lab2:A2.3
+lab3
+  lab2:A3.1
+  lab2:A3.2
+  lab2:A3.3
+lab4
+  lab2:A4.1
+  lab2:A4.2
+  lab2:A4.3
+lab3
+lab1
+  lab3:A1.1
+  lab3:A1.2
+  lab3:A1.3
+lab2
+  lab3:A2.1
+  lab3:A2.2
+  lab3:A2.3
+lab3
+  lab3:A3.1
+  lab3:A3.2
+  lab3:A3.3
+lab4
+  lab3:A4.1
+  lab3:A4.2
+  lab3:A4.3
+lab4
+lab1
+  lab4:A1.1
+  lab4:A1.2
+  lab4:A1.3
+lab2
+  lab4:A2.1
+  lab4:A2.2
+  lab4:A2.3
+lab3
+  lab4:A3.1
+  lab4:A3.2
+  lab4:A3.3
+lab4
+  lab4:A4.1
+  lab4:A4.2
+  lab4:A4.3
+
+--  Table 5
+
+lab1, lab2, lab3, lab4 {lab1}
+lab1, lab2, lab3, lab4 {lab2}
+lab1, lab2, lab3, lab4 {lab3}
+lab1, lab2, lab3, lab4 {lab4}
+
+[INFO] testme54.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] --  Table 1
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] --  Table 2
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] --  Table 3
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] @_LABELS_@
+            [TABLE]
+              [BLOCK]
+                [COMMON]
+                  [TEXT]   @_LABELS'Up_Level_@:@_MAT_@
+              [END_BLOCK]
+            [END_TABLE]
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] --  Table 4
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS_@
+      [TABLE]
+        [BLOCK]
+          [COMMON]
+            [TEXT] @_LABELS_@
+            [TABLE]
+              [BLOCK]
+                [COMMON]
+                  [TEXT]   @_LABELS'Up_Level(2)_@:@_MAT_@
+              [END_BLOCK]
+            [END_TABLE]
+        [END_BLOCK]
+      [END_TABLE]
+  [END_BLOCK]
+[END_TABLE]
+[TEXT] 
+[TEXT] --  Table 5
+[TEXT] 
+[TABLE]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_LABELS'Up_Level(2)_@ {@_LABELS_@}
+  [END_BLOCK]
+[END_TABLE]

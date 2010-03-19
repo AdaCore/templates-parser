@@ -1,0 +1,29 @@
+
+First line<br/>Second line
+First line
+Second line
+
+First line
+Second line
+First line<br/>Second line
+
+First line
+Second line
+First line
+Second line
+First lineSecond line
+First line
+Second line
+[INFO] testme25.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] @_LF_2_BR:WITHLF_@
+[TEXT] @_BR_2_LF:WITHBR_@
+[TEXT] 
+[TEXT] @_BR_2_LF:LF_2_BR:WITHLF_@
+[TEXT] @_LF_2_BR:BR_2_LF:WITHBR_@
+[TEXT] 
+[TEXT] @_BR_2_EOL(LF):WITHBR_@
+[TEXT] @_BR_2_EOL(CRLF):WITHBR_@
+[TEXT] @_BR_2_EOL(CR):WITHBR_@
+[TEXT] @_BR_2_EOL(LFCR):WITHBR_@

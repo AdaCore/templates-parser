@@ -1,0 +1,54 @@
+
+2
+11
+2
+11
+
+1
+-1
+1
+-1
+
+6
+2
+6
+2
+
+1
+0
+1
+0
+
+1
+0
+1
+
+5
+[INFO] testme24.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] @_"+"(1):ONE_@
+[TEXT] @_"+"(10):ONE_@
+[TEXT] @_"+"(1):ONE_@
+[TEXT] @_"+"(10):ONE_@
+[TEXT] 
+[TEXT] @_"-"(2):THREE_@
+[TEXT] @_"-"(2):ONE_@
+[TEXT] @_"-"(2):THREE_@
+[TEXT] @_"-"(2):ONE_@
+[TEXT] 
+[TEXT] @_"*"(2):THREE_@
+[TEXT] @_"*"(1):TWO_@
+[TEXT] @_"*"(2):THREE_@
+[TEXT] @_"*"(1):TWO_@
+[TEXT] 
+[TEXT] @_"/"(3):THREE_@
+[TEXT] @_"/"(3):ONE_@
+[TEXT] @_"/"(3):THREE_@
+[TEXT] @_"/"(3):ONE_@
+[TEXT] 
+[TEXT] @_MOD(2):ONE_@
+[TEXT] @_MOD(2):TWO_@
+[TEXT] @_MOD(2):THREE_@
+[TEXT] 
+[TEXT] @_"+"(2):V5'Length_@

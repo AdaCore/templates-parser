@@ -1,0 +1,82 @@
+Just some special tags:
+
+a value
+A VALUE
+AValue
+Avalue
+EULAVA
+
+ a text with < 6 words & good 92 chars like + > 
+   a text with <     words & good       chars like + > 
+ a text with < words & good chars like + > 
+ < 6 & 92 + > 
+< 6 & 92 + >
+   a text with &lt; 6   words &amp; good   92  chars like + &gt; 
+&nbsp;&nbsp;&nbsp;a&nbsp;text&nbsp;with&nbsp;<&nbsp;6&nbsp;&nbsp;&nbsp;words&nbsp;&&nbsp;good&nbsp;&nbsp;&nbsp;92&nbsp;&nbsp;chars&nbsp;like&nbsp;+&nbsp;>&nbsp;
+a&nbsp;text&nbsp;with&nbsp;<&nbsp;6&nbsp;words&nbsp;&&nbsp;good&nbsp;92&nbsp;chars&nbsp;like&nbsp;+&nbsp;>
+TRUE
+FALSE
+a valuea valuea value
+7
+4
+123 456
+1 234 567.98765
+12.98765
+123.9
+1 234.98
+.98
+
+  OK
+
+  OK
+
+  OK
+
+[INFO] testme9.tmplt
+[C_INFO]  1 FALSE
+[TEXT] 
+[TEXT] Just some special tags:
+[TEXT] 
+[TEXT] @_LOWER:VAR1_@
+[TEXT] @_UPPER:VAR1_@
+[TEXT] @_NO_SPACE:CAPITALIZE:VAR1_@
+[TEXT] @_CAPITALIZE:NO_SPACE:VAR1_@
+[TEXT] @_NO_SPACE:UPPER:REVERSE:VAR1_@
+[TEXT] 
+[TEXT] @_CONTRACT:FILTER_@
+[TEXT] @_NO_DIGIT:FILTER_@
+[TEXT] @_CONTRACT:NO_DIGIT:FILTER_@
+[TEXT] @_CONTRACT:NO_LETTER:FILTER_@
+[TEXT] @_TRIM:CONTRACT:NO_LETTER:FILTER_@
+[TEXT] @_WEB_ESCAPE:FILTER_@
+[TEXT] @_WEB_NBSP:FILTER_@
+[TEXT] @_WEB_NBSP:TRIM:CONTRACT:FILTER_@
+[TEXT] @_MATCH(.*text.*):FILTER_@
+[TEXT] @_MATCH(.*abc):FILTER_@
+[TEXT] @_REPEAT(3):VAR1_@
+[TEXT] @_SIZE:VAR1_@
+[TEXT] @_SIZE:COND2_@
+[TEXT] @_FORMAT_NUMBER:NUM0_@
+[TEXT] @_FORMAT_NUMBER:NUM1_@
+[TEXT] @_FORMAT_NUMBER:NUM2_@
+[TEXT] @_FORMAT_NUMBER:NUM3_@
+[TEXT] @_FORMAT_NUMBER:NUM4_@
+[TEXT] @_FORMAT_NUMBER:NUM5_@
+[TEXT] 
+[IF] @_VAR5_@
+  [TEXT]   NOK
+[ELSE]
+  [TEXT]   OK
+[END_IF]
+[TEXT] 
+[IF] @_NO_SPACE:VAR5_@
+  [TEXT]   OK
+[ELSE]
+  [TEXT]   NOK
+[END_IF]
+[TEXT] 
+[IF] @_UPPER:NO_SPACE:VAR5_@
+  [TEXT]   OK
+[ELSE]
+  [TEXT]   NOK
+[END_IF]

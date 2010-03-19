@@ -32,6 +32,7 @@ project Regtests is
 
    for Languages use ("Ada", "Project file");
 
+   for Source_Dirs use ("src");
    for Object_Dir use "../" & TP_Shared'Exec_Dir & "/robj";
    for Exec_Dir use "../" & TP_Shared'Exec_Dir & "/rbin";
    for Main use ("testme.adb", "print_tree.adb");

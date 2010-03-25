@@ -10,6 +10,7 @@ from gnatpython.fileutils import mkdir, rm
 from gnatpython.main import Main
 from gnatpython.mainloop import (MainLoop, add_mainloop_options,
                                  generate_collect_result)
+from gnatpython.reports import ReportDiff
 
 from glob import glob
 
@@ -87,6 +88,12 @@ def main():
 
     MainLoop(test_list, test_build_cmd, collect_result, options.mainloop_jobs)
 
+    # Write report
+    with open(result_dir + '/discs', 'w') as discs_f:
+        discs_f.write(" ".join(discs))
+    ReportDiff(result_dir, options.old_result_dir).txt_image(
+        result_dir + '/report')
+
 
 def filter_list(pattern, run_test=""):
     """Compute the list of test matching pattern
@@ -108,6 +115,8 @@ def __parse_options():
                  default=False, help="Print .diff content")
     m.add_option('--discs', type="string", default="",
                  help="Additional discriminants")
+    m.add_option("--old-result-dir", type="string", default=None,
+                 help="Old result dir")
     m.add_option("-o", "--output-dir",
                  dest="output_dir",
                  metavar="DIR",

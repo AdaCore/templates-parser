@@ -35,6 +35,8 @@ else:
 
 ep = os.getcwd() + "/../.build/" + PLATFORM + "/" + PRJ_BUILD + "/static/"
 
+assert os.path.exists(ep), "cannot find %s directory" % ep
+
 os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + ep \
         + "bin" + os.pathsep + ep + "rbin"
 

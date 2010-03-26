@@ -20,24 +20,26 @@ import sys
 
 #  Compute PATH to global test drivers (testme, print_tree)
 
-PLATFORM=os.environ.get("PLATFORM")
-PRJ_BUILD=os.environ.get("PRJ_BUILD")
+PLATFORM = os.environ.get("PLATFORM")
+PRJ_BUILD = os.environ.get("PRJ_BUILD")
 
 if PLATFORM == None:
-    PLATFORM="native"
+    PLATFORM = "native"
 else:
-    PLATFORM=PLATFORM.lower()
+    PLATFORM = PLATFORM.lower()
 
 if PRJ_BUILD == None:
-    PRJ_BUILD="debug"
+    PRJ_BUILD = "debug"
 else:
-    PRJ_BUILD=PRJ_BUILD.lower()
+    PRJ_BUILD = PRJ_BUILD.lower()
 
 ep = os.getcwd() + "/../.build/" + PLATFORM + "/" + PRJ_BUILD + "/static/"
 
-os.environ["PATH"] = os.environ.get ("PATH") + os.pathsep + ep + "bin" + os.pathsep + ep + "rbin"
+os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + ep \
+        + "bin" + os.pathsep + ep + "rbin"
 
 from gnatpython.ex import Run
+
 
 def gnatmake(prj):
     """Compile a project with gnatmake"""
@@ -45,6 +47,7 @@ def gnatmake(prj):
     process = Run(cmd)
     if process.status:
         print process.out
+
 
 def main():
     """Run the testsuite"""

@@ -10,6 +10,7 @@ from gnatpython.fileutils import mkdir, rm
 from gnatpython.main import Main
 from gnatpython.mainloop import (MainLoop, add_mainloop_options,
                                  generate_collect_result)
+from gnatpython.testdriver import add_run_test_options
 from gnatpython.reports import ReportDiff
 
 from glob import glob
@@ -58,7 +59,12 @@ def main():
     result_dir = options.output_dir
     results_file = result_dir + '/results'
 
-    rm(result_dir, True)
+    if os.path.exists(result_dir):
+        for file in (results_file, result_dir + '/report', 'discs'):
+            rm(file, True)
+        for ext in ('.diff', '.expected', '.out', '.result'):
+            for file in glob(result_dir + '/*' + ext):
+                rm(file, True)
     mkdir(result_dir)
 
     discs = ['ALL']
@@ -73,7 +79,8 @@ def main():
         """Run the given test"""
         cmd = [sys.executable, 'run-test',
                     '-d', ",".join(discs),
-                    '--output-dir', result_dir,
+                    '-o', result_dir,
+                    '-t', options.tmp,
                     test]
         if options.verbose:
             cmd.append('-v')
@@ -81,6 +88,8 @@ def main():
             cmd.append('--host=' + options.host)
         if options.target:
             cmd.append('--target=' + options.target)
+        if not options.enable_cleanup:
+            cmd.append('--disable-cleanup')
         return Run(cmd, bg=True)
 
     collect_result = generate_collect_result(
@@ -111,17 +120,11 @@ def __parse_options():
     """Parse command lines options"""
     m = Main()
     add_mainloop_options(m)
+    add_run_test_options(m)
     m.add_option("--diffs", dest="view_diffs", action="store_true",
                  default=False, help="Print .diff content")
-    m.add_option('--discs', type="string", default="",
-                 help="Additional discriminants")
     m.add_option("--old-result-dir", type="string", default=None,
                  help="Old result dir")
-    m.add_option("-o", "--output-dir",
-                 dest="output_dir",
-                 metavar="DIR",
-                 default="./out",
-                 help="select output dir")
     m.parse_args()
 
     if m.args:
@@ -130,6 +133,9 @@ def __parse_options():
         print "Running only test '%s'" % m.options.run_test
     else:
         m.options.run_test = ""
+
+    if m.options.discs:
+        m.options.discs = m.options.discs.split(',')
 
     return m.options
 

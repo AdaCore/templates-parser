@@ -1,7 +1,7 @@
 *~
 .build
-config/test_shared/*.ali
-config/test_shared/*.o
+config/setup/*.ali
+config/setup/*.o
 config/tp_config.gpr
 docs/ada.sed
 docs/demo*

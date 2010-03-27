@@ -45,7 +45,7 @@ BDIR           = .build/$(PLATFORM)/$(DR_BUILD)
 prefix	= $(dir $(shell which gnatls))..
 
 ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
-		-Pconfig/test_shared/test_shared 2>/dev/null && echo "true")
+		-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 
 -include makefile.setup
 

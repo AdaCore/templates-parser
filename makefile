@@ -32,7 +32,6 @@ GNAT	= gnat
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
-TP_XMLADA    = Disabled
 LIBRARY_TYPE = static
 CJOBS        = 2
 PLATFORM     = native
@@ -46,6 +45,9 @@ prefix	= $(dir $(shell which gnatls))..
 
 ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
 		-Pconfig/setup/test_shared 2>/dev/null && echo "true")
+TP_XMLADA    = $(shell $(GNAT) make -c -q -p \
+		-Pconfig/setup/test_xmlada 2>/dev/null \
+		&& echo "Installed")
 
 -include makefile.setup
 
@@ -93,20 +95,26 @@ else
 PRJ_BUILD=Release
 endif
 
+ifeq ($(TP_XMLADA),)
+TP_XMLADA=Disabled
+endif
+
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
+GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA)
+
 build: setup_config tp_xmlada.gpr
-	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=static \
-		-XPRJ_BUILD=$(PRJ_BUILD) -Ptemplates_parser
-	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=static \
-		-XPRJ_BUILD=$(PRJ_BUILD) -Ptools/tools
+	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=static \
+		-Ptemplates_parser
+	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=static \
+		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	$(GNAT) make -p -j$(CJOBS) -XLIBRARY_TYPE=relocatable \
-		-XPRJ_BUILD=$(PRJ_BUILD) -Ptemplates_parser
+	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=relocatable \
+		-Ptemplates_parser
 endif
 
 tp_xmlada.gpr: setup
@@ -135,6 +143,7 @@ endif
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
 	echo "CJOBS=$(CJOBS)" >> makefile.setup
+	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)
@@ -181,12 +190,12 @@ endif
 
 clean:
 ifeq ($(AWS),)
-	-$(GNAT) clean -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
 		-Ptemplates_parser
-	-$(GNAT) clean -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
 		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	-$(GNAT) clean -XLIBRARY_TYPE=relocatable -XPRJ_BUILD=$(PRJ_BUILD) \
+	-$(GNAT) clean -XLIBRARY_TYPE=relocatable $(GPROPTS) \
 		-Ptemplates_parser
 endif
 endif

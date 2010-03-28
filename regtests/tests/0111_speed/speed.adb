@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                      Copyright (C) 2005-2010, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -26,32 +25,62 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Calendar;
 with Ada.Strings.Unbounded;
+with Ada.Text_IO;
 
 with Templates_Parser;
 
 procedure Speed is
 
+   use Ada;
    use Ada.Strings.Unbounded;
    use Templates_Parser;
+   use type Calendar.Time;
 
    Str : constant String
      := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       & "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
       & "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc";
 
-   V : Vector_Tag;
+   Start, Stop    : Calendar.Time;
+   Elaps1, Elaps2 : Duration;
 
-   T : Translate_Table (1 .. 1);
+   ---------
+   -- Job --
+   ---------
 
-   R : Unbounded_String;
+   procedure Job (N : Positive) is
+      V : Vector_Tag;
+      T : Translate_Table (1 .. 1);
+      R : Unbounded_String;
+   begin
+      for K in 1 .. N loop
+         V := V & Str;
+      end loop;
+
+      T (1) := Assoc ("V", V);
+
+      R := Parse ("speed.tmplt", T);
+   end Job;
 
 begin
-   for K in 1 .. 15_000 loop
-      V := V & Str;
-   end loop;
+   Start := Calendar.Clock;
+   Job (4_000);
+   Stop := Calendar.Clock;
 
-   T (1) := Assoc ("V", V);
+   Elaps1 := Stop - Start;
 
-   R := Parse ("speed.tmplt", T);
+   Start := Calendar.Clock;
+   Job (40_000);
+   Stop := Calendar.Clock;
+
+   Elaps2 := Stop - Start;
+
+   if Elaps2 < (Elaps1 * 12) then
+      Text_Io.Put_Line ("OK");
+   else
+      Text_IO.Put_Line
+        ("NOK: " & Duration'Image (Elaps1 * 11) & " < " & Elaps2'Img);
+   end if;
 end Speed;

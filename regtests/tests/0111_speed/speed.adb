@@ -77,10 +77,10 @@ begin
 
    Elaps2 := Stop - Start;
 
-   if Elaps2 < (Elaps1 * 12) then
+   if Elaps2 < (Elaps1 * 15) then
       Text_Io.Put_Line ("OK");
    else
       Text_IO.Put_Line
-        ("NOK: " & Duration'Image (Elaps1 * 11) & " < " & Elaps2'Img);
+        ("NOK: " & Duration'Image (Elaps1 * 15) & " < " & Elaps2'Img);
    end if;
 end Speed;

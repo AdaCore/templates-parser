@@ -123,7 +123,7 @@ def filter_list(pattern, run_test=""):
 
 def __parse_options():
     """Parse command lines options"""
-    m = Main()
+    m = Main(add_targets_options=True)
     add_mainloop_options(m)
     add_run_test_options(m)
     m.add_option("--diffs", dest="view_diffs", action="store_true",

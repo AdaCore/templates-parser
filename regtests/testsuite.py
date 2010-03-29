@@ -35,7 +35,6 @@ else:
 
 ep = os.getcwd() + "/../.build/" + PLATFORM + "/" + PRJ_BUILD + "/static/"
 
-assert os.path.exists(ep), "cannot find %s directory" % ep
 
 os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + ep \
         + "bin" + os.pathsep + ep + "rbin"
@@ -54,6 +53,7 @@ def gnatmake(prj):
 def main():
     """Run the testsuite"""
     options = __parse_options()
+    assert os.path.exists(ep), "cannot find %s directory" % ep
     env = Env()
     env.add_search_path("PYTHONPATH", os.getcwd())
 

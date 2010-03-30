@@ -122,7 +122,7 @@ tp_xmlada.gpr: setup
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
-doc: tp_xmlada.gpr
+doc:
 	$(MAKE) -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
 

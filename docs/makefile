@@ -1,7 +1,7 @@
 ############################################################################
 #                             Templates_Parser                             #
 #                                                                          #
-#                      Copyright (C) 2003-2009, AdaCore                    #
+#                      Copyright (C) 2003-2010, AdaCore                    #
 #                                                                          #
 #  This library is free software; you can redistribute it and/or modify    #
 #  it under the terms of the GNU General Public License as published by    #
@@ -120,7 +120,7 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
 	$(GNAT) make -p -q -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
-		-Pdocs $(EXEFILES)
+		-XTP_XMLADA=Disabled -Pdocs $(EXEFILES)
 
 %.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res

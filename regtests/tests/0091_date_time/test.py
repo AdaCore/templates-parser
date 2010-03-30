@@ -15,8 +15,7 @@ def check_n(name, current, expected):
     else:
         print "NOK " + name + ": '" + str(expected) + "' != '" + current + "'"
 
-    
-WeekDays = ["Monday", "Thuesday", "Wednesday", "Thursday", "Friday",
+WeekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
            "Saturday", "Sunday"]
 
 Months = ["January", "February", "March", "April", "May", "June", "July",

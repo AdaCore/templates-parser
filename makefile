@@ -33,7 +33,7 @@ GNAT	= gnat
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
 LIBRARY_TYPE = static
-CJOBS        = 2
+PROCESSORS   = 2
 PLATFORM     = native
 
 TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
@@ -105,15 +105,16 @@ ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
-GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA)
+GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
+		-XPROCESSORS=$(PROCESSORS)
 
 build: setup_config tp_xmlada.gpr
-	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=static \
+	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=static \
 		-Ptemplates_parser
-	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=static \
+	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=static \
 		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	$(GNAT) make -p -j$(CJOBS) $(GPROPTS) -XLIBRARY_TYPE=relocatable \
+	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
 		-Ptemplates_parser
 endif
 
@@ -142,7 +143,7 @@ endif
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
-	echo "CJOBS=$(CJOBS)" >> makefile.setup
+	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
 	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
 
 setup_config:

@@ -44,6 +44,8 @@ project TP_Shared is
    type Target_Type is ("native", "vxworks");
    Target : Target_Type := external ("PLATFORM", "native");
 
+   Processors := External ("PROCESSORS", "2");
+
    -----------------------
    -- Build directories --
    -----------------------
@@ -122,7 +124,7 @@ project TP_Shared is
    -------------
 
    package Builder is
-      for Default_Switches ("Ada") use ("-m");
+      for Default_Switches ("Ada") use ("-m", "-j" & Processors);
    end Builder;
 
    ---------

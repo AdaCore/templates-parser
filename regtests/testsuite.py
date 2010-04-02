@@ -72,10 +72,7 @@ def main():
                 rm(file, True)
     mkdir(result_dir)
 
-    discs = ['ALL']
-    discs.append('ALL')
-    discs.append(env.target.platform)
-    discs.append(env.target.triplet)
+    discs = env.discriminants
 
     if options.discs:
         discs += options.discs

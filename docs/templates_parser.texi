@@ -50,7 +50,7 @@
 
 Copyright @copyright{} 1999-2004, Pascal Obry
 
-Copyright @copyright{} 2005-2008, AdaCore
+Copyright @copyright{} 2005-2010, AdaCore
 
 @*
 

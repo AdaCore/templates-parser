@@ -38,7 +38,6 @@
 @titlepage
 
 @title Templates Parser User's Guide
-@subtitle Document revision level $Revision$
 @subtitle Date: @today{}
 @author AdaCore
 

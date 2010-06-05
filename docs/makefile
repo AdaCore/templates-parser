@@ -52,10 +52,6 @@ GFLAGS	  = -I../src -I../include
 DOCS	  = templates_parser.info templates_parser.html \
 		templates_parser.txt templates_parser.pdf
 
-ADA_KW    = use package is in out exception function with type constant \
-		private of return range procedure begin end array record \
-		else if then pragma access new case when subtype
-
 APIFILES    = ../src/templates_parser.ads.texi \
 	      ../src/templates_parser-debug.ads.texi \
 	      ../src/templates_parser-utils.ads.texi \
@@ -130,29 +126,14 @@ $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
 %.adb.html: %.adb
 	`basename $@ .adb.html` >> $<.html
 
-%.ads.texi: %.ads  ada.sed gentexifile
+%.ads.texi: %.ads gentexifile
 	./gentexifile $< NOGROUP
 
-%.adb.texi: %.adb  %.adb.res ada.sed gentexifile
+%.adb.texi: %.adb  %.adb.res gentexifile
 	./gentexifile $<
 
-%.tmplt.texi: %.tmplt ada.sed gentexifile
+%.tmplt.texi: %.tmplt gentexifile
 	./gentexifile $<
-
-ada.sed: makefile
-	echo "s/\([^@_]\)@\([^@_]\)/\1@@\2/" > ada.sed
-	echo "s/-- \(.*\)$$/-- @i{\1}/" >> ada.sed
-	echo "/--/!s/\([^-][^-][^\"]*\)\"\([^\"]*\)\"/\1\"@i{\2}\"/g" \
-		>> ada.sed
-	echo "s/@@/@@@@/g" >> ada.sed
-	echo "s/@_/@@_/g" >> ada.sed
-	echo "s/_@/_@@/g" >> ada.sed
-	for kw in $(ADA_KW); do \
-		echo "s/^\([^-]* \)$$kw/\1@b{$$kw}/g" >> ada.sed; \
-		echo "s/^\([^-]* \)$$kw/\1@b{$$kw}/g" >> ada.sed; \
-		echo "s/^\( *\)$$kw /\1@b{$$kw} /g" >> ada.sed; \
-		echo "s/^$$kw$$/@b{$$kw}/g" >> ada.sed; \
-	done
 
 force:
 

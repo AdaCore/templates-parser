@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2009, AdaCore                     --
+--                     Copyright (C) 2003-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -28,18 +28,15 @@
 package Templates_Parser.Query is
 
    function Kind
-     (Association : Templates_Parser.Association)
-      return Association_Kind;
+     (Association : Templates_Parser.Association) return Association_Kind;
    --  Returns the kind for this association
 
    function Variable
-     (Association : Templates_Parser.Association)
-      return String;
+     (Association : Templates_Parser.Association) return String;
    --  Returns the variable name for Association
 
    function Composite
-     (Association : Templates_Parser.Association)
-      return Tag;
+     (Association : Templates_Parser.Association) return Tag;
    --  Returns the vector tag for this association, raises Constraint_Error
    --  if it is not a vector.
 

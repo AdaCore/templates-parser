@@ -11,12 +11,12 @@ Some make variables can be adjusted to change the default setup:
         (default to compiler root directory)
 
    ENABLE_SHARED=[true|false]
-	(default yes on platforms supporting shared libraries)
+        (default yes on platforms supporting shared libraries)
 
    DEBUG=[true|false]
         (default false)
 
-   CJOBS=N
+   PROCESSORS=N
         Number of parallel compilations
         (default 2)
 

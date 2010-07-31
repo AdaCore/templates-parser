@@ -28,7 +28,6 @@
 with Ada.Exceptions;
 with Ada.Characters.Handling;
 with Ada.Calendar;
-with Ada.Directories;
 with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
@@ -39,6 +38,7 @@ with GNAT.Regpat;
 
 with Templates_Parser.Input;
 with Templates_Parser.Configuration;
+with Templates_Parser.Utils;
 
 package body Templates_Parser is
 
@@ -51,10 +51,6 @@ package body Templates_Parser is
 
    Max_Include_Parameters : constant := 20;
    --  Maximum number of include parameters handled by this implementation
-
-   Windows_OS : constant Boolean :=
-                  Fixed.Index (Directories.Current_Directory, "/") = 0;
-   --  Simple Windows OS detection based on the current directory
 
    --------------
    -- Tag Info --
@@ -3649,7 +3645,7 @@ package body Templates_Parser is
                               N := N + 1;
 
                            when 'n' =>
-                              if Windows_OS then
+                              if Utils.Is_Windows then
                                  K := K + 2;
                                  R (K - 1 .. K) := (ASCII.CR, ASCII.LF);
                               else

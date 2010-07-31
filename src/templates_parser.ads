@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2009, AdaCore                     --
+--                     Copyright (C) 1999-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -514,8 +514,8 @@ private
    procedure Field
      (T      : Tag;
       N      : Positive;
-      Result :    out Tag;
-      Found  :    out Boolean);
+      Result : out Tag;
+      Found  : out Boolean);
    --  Returns the N'th item in Tag. Found is set to False is there is no
    --  such item.
 

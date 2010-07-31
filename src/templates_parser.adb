@@ -36,8 +36,8 @@ with Ada.Unchecked_Deallocation;
 with GNAT.Calendar.Time_IO;
 with GNAT.Regpat;
 
-with Templates_Parser.Input;
 with Templates_Parser.Configuration;
+with Templates_Parser.Input;
 with Templates_Parser.Utils;
 
 package body Templates_Parser is
@@ -318,8 +318,8 @@ package body Templates_Parser is
       --  value of the corresponding parameter is set here, we do not handle
       --  full data tree into the filter parameters.
 
-      No_Include_Parameters : constant Include_Parameters
-        := (others => (Null_Unbounded_String));
+      No_Include_Parameters : constant Include_Parameters :=
+                                (others => (Null_Unbounded_String));
 
       type Filter_Context is record
          Translations : Translate_Set;
@@ -939,16 +939,16 @@ package body Templates_Parser is
    procedure Field
      (T      : Tag;
       N      : Positive;
-      Result :    out Tag_Node_Access;
-      Found  :    out Boolean);
+      Result : out Tag_Node_Access;
+      Found  : out Boolean);
    --  Returns the Nth item in Tag
 
    procedure Field
      (T        : Tag;
       Cursor   : Indices;
       Up_Value : Natural;
-      Result   :    out Unbounded_String;
-      Found    :    out Boolean);
+      Result   : out Unbounded_String;
+      Found    : out Boolean);
    --  Returns Value in Tag at position Cursor. Found is set to False if
    --  there is no such value in Tag.
 
@@ -2030,8 +2030,8 @@ package body Templates_Parser is
    procedure Field
      (T      : Tag;
       N      : Positive;
-      Result :    out Tag_Node_Access;
-      Found  :    out Boolean) is
+      Result : out Tag_Node_Access;
+      Found  : out Boolean) is
    begin
       Found := True;
 
@@ -2063,8 +2063,8 @@ package body Templates_Parser is
    procedure Field
      (T      : Tag;
       N      : Positive;
-      Result :    out Tag;
-      Found  :    out Boolean)
+      Result : out Tag;
+      Found  : out Boolean)
    is
       R : Tag_Node_Access;
    begin
@@ -2082,8 +2082,8 @@ package body Templates_Parser is
      (T        : Tag;
       Cursor   : Indices;
       Up_Value : Natural;
-      Result   :    out Unbounded_String;
-      Found    :    out Boolean)
+      Result   : out Unbounded_String;
+      Found    : out Boolean)
    is
 
       function Image (T : Tag) return Unbounded_String;

@@ -805,7 +805,7 @@ package body Templates_Parser is
                   Include_Stmt,  --  an INCLUDE tag statement
                   Inline_Stmt);  --  an INLINE tag statement
 
-   --  A template line is coded as a suite of Data and Var element
+   --  A template line is coded as a suite of Data and Var elements
 
    --  The first node in the tree is of type Info and should never be release
    --  and changed. This ensure that included tree will always be valid
@@ -2490,7 +2490,7 @@ package body Templates_Parser is
       --  end of file reached.
 
       function Get_First_Parameter return Unbounded_String;
-      --  Get first parameter in current line (second word), words beeing
+      --  Get first parameter in current line (second word), words being
       --  separated by a set of blank characters (space or horizontal
       --  tabulation).
 
@@ -2512,7 +2512,7 @@ package body Templates_Parser is
       function Is_Stmt
         (Stmt : String; Extended : Boolean := False) return Boolean;
       pragma Inline (Is_Stmt);
-      --  Returns True is Stmt is found at the begining of the current line
+      --  Returns True if Stmt is found at the begining of the current line
       --  ignoring leading blank characters. If Extended is True it recognize
       --  statement attributes or parameter.
 

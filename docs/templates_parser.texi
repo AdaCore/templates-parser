@@ -1302,7 +1302,7 @@ Returns TRUE if either A is FALSE and FALSE otherwise.
 
 The default evaluation order is done from left to right, all operators
 having the same precedence. To build an expression it is possible to
-use parentheses to change the evaluation order. A value with
+use parenthesis to change the evaluation order. A value with
 spaces must be quoted as a string. So valid expressions could be:
 
 @TPEXP{@@@@IF@@@@ (@@_VAR1_@@ > 3) or (@@_COND1_@@ and @@_COND2_@@)

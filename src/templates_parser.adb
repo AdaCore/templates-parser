@@ -5131,7 +5131,7 @@ package body Templates_Parser is
             --  returns the empty string or we keep the tag as is.
 
             if Keep_Unknown_Tags then
-               return To_String (Begin_Tag & Var.Name & End_Tag);
+               return Data.Image (Var);
             else
                return Data.Translate (Var, "", C'Access);
             end if;

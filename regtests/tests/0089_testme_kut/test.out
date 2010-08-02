@@ -1,7 +1,7 @@
 
 One 1
 
-Unknown @_unknown_@
+Unknown @_UPPER:unknown_@
 
   1
 
@@ -21,7 +21,7 @@ three @_unknown_@
 [TEXT] 
 [TEXT] One @_ONE_@
 [TEXT] 
-[TEXT] Unknown @_unknown_@
+[TEXT] Unknown @_UPPER:unknown_@
 [TEXT] 
 [IF] (@_ONE_@ = 1)
   [TEXT]   1

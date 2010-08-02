@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2009, AdaCore                     --
+--                     Copyright (C) 2003-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -254,7 +254,7 @@ package body Filter is
      (S   : String;
       P   : Parameter_Data;
       T   : Translate_Set;
-      I   : Include_Parameters;
+      I   : Parameter_Set;
       One : Boolean) return String;
    --  Routine used to implement the REPLACE (One set to True) and REPLACE_ALL
    --  filters.
@@ -262,7 +262,7 @@ package body Filter is
    function Value
      (Str          : String;
       Translations : Translate_Set;
-      I_Params     : Include_Parameters) return String;
+      I_Params     : Parameter_Set) return String;
    --  Returns the value for Str, or if Str is a tag, returns it's value
 
    function BR_2_EOL (S : String; EOL : String) return String;
@@ -1544,7 +1544,7 @@ package body Filter is
      (S   : String;
       P   : Parameter_Data;
       T   : Translate_Set;
-      I   : Include_Parameters;
+      I   : Parameter_Set;
       One : Boolean) return String
    is
       use type GNAT.Regpat.Match_Location;
@@ -1794,7 +1794,7 @@ package body Filter is
    function Value
      (Str          : String;
       Translations : Translate_Set;
-      I_Params     : Include_Parameters) return String
+      I_Params     : Parameter_Set) return String
    is
       Pos : Association_Map.Cursor;
    begin
@@ -1808,7 +1808,7 @@ package body Filter is
             N : constant Natural :=
                   Natural'Value (Str (Str'First + 1 .. Str'Last));
          begin
-            return To_String (I_Params (N));
+            return To_String (I_Params (N + 1));
          end;
 
       elsif Translations = Null_Set then

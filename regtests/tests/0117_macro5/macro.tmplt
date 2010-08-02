@@ -1,0 +1,13 @@
+@@MACRO(MACRO)@@
+@@IF@@ @_$1_@ = 1
+only second @_$2_@
+@@ELSE@@
+both @_$1_@ and @_$2_@
+@@END_IF@@
+Named and Optional: 3:(@_$3_@) 5:(@_$5_@) 8:(@_$8_@)
+@@END_MACRO@@
+--
+@_MACRO(2,3,3=>trois)_@
+--
+@_MACRO(1,5,5=>cinq, 8 => huit)_@
+--

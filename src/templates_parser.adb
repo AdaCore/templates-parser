@@ -49,8 +49,10 @@ package body Templates_Parser is
 
    Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
 
-   Max_Include_Parameters : constant := 20;
-   --  Maximum number of include parameters handled by this implementation
+   function Get_Parameters (Parameters : String) return Parameter_Set;
+   --  Returns the parameters set as parsed into Parameters. This routines
+   --  handles both positional and named parameters. It is currently used for
+   --  include and macro parameters.
 
    --------------
    -- Tag Info --
@@ -314,19 +316,10 @@ package body Templates_Parser is
       pragma Inline (Release);
       --  Release all memory allocated P
 
-      type Include_Parameters is
-        array (0 .. Max_Include_Parameters) of Unbounded_String;
-      --  Flat representation of the include parameters. Only the name or the
-      --  value of the corresponding parameter is set here, we do not handle
-      --  full data tree into the filter parameters.
-
-      No_Include_Parameters : constant Include_Parameters :=
-                                (others => (Null_Unbounded_String));
-
-      type Filter_Context is record
+      type Filter_Context (P_Size : Natural) is record
          Translations : Translate_Set;
          Lazy_Tag     : Dynamic.Lazy_Tag_Access;
-         I_Parameters : Include_Parameters;
+         I_Parameters : Parameter_Set (1 .. P_Size);
       end record;
 
       type Callback is access function
@@ -657,8 +650,8 @@ package body Templates_Parser is
 
       No_Attribute : constant Attribute_Data := (Nil, 0);
 
-      type Parameters is array (Natural range <>) of Tree;
-      type Parameter_Set is access all Parameters;
+      type Parameter_Set is array (Natural range <>) of Tree;
+      type Parameters is access all Parameter_Set;
 
       type Tag_Var is record
          Name       : Unbounded_String;
@@ -667,7 +660,7 @@ package body Templates_Parser is
          N          : Integer;           -- Include variable index
          Internal   : Internal_Tag;      -- No if not an internal variable
          Is_Macro   : Boolean := False;  -- True if this is a macro call
-         Parameters : Parameter_Set;
+         Parameters : Data.Parameters;
          Def        : Templates_Parser.Tree;
       end record;
 
@@ -685,6 +678,10 @@ package body Templates_Parser is
       pragma Inline (Is_Include_Variable);
       --  Returns True if T is an include variable (Name is $<n>)
 
+      function To_Data_Parameters
+        (Parameters : Templates_Parser.Parameter_Set) return Data.Parameters;
+      --  Returns Parameters as a Data.Tree set
+
       function Build (Str : String) return Tag_Var;
       --  Create a Tag from Str. A tag is composed of a name and a set of
       --  filters.
@@ -700,6 +697,9 @@ package body Templates_Parser is
 
       procedure Release (T : in out Tag_Var);
       --  Release all memory associated with Tag
+
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Parameter_Set, Parameters);
 
       function Parse (Line : String) return Tree;
       --  Parse text line and returns the corresponding tree representation
@@ -855,10 +855,6 @@ package body Templates_Parser is
 
    Null_Static_Tree : constant Static_Tree := (null, null);
 
-   type Include_Parameters is array (0 .. Max_Include_Parameters) of Data.Tree;
-
-   No_Parameter : constant Include_Parameters := (others => null);
-
    type Node (Kind : Nkind) is record
       Next : Tree;
       Line : Natural;
@@ -902,7 +898,7 @@ package body Templates_Parser is
          when Include_Stmt =>
             File       : Static_Tree;
             I_Filename : Data.Tree;
-            I_Params   : Include_Parameters;
+            I_Params   : Data.Parameters;
 
          when Inline_Stmt =>
             Before  : Unbounded_String;
@@ -971,7 +967,9 @@ package body Templates_Parser is
       function Get (Name : String) return Tree;
       --  Get macro tree, returns null if this macro has no definition
 
-      procedure Rewrite (T : in out Tree; Parameters : Data.Parameter_Set);
+      procedure Rewrite
+        (T          : in out Tree;
+         Parameters : not null access Data.Parameter_Set);
       --  Rewrite the macro tree with the given parameters. All @_1_@
       --  parameters in the macro definition are replaced with the
       --  corresponding value in the parameter set.
@@ -2012,7 +2010,8 @@ package body Templates_Parser is
       --  separated by a set of blank characters (space or horizontal
       --  tabulation).
 
-      function Get_All_Parameters return String;
+      function Get_All_Parameters
+        (At_Least_One : Boolean := True) return String;
       --  Get all parameters on the current line
 
       function Count_Tag_Attributes return Natural;
@@ -2037,10 +2036,6 @@ package body Templates_Parser is
       function EOF return Boolean;
       pragma Inline (EOF);
       --  Returns True if the end of file has been reach
-
-      function Load_Include_Parameters
-        (Parameters : String) return Include_Parameters;
-      --  Returns the include parameters found by parsing Parameters
 
       type Parse_Mode is
         (Parse_Std,              --  in standard line
@@ -2102,13 +2097,20 @@ package body Templates_Parser is
       -- Get_All_Parameters --
       ------------------------
 
-      function Get_All_Parameters return String is
+      function Get_All_Parameters
+        (At_Least_One : Boolean := True) return String is
          Start : Natural;
       begin
+         --  Skip first word (tag statement, or include file name)
+
          Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
 
          if Start = 0 then
-            Fatal_Error ("missing parameter");
+            if At_Least_One then
+               Fatal_Error ("missing parameter");
+            else
+               Start := Last + 1;
+            end if;
          end if;
 
          if Buffer (Last) = ASCII.CR then
@@ -2383,222 +2385,6 @@ package body Templates_Parser is
                         or else Buffer (First + Stmt'Length - Offset) = '('
                         or else Buffer (First + Stmt'Length - Offset) = '@'));
       end Is_Stmt;
-
-      -----------------------------
-      -- Load_Include_Parameters --
-      -----------------------------
-
-      function Load_Include_Parameters
-        (Parameters : String) return Include_Parameters
-      is
-         procedure Load_Include_Named_Parameters (Parameters : String);
-         --  Load parameters specified with a name:
-         --  (param_a, 5 => param_b, 3 => param_c)
-         --  Set Result variable accordingly.
-
-         procedure Get_Next_Parameter
-           (Parameters : String;
-            First      : in out Positive;
-            Last       :    out Natural;
-            Next_Last  :    out Natural);
-         --  Look for next parameter starting at position First, set First and
-         --  Last to the index of this parameter. Next_Last is set to the next
-         --  value to assigned to last.
-
-         First, Last : Natural := 0;
-         Next_Last   : Natural;
-         K           : Natural := 0;
-         Result      : Include_Parameters;
-
-         ------------------------
-         -- Get_Next_Parameter --
-         ------------------------
-
-         procedure Get_Next_Parameter
-           (Parameters : String;
-            First      : in out Positive;
-            Last       :    out Natural;
-            Next_Last  :    out Natural) is
-         begin
-            --  Skip blanks
-
-            while First < Parameters'Last
-              and then (Parameters (First) = ' '
-                        or else Parameters (First) = ASCII.HT)
-            loop
-               First := First + 1;
-            end loop;
-            --  Look for end of parameter
-
-            Next_Last := First + 1;
-
-            if Parameters (First) = '"' then
-               --  Look for closing quote
-               while Next_Last < Parameters'Last
-                 and then Parameters (Next_Last) /= '"'
-               loop
-                  Next_Last := Next_Last + 1;
-               end loop;
-
-               if Parameters (Next_Last) /= '"' then
-                  Fatal_Error ("Missing closing quote in include parameters");
-               end if;
-
-               --  Skip quotes
-
-               First := First + 1;
-               Last := Next_Last - 1;
-
-            else
-               --  Look for end of word
-
-               while Next_Last < Parameters'Last
-                 and then Parameters (Next_Last) /= ' '
-                 and then Parameters (Next_Last) /= ASCII.HT
-               loop
-                  Next_Last := Next_Last + 1;
-               end loop;
-
-               if Next_Last /= Parameters'Last then
-                  Last := Next_Last - 1;
-               else
-                  Last := Next_Last;
-               end if;
-            end if;
-         end Get_Next_Parameter;
-
-         -----------------------------------
-         -- Load_Include_Named_Parameters --
-         -----------------------------------
-
-         procedure Load_Include_Named_Parameters (Parameters : String) is
-
-            procedure Parse (Parameter : String);
-            --  Parse one parameter
-
-            Named       : Boolean := False;
-            First, Last : Natural;
-
-            -----------
-            -- Parse --
-            -----------
-
-            procedure Parse (Parameter : String) is
-               use type Data.Tree;
-               Sep : constant Natural := Strings.Fixed.Index (Parameter, "=>");
-               Ind : Natural;
-            begin
-               if Sep = 0 then
-                  --  A positional parameter, this is valid only if we have not
-                  --  yet found a named parameter.
-
-                  if Named then
-                     Fatal_Error
-                       ("Can't have a positional parameter after a named one");
-                  else
-                     Result (K) := Data.Parse (Parameter);
-                     K := K + 1;
-                  end if;
-
-               else
-                  --  A named parameter, get index
-                  Named := True;
-
-                  declare
-                     Ind_Str     : constant String :=
-                                     Strings.Fixed.Trim
-                                       (Parameter (Parameter'First .. Sep - 1),
-                                        Strings.Both);
-                     First, Last : Natural;
-                     Next_Last   : Natural;
-                     pragma Unreferenced (Next_Last);
-                  begin
-                     if Is_Number (Ind_Str) then
-                        Ind := Natural'Value (Ind_Str);
-
-                        if Result (Ind) = null then
-                           --  This parameter has not yet been found
-
-                           First := Sep + 2;
-
-                           Get_Next_Parameter
-                             (Parameter, First, Last, Next_Last);
-
-                           Result (Ind)
-                             := Data.Parse (Parameter (First .. Last));
-                        else
-                           Fatal_Error
-                             ("Parameter" & Natural'Image (Ind)
-                              & " defined multiple time");
-                        end if;
-
-                     else
-                        Fatal_Error ("Wrong number in named parameter");
-                     end if;
-                  end;
-               end if;
-            end Parse;
-
-         begin
-            if Parameters (Parameters'Last) /= ')' then
-               Fatal_Error
-                 ("Missing closing parenthesis in named include parameters");
-            end if;
-
-            First := Parameters'First + 1;
-            --  Skip the parenthesis
-
-            loop
-               Last := Strings.Fixed.Index
-                 (Parameters (First .. Parameters'Last), ",");
-               exit when Last = 0;
-
-               Parse
-                 (Strings.Fixed.Trim
-                    (Parameters (First .. Last - 1), Strings.Both));
-               First := Last + 1;
-            end loop;
-
-            --  Handle last parameter
-
-            Parse
-              (Strings.Fixed.Trim
-                 (Parameters (First .. Parameters'Last - 1), Strings.Both));
-         end Load_Include_Named_Parameters;
-
-      begin
-         First := Parameters'First;
-
-         while First <= Parameters'Last loop
-            --  Skip blanks
-
-            while First < Parameters'Last
-              and then (Parameters (First) = ' '
-                        or else Parameters (First) = ASCII.HT)
-            loop
-               First := First + 1;
-            end loop;
-
-            --  Check if parameters are specified with a name
-
-            if K = 1 and then Parameters (First) = '(' then
-               --  Stop current processing, load as named parameters
-               Load_Include_Named_Parameters
-                 (Parameters (First .. Parameters'Last));
-               return Result;
-            end if;
-
-            Get_Next_Parameter (Parameters, First, Last, Next_Last);
-
-            Result (K) := Data.Parse (Parameters (First .. Last));
-            K := K + 1;
-
-            Last := Next_Last;
-            First := Last + 1;
-         end loop;
-
-         return Result;
-      end Load_Include_Parameters;
 
       -----------
       -- Parse --
@@ -3063,49 +2849,68 @@ package body Templates_Parser is
 
             T.Line       := Line;
 
-            T.I_Filename := Data.Parse (To_String (Get_First_Parameter));
+            declare
+               File : constant String := To_String (Get_First_Parameter);
+            begin
+               T.I_Filename := Data.Parse (File);
 
-            if T.I_Filename.Kind = Data.Text
-              and then T.I_Filename.Next = null
-            then
-               --  In the case of static strings we load the include file now
-               declare
-                  I_Filename : constant String :=
-                                 Build_Include_Pathname
-                                   (Filename, To_String (Get_First_Parameter));
-               begin
-                  T.File := Load (I_Filename, Cached, True);
-               exception
-                  when IO_Exceptions.Name_Error =>
-                     --  File not found, this is an error only if we are not
-                     --  inside a conditional.
-                     if not In_If then
+               if T.I_Filename.Kind = Data.Text
+                 and then T.I_Filename.Next = null
+               then
+                  --  In the case of static strings we load the include file
+                  --  now
+                  declare
+                     I_Filename : constant String :=
+                                    Build_Include_Pathname (Filename, File);
+                  begin
+                     T.File := Load (I_Filename, Cached, True);
+                  exception
+                     when IO_Exceptions.Name_Error =>
+                        --  File not found, this is an error only if we are not
+                        --  inside a conditional.
+                        if not In_If then
+                           Error_Include_Message :=
+                             To_Unbounded_String
+                               ("Include file " & I_Filename & " not found.");
+                           Free (T);
+                           return null;
+                        end if;
+
+                     when E : others =>
+                        --  Error while parsing the include file, record this
+                        --  error. Let the parser exit properly from the
+                        --  recursion to be able to release properly the memory
+                        --  before raising an exception.
+
                         Error_Include_Message :=
-                          To_Unbounded_String
-                            ("Include file " & I_Filename & " not found.");
+                          To_Unbounded_String (Exception_Message (E));
+
                         Free (T);
                         return null;
-                     end if;
+                  end;
 
-                  when E : others =>
-                     --  Error while parsing the include file, record this
-                     --  error. Let the parser exit properly from the recursion
-                     --  to be able to release properly the memory before
-                     --  raising an exception.
+                  --  We do not need to keep reference to the include file in
+                  --  this case. The filename is static and already loaded.
+                  Data.Release (T.I_Filename);
+               end if;
 
-                     Error_Include_Message
-                       := To_Unbounded_String (Exception_Message (E));
+               --  Move past @@INCLUDE@@
 
-                     Free (T);
-                     return null;
+               First := First + 11;
+
+               while First < Last and then Buffer (First) = ' ' loop
+                  First := First + 1;
+               end loop;
+
+               declare
+                  P_Set : constant Parameter_Set :=
+                            (0 => To_Unbounded_String (File))
+                            & Get_Parameters
+                                (Get_All_Parameters (At_Least_One => False));
+               begin
+                  T.I_Params := Data.To_Data_Parameters (P_Set);
                end;
-
-               --  We do not need to keep reference to the include file in this
-               --  case. The filename is static and already loaded.
-               Data.Release (T.I_Filename);
-            end if;
-
-            T.I_Params := Load_Include_Parameters (Get_All_Parameters);
+            end;
 
             I_File := new Node'
               (Include_Stmt, I_File, Line, T.File, T.I_Filename, T.I_Params);
@@ -3446,6 +3251,342 @@ package body Templates_Parser is
          raise;
    end Load;
 
+   --------------------
+   -- Get_Parameters --
+   --------------------
+
+   function Get_Parameters
+     (Parameters : String) return Parameter_Set
+   is
+      function Get (Count : Natural) return Parameter_Set;
+      --  Load the Count parameters from Parameters string
+
+      function Next (Char : Character; From : Positive) return Natural;
+      --  Returns the position of the next character Char starting from
+      --  position From. Returns 0 if the character is not found. This routine
+      --  skips characters inside quoted string.
+
+      ---------
+      -- Get --
+      ---------
+
+      function Get (Count : Natural) return Parameter_Set is
+
+         procedure Get_Named_Parameters (Parameters : String);
+         --  Load parameters specified with a name:
+         --  (param_a, 5 => param_b, 3 => param_c)
+         --  Set Result variable accordingly.
+
+         procedure Get_Next_Parameter
+           (Parameters : String;
+            First      : in out Positive;
+            Last       :    out Natural;
+            Next_Last  :    out Natural);
+         --  Look for next parameter starting at position First, set First and
+         --  Last to the index of this parameter. Next_Last is set to the next
+         --  value to assigned to last.
+
+         Result      : Parameter_Set (1 .. Count);
+         Index       : Positive := Result'First;
+         First, Last : Natural := 0;
+         Next_Last   : Natural;
+
+         ------------------------
+         -- Get_Next_Parameter --
+         ------------------------
+
+         procedure Get_Next_Parameter
+           (Parameters : String;
+            First      : in out Positive;
+            Last       :    out Natural;
+            Next_Last  :    out Natural) is
+         begin
+            --  Skip blanks
+
+            while First < Parameters'Last
+              and then (Parameters (First) = ' '
+                        or else Parameters (First) = ASCII.HT)
+            loop
+               First := First + 1;
+            end loop;
+
+            --  Look for end of parameter
+
+            Next_Last := First + 1;
+
+            if Parameters (First) = '"' then
+               --  Look for closing quote
+               while Next_Last < Parameters'Last
+                 and then Parameters (Next_Last) /= '"'
+               loop
+                  Next_Last := Next_Last + 1;
+               end loop;
+
+               if Parameters (Next_Last) /= '"' then
+                  raise Internal_Error
+                    with "Missing closing quote in include parameters";
+               end if;
+
+               --  Skip quotes
+
+               First := First + 1;
+               Last := Next_Last - 1;
+
+            else
+               --  Look for end of word
+
+               while Next_Last < Parameters'Last
+                 and then Parameters (Next_Last) /= ' '
+                 and then Parameters (Next_Last) /= ASCII.HT
+               loop
+                  Next_Last := Next_Last + 1;
+               end loop;
+
+               if Next_Last /= Parameters'Last then
+                  Last := Next_Last - 1;
+               else
+                  Last := Next_Last;
+               end if;
+            end if;
+         end Get_Next_Parameter;
+
+         --------------------------
+         -- Get_Named_Parameters --
+         --------------------------
+
+         procedure Get_Named_Parameters (Parameters : String) is
+
+            procedure Parse (Parameter : String);
+            --  Parse one parameter
+
+            Named       : Boolean := False;
+            First, Last : Natural;
+
+            -----------
+            -- Parse --
+            -----------
+
+            procedure Parse (Parameter : String) is
+               use type Data.Tree;
+               Sep : constant Natural := Strings.Fixed.Index (Parameter, "=>");
+               Ind : Natural;
+            begin
+               if Sep = 0 then
+                  --  A positional parameter, this is valid only if we have not
+                  --  yet found a named parameter.
+
+                  if Named then
+                     raise Internal_Error with
+                       "Can't have a positional parameter after a named one";
+                  else
+                     Result (Index) := To_Unbounded_String (Parameter);
+                     Index := Index + 1;
+                  end if;
+
+               else
+                  --  A named parameter, get index
+                  Named := True;
+
+                  declare
+                     Ind_Str     : constant String :=
+                                     Strings.Fixed.Trim
+                                       (Parameter (Parameter'First .. Sep - 1),
+                                        Strings.Both);
+                     First, Last : Natural;
+                     Next_Last   : Natural;
+                     pragma Unreferenced (Next_Last);
+                  begin
+                     if Is_Number (Ind_Str) then
+                        Ind := Natural'Value (Ind_Str);
+
+                        if Result (Ind) = Null_Unbounded_String then
+                           --  This parameter has not yet been found
+
+                           First := Sep + 2;
+
+                           Get_Next_Parameter
+                             (Parameter, First, Last, Next_Last);
+
+                           Result (Ind) :=
+                             To_Unbounded_String (Parameter (First .. Last));
+
+                        else
+                           raise Internal_Error with
+                             "Parameter" & Natural'Image (Ind)
+                             & " defined multiple time";
+                        end if;
+
+                     else
+                        raise Internal_Error
+                          with "Wrong number in named parameter";
+                     end if;
+                  end;
+               end if;
+            end Parse;
+
+         begin
+            if Parameters (Parameters'Last) /= ')' then
+               raise Internal_Error with
+                 "Missing closing parenthesis in named include parameters";
+            end if;
+
+            First := Parameters'First + 1;
+            --  Skip the parenthesis
+
+            loop
+               Last := Strings.Fixed.Index
+                 (Parameters (First .. Parameters'Last), ",");
+               exit when Last = 0;
+
+               Parse
+                 (Strings.Fixed.Trim
+                    (Parameters (First .. Last - 1), Strings.Both));
+               First := Last + 1;
+            end loop;
+
+            --  Handle last parameter
+
+            Parse
+              (Strings.Fixed.Trim
+                 (Parameters (First .. Parameters'Last - 1), Strings.Both));
+         end Get_Named_Parameters;
+
+      begin
+         First := Parameters'First;
+
+         while First <= Parameters'Last loop
+            --  Skip blanks
+
+            while First < Parameters'Last
+              and then (Parameters (First) = ' '
+                        or else Parameters (First) = ASCII.HT)
+            loop
+               First := First + 1;
+            end loop;
+
+            --  Check if parameters are specified with a name
+
+            if Index = 1 and then Parameters (First) = '(' then
+               --  Stop current processing, load as named parameters
+               Get_Named_Parameters (Parameters (First .. Parameters'Last));
+               return Result;
+            end if;
+
+            Get_Next_Parameter (Parameters, First, Last, Next_Last);
+
+            Result (Index) := To_Unbounded_String (Parameters (First .. Last));
+            Index := Index + 1;
+
+            Last := Next_Last;
+            First := Last + 1;
+         end loop;
+
+         return Result;
+      end Get;
+
+      ----------
+      -- Next --
+      ----------
+
+      function Next (Char : Character; From : Positive) return Natural is
+         In_Quote : Boolean := False;
+         Index    : Natural := 0;
+      begin
+         for K in From .. Parameters'Last loop
+            if Parameters (K) = '"' then
+               In_Quote := not In_Quote;
+
+            elsif Parameters (K) = Char and then not In_Quote then
+               Index := K;
+               exit;
+            end if;
+         end loop;
+         return Index;
+      end Next;
+
+      Count : Natural := 0;
+      Index : Natural := Parameters'First - 1;
+
+   begin
+      --  Count parameters
+
+      if Parameters'First <= Parameters'Last then
+         Count := 1;
+
+         if Parameters (Parameters'First) = '(' then
+            --  We are using the parentherized form with parameters separated
+            --  with coma and possibly using the named notation.
+
+            --  Count positional parameters
+
+            loop
+               Index := Next (',', Index + 1);
+               exit when Index = 0;
+               Count := Count + 1;
+            end loop;
+
+            --  Then check for named ones
+
+            declare
+               Sep, SP, EP : Natural := Parameters'First;
+            begin
+               loop
+                  Sep := Strings.Fixed.Index (Parameters, "=>", From => Sep);
+                  exit when Sep = 0;
+
+                  EP := Sep - 1;
+
+                  --  Skip spaces
+
+                  while EP > Parameters'First
+                    and then Parameters (EP) = ' '
+                  loop
+                     EP := EP - 1;
+                  end loop;
+
+                  SP := EP;
+
+                  --  Get number
+
+                  while SP > Parameters'First
+                    and then Strings.Maps.Is_In
+                      (Parameters (SP - 1),
+                       Strings.Maps.Constants.Decimal_Digit_Set)
+                  loop
+                     SP := SP - 1;
+                  end loop;
+
+                  if EP >= SP and then Parameters (EP) in '0' .. '9' then
+                     Count := Natural'Max
+                       (Count, Natural'Value (Parameters (SP .. EP)));
+                  end if;
+
+                  Sep := Sep + 1;
+               end loop;
+            end;
+
+         else
+            --  We are using the standard form, parameters are separated by
+            --  spaces.
+
+            loop
+               Index := Next (' ', Index + 1);
+               exit when Index = 0;
+
+               --  Skip multiple spaces
+
+               while Parameters (Index) = ' ' loop
+                  Index := Index + 1;
+               end loop;
+
+               Count := Count + 1;
+            end loop;
+         end if;
+      end if;
+
+      return Get (Count);
+   end Get_Parameters;
+
    --------------
    -- No_Quote --
    --------------
@@ -3530,7 +3671,7 @@ package body Templates_Parser is
       type Parse_State;
       type Parse_State_Access is access constant Parse_State;
 
-      type Parse_State is record
+      type Parse_State (P_Size : Natural) is record
          Cursor        : Indices (1 .. Max_Nested_Levels);
          Max_Lines     : Natural;
          Max_Expand    : Natural;
@@ -3539,18 +3680,17 @@ package body Templates_Parser is
          Inline_Sep    : Unbounded_String;
          Filename      : Unbounded_String;
          Blocks_Count  : Natural;
-         I_Params      : Include_Parameters;
-         F_Params      : Filter.Include_Parameters;
+         I_Params      : Data.Parameters;
+         F_Params      : Parameter_Set (1 .. P_Size);
          Block         : Block_State;
          Terse_Table   : Boolean;
          Parent        : Parse_State_Access;
       end record;
 
       Empty_State : constant Parse_State :=
-                      ((1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
+                      (0, (1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
                        Null_Unbounded_String, Null_Unbounded_String, 0,
-                       No_Parameter, Filter.No_Include_Parameters,
-                       Empty_Block_State, False, null);
+                       null, No_Parameter, Empty_Block_State, False, null);
 
       Results : Unbounded_String := Null_Unbounded_String;
 
@@ -3650,10 +3790,14 @@ package body Templates_Parser is
          --  current result stays. The mark is cleared.
 
          function Flatten_Parameters
-           (I : Include_Parameters) return Filter.Include_Parameters;
+           (I : Data.Parameter_Set) return Parameter_Set;
          --  Returns a flat representation of the include parameters, only the
          --  name or the value are kept. The tree are replaced by an empty
          --  value.
+
+         function Flatten_Parameters
+           (I : Data.Parameters) return Parameter_Set;
+         --  As above but for an access to a Parameter_Set
 
          function Inline_Cursor_Tag
            (Cursor_Tag : Dynamic.Cursor_Tag_Access;
@@ -4080,9 +4224,9 @@ package body Templates_Parser is
          ------------------------
 
          function Flatten_Parameters
-           (I : Include_Parameters) return Filter.Include_Parameters
+           (I : Data.Parameter_Set) return Parameter_Set
          is
-            F            : Filter.Include_Parameters;
+            F            : Parameter_Set (I'Range);
             Is_Composite : aliased Boolean;
          begin
             for K in I'Range loop
@@ -4100,6 +4244,18 @@ package body Templates_Parser is
                end if;
             end loop;
             return F;
+         end Flatten_Parameters;
+
+         function Flatten_Parameters
+           (I : Data.Parameters) return Parameter_Set
+         is
+            use type Data.Parameters;
+         begin
+            if I = null then
+               return No_Parameter;
+            else
+               return Flatten_Parameters (I.all);
+            end if;
          end Flatten_Parameters;
 
          -----------
@@ -4174,7 +4330,8 @@ package body Templates_Parser is
                function Check (T : Data.Tag_Var) return Natural;
                --  Returns the length of Tag T for the current context
 
-               function Check (I : Include_Parameters) return Natural;
+               function Check
+                 (I : not null access Data.Parameter_Set) return Natural;
                --  Returns the length of the largest vector tag found on the
                --  include parameters.
 
@@ -4385,7 +4542,9 @@ package body Templates_Parser is
                   end case;
                end Check;
 
-               function Check (I : Include_Parameters) return Natural is
+               function Check
+                 (I : not null access Data.Parameter_Set) return Natural
+               is
                   Iteration : Natural := Natural'First;
                begin
                   for K in I'Range loop
@@ -4483,10 +4642,12 @@ package body Templates_Parser is
          is
             use type Data.NKind;
             use type Data.Attribute;
+            use type Data.Parameters;
          begin
             pragma Assert (Var.N /= -1);
 
-            if Var.N <= Max_Include_Parameters
+            if State.I_Params /= null
+              and then Var.N <= State.I_Params'Last
               and then State.I_Params (Var.N) /= null
             then
                declare
@@ -4494,7 +4655,8 @@ package body Templates_Parser is
                   --  T is the data tree that should be evaluated in place
                   --  of the include variable.
                   C : aliased Filter.Filter_Context :=
-                        (Translations, Lazy_Tag, State.F_Params);
+                        (State.F_Params'Length,
+                         Translations, Lazy_Tag, State.F_Params);
                   Is_Composite : aliased Boolean;
                begin
                   if T.Next = null and then T.Kind = Data.Var then
@@ -4647,8 +4809,11 @@ package body Templates_Parser is
             Is_Composite : access Boolean) return String
          is
             use type Filter.Set_Access;
+            use type Data.Parameters;
+
             C        : aliased Filter.Filter_Context :=
-                         (Translations, Lazy_Tag, State.F_Params);
+                         (State.F_Params'Length,
+                          Translations, Lazy_Tag, State.F_Params);
             D_Pos    : Definitions.Def_Map.Cursor;
             Up_Value : Natural := 0;
          begin
@@ -4723,7 +4888,8 @@ package body Templates_Parser is
                         return I_Translate (V, State);
 
                      when Definitions.Ref_Default =>
-                        if N.Ref > Max_Include_Parameters
+                        if State.I_Params = null
+                          or else N.Ref > State.I_Params'Last
                           or else State.I_Params (N.Ref) = null
                         then
                            --  This include parameter does not exists, use
@@ -5057,7 +5223,8 @@ package body Templates_Parser is
                   Get_Max (T, Max_Lines, Max_Expand);
 
                   Analyze (T.Blocks,
-                           Parse_State'(State.Cursor,
+                           Parse_State'(State.F_Params'Length,
+                                        State.Cursor,
                                         Max_Lines, Max_Expand,
                                         T.Reverse_Index,
                                         State.Table_Level + 1,
@@ -5116,7 +5283,8 @@ package body Templates_Parser is
 
                            Analyze
                              (Block.Common,
-                              Parse_State'(New_Cursor,
+                              Parse_State'(State.F_Params'Length,
+                                           New_Cursor,
                                            State.Max_Lines, State.Max_Expand,
                                            State.Reverse_Index,
                                            State.Table_Level,
@@ -5136,7 +5304,8 @@ package body Templates_Parser is
 
                            Analyze
                              (Block.Sections,
-                              Parse_State'(New_Cursor,
+                              Parse_State'(State.F_Params'Length,
+                                           New_Cursor,
                                            State.Max_Lines, State.Max_Expand,
                                            State.Reverse_Index,
                                            State.Table_Level,
@@ -5168,7 +5337,8 @@ package body Templates_Parser is
             when Section_Stmt =>
                Analyze
                  (State.Block.Section.Next,
-                  Parse_State'(State.Cursor,
+                  Parse_State'(State.F_Params'Length,
+                               State.Cursor,
                                State.Max_Lines, State.Max_Expand,
                                State.Reverse_Index,
                                State.Table_Level,
@@ -5213,7 +5383,8 @@ package body Templates_Parser is
                end if;
 
                Analyze (T.File.Info,
-                        Parse_State'(Cursor        => State.Cursor,
+                        Parse_State'(T.I_Params'Length,
+                                     Cursor        => State.Cursor,
                                      Max_Lines     => State.Max_Lines,
                                      Max_Expand    => State.Max_Expand,
                                      Reverse_Index => State.Reverse_Index,
@@ -5232,7 +5403,8 @@ package body Templates_Parser is
             when Inline_Stmt =>
                Add (To_String (T.Before));
                Analyze (T.I_Block,
-                        Parse_State'(Cursor        => State.Cursor,
+                        Parse_State'(State.F_Params'Length,
+                                     Cursor        => State.Cursor,
                                      Max_Lines     => State.Max_Lines,
                                      Max_Expand    => State.Max_Expand,
                                      Reverse_Index => State.Reverse_Index,
@@ -5448,6 +5620,7 @@ package body Templates_Parser is
                   exit when T.I_Params (K) = null;
                   Data.Release (T.I_Params (K));
                end loop;
+               Data.Free (T.I_Params);
 
             end if;
             Release (T.Next, Include);
@@ -5567,7 +5740,7 @@ package body Templates_Parser is
       function Translate (Var : Data.Tag_Var) return String is
          Pos : Association_Map.Cursor;
          C   : aliased Filter.Filter_Context :=
-                 (Translations, null, Filter.No_Include_Parameters);
+                 (0, Translations, null, No_Parameter);
       begin
          --  ??? we should probably handle macros there too
          Pos := Translations.Set.Find (To_String (Var.Name));

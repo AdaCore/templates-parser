@@ -391,6 +391,8 @@ package Templates_Parser is
 
    type Parameter_Set is array (Natural range <>) of Unbounded_String;
 
+   No_Parameter : constant Parameter_Set;
+
    type Macro_Callback is access
      function (Name : String; Parameters : Parameter_Set) return String;
 
@@ -589,5 +591,7 @@ private
    ------------------
 
    type User_Filter is abstract tagged null record;
+
+   No_Parameter : constant Parameter_Set := (1 .. 0 => <>);
 
 end Templates_Parser;

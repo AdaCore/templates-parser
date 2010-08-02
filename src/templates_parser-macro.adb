@@ -73,7 +73,10 @@ package body Macro is
    -- Rewrite --
    -------------
 
-   procedure Rewrite (T : in out Tree; Parameters : Data.Parameter_Set) is
+   procedure Rewrite
+     (T          : in out Tree;
+      Parameters : not null access Data.Parameter_Set)
+   is
 
       procedure Rewrite (T : in out Data.Tree);
       --  Rewrite every variable references @_$N_@ (where N is a
@@ -111,6 +114,7 @@ package body Macro is
                when Data.Var =>
                   if D.Var.N > 0
                     and then D.Var.N <= Parameters'Length
+                    and then Parameters (D.Var.N) /= null
                   then
                      --  This is a reference to replace
                      declare
@@ -145,6 +149,8 @@ package body Macro is
       -------------
 
       procedure Rewrite (T : in out Definitions.Tree) is
+
+         use type Data.Tree;
 
          procedure Replace
            (Def   : in out Definitions.Tree;
@@ -194,12 +200,16 @@ package body Macro is
                null;
 
             when Definitions.Ref =>
-               if T.N.Ref <= Parameters'Length then
+               if T.N.Ref <= Parameters'Length
+                 and then Parameters (T.N.Ref) /= null
+               then
                   Replace (T, Parameters (T.N.Ref));
                end if;
 
             when Definitions.Ref_Default =>
-               if T.N.Ref <= Parameters'Length then
+               if T.N.Ref <= Parameters'Length
+                 and then Parameters (T.N.Ref) /= null
+               then
                   Replace (T, Parameters (T.N.Ref));
                else
                   Replace (T, T.N.Value);

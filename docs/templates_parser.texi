@@ -1726,7 +1726,10 @@ Syntax:
 The code inside the macro can be anything supported by the templates
 engine. There is no restriction. The parameters inside the macro are
 referenced as @@_$N_@@ (where N is a number and corresponds to the Nth
-parameter passed to the macro).
+parameter passed to the macro). There is no maximum number of
+parameters. A reference to a parameter that has no corresponding formal
+parameter at the call point is ignored (the value will be the empty
+string).
 
 @noindent
 For example:
@@ -1752,8 +1755,13 @@ to use an @@@@INCLUDE@@@@ as the code is not expanded.
 Syntax:
 
 @TPEXP{
-@code{@@_[[FILTER[(parameter)]:]MACRO_NAME([PARAM1][,PARAM2])_@@}.
+@code{@@_[[FILTER[(parameter)]:]MACRO_NAME([PARAM1][,N=>PARAMN])_@@}.
 }
+
+@noindent
+A macro call can have positional parameters (like @code{PARAM1} above)
+or named (where the name is a number corresponding to the actual
+parameter position) parameters (like @code{PARAMN} above).
 
 @noindent
 With the following definition:

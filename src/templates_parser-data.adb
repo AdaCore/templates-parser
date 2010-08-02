@@ -48,9 +48,6 @@ package body Data is
       function Get_Attribute (Tag : String) return Attribute_Data;
       --  Returns attribute for the given tag
 
-      function Get_Macro_Parameters return Parameter_Set;
-      --  Returns the macro parameter set
-
       function Is_Internal (Name : String) return Internal_Tag;
       --  Returns True if Name is an internal tag
 
@@ -450,46 +447,6 @@ package body Data is
          return new Filter.Set'(FS (FS'First .. K - 1));
       end Get_Filter_Set;
 
-      --------------------------
-      -- Get_Macro_Parameters --
-      --------------------------
-
-      function Get_Macro_Parameters return Parameter_Set is
-         Count  : Natural := 0;
-         Params : Parameter_Set;
-         P1, P2 : Natural;
-      begin
-         --  Count parameters
-
-         if MP_Start <= MP_End then
-            Count := 1;
-
-            for K in MP_Start .. MP_End loop
-               if Str (K) = ',' then
-                  Count := Count + 1;
-               end if;
-            end loop;
-         end if;
-
-         --  Read them
-
-         Params := new Parameters (1 .. Count);
-         P1 := MP_Start;
-
-         for K in Params'Range loop
-            P2 := P1;
-            loop
-               P2 := P2 + 1;
-               exit when Str (P2) = ',' or else Str (P2) = ')';
-            end loop;
-
-            Params (K) := Parse (Str (P1 .. P2 - 1));
-            P1 := P2 + 1;
-         end loop;
-
-         return Params;
-      end Get_Macro_Parameters;
-
       ------------------
       -- Get_Var_Name --
       ------------------
@@ -504,14 +461,14 @@ package body Data is
             --  Check for macro parameters
 
             if Tag (Stop) = ')' then
-               MP_End := Stop - 1;
+               MP_End := Stop;
                --  Go back to matching open parenthesis
                loop
                   Stop := Stop - 1;
                   --  ??? check for string literal
                   exit when Tag (Stop + 1) = '(' or else Stop = Tag'First;
                end loop;
-               MP_Start := Stop + 2;
+               MP_Start := Stop + 1;
             end if;
 
          else
@@ -637,7 +594,13 @@ package body Data is
 
          if Result.Attribute = No_Attribute and then Is_Macro then
             Result.Is_Macro := True;
-            Result.Parameters := Get_Macro_Parameters;
+
+            declare
+               P : constant Templates_Parser.Parameter_Set :=
+                     Get_Parameters (Str (MP_Start .. MP_End));
+            begin
+               Result.Parameters := To_Data_Parameters (P);
+            end;
 
             --  Check if this is a known macro
 
@@ -674,8 +637,12 @@ package body Data is
       end if;
 
       if R.Is_Macro then
+         R.Parameters := new Data.Parameter_Set'(R.Parameters.all);
+
          for K in R.Parameters'Range loop
-            R.Parameters (K) := Data.Clone (R.Parameters (K));
+            if R.Parameters (K) /= null then
+               R.Parameters (K) := Data.Clone (R.Parameters (K));
+            end if;
          end loop;
 
          R.Def := Clone (R.Def);
@@ -711,7 +678,8 @@ package body Data is
 
    function Image (T : Tag_Var) return String is
       use type Filter.Set_Access;
-      R : Unbounded_String;
+      R     : Unbounded_String;
+      Named : Boolean := False;
    begin
       R := Begin_Tag;
 
@@ -735,13 +703,22 @@ package body Data is
          Append (R, "(");
 
          for K in T.Parameters'Range loop
-            case T.Parameters (K).Kind is
-               when Text => Append (R, T.Parameters (K).Value);
-               when Var  => Append (R, Image (T.Parameters (K).Var));
-            end case;
+            if T.Parameters (K) = null then
+               Named := True;
 
-            if K /= T.Parameters'Last then
-               Append (R, ",");
+            else
+               if Named then
+                  Append (R, Natural'Image (K) & " => ");
+               end if;
+
+               case T.Parameters (K).Kind is
+                  when Text => Append (R, T.Parameters (K).Value);
+                  when Var  => Append (R, Image (T.Parameters (K).Var));
+               end case;
+
+               if K /= T.Parameters'Last then
+                  Append (R, ",");
+               end if;
             end if;
          end loop;
 
@@ -896,8 +873,6 @@ package body Data is
       use type Filter.Set_Access;
       procedure Free is
          new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
-      procedure Free is
-         new Ada.Unchecked_Deallocation (Parameters, Parameter_Set);
    begin
       if T.Filters /= null then
          Filter.Release (T.Filters.all);
@@ -908,7 +883,7 @@ package body Data is
          for K in T.Parameters'Range loop
             Data.Release (T.Parameters (K));
          end loop;
-         Free (T.Parameters);
+         Data.Free (T.Parameters);
       end if;
 
       Release (T.Def);
@@ -937,6 +912,21 @@ package body Data is
 
       D := null;
    end Release;
+
+   ------------------------
+   -- To_Data_Parameters --
+   ------------------------
+
+   function To_Data_Parameters
+     (Parameters : Templates_Parser.Parameter_Set) return Data.Parameters
+   is
+      P : constant Data.Parameters := new Parameter_Set (Parameters'Range);
+   begin
+      for K in P'Range loop
+         P (K) := Data.Parse (To_String (Parameters (K)));
+      end loop;
+      return P;
+   end To_Data_Parameters;
 
    ---------------
    -- Translate --

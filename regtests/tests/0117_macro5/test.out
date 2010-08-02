@@ -1,0 +1,14 @@
+[INFO] macro.tmplt
+[C_INFO]  1 FALSE
+[TEXT] --
+[TEXT] @_MACRO(2,3,trois)_@
+[TEXT] --
+[TEXT] @_MACRO(1,5, 5 => cinq, 8 => huit)_@
+[TEXT] --
+--
+both 2 and 3
+Named and Optional: 3:(trois) 5:() 8:()
+--
+only second 5
+Named and Optional: 3:() 5:(cinq) 8:(huit)
+--

@@ -3437,7 +3437,6 @@ package body Templates_Parser is
       D_Map    : Definitions.Map;
       Lazy_Set : Translate_Set;
       Output   : Boolean;
-      Mark     : Natural;
 
       procedure Analyze
         (T     : Tree;
@@ -3509,14 +3508,15 @@ package body Templates_Parser is
          pragma Inline (Flush);
          --  Flush buffer to Results
 
-         procedure Mark;
-         pragma Inline (Mark);
-         --  Mark the current text buffer
+         function Get_Mark return Natural;
+         pragma Inline (Get_Mark);
+         --  Get a mark on the current text buffer
 
-         procedure Commit_Rollback;
-         pragma Inline (Commit_Rollback);
+         procedure Rollback (Activate : Boolean; Mark : Natural);
+         pragma Inline (Rollback);
          --  Commit or rollback added texts for terse output. If no text added
-         --  from the vector tag we rollback otherwise we commit the result.
+         --  from the vector tag we rollback to the previous mark otherwise the
+         --  current result stays. The mark is cleared.
 
          function Flatten_Parameters
            (I : Include_Parameters) return Filter.Include_Parameters;
@@ -3910,18 +3910,18 @@ package body Templates_Parser is
             end case;
          end Analyze;
 
-         ---------------------
-         -- Commit_Rollback --
-         ---------------------
+         --------------
+         -- Rollback --
+         --------------
 
-         procedure Commit_Rollback is
+         procedure Rollback (Activate : Boolean; Mark : Natural) is
          begin
-            if not Output then
+            if Activate then
                --  Rollback
 
                Rollback : declare
                   To_Delete : constant Natural :=
-                                Length (Results) + Last - Parse.Mark;
+                                Length (Results) + Last - Mark;
                begin
                   if To_Delete > 0 then
                      if Last >= To_Delete then
@@ -3942,11 +3942,7 @@ package body Templates_Parser is
                   end if;
                end Rollback;
             end if;
-
-            --  Clear mark
-
-            Parse.Mark := 0;
-         end Commit_Rollback;
+         end Rollback;
 
          ------------------------
          -- Flatten_Parameter  --
@@ -4455,11 +4451,11 @@ package body Templates_Parser is
          -- Mark --
          ----------
 
-         procedure Mark is
+         function Get_Mark return Natural is
          begin
             Output := False;
-            Parse.Mark := Length (Results) + Last;
-         end Mark;
+            return Length (Results) + Last;
+         end Get_Mark;
 
          -------------
          -- Pop_Sep --
@@ -4878,10 +4874,11 @@ package body Templates_Parser is
                declare
                   B_State : array (1 .. State.Blocks_Count) of Block_State;
                   B       : Positive;
+                  Mark    : Natural;
                begin
                   for K in 1 .. State.Max_Expand loop
                      if State.Terse_Table then
-                        Mark;
+                        Mark := Get_Mark;
                      end if;
 
                      declare
@@ -4954,7 +4951,7 @@ package body Templates_Parser is
                         end loop;
 
                         if State.Terse_Table then
-                           Commit_Rollback;
+                           Rollback (Activate => Output = False, Mark => Mark);
                         end if;
                      end;
                   end loop;

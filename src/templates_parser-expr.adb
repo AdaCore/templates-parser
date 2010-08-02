@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2009, AdaCore                     --
+--                     Copyright (C) 1999-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -342,8 +342,8 @@ package body Expr is
                Start := Current_Token.Start;
                Stop  := Current_Token.Stop;
                Next_Token;
-               return new Node'(Var,
-                                Var => Build (Expression (Start .. Stop)));
+               return new Node'
+                 (Var, Var => Data.Build (Expression (Start .. Stop)));
 
             --  Errors
 
@@ -431,7 +431,7 @@ package body Expr is
             Text_IO.Put (Quote (To_String (E.V)));
 
          when Var =>
-            Text_IO.Put (Image (E.Var));
+            Text_IO.Put (Data.Image (E.Var));
 
          when Op =>
             Text_IO.Put ('(');
@@ -460,7 +460,7 @@ package body Expr is
             null;
 
          when Var =>
-            Release (E.Var);
+            Data.Release (E.Var);
 
          when Op =>
             Release (E.Left);

@@ -624,48 +624,12 @@ package body Templates_Parser is
 
    end Filter;
 
-   --------------------
-   --  Tags variable --
-   --------------------
+   ---------------
+   -- Main tree --
+   ---------------
 
-   type Attribute is (Nil, Length, Line, Min_Column, Max_Column, Up_Level);
-
-   type Internal_Tag
-     is (No, Now, Year, Month, Month_Name, Day, Day_Name, Hour, Minute, Second,
-         Number_Line, Table_Line, Table_Level, Up_Table_Line);
-
-   type Attribute_Data is record
-      Attr  : Attribute := Nil;
-      Value : Integer;
-   end record;
-
-   type Tag_Var is record
-      Name      : Unbounded_String;
-      Filters   : Filter.Set_Access;
-      Attribute : Attribute_Data;
-      N         : Integer;           -- Include variable index
-      Internal  : Internal_Tag;      -- Set to No if not an internal variable
-   end record;
-
-   function Is_Include_Variable (T : Tag_Var) return Boolean;
-   pragma Inline (Is_Include_Variable);
-   --  Returns True if T is an include variable (Name is $<n>)
-
-   function Build (Str : String) return Tag_Var;
-   --  Create a Tag from Str. A tag is composed of a name and a set of
-   --  filters.
-
-   function Image (T : Tag_Var) return String;
-   --  Returns string representation for the Tag variable
-
-   function Translate
-     (T       : Tag_Var;
-      Value   : String;
-      Context : not null access Filter.Filter_Context) return String;
-   --  Returns the result of Value after applying all filters for tag T
-
-   procedure Release (T : in out Tag_Var);
-   --  Release all memory associated with Tag
+   type Node;
+   type Tree is access Node;
 
    ----------
    -- Data --
@@ -678,6 +642,27 @@ package body Templates_Parser is
 
       type NKind is (Text, Var);
 
+      type Attribute is (Nil, Length, Line, Min_Column, Max_Column, Up_Level);
+
+      type Internal_Tag
+        is (No, Now, Year, Month, Month_Name, Day, Day_Name, Hour, Minute,
+            Second, Number_Line, Table_Line, Table_Level, Up_Table_Line);
+
+      type Attribute_Data is record
+         Attr  : Attribute := Nil;
+         Value : Integer;
+      end record;
+
+      No_Attribute : constant Attribute_Data := (Nil, 0);
+
+      type Tag_Var is record
+         Name       : Unbounded_String;
+         Filters    : Filter.Set_Access;
+         Attribute  : Attribute_Data;
+         N          : Integer;           -- Include variable index
+         Internal   : Internal_Tag;      -- No if not an internal variable
+      end record;
+
       type Node (Kind : NKind) is record
          Next : Tree;
          case Kind is
@@ -687,6 +672,26 @@ package body Templates_Parser is
                Var   : Tag_Var;
          end case;
       end record;
+
+      function Is_Include_Variable (T : Tag_Var) return Boolean;
+      pragma Inline (Is_Include_Variable);
+      --  Returns True if T is an include variable (Name is $<n>)
+
+      function Build (Str : String) return Tag_Var;
+      --  Create a Tag from Str. A tag is composed of a name and a set of
+      --  filters.
+
+      function Image (T : Tag_Var) return String;
+      --  Returns string representation for the Tag variable
+
+      function Translate
+        (T       : Tag_Var;
+         Value   : String;
+         Context : not null access Filter.Filter_Context) return String;
+      --  Returns the result of Value after applying all filters for tag T
+
+      procedure Release (T : in out Tag_Var);
+      --  Release all memory associated with Tag
 
       function Parse (Line : String) return Tree;
       --  Parse text line and returns the corresponding tree representation
@@ -765,7 +770,7 @@ package body Templates_Parser is
                V   : Unbounded_String;
 
             when Var =>
-               Var : Tag_Var;
+               Var : Data.Tag_Var;
 
             when Op =>
                O           : Ops;
@@ -811,10 +816,7 @@ package body Templates_Parser is
    --  and changed. This ensure that included tree will always be valid
    --  otherwise will would have to parse all the current trees in the cache
    --  to update the reference.
-
-   type Node;
-   type Tree is access Node;
-
+   --
    --  Static_Tree represent a Tree immune to cache changes. Info point to the
    --  first node and C_Info to the second one. C_Info could be different to
    --  Info.Next in case of cache changes. This way we keep a pointer to the
@@ -1387,548 +1389,6 @@ package body Templates_Parser is
          Comp_Value => T);
    end Assoc;
 
-   -----------
-   -- Build --
-   -----------
-
-   function Build (Str : String) return Tag_Var is
-
-      function Get_Var_Name (Tag : String) return String;
-      --  Given a Tag name, it returns the variable name only. It removes
-      --  the tag separator and the filters.
-
-      function Get_Filter_Set (Tag : String) return Filter.Set_Access;
-      --  Given a tag name, it retruns a set of filter to apply to this
-      --  variable when translated.
-
-      function Get_Attribute (Tag : String) return Attribute_Data;
-      --  Returns attribute for the given tag
-
-      function Is_Internal (Name : String) return Internal_Tag;
-      --  Returns True if Name is an internal tag
-
-      F_Sep : constant Natural :=
-                Strings.Fixed.Index (Str, ":", Strings.Backward);
-      --  Last filter separator
-
-      A_Sep : Natural :=
-                Strings.Fixed.Index (Str, "'", Strings.Backward);
-      --  Attribute separator
-
-      -------------------
-      -- Get_Attribute --
-      -------------------
-
-      function Get_Attribute (Tag : String) return Attribute_Data is
-         Start, Stop : Natural;
-      begin
-         if A_Sep = 0 then
-            return (Nil, 0);
-         else
-            Start := A_Sep + 1;
-            Stop  := Tag'Last - Length (End_Tag);
-         end if;
-
-         declare
-            A_Name : constant String :=
-                       Characters.Handling.To_Lower (Tag (Start .. Stop));
-         begin
-            if A_Name = "length" then
-               return (Length, 0);
-
-            elsif A_Name = "line" then
-               return (Line, 0);
-
-            elsif A_Name = "min_column" then
-               return (Min_Column, 0);
-
-            elsif A_Name = "max_column" then
-               return (Max_Column, 0);
-
-            elsif A_Name'Length >= 8
-              and then A_Name (A_Name'First .. A_Name'First + 7) = "up_level"
-            then
-               if A_Name'Length > 8 then
-                  --  We have a parameter
-                  declare
-                     V : constant String
-                       := Strings.Fixed.Trim
-                           (A_Name (A_Name'First + 8 .. A_Name'Last),
-                            Strings.Both);
-                     N : Integer;
-                  begin
-                     if V (V'First) = '('
-                       and then V (V'Last) = ')'
-                       and then Is_Number (V (V'First + 1 .. V'Last - 1))
-                     then
-                        N := Integer'Value (V (V'First + 1 .. V'Last - 1));
-                     else
-                        raise Template_Error
-                          with "Wrong value for attribute Up_Level";
-                     end if;
-                     return (Up_Level, N);
-                  end;
-               else
-                  return (Up_Level, 1);
-               end if;
-
-            else
-               raise Template_Error
-                 with "Unknown attribute name """ & A_Name & '"';
-            end if;
-         end;
-      end Get_Attribute;
-
-      --------------------
-      -- Get_Filter_Set --
-      --------------------
-
-      function Get_Filter_Set (Tag : String) return Filter.Set_Access is
-
-         use type Filter.Callback;
-
-         Start : Natural;
-         Stop  : Natural := Tag'Last;
-         FS    : Filter.Set (1 .. Strings.Fixed.Count (Tag, ":"));
-         --  Note that FS can be larger than needed as ':' can be used inside
-         --  filter parameters for example.
-         K     : Positive := FS'First;
-
-         function Name_Parameter
-           (Filter : String) return Templates_Parser.Filter.Routine;
-         --  Given a Filter description, returns the filter handle and
-         --  parameter.
-
-         procedure Get_Slice (Slice : String; First, Last : out Integer);
-         --  Returns the First and Last slice index as parsed into the Slice
-         --  string. Returns First and Last set to 0 if there is not valid
-         --  slice definition in Slice.
-
-         function Find_Slash (Str : String) return Natural;
-         --  Returns the first slash index in Str, skip espaced slashes
-
-         function Find
-           (Str   : String;
-            Start : Positive;
-            C     : Character) return Natural;
-         --  Look backward for character C in Str starting at position Start.
-         --  This procedure skips quoted strings and parenthesis. Returns 0 if
-         --  the character if not found otherwize it returns the positon of C
-         --  in Str.
-
-         ----------
-         -- Find --
-         ----------
-
-         function Find
-           (Str   : String;
-            Start : Positive;
-            C     : Character) return Natural
-         is
-            Pos   : Natural := Start;
-            Count : Integer := 0;
-         begin
-            while Pos > Str'First
-              and then (Str (Pos) /= C or else Count /= 0)
-            loop
-               if Pos > Str'First and then Str (Pos - 1) /= '\' then
-                  --  This is not a quoted character
-                  if Str (Pos) = ')' then
-                     Count := Count - 1;
-                  elsif Str (Pos) = '(' then
-                     Count := Count + 1;
-                  end if;
-               end if;
-               Pos := Pos - 1;
-            end loop;
-
-            if Pos = Str'First then
-               return 0;
-            else
-               return Pos;
-            end if;
-         end Find;
-
-         ----------------
-         -- Find_Slash --
-         ----------------
-
-         function Find_Slash (Str : String) return Natural is
-            Escaped : Boolean := False;
-         begin
-            for K in Str'Range loop
-               if Str (K) = '\' then
-                  Escaped := not Escaped;
-
-               elsif Str (K) = '/' and then not Escaped then
-                  return K;
-
-               else
-                  Escaped := False;
-               end if;
-            end loop;
-
-            return 0;
-         end Find_Slash;
-
-         ---------------
-         -- Get_Slice --
-         ---------------
-
-         procedure Get_Slice (Slice : String; First, Last : out Integer) is
-            P1 : constant Natural := Fixed.Index (Slice, "..");
-         begin
-            First := 0;
-            Last  := 0;
-
-            if P1 = 0 then
-               raise Template_Error with "slice expected """ & Slice & '"';
-
-            else
-               First := Integer'Value (Slice (Slice'First .. P1 - 1));
-               Last  := Integer'Value (Slice (P1 + 2 .. Slice'Last));
-            end if;
-         end Get_Slice;
-
-         --------------------
-         -- Name_Parameter --
-         --------------------
-
-         function Name_Parameter
-           (Filter : String) return Templates_Parser.Filter.Routine
-         is
-            package F renames Templates_Parser.Filter;
-
-            use type F.Mode;
-
-            function Unescape (Str : String) return String;
-            --  Unespace characters Str, to be used with regpat replacement
-            --  pattern.
-
-            --------------
-            -- Unescape --
-            --------------
-
-            function Unescape (Str : String) return String is
-               S : String (Str'Range);
-               I : Natural  := S'First - 1;
-               K : Positive := Str'First;
-            begin
-               loop
-                  exit when K > Str'Last;
-
-                  I := I + 1;
-
-                  if Str (K) = '\'
-                    and then K < Str'Last
-                    and then not (Str (K + 1) in '0' .. '9')
-                  then
-                     --  An escaped character, skip the backslash
-                     K := K + 1;
-
-                     --  Handled some special escaped characters \n \r \t
-
-                     case Str (K) is
-                        when 'n'    => S (I) := ASCII.LF;
-                        when 'r'    => S (I) := ASCII.CR;
-                        when 't'    => S (I) := ASCII.HT;
-                        when others => S (I) := Str (K);
-                     end case;
-
-                  else
-                     S (I) := Str (K);
-                  end if;
-
-                  K := K + 1;
-               end loop;
-
-               return S (S'First .. I);
-            end Unescape;
-
-            P1 : constant Natural := Fixed.Index (Filter, "(");
-            P2 : constant Natural := Fixed.Index (Filter, ")", Backward);
-
-         begin
-            if (P1 = 0 and then P2 /= 0) or else (P1 /= 0 and then P2 = 0) then
-               raise Template_Error
-                 with "unbalanced parenthesis """ & Filter & '"';
-
-            elsif P2 /= 0
-              and then P2 < Filter'Last
-              and then Filter (P2 + 1) /= ':'
-            then
-               raise Template_Error with
-                 "unexpected character after parenthesis """ & Filter & '"';
-            end if;
-
-            if P1 = 0 then
-               --  No parenthesis, so there is no parameter to parse
-
-               if F.Mode_Value (Filter) = F.User_Defined then
-                  return
-                    (F.Handle (Filter),
-                     F.Parameter_Data'(Mode    => F.User_Callback,
-                                       Handler => F.User_Handle (Filter),
-                                       P       => Null_Unbounded_String));
-               else
-                  return (F.Handle (Filter),
-                          Templates_Parser.Filter.No_Parameter);
-               end if;
-
-            else
-               declare
-                  use GNAT.Regpat;
-                  Name : constant String := Filter (Filter'First .. P1 - 1);
-                  Mode : constant F.Mode := F.Mode_Value (Name);
-
-                  Parameter : constant String :=
-                                No_Quote (Filter (P1 + 1 .. P2 - 1));
-               begin
-                  case F.Parameter (Mode) is
-                     when F.Regexp =>
-                        return (F.Handle (Mode),
-                                F.Parameter_Data'
-                                  (F.Regexp,
-                                   R_Str  => To_Unbounded_String (Parameter),
-                                   Regexp => new Pattern_Matcher'
-                                                   (Compile (Parameter))));
-
-                     when F.Regpat =>
-                        declare
-                           K : constant Natural := Find_Slash (Parameter);
-                        begin
-                           if K = 0 then
-                              --  No replacement, this is equivalent to
-                              --  REPLACE(<regexp>/\1)
-                              return (F.Handle (Mode),
-                                      F.Parameter_Data'
-                                        (F.Regpat,
-                                         P_Str  => To_Unbounded_String
-                                                     (Parameter),
-                                         Regpat => new Pattern_Matcher'
-                                                         (Compile (Parameter)),
-                                         Param => To_Unbounded_String ("\1")));
-                           else
-                              return (F.Handle (Mode),
-                                      F.Parameter_Data'
-                                        (F.Regpat,
-                                         P_Str => To_Unbounded_String
-                                                    (Parameter
-                                                       (Parameter'First
-                                                        .. K - 1)),
-                                         Regpat => new Pattern_Matcher'
-                                                     (Compile
-                                                        (Parameter
-                                                           (Parameter'First
-                                                            .. K - 1))),
-                                         Param =>
-                                           To_Unbounded_String
-                                             (Unescape
-                                                (Parameter
-                                                   (K + 1
-                                                    .. Parameter'Last)))));
-                           end if;
-                        end;
-
-                     when F.Slice =>
-                        declare
-                           First, Last : Integer;
-                        begin
-                           Get_Slice (Parameter, First, Last);
-
-                           return (F.Handle (Mode),
-                                   F.Parameter_Data'(F.Slice, First, Last));
-                        end;
-
-                     when F.Str =>
-                        return (F.Handle (Mode),
-                                F.Parameter_Data'
-                                  (F.Str,
-                                   S => To_Unbounded_String (Parameter)));
-
-                     when F.User_Callback =>
-                        return (F.Handle (Mode),
-                                F.Parameter_Data'
-                                  (F.User_Callback,
-                                   F.User_Handle (Name),
-                                   P => To_Unbounded_String (Parameter)));
-                  end case;
-               end;
-            end if;
-         end Name_Parameter;
-
-      begin
-         if FS'Length = 0 then
-            return null;
-         end if;
-
-         loop
-            Start := Tag'First;
-
-            Stop := Find (Str, Stop, ':');
-
-            exit when Stop = 0;
-
-            Start := Find (Str, Stop - 1, ':');
-
-            if Start = 0 then
-               --  Last filter found
-               FS (K) := Name_Parameter
-                 (Tag (Tag'First + Length (Begin_Tag) .. Stop - 1));
-            else
-               FS (K) := Name_Parameter (Tag (Start + 1 .. Stop - 1));
-            end if;
-
-            --  Specific check for the NO_DYNAMIC filter which must appear
-            --  first.
-
-            if FS (K).Handle = Filter.No_Dynamic'Access
-              and then K /= FS'First
-            then
-               raise Template_Error with "NO_DYNAMIC must be the first filter";
-            end if;
-
-            K := K + 1;
-
-            Stop := Stop - 1;
-         end loop;
-
-         return new Filter.Set'(FS (FS'First .. K - 1));
-      end Get_Filter_Set;
-
-      ------------------
-      -- Get_Var_Name --
-      ------------------
-
-      function Get_Var_Name (Tag : String) return String is
-         Start, Stop : Natural;
-      begin
-         if A_Sep = 0 then
-            --  No attribute
-            Stop := Tag'Last - Length (End_Tag);
-         else
-            Stop := A_Sep - 1;
-         end if;
-
-         if F_Sep = 0 then
-            --  No filter
-            Start := Tag'First + Length (Begin_Tag);
-         else
-            Start := F_Sep + 1;
-         end if;
-
-         return Tag (Start .. Stop);
-      end Get_Var_Name;
-
-      -----------------
-      -- Is_Internal --
-      -----------------
-
-      function Is_Internal (Name : String) return Internal_Tag is
-      begin
-         case Name (Name'First) is
-            when 'D' =>
-               if Name = "DAY" then
-                  return Day;
-               elsif Name = "DAY_NAME" then
-                  return Day_Name;
-               else
-                  return No;
-               end if;
-
-            when 'H' =>
-               if Name = "HOUR" then
-                  return Hour;
-               else
-                  return No;
-               end if;
-
-            when 'M' =>
-               if Name = "MONTH" then
-                  return Month;
-               elsif Name = "MONTH_NAME" then
-                  return Month_Name;
-               elsif Name = "MINUTE" then
-                  return Minute;
-               else
-                  return No;
-               end if;
-
-            when 'N' =>
-               if Name = "NOW" then
-                  return Now;
-               elsif Name = "NUMBER_LINE" then
-                  return Number_Line;
-               else
-                  return No;
-               end if;
-
-            when 'S' =>
-               if Name = "SECOND" then
-                  return Second;
-               else
-                  return No;
-               end if;
-
-            when 'T' =>
-               if Name = "TABLE_LINE" then
-                  return Table_Line;
-               elsif Name = "TABLE_LEVEL" then
-                  return Table_Level;
-               else
-                  return No;
-               end if;
-
-            when 'U' =>
-               if Name = "UP_TABLE_LINE" then
-                  return Up_Table_Line;
-               else
-                  return No;
-               end if;
-
-            when 'Y' =>
-               if Name = "YEAR" then
-                  return Year;
-               else
-                  return No;
-               end if;
-
-            when others =>
-               return No;
-         end case;
-      end Is_Internal;
-
-      Result : Tag_Var;
-
-   begin
-      if A_Sep <= F_Sep then
-         --  This is not an attribute in fact, but something like:
-         --  Filter(that's it):VAR
-         A_Sep := 0;
-      end if;
-
-      Result.Filters   := Get_Filter_Set (Str);
-      Result.Attribute := Get_Attribute (Str);
-
-      declare
-         Name : constant String := Get_Var_Name (Str);
-      begin
-         Result.Name     := To_Unbounded_String (Name);
-         Result.Internal := Is_Internal (Name);
-
-         if Name (Name'First) = '$'
-           and then Strings.Fixed.Count
-             (Name, Strings.Maps.Constants.Decimal_Digit_Set) = Name'Length - 1
-         then
-            Result.N := Natural'Value (Name (Name'First + 1 .. Name'Last));
-         else
-            Result.N := -1;
-         end if;
-      end;
-
-      return Result;
-   end Build;
-
    ----------------------------
    -- Build_Include_Pathname --
    ----------------------------
@@ -2333,46 +1793,6 @@ package body Templates_Parser is
       end if;
    end Image;
 
-   function Image (T : Tag_Var) return String is
-      use type Filter.Set_Access;
-      R : Unbounded_String;
-   begin
-      R := Begin_Tag;
-
-      --  Filters
-
-      if T.Filters /= null then
-         for K in reverse T.Filters'Range loop
-            Append (R, Filter.Name (T.Filters (K).Handle));
-            Append (R, Filter.Image (T.Filters (K).Parameters));
-            Append (R, ":");
-         end loop;
-      end if;
-
-      --  Tag name
-
-      Append (R, T.Name);
-
-      --  Attributes
-
-      case T.Attribute.Attr is
-         when Nil        => null;
-         when Length     => Append (R, "'Length");
-         when Line       => Append (R, "'Line");
-         when Min_Column => Append (R, "'Min_Column");
-         when Max_Column => Append (R, "'Max_Column");
-         when Up_Level   =>
-            Append (R, "'Up_Level");
-            if T.Attribute.Value /= 1 then
-               Append (R, '(' & Image (T.Attribute.Value) & ')');
-            end if;
-      end case;
-
-      Append (R, End_Tag);
-
-      return To_String (R);
-   end Image;
-
    ----------------
    -- Initialize --
    ----------------
@@ -2416,15 +1836,6 @@ package body Templates_Parser is
          Pos := Association_Map.Next (Pos);
       end loop;
    end Insert;
-
-   -------------------------
-   -- Is_Include_Variable --
-   -------------------------
-
-   function Is_Include_Variable (T : Tag_Var) return Boolean is
-   begin
-      return T.N /= -1;
-   end Is_Include_Variable;
 
    ---------------
    -- Is_Number --
@@ -3963,7 +3374,7 @@ package body Templates_Parser is
       --  Parse T and build results file. State is needed for Vector_Tag and
       --  Matrix_Tag expansion.
 
-      function Get_Association (Var : Tag_Var) return Association;
+      function Get_Association (Var : Data.Tag_Var) return Association;
       --  Returns association for Name or Null_Association if not found. This
       --  routine also handles lazy tags by calling the appropriate callback
       --  routine. Lazy tag values are then recorded into Lazy_Set.
@@ -4008,14 +3419,14 @@ package body Templates_Parser is
          --  case sensitive.
 
          function Translate
-           (Var          : Tag_Var;
+           (Var          : Data.Tag_Var;
             State        : Parse_State;
             Is_Composite : access Boolean) return String;
          --  Translate Tag variable using Translation table and apply all
          --  Filters and Atribute recorded for this variable.
 
          function I_Translate
-           (Var : Tag_Var; State : Parse_State) return String;
+           (Var : Data.Tag_Var; State : Parse_State) return String;
          --  As above but for an include variable
 
          procedure Add (S : String; Sep : Boolean := False);
@@ -4096,7 +3507,7 @@ package body Templates_Parser is
                      Add (To_String (T.Value));
 
                   when Data.Var =>
-                     if Is_Include_Variable (T.Var) then
+                     if Data.Is_Include_Variable (T.Var) then
                         Add (I_Translate (T.Var, State));
 
                      else
@@ -4414,7 +3825,7 @@ package body Templates_Parser is
                   return To_String (E.V);
 
                when Expr.Var =>
-                  if Is_Include_Variable (E.Var) then
+                  if Data.Is_Include_Variable (E.Var) then
                      return I_Translate (E.Var, State);
                   else
                      return Translate (E.Var, State, Is_Composite'Access);
@@ -4536,7 +3947,7 @@ package body Templates_Parser is
                function Check (T : Expr.Tree) return Natural;
                --  Idem for an expression subtree as found in a condition
 
-               function Check (T : Tag_Var) return Natural;
+               function Check (T : Data.Tag_Var) return Natural;
                --  Returns the length of Tag T for the current context
 
                function Check (I : Include_Parameters) return Natural;
@@ -4547,7 +3958,7 @@ package body Templates_Parser is
                -- Check --
                -----------
 
-               function Check (T : Tag_Var) return Natural is
+               function Check (T : Data.Tag_Var) return Natural is
 
                   Table_Level : constant Positive := State.Table_Level + 1;
                   --  This is the current table level, State.Table_Level is
@@ -4719,12 +4130,13 @@ package body Templates_Parser is
 
                function Check (T : Data.Tree) return Natural is
                   use type Data.NKind;
+                  use type Data.Attribute;
                   Iteration : Natural := Natural'First;
                   D         : Data.Tree := T;
                begin
                   while D /= null loop
                      if D.Kind = Data.Var
-                       and then D.Var.Attribute.Attr = Nil
+                       and then D.Var.Attribute.Attr = Data.Nil
                      then
                         Iteration := Natural'Max (Iteration, Check (D.Var));
                      end if;
@@ -4842,10 +4254,11 @@ package body Templates_Parser is
          -----------------
 
          function I_Translate
-           (Var   : Tag_Var;
+           (Var   : Data.Tag_Var;
             State : Parse_State) return String
          is
             use type Data.NKind;
+            use type Data.Attribute;
          begin
             pragma Assert (Var.N /= -1);
 
@@ -4865,14 +4278,14 @@ package body Templates_Parser is
                      --  variable is replaced by a single variable.
 
                      declare
-                        V : Tag_Var := T.Var;
+                        V : Data.Tag_Var := T.Var;
                      begin
                         if V.N = -1 then
                            --  First thing we want to do is to inherit
                            --  attributes from the include variable if we
                            --  have no attribute.
 
-                           if V.Attribute.Attr = Nil then
+                           if V.Attribute.Attr = Data.Nil then
                               V.Attribute := Var.Attribute;
                            end if;
 
@@ -4883,7 +4296,7 @@ package body Templates_Parser is
                            --  variable is a standard one (from a translate
                            --  table) the state will not be used.
 
-                           return Translate
+                           return Data.Translate
                              (Var,
                               Translate
                                 (V, State.Parent.all, Is_Composite'Access),
@@ -4910,7 +4323,7 @@ package body Templates_Parser is
                         L : constant Natural := Last;
                      begin
                         Last := 0;
-                        return Translate
+                        return Data.Translate
                           (Var, Buffer (Buffer'First .. L), C'Access);
                      end;
                   end if;
@@ -5005,7 +4418,7 @@ package body Templates_Parser is
          ---------------
 
          function Translate
-           (Var          : Tag_Var;
+           (Var          : Data.Tag_Var;
             State        : Parse_State;
             Is_Composite : access Boolean) return String
          is
@@ -5024,11 +4437,11 @@ package body Templates_Parser is
                declare
                   N : constant Definitions.Node :=
                         Definitions.Def_Map.Element (D_Pos);
-                  V : Tag_Var := Var;
+                  V : Data.Tag_Var := Var;
                begin
                   case N.Kind is
                      when Definitions.Const =>
-                        return Translate
+                        return Data.Translate
                           (Var, To_String (N.Value), C'Access);
 
                      when Definitions.Ref =>
@@ -5041,7 +4454,7 @@ package body Templates_Parser is
                         then
                            --  This include parameter does not exists, use
                            --  default value.
-                           return Translate
+                           return Data.Translate
                              (Var, To_String (N.Value), C'Access);
                         else
                            V.N := N.Ref;
@@ -5052,6 +4465,7 @@ package body Templates_Parser is
             end if;
 
             declare
+               use type Data.Attribute;
                use type Dynamic.Cursor_Tag_Access;
                use type Dynamic.Path;
                Tk : constant Association := Get_Association (Var);
@@ -5068,7 +4482,7 @@ package body Templates_Parser is
                         D := Dynamic.Dimension (Cursor_Tag, Name);
 
                         if D /= 0 then
-                           if Var.Attribute.Attr /= Nil then
+                           if Var.Attribute.Attr /= Data.Nil then
                               --  ??? Would be nice to remove this restriction
                               raise Template_Error with
                                 "Attributes not supported for Cursor_Tag.";
@@ -5096,7 +4510,7 @@ package body Templates_Parser is
 
                               if D = 1 and then L = 1 then
                                  --  A standard tag (single value)
-                                 return Translate
+                                 return Data.Translate
                                    (Var,
                                     Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
                                     C'Access);
@@ -5107,7 +4521,7 @@ package body Templates_Parser is
                                  --  nested level.
 
                                  if D = State.Table_Level then
-                                    return Translate
+                                    return Data.Translate
                                       (Var,
                                        Dynamic.Value
                                          (Cursor_Tag, Name,
@@ -5131,13 +4545,13 @@ package body Templates_Parser is
                   case Tk.Kind is
 
                      when Std =>
-                        if Var.Attribute.Attr = Nil then
-                           return Translate
+                        if Var.Attribute.Attr = Data.Nil then
+                           return Data.Translate
                              (Var, To_String (Tk.Value), C'Access);
                         else
                            raise Template_Error
                              with "Attribute not valid on a discrete tag ("
-                               & Image (Var) & ')';
+                               & Data.Image (Var) & ')';
                         end if;
 
                      when Composite =>
@@ -5145,43 +4559,43 @@ package body Templates_Parser is
                         if Tk.Comp_Value.Data.Nested_Level = 1 then
                            --  This is a vector
 
-                           if Var.Attribute.Attr = Length then
-                              return Translate
+                           if Var.Attribute.Attr = Data.Length then
+                              return Data.Translate
                                 (Var,
                                  Image (Tk.Comp_Value.Data.Count), C'Access);
 
-                           elsif Var.Attribute.Attr = Up_Level then
+                           elsif Var.Attribute.Attr = Data.Up_Level then
                               Up_Value := Var.Attribute.Value;
 
-                           elsif Var.Attribute.Attr /= Nil then
+                           elsif Var.Attribute.Attr /= Data.Nil then
                               raise Template_Error
                                 with "This attribute is not valid for a "
-                                  & "vector tag (" & Image (Var) & ')';
+                                  & "vector tag (" & Data.Image (Var) & ')';
                            end if;
 
                         elsif Tk.Comp_Value.Data.Nested_Level = 2 then
-                           if Var.Attribute.Attr = Line then
+                           if Var.Attribute.Attr = Data.Line then
                               --  'Line on a matrix
-                              return Translate
+                              return Data.Translate
                                 (Var,
                                  Image (Tk.Comp_Value.Data.Count), C'Access);
 
-                           elsif Var.Attribute.Attr = Min_Column then
+                           elsif Var.Attribute.Attr = Data.Min_Column then
                               --  'Min_Column on a matrix
-                              return Translate
+                              return Data.Translate
                                 (Var,
                                  Image (Tk.Comp_Value.Data.Min), C'Access);
 
-                           elsif Var.Attribute.Attr = Max_Column then
+                           elsif Var.Attribute.Attr = Data.Max_Column then
                               --  'Max_Column on a matrix
-                              return Translate
+                              return Data.Translate
                                 (Var,
                                  Image (Tk.Comp_Value.Data.Max), C'Access);
 
-                           elsif Var.Attribute.Attr /= Nil then
+                           elsif Var.Attribute.Attr /= Data.Nil then
                               raise Template_Error
                                 with "This attribute is not valid for a "
-                                  & "matrix tag (" & Image (Var) & ')';
+                                  & "matrix tag (" & Data.Image (Var) & ')';
                            end if;
                         end if;
 
@@ -5195,7 +4609,7 @@ package body Templates_Parser is
                               Up_Value,
                               Result, Found);
 
-                           return Translate
+                           return Data.Translate
                              (Var, To_String (Result), C'Access);
                         end;
                   end case;
@@ -5203,73 +4617,73 @@ package body Templates_Parser is
             end;
 
             case Var.Internal is
-               when Up_Table_Line =>
+               when Data.Up_Table_Line =>
                   if State.Table_Level < 2 then
-                     return Translate (Var, "0", C'Access);
+                     return Data.Translate (Var, "0", C'Access);
                   else
-                     return Translate
+                     return Data.Translate
                        (Var,
                         Image (State.Cursor (State.Table_Level - 1)),
                         C'Access);
                   end if;
 
-               when Table_Line =>
+               when Data.Table_Line =>
                   if State.Table_Level = 0 then
-                     return Translate (Var, "0", C'Access);
+                     return Data.Translate (Var, "0", C'Access);
                   else
-                     return Translate
+                     return Data.Translate
                        (Var,
                         Image (State.Cursor (State.Table_Level)),
                         C'Access);
                   end if;
 
-               when Number_Line =>
-                  return Translate
+               when Data.Number_Line =>
+                  return Data.Translate
                     (Var, Image (State.Max_Lines), C'Access);
 
-               when Table_Level =>
-                  return Translate
+               when Data.Table_Level =>
+                  return Data.Translate
                     (Var, Image (State.Table_Level), C'Access);
 
-               when Templates_Parser.Now =>
-                  return Translate
+               when Data.Now =>
+                  return Data.Translate
                     (Var,
                      GNAT.Calendar.Time_IO.Image (Now, "%Y-%m-%d %H:%M:%S"),
                      C'Access);
 
-               when Year =>
-                  return Translate
+               when Data.Year =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%Y"), C'Access);
 
-               when Month =>
-                  return Translate
+               when Data.Month =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%m"), C'Access);
 
-               when Day =>
-                  return Translate
+               when Data.Day =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%d"), C'Access);
 
-               when Hour =>
-                  return Translate
+               when Data.Hour =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%H"), C'Access);
 
-               when Minute =>
-                  return Translate
+               when Data.Minute =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%M"), C'Access);
 
-               when Second =>
-                  return Translate
+               when Data.Second =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%S"), C'Access);
 
-               when Month_Name =>
-                  return Translate
+               when Data.Month_Name =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%B"), C'Access);
 
-               when Day_Name =>
-                  return Translate
+               when Data.Day_Name =>
+                  return Data.Translate
                     (Var, GNAT.Calendar.Time_IO.Image (Now, "%A"), C'Access);
 
-               when No =>
+               when Data.No =>
                   null;
             end case;
 
@@ -5279,7 +4693,7 @@ package body Templates_Parser is
             if Keep_Unknown_Tags then
                return To_String (Begin_Tag & Var.Name & End_Tag);
             else
-               return Translate (Var, "", C'Access);
+               return Data.Translate (Var, "", C'Access);
             end if;
          end Translate;
 
@@ -5565,7 +4979,8 @@ package body Templates_Parser is
       -- Get_Association --
       ---------------------
 
-      function Get_Association (Var : Tag_Var) return Association is
+      function Get_Association (Var : Data.Tag_Var) return Association is
+         use type Data.Internal_Tag;
          use type Dynamic.Lazy_Tag_Access;
          Name : constant String := To_String (Var.Name);
          Pos  : Association_Map.Cursor;
@@ -5577,7 +4992,7 @@ package body Templates_Parser is
 
          elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
            and then not Filter.Is_No_Dynamic (Var.Filters)
-           and then Var.Internal = No
+           and then Var.Internal = Data.No
          then
             --  Look into the Lazy_Set for the cached value
 
@@ -5671,17 +5086,6 @@ package body Templates_Parser is
    -------------
    -- Release --
    -------------
-
-   procedure Release (T : in out Tag_Var) is
-      use type Filter.Set_Access;
-      procedure Free is
-         new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
-   begin
-      if T.Filters /= null then
-         Filter.Release (T.Filters.all);
-         Free (T.Filters);
-      end if;
-   end Release;
 
    procedure Release (T : in out Tree; Include : Boolean := True) is
       use type Data.Tree;
@@ -5854,34 +5258,6 @@ package body Templates_Parser is
    ---------------
 
    function Translate
-     (T       : Tag_Var;
-      Value   : String;
-      Context : not null access Filter.Filter_Context) return String
-   is
-      use type Filter.Set_Access;
-   begin
-      if T.Filters /= null then
-         declare
-            R : Unbounded_String := To_Unbounded_String (Value);
-         begin
-            for K in T.Filters'Range loop
-               R := To_Unbounded_String
-                 (T.Filters (K).Handle
-                  (To_String (R), Context, T.Filters (K).Parameters));
-            end loop;
-
-            return To_String (R);
-         end;
-      end if;
-
-      return Value;
-   end Translate;
-
-   ---------------
-   -- Translate --
-   ---------------
-
-   function Translate
      (Template     : String;
       Translations : Translate_Table := No_Translation) return String is
    begin
@@ -5897,14 +5273,14 @@ package body Templates_Parser is
 
       Results : Unbounded_String;
 
-      function Translate (Var : Tag_Var) return String;
+      function Translate (Var : Data.Tag_Var) return String;
       --  Returns translation for Var
 
       ---------------
       -- Translate --
       ---------------
 
-      function Translate (Var : Tag_Var) return String is
+      function Translate (Var : Data.Tag_Var) return String is
          Pos : Association_Map.Cursor;
          C   : aliased Filter.Filter_Context :=
                  (Translations, null, Filter.No_Include_Parameters);
@@ -5917,7 +5293,8 @@ package body Templates_Parser is
             begin
                case Item.Kind is
                   when Std =>
-                     return Translate (Var, To_String (Item.Value), C'Access);
+                     return Data.Translate
+                       (Var, To_String (Item.Value), C'Access);
                   when others =>
                      return "";
                end case;

@@ -1805,8 +1805,8 @@ package body Filter is
          --  This is an include parameter
 
          declare
-            N : constant Natural
-              := Natural'Value (Str (Str'First + 1 .. Str'Last));
+            N : constant Natural :=
+                  Natural'Value (Str (Str'First + 1 .. Str'Last));
          begin
             return To_String (I_Params (N));
          end;

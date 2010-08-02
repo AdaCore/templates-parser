@@ -908,7 +908,7 @@ package body Templates_Parser is
       procedure Add
         (Filename : String;
          T        : Tree;
-         Old      :    out Tree);
+         Old      : out Tree);
       --  Add Filename/T to the list of cached files. If Filename is
       --  already in the list, replace the current tree with T. Furthermore
       --  if Filename tree is already in use, Old will be set with the
@@ -917,7 +917,7 @@ package body Templates_Parser is
 
       procedure Get
         (Filename : String;
-         Result   :    out Static_Tree);
+         Result   : out Static_Tree);
       --  Returns the Tree for Filename or Null_Static_Tree if Filename has
       --  not been cached or is obsolete.
 
@@ -2548,8 +2548,7 @@ package body Templates_Parser is
 
       function Count_Tag_Attributes return Natural is
          K : constant Natural :=
-               Strings.Fixed.Index
-                 (Buffer (First + 2 .. Last), "@@");
+               Strings.Fixed.Index (Buffer (First + 2 .. Last), "@@");
       begin
          return Strings.Fixed.Count (Buffer (First + 2 .. K), "'");
       end Count_Tag_Attributes;
@@ -4236,7 +4235,7 @@ package body Templates_Parser is
             -- F_In --
             ----------
 
-            function F_In   (L, R : Expr.Tree) return String is
+            function F_In (L, R : Expr.Tree) return String is
                use type Expr.NKind;
 
                procedure Build_Set (Data : in out Tag_Data);

@@ -5617,7 +5617,6 @@ package body Templates_Parser is
                Release (T.File.Info, Include);
 
                for K in T.I_Params'Range loop
-                  exit when T.I_Params (K) = null;
                   Data.Release (T.I_Params (K));
                end loop;
                Data.Free (T.I_Params);

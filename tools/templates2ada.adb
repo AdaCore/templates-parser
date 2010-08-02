@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2006-2009, AdaCore                     --
+--                     Copyright (C) 2006-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -349,68 +349,95 @@ procedure Templates2Ada is
       -----------------
 
       procedure Process_Tag (Str : String; S : in out Integer) is
-         First : Integer := S + 2;
-         Last  : Integer := First;
+         First           : Integer := S + 2;
+         Last            : Integer := First;
          Parents_Nesting : Natural := 0;
+         Macro           : Boolean := False;
       begin
          while Last < Str'Last loop
             if Str (Last) = ':' then
                First := Last + 1;
+            elsif Str (Last .. Last + 2) = ")_@" then
+               Macro := True;
+               exit;
             elsif Str (Last .. Last + 1) = "_@" then
                exit;
             end if;
             Last := Last + 1;
          end loop;
 
-         --  Special case: a convention is that user-defined scripts
-         --  might accept arguments that reference other tags, by using
-         --  the syntax @_FILTER(@param):..._@, ie the parameter starts
-         --  with a single @ sign. In this case, we want to make sure
-         --  there is a entry made for the argument as well. Such
-         --  filters might have multiple arguments. Multiple arguments
-         --  must be comma-separated.
+         if Macro then
+            --  First word is the macro name, check if this is a AWS/Ajax macro
+            S := S + 2;
+            Next_Word (Str, S, First, Last);
+            S := Last + 1;
 
-         for A in S + 2 .. Last - 1 loop
-            if Str (A) = '(' then
-               Parents_Nesting := Parents_Nesting + 1;
-            elsif Str (A) = ')' then
-               Parents_Nesting := Parents_Nesting - 1;
-            elsif Str (A) = '@'
-               and then Parents_Nesting > 0
-               and then (Str (A - 1) = ',' or else Str (A - 1) = '(')
+            if Str (First .. Last) = "JS_ACTION" then
+               --  First parameter is the event
+               Next_Word (Str, S, First, Last);
+               Append (Ajax_Event, Str (First .. Last));
+               S := Last + 1;
+               --  Second parameter is the action
+               Next_Word (Str, S, First, Last);
+               Append (Ajax_Action, Str (First .. Last));
+               S := Last + 1;
+               --  Record Ajax file location
+               Append
+                 (Ajax_File,
+                  Directories.Base_Name (Relative_Name));
+            end if;
+
+         else
+            --  Special case: a convention is that user-defined scripts
+            --  might accept arguments that reference other tags, by using
+            --  the syntax @_FILTER(@param):..._@, ie the parameter starts
+            --  with a single @ sign. In this case, we want to make sure
+            --  there is a entry made for the argument as well. Such
+            --  filters might have multiple arguments. Multiple arguments
+            --  must be comma-separated.
+
+            for A in S + 2 .. Last - 1 loop
+               if Str (A) = '(' then
+                  Parents_Nesting := Parents_Nesting + 1;
+               elsif Str (A) = ')' then
+                  Parents_Nesting := Parents_Nesting - 1;
+               elsif Str (A) = '@'
+                 and then Parents_Nesting > 0
+                 and then (Str (A - 1) = ',' or else Str (A - 1) = '(')
+               then
+                  for B in A + 1 .. Last - 1 loop
+                     if Str (B) = ',' or else Str (B) = ')' then
+                        Insert (Seen, Str (A + 1 .. B - 1), C, Inserted);
+                        Insert
+                          (All_Variables, Str (A + 1 .. B - 1),
+                           C, Inserted);
+                        exit;
+                     end if;
+                  end loop;
+               end if;
+            end loop;
+
+            --  Remove attributes (can't be done in the loop above, because
+            --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS.
+
+            for F in reverse First .. Last - 1 loop
+               if Str (F) = ''' then
+                  Last := F;
+                  exit;
+               end if;
+            end loop;
+
+            if Str (First) /= '$'
+              and then Str (First .. Last - 1) /= "TABLE_LINE"
+              and then Str (First .. Last - 1) /= "UP_TABLE_LINE"
+              and then Str (First .. Last - 1) /= "NUMBER_LINE"
             then
-               for B in A + 1 .. Last - 1 loop
-                  if Str (B) = ',' or else Str (B) = ')' then
-                     Insert (Seen, Str (A + 1 .. B - 1), C, Inserted);
-                     Insert
-                        (All_Variables, Str (A + 1 .. B - 1),
-                         C, Inserted);
-                     exit;
-                  end if;
-               end loop;
+               Insert (Seen, Str (First .. Last - 1), C, Inserted);
+               Insert (All_Variables, Str (First .. Last - 1), C, Inserted);
             end if;
-         end loop;
 
-         --  Remove attributes (can't be done in the loop above, because
-         --  of complex structures like ADD_PARAM(AI='...'):PARAMETERS.
-
-         for F in reverse First .. Last - 1 loop
-            if Str (F) = ''' then
-               Last := F;
-               exit;
-            end if;
-         end loop;
-
-         if Str (First) /= '$'
-           and then Str (First .. Last - 1) /= "TABLE_LINE"
-           and then Str (First .. Last - 1) /= "UP_TABLE_LINE"
-           and then Str (First .. Last - 1) /= "NUMBER_LINE"
-         then
-            Insert (Seen, Str (First .. Last - 1), C, Inserted);
-            Insert (All_Variables, Str (First .. Last - 1), C, Inserted);
+            S := Last + 2;
          end if;
-
-         S := Last + 2;
       end Process_Tag;
 
       ------------------

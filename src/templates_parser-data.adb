@@ -795,9 +795,10 @@ package body Data is
          P := T;
          T := T.Next;
 
-         if P.Kind = Var then
-            Release (P.Var);
-         end if;
+         case P.Kind is
+            when Var  => Release (P.Var);
+            when Text => null;
+         end case;
 
          Free (P);
       end loop;

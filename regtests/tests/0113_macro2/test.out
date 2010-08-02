@@ -1,0 +1,14 @@
+[INFO] macro.tmplt
+[C_INFO]  1 FALSE
+[TEXT] --
+[TEXT] @_MACRO(2,3)_@
+[TEXT] --
+[TEXT] @_MACRO(1,5,99)_@
+[TEXT] --
+--
+both 2 and 3
+finally : defval
+--
+only second 5
+finally : 99
+--

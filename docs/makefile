@@ -33,12 +33,12 @@ PDFTEX          = $(shell which pdftex 2> /dev/null)
 
 TMPLT	  = demo.tmplt user.tmplt table.tmplt table_section.tmplt \
 	    table_if.tmplt matrix.tmplt table_block.tmplt table_inline.tmplt \
-	    if_inline.tmplt
+	    if_inline.tmplt macro.tmplt
 
 TMPLTTEXI = $(TMPLT:=.texi)
 
 ADBFILES  = demo.adb user1.adb user2.adb table.adb table_section.adb \
-	    table_if.adb matrix.adb table_inline.adb if_inline.adb
+	    table_if.adb matrix.adb table_inline.adb if_inline.adb macro.adb
 
 EXEFILES  = $(ADBFILES:.adb=)
 ADAFILES  = $(ADBFILES)

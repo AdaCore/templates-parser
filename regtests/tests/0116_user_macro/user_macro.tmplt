@@ -1,0 +1,14 @@
+@@MACRO(MACRO1)@@
+this is macro1 @_$1_@, @_STAG_@
+@@END_MACRO@@
+--
+@_MACRO1(23)_@
+--
+@_MACRO2(5,1)_@
+--
+@_LOWER:MACRO2(MAISON,Ada)_@
+--
+@_UPPER:MACRO2(@_STAG_@,Ada)_@
+--
+@_MACRO3()_@
+--

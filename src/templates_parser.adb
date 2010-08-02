@@ -66,6 +66,8 @@ package body Templates_Parser is
    End_Token                  : constant String := "@@END@@";
    Section_Token              : constant String := "@@SECTION@@";
    End_Table_Token            : constant String := "@@END_TABLE@@";
+   Macro_Token                : constant String := "@@MACRO@@";
+   End_Macro_Token            : constant String := "@@END_MACRO@@";
    If_Token                   : constant String := "@@IF@@";
    Elsif_Token                : constant String := "@@ELSIF@@";
    Else_Token                 : constant String := "@@ELSE@@";
@@ -655,12 +657,18 @@ package body Templates_Parser is
 
       No_Attribute : constant Attribute_Data := (Nil, 0);
 
+      type Parameters is array (Natural range <>) of Tree;
+      type Parameter_Set is access all Parameters;
+
       type Tag_Var is record
          Name       : Unbounded_String;
          Filters    : Filter.Set_Access;
          Attribute  : Attribute_Data;
          N          : Integer;           -- Include variable index
          Internal   : Internal_Tag;      -- No if not an internal variable
+         Is_Macro   : Boolean := False;  -- True if this is a macro call
+         Parameters : Parameter_Set;
+         Def        : Templates_Parser.Tree;
       end record;
 
       type Node (Kind : NKind) is record
@@ -949,6 +957,28 @@ package body Templates_Parser is
       --  currently loaded template trees.
 
    end Cached_Files;
+
+   -----------
+   -- Macro --
+   -----------
+
+   package Macro is
+
+      procedure Register (Name : String; T : Tree);
+      --  Register a new macro definition, if previous definition exists,
+      --  replace with the new definition.
+
+      function Get (Name : String) return Tree;
+      --  Get macro tree, returns null if this macro has no definition
+
+      procedure Rewrite (T : in out Tree; Parameters : Data.Parameter_Set);
+      --  Rewrite the macro tree with the given parameters. All @_1_@
+      --  parameters in the macro definition are replaced with the
+      --  corresponding value in the parameter set.
+
+      Callback : Macro_Callback;
+
+   end Macro;
 
    ---------
    -- Tag --
@@ -1442,6 +1472,12 @@ package body Templates_Parser is
    ------------------
 
    package body Cached_Files is separate;
+
+   -----------
+   -- Macro --
+   -----------
+
+   package body Macro is separate;
 
    -----------
    -- Clear --
@@ -2015,7 +2051,8 @@ package body Templates_Parser is
          Parse_Block,            --  in a table block statement
          Parse_Section,          --  in new section
          Parse_Section_Content,  --  in section content
-         Parse_Inline            --  in an inline block statement
+         Parse_Inline,           --  in an inline block statement
+         Parse_Macro             --  in a macro definition
         );
 
       function Parse
@@ -2744,6 +2781,11 @@ package body Templates_Parser is
                     ("@@END@@ found outside a @@BEGIN@@ block statement");
                end if;
 
+               if Is_Stmt (End_Macro_Token) then
+                  Fatal_Error
+                    ("@@END_MACRO@@ found outside a @@MACRO@@ statement");
+               end if;
+
             when Parse_If =>
                if Is_Stmt (Else_Token)
                  or else Is_Stmt (Elsif_Token)
@@ -2894,6 +2936,15 @@ package body Templates_Parser is
             when Parse_Inline =>
                if Is_Stmt (End_Inline_Token) then
                   return null;
+               end if;
+
+            when Parse_Macro =>
+               if Is_Stmt (End_Macro_Token) then
+                  return null;
+               end if;
+
+               if Is_Stmt (End_If_Token) then
+                  Fatal_Error ("@@END_IF@@ found, @@END_MACRO@@ expected");
                end if;
          end case;
 
@@ -3062,6 +3113,81 @@ package body Templates_Parser is
             T.Next := Parse (Mode, In_If);
 
             return T;
+
+         elsif Is_Stmt (Macro_Token, Extended => True) then
+            --  Parse a macro definition and register it
+
+            declare
+               Name : constant String := Get_Tag_Parameter (1);
+               T    : constant Tree := Parse (Parse_Macro, In_If);
+
+               procedure Move_To_Last (T : in out Tree);
+               --  Move to last node
+
+               procedure Rewrite (T : in out Tree);
+               --  Rewrite this node, this is used to remove all CR/LF for
+               --  the last lines which could be output for this tree.
+
+               ------------------
+               -- Move_To_Last --
+               ------------------
+
+               procedure Move_To_Last (T : in out Tree) is
+               begin
+                  while T.Next /= null loop
+                     T := T.Next;
+                  end loop;
+               end Move_To_Last;
+
+               -------------
+               -- Rewrite --
+               -------------
+
+               procedure Rewrite (T : in out Tree) is
+                  D : Data.Tree;
+               begin
+                  Move_To_Last (T);
+
+                  case T.Kind is
+                     when Text =>
+                        --  A text node
+
+                        D := T.Text;
+
+                        --  Move to the end of this line
+
+                        while D.Next /= null loop
+                           D := D.Next;
+                        end loop;
+
+                        if D.Kind = Data.Text then
+                           Strings.Unbounded.Trim
+                             (D.Value,
+                              Left  => Maps.Null_Set,
+                              Right => Maps.To_Set (ASCII.CR & ASCII.LF));
+                        end if;
+
+                     when If_Stmt =>
+                        Rewrite (T.N_True);
+                        Rewrite (T.N_False);
+
+                     when others =>
+                        null;
+                  end case;
+               end Rewrite;
+
+               N : Tree := T;
+            begin
+               --  We want to trim CR/LF from the last text node
+
+               Rewrite (N);
+
+               Macro.Register (Name, T);
+            end;
+
+            --  Then continue parsing the remaining of the file
+
+            return Parse (Mode, In_If);
 
          elsif Is_Stmt (Set_Token) then
             --  We want to handle multiple SET lines to avoid deep recursion
@@ -3234,6 +3360,8 @@ package body Templates_Parser is
                     or else Is_Stmt (Set_Token)
                     or else Is_Stmt (Inline_Token, Extended => True)
                     or else Is_Stmt (End_Inline_Token)
+                    or else Is_Stmt (Macro_Token, Extended => True)
+                    or else Is_Stmt (End_Macro_Token)
                   then
                      T.Next := Parse (Mode, In_If, No_Read => True);
                      return Root;
@@ -4518,12 +4646,62 @@ package body Templates_Parser is
             State        : Parse_State;
             Is_Composite : access Boolean) return String
          is
+            use type Filter.Set_Access;
             C        : aliased Filter.Filter_Context :=
                          (Translations, Lazy_Tag, State.F_Params);
             D_Pos    : Definitions.Def_Map.Cursor;
             Up_Value : Natural := 0;
          begin
             Is_Composite.all := False;
+
+            if Var.Is_Macro then
+               --  Two possibilities, either we have a macro inlined here or a
+               --  user macro.
+
+               if Var.Def = null then
+                  --  A user defined macro, use callback if any
+                  if Macro.Callback /= null then
+                     declare
+                        Name   : constant String := To_String (Var.Name);
+                        Params : Parameter_Set (Var.Parameters'Range);
+                     begin
+                        --  Set parameters
+                        for K in Params'Range loop
+                           Flush;
+                           Analyze (Var.Parameters (K));
+
+                           Params (K) := To_Unbounded_String
+                             (Buffer (Buffer'First .. Last));
+                           Last := 0;
+                        end loop;
+
+                        return Data.Translate
+                          (Var, Macro.Callback (Name, Params), C'Access);
+                     end;
+                  end if;
+
+               else
+                  declare
+                     Mark : constant Natural := Get_Mark;
+                  begin
+                     Analyze (Var.Def, State);
+
+                     --  Apply filters if any to the result
+
+                     if Var.Filters /= null then
+                        declare
+                           V : constant String := Get_Marked_Text (Mark);
+                        begin
+                           Rollback (True, Mark);
+                           return Data.Translate (Var, V, C'Access);
+                        end;
+
+                     else
+                        return "";
+                     end if;
+                  end;
+               end if;
+            end if;
 
             D_Pos := Definitions.Def_Map.Find
               (D_Map, To_String (Var.Name));
@@ -5180,6 +5358,15 @@ package body Templates_Parser is
 
    procedure Free_Filters renames Filter.Free_Filters;
 
+   -----------
+   -- Macro --
+   -----------
+
+   procedure Register_Macro_Handler (Callback : Macro_Callback) is
+   begin
+      Macro.Callback := Callback;
+   end Register_Macro_Handler;
+
    -------------
    -- Release --
    -------------
@@ -5382,6 +5569,7 @@ package body Templates_Parser is
          C   : aliased Filter.Filter_Context :=
                  (Translations, null, Filter.No_Include_Parameters);
       begin
+         --  ??? we should probably handle macros there too
          Pos := Translations.Set.Find (To_String (Var.Name));
 
          if Association_Map.Has_Element (Pos) then

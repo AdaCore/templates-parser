@@ -48,8 +48,15 @@ package body Data is
       function Get_Attribute (Tag : String) return Attribute_Data;
       --  Returns attribute for the given tag
 
+      function Get_Macro_Parameters return Parameter_Set;
+      --  Returns the macro parameter set
+
       function Is_Internal (Name : String) return Internal_Tag;
       --  Returns True if Name is an internal tag
+
+      function Is_Macro return Boolean;
+      pragma Inline (Is_Macro);
+      --  Returns True if we are parsing a macro
 
       F_Sep : constant Natural :=
                   Strings.Fixed.Index (Str, ":", Strings.Backward);
@@ -58,6 +65,9 @@ package body Data is
       A_Sep : Natural :=
                   Strings.Fixed.Index (Str, "'", Strings.Backward);
       --  Attribute separator
+
+      MP_Start, MP_End : Natural := 0;
+      --  Start/End of the macro parameters, 0 if not a macro
 
       -------------------
       -- Get_Attribute --
@@ -440,6 +450,46 @@ package body Data is
          return new Filter.Set'(FS (FS'First .. K - 1));
       end Get_Filter_Set;
 
+      --------------------------
+      -- Get_Macro_Parameters --
+      --------------------------
+
+      function Get_Macro_Parameters return Parameter_Set is
+         Count  : Natural := 0;
+         Params : Parameter_Set;
+         P1, P2 : Natural;
+      begin
+         --  Count parameters
+
+         if MP_Start <= MP_End then
+            Count := 1;
+
+            for K in MP_Start .. MP_End loop
+               if Str (K) = ',' then
+                  Count := Count + 1;
+               end if;
+            end loop;
+         end if;
+
+         --  Read them
+
+         Params := new Parameters (1 .. Count);
+         P1 := MP_Start;
+
+         for K in Params'Range loop
+            P2 := P1;
+            loop
+               P2 := P2 + 1;
+               exit when Str (P2) = ',' or else Str (P2) = ')';
+            end loop;
+
+            Params (K) := Parse (Str (P1 .. P2 - 1));
+            P1 := P2 + 1;
+         end loop;
+
+         return Params;
+      end Get_Macro_Parameters;
+
       ------------------
       -- Get_Var_Name --
       ------------------
@@ -450,6 +500,20 @@ package body Data is
          if A_Sep = 0 then
             --  No attribute
             Stop := Tag'Last - Length (End_Tag);
+
+            --  Check for macro parameters
+
+            if Tag (Stop) = ')' then
+               MP_End := Stop - 1;
+               --  Go back to matching open parenthesis
+               loop
+                  Stop := Stop - 1;
+                  --  ??? check for string literal
+                  exit when Tag (Stop + 1) = '(' or else Stop = Tag'First;
+               end loop;
+               MP_Start := Stop + 2;
+            end if;
+
          else
             Stop := A_Sep - 1;
          end if;
@@ -542,6 +606,15 @@ package body Data is
          end case;
       end Is_Internal;
 
+      --------------
+      -- Is_Macro --
+      --------------
+
+      function Is_Macro return Boolean is
+      begin
+         return MP_Start /= 0 and MP_End /= 0;
+      end Is_Macro;
+
       Result : Tag_Var;
 
    begin
@@ -559,6 +632,21 @@ package body Data is
       begin
          Result.Name     := To_Unbounded_String (Name);
          Result.Internal := Is_Internal (Name);
+
+         --  If there is no attribute, check for a macro
+
+         if Result.Attribute = No_Attribute and then Is_Macro then
+            Result.Is_Macro := True;
+            Result.Parameters := Get_Macro_Parameters;
+
+            --  Check if this is a known macro
+
+            Result.Def := Clone (Macro.Get (Name));
+
+            if Result.Def /= null then
+               Macro.Rewrite (Result.Def, Result.Parameters);
+            end if;
+         end if;
 
          if Name (Name'First) = '$'
            and then Strings.Fixed.Count
@@ -641,6 +729,25 @@ package body Data is
 
       Append (R, T.Name);
 
+      --  Macro parameters if any
+
+      if T.Is_Macro then
+         Append (R, "(");
+
+         for K in T.Parameters'Range loop
+            case T.Parameters (K).Kind is
+               when Text => Append (R, T.Parameters (K).Value);
+               when Var  => Append (R, Image (T.Parameters (K).Var));
+            end case;
+
+            if K /= T.Parameters'Last then
+               Append (R, ",");
+            end if;
+         end loop;
+
+         Append (R, ")");
+      end if;
+
       --  Attributes
 
       case T.Attribute.Attr is
@@ -687,7 +794,7 @@ package body Data is
       -----------
 
       function Build (Line : String) return Tree is
-         Start, Stop : Natural;
+         Start, Stop, S : Natural;
       begin
          if Line = "" then
             return null;
@@ -702,7 +809,20 @@ package body Data is
                                 Value => To_Unbounded_String (Line));
 
             else
-               Stop := Strings.Fixed.Index (Line, End_Tag);
+               --  Get matching ending separator, a macro can have variables
+               --  as parameter:
+               --  @_MACRO(2,@_VAR_@)_@
+
+               S := Start + Begin_Tag'Length;
+
+               Search_Matching_Tag : loop
+                  Stop := Strings.Fixed.Index (Line, End_Tag, From => S);
+                  S := Strings.Fixed.Index (Line, Begin_Tag, From => S);
+
+                  exit Search_Matching_Tag when S = 0 or else S > Stop;
+
+                  S := Stop + End_Tag'Length;
+               end loop Search_Matching_Tag;
 
                if Stop = 0 then
                   raise Internal_Error with
@@ -776,11 +896,22 @@ package body Data is
       use type Filter.Set_Access;
       procedure Free is
          new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
+      procedure Free is
+         new Ada.Unchecked_Deallocation (Parameters, Parameter_Set);
    begin
       if T.Filters /= null then
          Filter.Release (T.Filters.all);
          Free (T.Filters);
       end if;
+
+      if T.Parameters /= null then
+         for K in T.Parameters'Range loop
+            Data.Release (T.Parameters (K));
+         end loop;
+         Free (T.Parameters);
+      end if;
+
+      Release (T.Def);
    end Release;
 
    procedure Release (D : in out Tree; Single : Boolean := False) is

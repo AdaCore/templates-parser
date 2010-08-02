@@ -1,0 +1,16 @@
+@@MACRO(MACRO)@@
+@@SET@@ FIRST=$1
+@@SET@@ SECOND=$2
+@@SET@@ THIRD=$3|defval
+@@IF@@ @_FIRST_@ = 1
+only second @_SECOND_@
+@@ELSE@@
+both @_FIRST_@ and @_SECOND_@
+@@END_IF@@
+finally : @_THIRD_@
+@@END_MACRO@@
+--
+@_MACRO(2,3)_@
+--
+@_MACRO(1,5,99)_@
+--

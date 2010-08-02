@@ -1,0 +1,11 @@
+--
+this is macro1 23, tag_value
+--
+[MACRO2](5,1)
+--
+[macro2](maison,ada)
+--
+[MACRO2](TAG_VALUE,ADA)
+--
+[MACRO3]()
+--

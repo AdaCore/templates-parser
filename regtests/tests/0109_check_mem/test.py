@@ -1,5 +1,9 @@
 from test_support import *
 
+def print_file(content):
+    for line in content:
+        print line
+
 #  Build driver
 
 gnatmake('check_mem')
@@ -32,6 +36,10 @@ for item in r2:
 
 if fr1 != fr2:
     print "NOK"
+    print "run 1 ---------------"
+    print_file (r1)
+    print "run 2 ---------------"
+    print_file (r2)
     sys.exit(1)
 else:
     print "OK"

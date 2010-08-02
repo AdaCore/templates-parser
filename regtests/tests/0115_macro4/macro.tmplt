@@ -1,0 +1,18 @@
+@@MACRO(MACRO1)@@
+@@IF@@ @_$1_@ = 1
+only second @_$2_@
+@@ELSE@@
+both @_$1_@ and @_$2_@
+@@END_IF@@
+@@END_MACRO@@
+@@--
+@@MACRO(MACRO2)@@
+Some text @_$1_@
+@_MACRO1(@_$2_@,@_$1_@)_@
+End of macro2 @_$2_@
+@@END_MACRO@@
+--
+@_MACRO2(2,3)_@
+--
+@_UPPER:MACRO2(5,1)_@
+--

@@ -1,0 +1,7 @@
+@@MACRO(MNAME)@@
+this text : @_$1_@
+@@END_MACRO@@
+> macro for 8       : @_MNAME(8)_@   <
+> macro for none    : @_MNAME()_@    <
+> macro for xyz     : @_MNAME(xyz)_@ <
+> macro for var ONE : @_MNAME(@_ONE_@)_@   <

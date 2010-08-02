@@ -1,0 +1,12 @@
+@@MACRO(MACRO)@@
+@@IF@@ @_$1_@ = 1
+only second @_$2_@
+@@ELSE@@
+both @_$1_@ and @_$2_@
+@@END_IF@@
+@@END_MACRO@@
+--
+@_MACRO(2,3)_@
+--
+@_MACRO(1,5)_@
+--

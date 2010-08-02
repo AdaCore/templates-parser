@@ -1,0 +1,16 @@
+[INFO] macro.tmplt
+[C_INFO]  1 FALSE
+[TEXT] --
+[TEXT] @_MACRO2(2,3)_@
+[TEXT] --
+[TEXT] @_UPPER:MACRO2(5,1)_@
+[TEXT] --
+--
+Some text 2
+both 3 and 2
+End of macro2 3
+--
+SOME TEXT 5
+ONLY SECOND 5
+END OF MACRO2 1
+--

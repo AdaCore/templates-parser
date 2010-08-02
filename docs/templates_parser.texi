@@ -89,6 +89,7 @@ unmodified in any copy.
 * Introduction::
 * Tags::
 * Template statements::
+* Macros::
 * Other services::
 * Templates_Parser API Reference::
 * Index::
@@ -1150,6 +1151,7 @@ by @code{@@@@}. The tag statements are:
 * TABLE statement::
 * SET statement::
 * INLINE statement::
+* MACRO statement::
 @end menu
 
 @c -----------------------------------------------------------------------
@@ -1701,6 +1703,72 @@ Using the program:
 We get the following result:
 
 @include if_inline.adb.res
+
+@c ---------------------------------------------------------------------------
+@node MACRO statement
+@section MACRO statement
+@cindex Command, MACRO
+@c ---------------------------------------------------------------------------
+
+@noindent
+The @code{MACRO} statement is used to defined macros that can be used
+in other places in the template. The macro statement takes a single
+parameter which is the name of the macro.
+
+@noindent
+Syntax:
+
+@TPEXP{@@@@MACRO(NAME)@@@@
+      ...
+@@@@END_MACRO@@@@}
+
+@noindent
+The code inside the macro can be anything supported by the templates
+engine. There is no restriction. The parameters inside the macro are
+referenced as @@_$N_@@ (where N is a number and corresponds to the Nth
+parameter passed to the macro).
+
+@noindent
+For example:
+
+@include macro.tmplt.texi
+
+For using macros @pxref{Macros}.
+
+@c ----------------------------------------------------------------------
+@node Macros
+@chapter Macros
+@c ----------------------------------------------------------------------
+
+@noindent
+A macro usage is like a tag but with a set of parameters passed inside
+parenthesis. Macros support all filters but attributes can't be
+used. It is important to note that macros are expanded at the point of
+their calls. This implementation maximizes speed but uses more memory
+as the definition is not shared. If the code is large it may be better
+to use an @@@@INCLUDE@@@@ as the code is not expanded.
+
+@noindent
+Syntax:
+
+@TPEXP{
+@code{@@_[[FILTER[(parameter)]:]MACRO_NAME([PARAM1][,PARAM2])_@@}.
+}
+
+@noindent
+With the following definition:
+
+@include macro.tmplt.texi
+
+@noindent
+Using the program:
+
+@include macro.adb.texi
+
+@noindent
+We get the following result:
+
+@include macro.adb.res
 
 @c ----------------------------------------------------------------------
 

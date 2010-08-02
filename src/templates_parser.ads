@@ -385,6 +385,20 @@ package Templates_Parser is
    --  Free all user filters registered above. This is mostly intended when
    --  you are testing memory leaks in your application.
 
+   -----------
+   -- Macro --
+   -----------
+
+   type Parameter_Set is array (Natural range <>) of Unbounded_String;
+
+   type Macro_Callback is access
+     function (Name : String; Parameters : Parameter_Set) return String;
+
+   procedure Register_Macro_Handler (Callback : Macro_Callback);
+   --  Use the given callbacks for every unknown macro in the template. The
+   --  default implementation of this routine juste raises the exception
+   --  Templates_Error. ???
+
    -----------------------------
    -- Parsing and Translating --
    -----------------------------

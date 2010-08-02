@@ -1,7 +1,12 @@
-
+@@MACRO(M1)@@
+_ (@_$1_@) _
+@@END_MACRO@@
+@@--
 @@INCLUDE@@ include2.tincl "toto titi" deux three
 
-V: @_VAR_@
+V : @_VAR_@
+M1: @_M1(12)_@
+M2: @_M1(toto)_@
 
 ----------------------
 @@TABLE@@

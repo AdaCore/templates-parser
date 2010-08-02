@@ -95,6 +95,11 @@ package body Macro is
       --  In @@SET@@ VAR=$N|val replace $N|val by Parameters(N) if it
       --                        exists or by val otherwise.
 
+      package Set_Var is new Containers.Indefinite_Hashed_Maps
+        (String, String, Strings.Hash_Case_Insensitive, "=");
+
+      Vars : Set_Var.Map;
+
       -------------
       -- Rewrite --
       -------------
@@ -112,24 +117,35 @@ package body Macro is
                   null;
 
                when Data.Var =>
-                  if D.Var.N > 0
-                    and then D.Var.N <= Parameters'Length
-                    and then Parameters (D.Var.N) /= null
-                  then
-                     --  This is a reference to replace
-                     declare
-                        New_Node : constant Data.Tree :=
-                                     Data.Clone (Parameters (D.Var.N));
-                     begin
-                        New_Node.Next := D.Next;
-                        if Prev = null then
-                           Data.Release (T, Single => True);
-                           T := New_Node;
-                        else
-                           Data.Release (Prev.Next, Single => True);
-                           Prev.Next := New_Node;
-                        end if;
-                     end;
+                  if D.Var.N > 0 then
+
+                     if D.Var.N <= Parameters'Length
+                       and then Parameters (D.Var.N) /= null
+                     then
+                        --  This is a reference to replace
+                        declare
+                           New_Node : constant Data.Tree :=
+                                        Data.Clone (Parameters (D.Var.N));
+                        begin
+                           New_Node.Next := D.Next;
+                           if Prev = null then
+                              Data.Release (T, Single => True);
+                              T := New_Node;
+                           else
+                              Data.Release (Prev.Next, Single => True);
+                              Prev.Next := New_Node;
+                           end if;
+                        end;
+
+                     elsif Vars.Contains (To_String (D.Var.Name)) then
+                        --  This is a variable that exists into the map.
+                        --  It means that this variable is actually the
+                        --  name of a SET which actually has been passed
+                        --  a reference to another variable.
+
+                        D.Var.Name := To_Unbounded_String
+                          (Vars.Element (To_String (D.Var.Name)));
+                     end if;
                   end if;
 
                   --  Rewrite also the macro call if any
@@ -186,12 +202,15 @@ package body Macro is
          is
             use type Data.NKind;
          begin
-            if Value.Kind = Data.Var then
-               raise Template_Error with
-                 "Cannot replace a SET with a variable.";
-            end if;
-
-            Replace (Def, Value.Value);
+            case Value.Kind is
+               when Data.Var  =>
+                  --  This is a variable reference, record this association
+                  --  into the map. The variable name will be changed later.
+                  Vars.Include
+                    (To_String (Def.Name), To_String (Value.Var.Name));
+               when Data.Text =>
+                  Replace (Def, Value.Value);
+            end case;
          end Replace;
 
       begin

@@ -1,0 +1,71 @@
+[INFO] widget_counter.thtml
+ -> ajax_api.tjs
+[C_INFO]  1 FALSE
+[INCLUDE] ajax_api.tjs
+    $0 = ajax_api.tjs
+  [INFO] ajax_api.tjs
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] 
+  [TEXT] 
+[TEXT] <p><div id="counter">@_COUNTER_@</div></p>
+[TEXT] <a id="previous" href="/">Previous</a>
+[TEXT] <a id="next" href="/">Next</a>
+[TEXT] @_JS_ACTION(onclick,next)_@
+[TEXT] @_JS_ACTION(onclick,previous)_@
+
+
+
+<p><div id="counter"></div></p>
+<a id="previous" href="/">Previous</a>
+<a id="next" href="/">Next</a>
+
+
+<script type="text/javascript">
+<!--
+   function call_onclick_next()
+   {
+      var rurl="/onclick$next";
+      var rpars = "";
+      var roncomplete = "";
+
+
+      AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+      return (false);
+   }
+-->
+</script>
+<script type="text/javascript">
+<!--
+   var rule_next = {
+	'#next' : function(el) {el.onclick = call_onclick_next;}
+   };
+
+   Behaviour.register (rule_next);
+-->
+</script>
+
+
+<script type="text/javascript">
+<!--
+   function call_onclick_previous()
+   {
+      var rurl="/onclick$previous";
+      var rpars = "";
+      var roncomplete = "";
+
+
+      AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+      return (false);
+   }
+-->
+</script>
+<script type="text/javascript">
+<!--
+   var rule_previous = {
+	'#previous' : function(el) {el.onclick = call_onclick_previous;}
+   };
+
+   Behaviour.register (rule_previous);
+-->
+</script>

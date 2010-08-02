@@ -2847,7 +2847,7 @@ package body Templates_Parser is
          elsif Is_Stmt (Include_Token) then
             T := new Node (Include_Stmt);
 
-            T.Line       := Line;
+            T.Line := Line;
 
             declare
                File : constant String := To_String (Get_First_Parameter);
@@ -2858,7 +2858,7 @@ package body Templates_Parser is
                  and then T.I_Filename.Next = null
                then
                   --  In the case of static strings we load the include file
-                  --  now
+                  --  now.
                   declare
                      I_Filename : constant String :=
                                     Build_Include_Pathname (Filename, File);
@@ -5620,8 +5620,8 @@ package body Templates_Parser is
                   Data.Release (T.I_Params (K));
                end loop;
                Data.Free (T.I_Params);
-
             end if;
+
             Release (T.Next, Include);
 
          when Inline_Stmt =>

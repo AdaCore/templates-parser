@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2009, AdaCore                     --
+--                     Copyright (C) 2004-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -30,6 +30,15 @@ with Ada.Text_IO;
 separate (Templates_Parser)
 
 package body Definitions is
+
+   -----------
+   -- Clone --
+   -----------
+
+   function Clone (D : Tree) return Tree is
+   begin
+      return new Def'(D.all);
+   end Clone;
 
    -----------
    -- Parse --

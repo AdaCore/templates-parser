@@ -48,6 +48,31 @@ package body Expr is
    Separator : constant Character_Set := Blank or To_Set ("<>=/()");
 
    -----------
+   -- Clone --
+   -----------
+
+   function Clone (E : Tree) return Tree is
+      N : Tree;
+   begin
+      if E = null then
+         return null;
+      else
+         N := new Node'(E.all);
+      end if;
+
+      case E.Kind is
+         when Value | Var =>
+            null;
+         when Op =>
+            N.Left := Clone (N.Left);
+            N.Right := Clone (N.Right);
+         when U_Op =>
+            N.Next := Clone (N.Next);
+      end case;
+      return N;
+   end Clone;
+
+   -----------
    -- Image --
    -----------
 

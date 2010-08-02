@@ -702,6 +702,12 @@ package body Templates_Parser is
       procedure Release (D : in out Tree);
       --  Release all memory used by the tree
 
+      function Clone (D : Tree) return Tree;
+      --  Returns a Clone of D
+
+      function Clone (V : Tag_Var) return Tag_Var;
+      --  Returns a Clone of V
+
    end Data;
 
    -----------------
@@ -737,6 +743,9 @@ package body Templates_Parser is
 
       procedure Release (D : in out Tree);
       --  Release all memory used by the tree
+
+      function Clone (D : Tree) return Tree;
+      --  Returns a Clone of D
 
    end Definitions;
 
@@ -792,6 +801,9 @@ package body Templates_Parser is
 
       procedure Release (E : in out Tree);
       --  Release all associated memory with the tree
+
+      function Clone (E : Tree) return Tree;
+      --  Returns a Clone of E
 
    end Expr;
 
@@ -893,6 +905,9 @@ package body Templates_Parser is
 
    procedure Release (T : in out Tree; Include : Boolean := True);
    --  Release all memory associated with the tree
+
+   function Clone (T : Tree) return Tree;
+   --  Returns a Clone of T
 
    procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
 
@@ -1437,6 +1452,61 @@ package body Templates_Parser is
       --  Here we just separate current vector from the new one
       T := NT;
    end Clear;
+
+   -----------
+   -- Clone --
+   -----------
+
+   function Clone (T : Tree) return Tree is
+      N : Tree;
+   begin
+      if T /= null then
+         N := new Node'(T.all);
+
+         case N.Kind is
+            when Text =>
+               N.Text := Data.Clone (N.Text);
+
+            when Info =>
+               N.I_File := Clone (N.I_File);
+
+            when If_Stmt =>
+               N.Cond := Expr.Clone (N.Cond);
+               N.N_True := Clone (N.N_True);
+               N.N_False := Clone (N.N_False);
+
+            when Table_Stmt =>
+               N.Blocks := Clone (N.Blocks);
+
+            when Section_Block =>
+               N.Common := Clone (N.Common);
+               N.Sections := Clone (N.Sections);
+
+            when Section_Stmt =>
+               N.N_Section := Clone (N.N_Section);
+
+            when Inline_Stmt =>
+               N.I_Block := Clone (N.I_Block);
+
+            when Set_Stmt =>
+               N.Def := Definitions.Clone (N.Def);
+
+            when Include_Stmt =>
+               N.I_Filename := Data.Clone (N.I_Filename);
+               N.I_Params := new Data.Parameter_Set'(N.I_Params.all);
+               for K in N.I_Params'Range loop
+                  N.I_Params (K) := Data.Clone (N.I_Params (K));
+               end loop;
+
+            when C_Info =>
+               null;
+         end case;
+
+         N.Next := Clone (N.Next);
+      end if;
+
+      return N;
+   end Clone;
 
    ---------------
    -- Composite --

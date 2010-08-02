@@ -574,6 +574,50 @@ package body Data is
    end Build;
 
    -----------
+   -- Clone --
+   -----------
+
+   function Clone (V : Tag_Var) return Tag_Var is
+      use type Filter.Set_Access;
+      R : Tag_Var := V;
+   begin
+      if R.Filters /= null then
+         R.Filters := new Filter.Set'(R.Filters.all);
+      end if;
+
+      if R.Is_Macro then
+         for K in R.Parameters'Range loop
+            R.Parameters (K) := Data.Clone (R.Parameters (K));
+         end loop;
+
+         R.Def := Clone (R.Def);
+      end if;
+
+      return R;
+   end Clone;
+
+   function Clone (D : Tree) return Tree is
+      Root, N : Tree;
+   begin
+      if D /= null then
+         Root := new Node'(D.all);
+         N := Root;
+
+         loop
+            if N.Kind = Data.Var then
+               N.Var := Data.Clone (N.Var);
+            end if;
+
+            exit when N.Next = null;
+
+            N.Next := new Node'(N.Next.all);
+            N := N.Next;
+         end loop;
+      end if;
+      return Root;
+   end Clone;
+
+   -----------
    -- Image --
    -----------
 

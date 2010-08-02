@@ -783,7 +783,7 @@ package body Data is
       end if;
    end Release;
 
-   procedure Release (D : in out Tree) is
+   procedure Release (D : in out Tree; Single : Boolean := False) is
 
       procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
 
@@ -801,6 +801,7 @@ package body Data is
          end case;
 
          Free (P);
+         exit when Single;
       end loop;
 
       D := null;

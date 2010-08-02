@@ -699,8 +699,9 @@ package body Templates_Parser is
       procedure Print_Tree (D : Tree);
       --  Decend the text tree and print it to the standard output
 
-      procedure Release (D : in out Tree);
-      --  Release all memory used by the tree
+      procedure Release (D : in out Tree; Single : Boolean := False);
+      --  Release all memory used by the tree or only the pointed node if
+      --  Single is set to True.
 
       function Clone (D : Tree) return Tree;
       --  Returns a Clone of D

@@ -25,7 +25,7 @@
 #  covered by the  GNU Public License.                                     #
 ############################################################################
 
-.SILENT: ada.sed doc clean
+.SILENT: doc clean
 
 MAKEINFO        = $(shell which makeinfo 2> /dev/null)
 TEXI2DVI        = $(shell which texi2dvi 2> /dev/null)

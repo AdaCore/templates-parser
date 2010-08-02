@@ -886,7 +886,7 @@ package body Data is
          Data.Free (T.Parameters);
       end if;
 
-      Release (T.Def);
+      Release (T.Def, Include => False);
    end Release;
 
    procedure Release (D : in out Tree; Single : Boolean := False) is

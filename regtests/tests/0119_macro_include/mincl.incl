@@ -1,0 +1,2 @@
+include @_$1_@ and @_$2_@
+@@INCLUDE@@ mincl2.incl @_$2_@ @_$1_@

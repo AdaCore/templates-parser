@@ -1,0 +1,17 @@
+[INFO] main.tmplt
+ -> mincl.incl
+[C_INFO]  1 FALSE
+[TEXT] Some text:
+[TEXT] @_WINCL(A,B)_@
+[TEXT] --
+[TEXT] @_WINCL(98,123)_@
+Some text:
+before
+include B and A
+Another A B
+after
+--
+before
+include 123 and 98
+Another 98 123
+after

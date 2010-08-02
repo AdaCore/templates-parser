@@ -310,6 +310,25 @@ package body Macro is
             when Section_Stmt =>
                Rewrite (N.N_Section, Parameters);
 
+            when Include_Stmt =>
+               for K in N.I_Params'Range loop
+                  declare
+                     use type Data.Tree;
+                     use type Data.NKind;
+                     P   : Data.Tree renames N.I_Params (K);
+                     Old : Data.Tree;
+                  begin
+                     if P /= null
+                       and then P.Kind = Data.Var
+                       and then P.Var.N > 0
+                     then
+                        Old := N.I_Params (K);
+                        N.I_Params (K) := Data.Clone (Parameters (P.Var.N));
+                        Data.Release (Old);
+                     end if;
+                  end;
+               end loop;
+
             when others =>
                null;
          end case;

@@ -1,0 +1,9 @@
+@@MACRO(WINCL)@@
+before
+@@INCLUDE@@ mincl.incl @_$2_@ @_$1_@
+after
+@@END_MACRO@@
+Some text:
+@_WINCL(A,B)_@
+--
+@_WINCL(98,123)_@

@@ -3512,6 +3512,9 @@ package body Templates_Parser is
          pragma Inline (Get_Mark);
          --  Get a mark on the current text buffer
 
+         function Get_Marked_Text (Mark : Natural) return String;
+         --  Returns the text from the mark to the end of the buffer
+
          procedure Rollback (Activate : Boolean; Mark : Natural);
          pragma Inline (Rollback);
          --  Commit or rollback added texts for terse output. If no text added
@@ -3980,6 +3983,32 @@ package body Templates_Parser is
             Append (Results, Buffer (1 .. Last));
             Last := 0;
          end Flush;
+
+         ---------------------
+         -- Get_Marked_Text --
+         ---------------------
+
+         function Get_Marked_Text (Mark : Natural) return String is
+            Len : constant Natural :=
+                    Length (Results) + Last - Mark;
+         begin
+            if Len > 0 then
+               if Last >= Len then
+                  --  Enough data into the buffer
+                  return Buffer (Last - Len + 1 .. Last);
+
+               else
+                  --  Get part from result
+                  return Slice
+                    (Results,
+                     Low  => Length (Results) - Len + Last + 1,
+                     High => Length (Results)) & Buffer (1 .. Last);
+               end if;
+
+            else
+               return "";
+            end if;
+         end Get_Marked_Text;
 
          -------------
          -- Get_Max --

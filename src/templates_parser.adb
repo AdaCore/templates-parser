@@ -800,7 +800,7 @@ package body Templates_Parser is
       --  expression with all parenthesis to show without ambiguity the way the
       --  expression has been parsed.
 
-      procedure Release (E : in out Tree);
+      procedure Release (E : in out Tree; Single : Boolean := False);
       --  Release all associated memory with the tree
 
       function Clone (E : Tree) return Tree;

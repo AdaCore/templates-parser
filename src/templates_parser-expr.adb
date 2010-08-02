@@ -477,7 +477,7 @@ package body Expr is
    -- Release --
    -------------
 
-   procedure Release (E : in out Tree) is
+   procedure Release (E : in out Tree; Single : Boolean := False) is
       procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
    begin
       case E.Kind is
@@ -488,11 +488,15 @@ package body Expr is
             Data.Release (E.Var);
 
          when Op =>
-            Release (E.Left);
-            Release (E.Right);
+            if not Single then
+               Release (E.Left);
+               Release (E.Right);
+            end if;
 
          when U_Op =>
-            Release (E.Next);
+            if not Single then
+               Release (E.Next);
+            end if;
       end case;
 
       Free (E);

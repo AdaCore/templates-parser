@@ -1,0 +1,21 @@
+[INFO] src.tmpl
+ -> navigation.tmpl
+[C_INFO]  1 FALSE
+[INCLUDE] navigation.tmpl
+    $0 = navigation.tmpl
+    $1 = P
+  [INFO] navigation.tmpl
+ -> navbutton.tmpl
+  [C_INFO]  1 FALSE
+  [SET] WHEREAMI = $1
+  [INCLUDE] navbutton.tmpl
+      $0 = navbutton.tmpl
+      $1 = @_WHEREAMI_@
+      $2 = @_TITI_@
+      $3 = @_TATA_@
+    [INFO] navbutton.tmpl
+    [C_INFO]  1 FALSE
+    [TEXT] navbut "@_$1_@" "@_$2_@" "@_$3_@"
+
+navbut "P" "" ""
+

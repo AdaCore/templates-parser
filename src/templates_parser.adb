@@ -3575,7 +3575,9 @@ package body Templates_Parser is
 
                --  Skip multiple spaces
 
-               while Parameters (Index) = ' ' loop
+               while Index < Parameters'Last
+                 and then Parameters (Index + 1) = ' '
+               loop
                   Index := Index + 1;
                end loop;
 

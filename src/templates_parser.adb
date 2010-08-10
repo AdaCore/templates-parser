@@ -4768,9 +4768,9 @@ package body Templates_Parser is
             return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
          end Is_True;
 
-         ----------
-         -- Mark --
-         ----------
+         --------------
+         -- Get_Mark --
+         --------------
 
          function Get_Mark return Natural is
          begin
@@ -5250,7 +5250,7 @@ package body Templates_Parser is
                declare
                   B_State : array (1 .. State.Blocks_Count) of Block_State;
                   B       : Positive;
-                  Mark    : Natural;
+                  Mark    : Natural := 0;
                begin
                   for K in 1 .. State.Max_Expand loop
                      if State.Terse_Table then

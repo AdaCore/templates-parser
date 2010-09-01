@@ -800,6 +800,11 @@ package body Templates_Parser is
          end case;
       end record;
 
+      function Is_True (Str : String) return Boolean;
+      pragma Inline (Is_True);
+      --  Return True if Str is one of "TRUE" or "T", the test is not
+      --  case sensitive.
+
       function Parse (Expression : String) return Tree;
       --  Parse Expression and returns the corresponding tree representation
 
@@ -3742,11 +3747,6 @@ package body Templates_Parser is
          --  (Max_Expand), this is equal to Max_Lines + offset to terminate
          --  the sections.
 
-         function Is_True (Str : String) return Boolean;
-         pragma Inline (Is_True);
-         --  Return True if Str is one of "TRUE" or "T", the test is not
-         --  case sensitive.
-
          function Translate
            (Var          : Data.Tag_Var;
             State        : Parse_State;
@@ -3902,7 +3902,9 @@ package body Templates_Parser is
 
             function F_And (L, R : Expr.Tree) return String is
             begin
-               if Is_True (Analyze (L)) and then Is_True (Analyze (R)) then
+               if Expr.Is_True (Analyze (L))
+                 and then Expr.Is_True (Analyze (R))
+               then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4083,7 +4085,7 @@ package body Templates_Parser is
 
             function F_Not (N : Expr.Tree) return String is
             begin
-               if Is_True (Analyze (N)) then
+               if Expr.Is_True (Analyze (N)) then
                   return "FALSE";
                else
                   return "TRUE";
@@ -4096,7 +4098,9 @@ package body Templates_Parser is
 
             function F_Or (L, R : Expr.Tree) return String is
             begin
-               if Is_True (Analyze (L)) or else Is_True (Analyze (R)) then
+               if Expr.Is_True (Analyze (L))
+                 or else Expr.Is_True (Analyze (R))
+               then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4132,7 +4136,9 @@ package body Templates_Parser is
 
             function F_Xor (L, R : Expr.Tree) return String is
             begin
-               if Is_True (Analyze (L)) xor Is_True (Analyze (R)) then
+               if Expr.Is_True (Analyze (L))
+                 xor Expr.Is_True (Analyze (R))
+               then
                   return "TRUE";
                else
                   return "FALSE";
@@ -4747,16 +4753,6 @@ package body Templates_Parser is
             return Result;
          end Inline_Cursor_Tag;
 
-         -------------
-         -- Is_True --
-         -------------
-
-         function Is_True (Str : String) return Boolean is
-            L_Str : constant String := Characters.Handling.To_Upper (Str);
-         begin
-            return L_Str = "TRUE" or else L_Str = "T" or else L_Str = "1";
-         end Is_True;
-
          --------------
          -- Get_Mark --
          --------------
@@ -5196,7 +5192,7 @@ package body Templates_Parser is
 
             when If_Stmt  =>
                begin
-                  if Is_True (Analyze (T.Cond)) then
+                  if Expr.Is_True (Analyze (T.Cond)) then
                      Analyze (T.N_True, State);
                   else
                      Analyze (T.N_False, State);

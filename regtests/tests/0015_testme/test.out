@@ -84,12 +84,10 @@ include.tmplt
   [TEXT] 
   [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [TABLE]
@@ -122,12 +120,10 @@ include.tmplt
   [TEXT] 
   [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [TABLE]
@@ -160,12 +156,10 @@ include.tmplt
   [TEXT] 
   [IF] (@_$2_@ = toto)
     [TEXT] 5>   @_$1_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [IF] ((@_WEB_NBSP:$2_@ = toto) or (@_WEB_NBSP:$1_@ = "xx yy"))
     [TEXT] 6>   @_$2_@
-  [ELSE]
   [END_IF]
   [TEXT] 
   [TABLE]

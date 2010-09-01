@@ -165,7 +165,6 @@ Should be 0 : 0
         [TEXT]      Well a another one [@_VAR2_@]
     [END_BLOCK]
   [END_TABLE]
-[ELSE]
 [END_IF]
 [TEXT] 
 [TABLE] TERMINATE_SECTIONS

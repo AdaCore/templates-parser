@@ -6,5 +6,4 @@
 [TEXT] 
 [IF] (@_TWO_@ > 0)
   [TEXT]   here
-[ELSE]
 [END_IF]

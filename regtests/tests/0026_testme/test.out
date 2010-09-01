@@ -67,7 +67,6 @@
           [COMMON]
             [IF] (@_MATDSIZE_@ /= )
               [TEXT]       @_TABLE_LINE_@> @_MATDSIZE_@
-            [ELSE]
             [END_IF]
         [END_BLOCK]
       [END_TABLE]

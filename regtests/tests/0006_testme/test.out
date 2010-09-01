@@ -60,7 +60,6 @@
             [IF] @_EXIST:MATDSIZE_@
               [TEXT] @_TABLE_LINE_@
               [TEXT] [@_MATDSIZE_@]
-            [ELSE]
             [END_IF]
         [END_BLOCK]
       [END_TABLE]
@@ -81,7 +80,6 @@
       [IF] @_EXIST:V6_@
         [TEXT] >@_V5_@
         [TEXT] >@_V6_@
-      [ELSE]
       [END_IF]
   [END_BLOCK]
 [END_TABLE]

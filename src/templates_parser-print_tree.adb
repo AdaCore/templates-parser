@@ -31,6 +31,8 @@ separate (Templates_Parser)
 
 procedure Print_Tree (T : Tree; Level : Natural := 0) is
 
+   use type Expr.Tree;
+
    procedure Print_Indent (L : Natural);
    --  Output proper number of spaces for identation
 
@@ -93,9 +95,11 @@ begin
          Expr.Print_Tree (T.Cond);
          Text_IO.New_Line;
          Print_Tree (T.N_True, Level + 1);
-         Print_Indent (Level);
-         Text_IO.Put_Line ("[ELSE]");
-         Print_Tree (T.N_False, Level + 1);
+         if T.N_False /= null then
+            Print_Indent (Level);
+            Text_IO.Put_Line ("[ELSE]");
+            Print_Tree (T.N_False, Level + 1);
+         end if;
          Print_Indent (Level);
          Text_IO.Put_Line ("[END_IF]");
          Print_Tree (T.Next, Level);

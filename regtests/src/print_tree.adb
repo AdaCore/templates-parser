@@ -40,6 +40,11 @@ begin
       Debug.Print_Tree (Command_Line.Argument (1));
 
    elsif Command_Line.Argument_Count = 2
+     and then Command_Line.Argument (1) = "-M"
+   then
+      Debug.Print_Tree (Command_Line.Argument (2), Expand_Macro => True);
+
+   elsif Command_Line.Argument_Count = 2
      and then Command_Line.Argument (1) = "-m"
    then
       Debug.Print_Tree (Command_Line.Argument (2));

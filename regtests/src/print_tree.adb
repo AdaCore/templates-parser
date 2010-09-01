@@ -36,12 +36,20 @@ procedure Print_Tree is
    use Templates_Parser;
 
 begin
-   if Command_Line.Argument_Count /= 1 then
-      Text_IO.New_Line;
-      Text_IO.Put_Line ("Usage: print_tree <filename>");
-      Text_IO.New_Line;
+   if Command_Line.Argument_Count = 1 then
+      Debug.Print_Tree (Command_Line.Argument (1));
+
+   elsif Command_Line.Argument_Count = 2
+     and then Command_Line.Argument (1) = "-m"
+   then
+      Debug.Print_Tree (Command_Line.Argument (2));
+      Debug.Print_Defined_Macros;
 
    else
-      Debug.Print_Tree (Command_Line.Argument (1));
+      Text_IO.New_Line;
+      Text_IO.Put_Line ("Usage: print_tree [-m] <filename>");
+      Text_IO.New_Line;
+      Text_IO.Put_Line ("       -m : print defined macros");
+      Text_IO.New_Line;
    end if;
 end Print_Tree;

@@ -27,6 +27,7 @@
 
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Hash_Case_Insensitive;
+with Ada.Text_IO;
 
 separate (Templates_Parser)
 
@@ -40,6 +41,34 @@ package body Macro is
      (String, Tree, Strings.Hash_Case_Insensitive, "=");
 
    Set : Registry.Map;
+
+   --------------------------
+   -- Print_Defined_Macros --
+   --------------------------
+
+   procedure Print_Defined_Macros is
+
+      procedure Print (Position : Registry.Cursor);
+      --  Print the given macro
+
+      -----------
+      -- Print --
+      -----------
+
+      procedure Print (Position : Registry.Cursor) is
+         Name  : constant String := Registry.Key (Position);
+         Macro : constant Tree := Registry.Element (Position);
+      begin
+         Text_IO.Put_Line ("[MACRO] " & Name);
+         Print_Tree (Macro);
+         Text_IO.Put_Line ("[END_MACRO]");
+         Text_IO.New_Line;
+      end Print;
+
+   begin
+      Text_IO.Put_Line ("------------------------------------- MACROS");
+      Set.Iterate (Print'Access);
+   end Print_Defined_Macros;
 
    --------------
    -- Register --

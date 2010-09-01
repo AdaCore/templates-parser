@@ -560,6 +560,9 @@ private
    --  Use for debugging purpose only, it will output the internal tree
    --  representation.
 
+   procedure Print_Defined_Macros;
+   --  Use for debugging purpose only, output all defined macros
+
    --------------------
    --  Translate_Set --
    --------------------

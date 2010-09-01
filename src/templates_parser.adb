@@ -974,6 +974,9 @@ package body Templates_Parser is
       --  parameters in the macro definition are replaced with the
       --  corresponding value in the parameter set.
 
+      procedure Print_Defined_Macros;
+      --  Print the defined macros (for debug purpose)
+
       Callback : Macro_Callback;
 
    end Macro;
@@ -5499,6 +5502,15 @@ package body Templates_Parser is
       Print_Tree (T.Info);
       Release (T.Info);
    end Print_Tree;
+
+   --------------------------
+   -- Print_Defined_Macros --
+   --------------------------
+
+   procedure Print_Defined_Macros is
+   begin
+      Macro.Print_Defined_Macros;
+   end Print_Defined_Macros;
 
    -----------
    -- Quote --

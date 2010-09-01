@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2009, AdaCore                     --
+--                     Copyright (C) 2004-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -72,6 +72,15 @@ package body Templates_Parser.Debug is
    begin
       Print (T, 1);
    end Print;
+
+   --------------------------
+   -- Print_Defined_Macros --
+   --------------------------
+
+   procedure Print_Defined_Macros is
+   begin
+      Templates_Parser.Print_Defined_Macros;
+   end Print_Defined_Macros;
 
    ----------------
    -- Print_Tree --

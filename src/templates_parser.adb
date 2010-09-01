@@ -3929,21 +3929,23 @@ package body Templates_Parser is
             ------------
 
             function F_Einf (L, R : Expr.Tree) return String is
-               LL : constant String := Analyze (L);
-               LR : constant String := Analyze (R);
+               LV : constant String := Analyze (L);
+               RV : constant String := Analyze (R);
             begin
-               if Integer'Value (LL) <= Integer'Value (LR) then
-                  return "TRUE";
-               else
-                  return "FALSE";
-               end if;
-            exception
-               when others =>
-                  if LL <= LR then
+               if Utils.Is_Number (LV) and then Is_Number (RV) then
+                  if Integer'Value (LV) <= Integer'Value (RV) then
                      return "TRUE";
                   else
                      return "FALSE";
                   end if;
+
+               else
+                  if LV <= RV then
+                     return "TRUE";
+                  else
+                     return "FALSE";
+                  end if;
+               end if;
             end F_Einf;
 
             -----------
@@ -3964,21 +3966,23 @@ package body Templates_Parser is
             ------------
 
             function F_Esup (L, R : Expr.Tree) return String is
-               LL : constant String := Analyze (L);
-               LR : constant String := Analyze (R);
+               LV : constant String := Analyze (L);
+               RV : constant String := Analyze (R);
             begin
-               if Integer'Value (LL) >= Integer'Value (LR) then
-                  return "TRUE";
-               else
-                  return "FALSE";
-               end if;
-            exception
-               when others =>
-                  if LL >= LR then
+               if Utils.Is_Number (LV) and then Is_Number (RV) then
+                  if Integer'Value (LV) >= Integer'Value (RV) then
                      return "TRUE";
                   else
                      return "FALSE";
                   end if;
+
+               else
+                  if LV >= RV then
+                     return "TRUE";
+                  else
+                     return "FALSE";
+                  end if;
+               end if;
             end F_Esup;
 
             ----------
@@ -4062,21 +4066,23 @@ package body Templates_Parser is
             -----------
 
             function F_Inf (L, R : Expr.Tree) return String is
-               LL : constant String := Analyze (L);
-               LR : constant String := Analyze (R);
+               LV : constant String := Analyze (L);
+               RV : constant String := Analyze (R);
             begin
-               if Integer'Value (LL) < Integer'Value (LR) then
-                  return "TRUE";
-               else
-                  return "FALSE";
-               end if;
-            exception
-               when others =>
-                  if LL < LR then
+               if Utils.Is_Number (LV) and then Is_Number (RV) then
+                  if Integer'Value (LV) < Integer'Value (RV) then
                      return "TRUE";
                   else
                      return "FALSE";
                   end if;
+
+               else
+                  if LV < RV then
+                     return "TRUE";
+                  else
+                     return "FALSE";
+                  end if;
+               end if;
             end F_Inf;
 
             -----------
@@ -4112,22 +4118,23 @@ package body Templates_Parser is
             -----------
 
             function F_Sup (L, R : Expr.Tree) return String is
-               LL : constant String := Analyze (L);
-               LR : constant String := Analyze (R);
+               LV : constant String := Analyze (L);
+               RV : constant String := Analyze (R);
             begin
-               --  ??? remove exception handler
-               if Integer'Value (LL) > Integer'Value (LR) then
-                  return "TRUE";
-               else
-                  return "FALSE";
-               end if;
-            exception
-               when others =>
-                  if LL > LR then
+               if Utils.Is_Number (LV) and then Is_Number (RV) then
+                  if Integer'Value (LV) > Integer'Value (RV) then
                      return "TRUE";
                   else
                      return "FALSE";
                   end if;
+
+               else
+                  if LV > RV then
+                     return "TRUE";
+                  else
+                     return "FALSE";
+                  end if;
+               end if;
             end F_Sup;
 
             -----------

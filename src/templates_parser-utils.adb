@@ -28,6 +28,7 @@
 with Ada.Command_Line;
 with Ada.Directories;
 with Ada.Strings.Fixed;
+with Ada.Strings.Maps.Constants;
 
 package body Templates_Parser.Utils is
 
@@ -257,6 +258,18 @@ package body Templates_Parser.Utils is
          return N_Img (N_Img'First + 1 .. N_Img'Last);
       end if;
    end Image;
+
+   ---------------
+   -- Is_Number --
+   ---------------
+
+   function Is_Number (S : String) return Boolean is
+   begin
+      return Strings.Fixed.Index
+        (S,
+         Strings.Maps.Constants.Decimal_Digit_Set,
+         Test => Strings.Outside) = 0;
+   end Is_Number;
 
    -----------
    -- Value --

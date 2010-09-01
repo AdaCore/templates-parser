@@ -59,6 +59,9 @@ package Templates_Parser.Utils is
    function Web_Escape (S : String) return String;
    --  Encode all characters that cannot be used as-is into an HTML page
 
+   function Is_Number (S : String) return Boolean;
+   --  Returns true if S is composed of digits only
+
 private
 
    subtype Windows_Host is Boolean;

@@ -398,8 +398,8 @@ package Templates_Parser is
 
    procedure Register_Macro_Handler (Callback : Macro_Callback);
    --  Use the given callbacks for every unknown macro in the template. The
-   --  default implementation of this routine juste raises the exception
-   --  Templates_Error. ???
+   --  default implementation of this routine just displays the macro (name
+   --  and parameters).
 
    -----------------------------
    -- Parsing and Translating --

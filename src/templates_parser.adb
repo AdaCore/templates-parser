@@ -5512,7 +5512,7 @@ package body Templates_Parser is
    function Quote (Str : String) return String is
       K : constant Natural := Strings.Fixed.Index (Str, " ");
    begin
-      if K = 0 then
+      if K = 0 and then Str'Length > 0 then
          return Str;
       else
          return '"' & Str & '"';

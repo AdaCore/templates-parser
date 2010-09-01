@@ -47,6 +47,280 @@ package body Expr is
 
    Separator : constant Character_Set := Blank or To_Set ("<>=/()");
 
+   -------------
+   -- Analyze --
+   -------------
+
+   function Analyze (E : Expr.Tree) return String is
+
+      type Ops_Fct is access function (L, R : Expr.Tree) return String;
+
+      function F_And  (L, R : Expr.Tree) return String;
+      function F_Or   (L, R : Expr.Tree) return String;
+      function F_Xor  (L, R : Expr.Tree) return String;
+      function F_Sup  (L, R : Expr.Tree) return String;
+      function F_Esup (L, R : Expr.Tree) return String;
+      function F_Einf (L, R : Expr.Tree) return String;
+      function F_Inf  (L, R : Expr.Tree) return String;
+      function F_Equ  (L, R : Expr.Tree) return String;
+      function F_Diff (L, R : Expr.Tree) return String;
+      function F_In   (L, R : Expr.Tree) return String;
+
+      type U_Ops_Fct is access function (N : Expr.Tree) return String;
+
+      function F_Not (N : Expr.Tree) return String;
+
+      -----------
+      -- F_And --
+      -----------
+
+      function F_And (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         elsif Is_True (LV) and then Is_True (RV) then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end F_And;
+
+      ------------
+      -- F_Diff --
+      ------------
+
+      function F_Diff (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         elsif Analyze (L) /= Analyze (R) then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end F_Diff;
+
+      ------------
+      -- F_Einf --
+      ------------
+
+      function F_Einf (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+
+         elsif Utils.Is_Number (LV) and then Utils.Is_Number (RV) then
+            if Integer'Value (LV) <= Integer'Value (RV) then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+
+         else
+            if LV <= RV then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+         end if;
+      end F_Einf;
+
+      -----------
+      -- F_Equ --
+      -----------
+
+      function F_Equ (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         elsif LV = RV then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end F_Equ;
+
+      ------------
+      -- F_Esup --
+      ------------
+
+      function F_Esup (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+
+         elsif Utils.Is_Number (LV) and then Utils.Is_Number (RV) then
+            if Integer'Value (LV) >= Integer'Value (RV) then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+
+         else
+            if LV >= RV then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+         end if;
+      end F_Esup;
+
+      ----------
+      -- F_In --
+      ----------
+
+      function F_In (L, R : Expr.Tree) return String is
+         pragma Unreferenced (L, R);
+      begin
+         --  Always unknown as an in expression contains a variable
+         return Unknown;
+      end F_In;
+
+      -----------
+      -- F_Inf --
+      -----------
+
+      function F_Inf (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+
+         elsif Utils.Is_Number (LV) and then Utils.Is_Number (RV) then
+            if Integer'Value (LV) < Integer'Value (RV) then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+
+         else
+            if LV < RV then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+         end if;
+      end F_Inf;
+
+      -----------
+      -- F_Not --
+      -----------
+
+      function F_Not (N : Expr.Tree) return String is
+         NV : constant String := Analyze (N);
+      begin
+         if NV = Unknown then
+            return Unknown;
+         elsif Is_True (NV) then
+            return "FALSE";
+         else
+            return "TRUE";
+         end if;
+      end F_Not;
+
+      ----------
+      -- F_Or --
+      ----------
+
+      function F_Or (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         elsif Is_True (LV) or else Is_True (RV) then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end F_Or;
+
+      -----------
+      -- F_Sup --
+      -----------
+
+      function F_Sup (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+
+         elsif Utils.Is_Number (LV) and then Utils.Is_Number (RV) then
+            if Integer'Value (LV) > Integer'Value (RV) then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+
+         else
+            if LV > RV then
+               return "TRUE";
+            else
+               return "FALSE";
+            end if;
+         end if;
+      end F_Sup;
+
+      -----------
+      -- F_Xor --
+      -----------
+
+      function F_Xor (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         elsif Is_True (LV) xor Is_True (RV) then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end F_Xor;
+
+      Op_Table   : constant array (Expr.Ops) of Ops_Fct :=
+                     (Expr.O_And   => F_And'Access,
+                      Expr.O_Or    => F_Or'Access,
+                      Expr.O_Xor   => F_Xor'Access,
+                      Expr.O_Sup   => F_Sup'Access,
+                      Expr.O_Inf   => F_Inf'Access,
+                      Expr.O_Esup  => F_Esup'Access,
+                      Expr.O_Einf  => F_Einf'Access,
+                      Expr.O_Equal => F_Equ'Access,
+                      Expr.O_Diff  => F_Diff'Access,
+                      Expr.O_In    => F_In'Access);
+
+      U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
+                     (Expr.O_Not => F_Not'Access);
+
+   begin
+      case E.Kind is
+         when Expr.Value =>
+            return To_String (E.V);
+
+         when Expr.Var =>
+            return Unknown;
+
+         when Expr.Op =>
+            return Op_Table (E.O) (E.Left, E.Right);
+
+         when Expr.U_Op =>
+            return U_Op_Table (E.U_O) (E.Next);
+      end case;
+   end Analyze;
+
    -----------
    -- Clone --
    -----------

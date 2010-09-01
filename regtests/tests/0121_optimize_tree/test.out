@@ -1,0 +1,32 @@
+[INFO] macro.tmplt
+[C_INFO]  1 FALSE
+[TEXT] --
+[TEXT]    eigth 8 value
+[TEXT] --
+[TEXT] M1-8 :    eigth 8 value
+[TEXT] --
+[TEXT]    eigth 8 value : M1-8
+[TEXT] --
+[TEXT] M1-8 :    eigth 8 value : M1-8
+[TEXT] --
+[TEXT]    128 : something else
+[TEXT] --
+[TEXT]    this is A
+[TEXT] --
+[TEXT]    NOT A
+
+--
+   eigth 8 value
+--
+M1-8 :    eigth 8 value
+--
+   eigth 8 value : M1-8
+--
+M1-8 :    eigth 8 value : M1-8
+--
+   128 : something else
+--
+   this is A
+--
+   NOT A
+

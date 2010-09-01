@@ -1,0 +1,172 @@
+[INFO] macro.tmplt
+ -> ajax_api.tjs
+[C_INFO]  1 FALSE
+[INCLUDE] ajax_api.tjs
+    $0 = ajax_api.tjs
+  [INFO] ajax_api.tjs
+  [C_INFO]  1 FALSE
+  [TEXT] 
+  [TEXT] 
+  [TEXT] 
+[TEXT] --
+[TEXT] [TEXT] start a
+[TEXT] $2 = ""
+[TEXT] $1 or $2 = ""
+[TEXT] ($1 and $2 = "") or $3 = ""
+[TEXT] not ($3 /= "" or $2 = "bb")
+[TEXT] AGAIN $2 = ""
+[TEXT] end
+
+[TEXT] --
+[TEXT] [TEXT] start a
+[TEXT] ($1 and $2 = "") or $3 = ""
+[TEXT] not ($3 /= "" or $2 = "bb")
+[TEXT] end
+
+[TEXT] --
+[TEXT] [TEXT] start a
+[TEXT] $3 /= "" or $2 = "bb"
+[TEXT] end
+
+[TEXT] --
+[TEXT] [TEXT] 
+[TEXT] 
+[TEXT] <script type="text/javascript">
+[TEXT] <!--
+[TEXT]    function call_onclick_myid()
+[TEXT]    {
+[TEXT]       var rurl="/onclick$myid";
+[TEXT]       var rpars = "";
+[TEXT]       var roncomplete = "";
+[TEXT] 
+[TEXT]       if (rpars != "")
+[TEXT]          rpars = rpars + "&";
+[TEXT]       rpars = rpars + AWS.Ajax.serialize('fourth');
+[TEXT] 
+[TEXT]       AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+[TEXT]       return (false);
+[TEXT]    }
+[TEXT] -->
+[TEXT] </script>
+[TEXT] [TEXT] <script type="text/javascript">
+[TEXT] <!--
+[TEXT]    var rule_myid = {
+[TEXT] 	'#myid' : function(el) {el.onclick = call_onclick_myid;}
+[TEXT]    };
+[TEXT] 
+[TEXT]    Behaviour.register (rule_myid);
+[TEXT] -->
+[TEXT] </script>
+
+
+[TEXT] --
+[TEXT] [TEXT] 
+[TEXT] 
+[TEXT] <script type="text/javascript">
+[TEXT] <!--
+[TEXT]    function call_onclick_myid8()
+[TEXT]    {
+[TEXT]       var rurl="/onclick$myid8";
+[TEXT]       var rpars = "";
+[TEXT]       var roncomplete = "";
+[TEXT] 
+[TEXT]       if (rpars != "")
+[TEXT]          rpars = rpars + "&";
+[TEXT]       rpars = rpars + AWS.Ajax.serialize('whatever');
+[TEXT] 
+[TEXT]       AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+[TEXT]       return (false);
+[TEXT]    }
+[TEXT] -->
+[TEXT] </script>
+[TEXT] [TEXT] <script type="text/javascript">
+[TEXT] <!--
+[TEXT]    var rule_myid8 = {
+[TEXT] 	'#myid8' : function(el) {el.onclick = call_onclick_myid8;}
+[TEXT]    };
+[TEXT] 
+[TEXT]    Behaviour.register (rule_myid8);
+[TEXT] -->
+[TEXT] </script>
+
+
+[TEXT] --
+
+
+
+--
+start a
+$2 = ""
+$1 or $2 = ""
+($1 and $2 = "") or $3 = ""
+not ($3 /= "" or $2 = "bb")
+AGAIN $2 = ""
+end
+--
+start a
+($1 and $2 = "") or $3 = ""
+not ($3 /= "" or $2 = "bb")
+end
+--
+start a
+$3 /= "" or $2 = "bb"
+end
+--
+
+
+<script type="text/javascript">
+<!--
+   function call_onclick_myid()
+   {
+      var rurl="/onclick$myid";
+      var rpars = "";
+      var roncomplete = "";
+
+      if (rpars != "")
+         rpars = rpars + "&";
+      rpars = rpars + AWS.Ajax.serialize('fourth');
+
+      AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+      return (false);
+   }
+-->
+</script>
+<script type="text/javascript">
+<!--
+   var rule_myid = {
+	'#myid' : function(el) {el.onclick = call_onclick_myid;}
+   };
+
+   Behaviour.register (rule_myid);
+-->
+</script>
+--
+
+
+<script type="text/javascript">
+<!--
+   function call_onclick_myid8()
+   {
+      var rurl="/onclick$myid8";
+      var rpars = "";
+      var roncomplete = "";
+
+      if (rpars != "")
+         rpars = rpars + "&";
+      rpars = rpars + AWS.Ajax.serialize('whatever');
+
+      AWS.Ajax.XML.request (rurl, rpars, roncomplete);
+      return (false);
+   }
+-->
+</script>
+<script type="text/javascript">
+<!--
+   var rule_myid8 = {
+	'#myid8' : function(el) {el.onclick = call_onclick_myid8;}
+   };
+
+   Behaviour.register (rule_myid8);
+-->
+</script>
+--

@@ -423,11 +423,6 @@ package body Macro is
 
                when If_Stmt =>
                   Rewrite (N.Cond);
-
-                  --  ??? After the rewrite above we could check the
-                  --  condition to see if it is always true or false and
-                  --  remove the corresponding branch.
-
                   Rewrite_Tree (N.N_True, Parameters);
                   Rewrite_Tree (N.N_False, Parameters);
 

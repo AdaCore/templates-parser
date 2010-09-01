@@ -1,0 +1,37 @@
+@@INCLUDE@@ ajax_api.tjs
+@@--
+@@MACRO(CPLX)@@
+start @_$1_@
+@@IF@@ @_$1_@ = "" and @_$2_@ = ""
+$1 and $2 = ""
+@@END_IF@@
+@@IF@@ @_$2_@ = ""
+$2 = ""
+@@END_IF@@
+@@IF@@ @_$1_@ = "" or @_$2_@ = ""
+$1 or $2 = ""
+@@END_IF@@
+@@IF@@ (@_$1_@ = "" and @_$2_@ = "") or @_$3_@ = ""
+($1 and $2 = "") or $3 = ""
+@@END_IF@@
+@@IF@@ @_$3_@ /= "" or @_$2_@ = "bb"
+$3 /= "" or $2 = "bb"
+@@ELSE@@
+not ($3 /= "" or $2 = "bb")
+@@END_IF@@
+@@IF@@ @_$2_@ = ""
+AGAIN $2 = ""
+@@END_IF@@
+end
+@@END_MACRO@@
+--
+@_CPLX(a)_@
+--
+@_CPLX(a,b)_@
+--
+@_CPLX(a,b,c)_@
+--
+@_JS_ACTION(onclick,myid, 4=>fourth)_@
+--
+@_JS_ACTION(onclick,myid, 4=>whatever, 18=>8)_@
+--

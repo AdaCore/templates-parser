@@ -9,22 +9,10 @@
 [IF] @_COND1_@
   [TEXT]    nok1
 [ELSE]
-  [IF] false
-    [TEXT]    nok2
+  [IF] @_COND2_@
+    [TEXT]    ok1
   [ELSE]
-    [IF] 8
-      [TEXT]    nok3
-    [ELSE]
-      [IF] sze
-        [TEXT]    nok4
-      [ELSE]
-        [IF] @_COND2_@
-          [TEXT]    ok1
-        [ELSE]
-          [TEXT]    else part
-        [END_IF]
-      [END_IF]
-    [END_IF]
+    [TEXT]    else part
   [END_IF]
 [END_IF]
 [TEXT] 

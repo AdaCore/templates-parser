@@ -819,6 +819,14 @@ package body Templates_Parser is
       function Clone (E : Tree) return Tree;
       --  Returns a Clone of E
 
+      Unknown : constant String := "*";
+      --  Value returned when the expression cannot be determined statically
+
+      function Analyze (E : Expr.Tree) return String;
+      --  Static analysis of expresssion E, returns TRUE, FALSE or value
+      --  Unknown if the value cannot be determined statically (some variables
+      --  are in the expression).
+
    end Expr;
 
    --------------------------------
@@ -985,6 +993,18 @@ package body Templates_Parser is
       Callback : Macro_Callback;
 
    end Macro;
+
+   ----------------
+   -- Simplifier --
+   ----------------
+
+   package Simplifier is
+
+      procedure Run (T : in out Tree);
+      --  Execute a tree simplifier pass, removes statically known IF branch
+      --  and merges all consecutive TEXT node.
+
+   end Simplifier;
 
    ---------
    -- Tag --
@@ -1484,6 +1504,12 @@ package body Templates_Parser is
    -----------
 
    package body Macro is separate;
+
+   ----------------
+   -- Simplifier --
+   ----------------
+
+   package body Simplifier is separate;
 
    -----------
    -- Clear --
@@ -2945,34 +2971,36 @@ package body Templates_Parser is
                procedure Rewrite (T : in out Tree) is
                   D : Data.Tree;
                begin
-                  Move_To_Last (T);
+                  if T /= null then
+                     Move_To_Last (T);
 
-                  case T.Kind is
-                     when Text =>
-                        --  A text node
+                     case T.Kind is
+                        when Text =>
+                           --  A text node
 
-                        D := T.Text;
+                           D := T.Text;
 
-                        --  Move to the end of this line
+                           --  Move to the end of this line
 
-                        while D.Next /= null loop
-                           D := D.Next;
-                        end loop;
+                           while D.Next /= null loop
+                              D := D.Next;
+                           end loop;
 
-                        if D.Kind = Data.Text then
-                           Strings.Unbounded.Trim
-                             (D.Value,
-                              Left  => Maps.Null_Set,
-                              Right => Maps.To_Set (ASCII.CR & ASCII.LF));
-                        end if;
+                           if D.Kind = Data.Text then
+                              Strings.Unbounded.Trim
+                                (D.Value,
+                                 Left  => Maps.Null_Set,
+                                 Right => Maps.To_Set (ASCII.CR & ASCII.LF));
+                           end if;
 
-                     when If_Stmt =>
-                        Rewrite (T.N_True);
-                        Rewrite (T.N_False);
+                        when If_Stmt =>
+                           Rewrite (T.N_True);
+                           Rewrite (T.N_False);
 
-                     when others =>
-                        null;
-                  end case;
+                        when others =>
+                           null;
+                     end case;
+                  end if;
                end Rewrite;
 
                N : Tree := T;
@@ -3191,6 +3219,8 @@ package body Templates_Parser is
 
       begin
          New_T := Parse (Parse_Std, False);
+
+         Simplifier.Run (New_T);
 
          Input.Close (File);
       exception

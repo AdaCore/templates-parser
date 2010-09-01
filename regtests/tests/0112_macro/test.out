@@ -1,8 +1,8 @@
 [INFO] macro.tmplt
 [C_INFO]  1 FALSE
-[TEXT] > macro for 8       : @_MNAME(8)_@   <
-[TEXT] > macro for none    : @_MNAME()_@    <
-[TEXT] > macro for xyz     : @_MNAME(xyz)_@ <
+[TEXT] > macro for 8       : this text : 8   <
+[TEXT] > macro for none    : this text :     <
+[TEXT] > macro for xyz     : this text : xyz <
 [TEXT] > macro for var ONE : @_MNAME(@_ONE_@)_@   <
 > macro for 8       : this text : 8   <
 > macro for none    : this text :     <

@@ -1,0 +1,5 @@
+@@MACRO(CALL)@@
+/@_$1_@/
+@@END_MACRO@@
+--
+@_UPPER:CALL(me)_@

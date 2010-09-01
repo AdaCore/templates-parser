@@ -1,0 +1,18 @@
+[INFO] macro.tmplt
+[C_INFO]  1 FALSE
+[TEXT] --
+[TEXT] $1:2 $2:3 $5:FiVe
+
+[TEXT] --
+[TEXT] [TEXT] [TEXT] $1:3 $2:2 $5:five
+[TEXT] $9:nine
+
+
+[TEXT] --
+--
+$1:2 $2:3 $5:FiVe
+
+--
+$1:3 $2:2 $5:five
+$9:nine
+--

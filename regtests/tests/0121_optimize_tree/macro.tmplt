@@ -1,0 +1,29 @@
+@@MACRO(M1)@@
+@@IF@@ @_$1_@ = 8
+   eigth @_$1_@ value
+@@ELSE@@
+   @_$1_@ : something else
+@@END_IF@@
+@@END_MACRO@@
+--
+@_M1(8)_@
+--
+M1-8 : @_M1(8)_@
+--
+@_M1(8)_@ : M1-8
+--
+M1-8 : @_M1(8)_@ : M1-8
+--
+@_M1(128)_@
+--
+@@IF@@ "A" = "A"
+   this is A
+@@ELSE@@
+   NOT A
+@@END_IF@@
+--
+@@IF@@ "A" = "B"
+   this is A
+@@ELSE@@
+   NOT A
+@@END_IF@@

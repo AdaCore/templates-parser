@@ -4150,17 +4150,17 @@ package body Templates_Parser is
                end if;
             end F_Xor;
 
-            Op_Table   : constant array (Expr.Ops) of Ops_Fct :=
-                           (Expr.O_And   => F_And'Access,
-                            Expr.O_Or    => F_Or'Access,
-                            Expr.O_Xor   => F_Xor'Access,
-                            Expr.O_Sup   => F_Sup'Access,
-                            Expr.O_Inf   => F_Inf'Access,
-                            Expr.O_Esup  => F_Esup'Access,
-                            Expr.O_Einf  => F_Einf'Access,
-                            Expr.O_Equal => F_Equ'Access,
-                            Expr.O_Diff  => F_Diff'Access,
-                            Expr.O_In    => F_In'Access);
+            Op_Table     : constant array (Expr.Ops) of Ops_Fct :=
+                             (Expr.O_And   => F_And'Access,
+                              Expr.O_Or    => F_Or'Access,
+                              Expr.O_Xor   => F_Xor'Access,
+                              Expr.O_Sup   => F_Sup'Access,
+                              Expr.O_Inf   => F_Inf'Access,
+                              Expr.O_Esup  => F_Esup'Access,
+                              Expr.O_Einf  => F_Einf'Access,
+                              Expr.O_Equal => F_Equ'Access,
+                              Expr.O_Diff  => F_Diff'Access,
+                              Expr.O_In    => F_In'Access);
 
             U_Op_Table   : constant array (Expr.U_Ops) of U_Ops_Fct :=
                              (Expr.O_Not => F_Not'Access);

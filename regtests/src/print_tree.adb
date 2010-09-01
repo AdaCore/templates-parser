@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                            Copyright (C) 2005                            --
---                                  AdaCore                                 --
+--                      Copyright (C) 2005-2010, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -26,9 +25,10 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-with Templates_Parser.Debug;
-with Ada.Text_IO;
 with Ada.Command_Line;
+with Ada.Text_IO;
+
+with Templates_Parser.Debug;
 
 procedure Print_Tree is
 

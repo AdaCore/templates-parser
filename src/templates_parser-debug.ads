@@ -30,7 +30,7 @@ package Templates_Parser.Debug is
    procedure Print (T : Tag);
    --  Print tag representation
 
-   procedure Print_Tree (Filename : String);
+   procedure Print_Tree (Filename : String; Expand_Macro : Boolean := False);
    --  Print tree for template Filename
 
    procedure Print_Defined_Macros;

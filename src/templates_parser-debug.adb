@@ -86,8 +86,9 @@ package body Templates_Parser.Debug is
    -- Print_Tree --
    ----------------
 
-   procedure Print_Tree (Filename : String) is
+   procedure Print_Tree (Filename : String; Expand_Macro : Boolean := False) is
    begin
+      Templates_Parser.Expand_Macro := Expand_Macro;
       Templates_Parser.Print_Tree (Filename);
    end Print_Tree;
 

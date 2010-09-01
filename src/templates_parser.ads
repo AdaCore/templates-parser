@@ -556,6 +556,14 @@ private
 
    No_Translation : constant Translate_Table := (2 .. 1 => Null_Association);
 
+   -----------
+   -- Debug --
+   -----------
+
+   Expand_Macro : Boolean := False;
+   --  If set to true the macro will be displayed inline instead of the named
+   --  reference.
+
    procedure Print_Tree (Filename : String);
    --  Use for debugging purpose only, it will output the internal tree
    --  representation.

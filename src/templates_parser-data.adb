@@ -853,9 +853,14 @@ package body Data is
                      NL := False;
                   end if;
                end;
+
             when Var =>
-               Text_IO.Put (Image (N.Var));
-               NL := False;
+               if N.Var.Is_Macro and then Expand_Macro then
+                  Print_Tree (N.Var.Def);
+               else
+                  Text_IO.Put (Image (N.Var));
+                  NL := False;
+               end if;
          end case;
          N := N.Next;
       end loop;

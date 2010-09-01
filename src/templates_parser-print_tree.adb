@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2009, AdaCore                     --
+--                     Copyright (C) 1999-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -158,7 +158,7 @@ begin
             for K in T.I_Params'Range loop
                if T.I_Params (K) /= null then
                   Print_Indent (Level + 2);
-                  Text_IO.Put ("$" & Image (K) & " = ");
+                  Text_IO.Put ("$" & Utils.Image (K) & " = ");
                   Data.Print_Tree (T.I_Params (K));
                end if;
             end loop;

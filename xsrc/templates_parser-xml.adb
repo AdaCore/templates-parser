@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2009, AdaCore                     --
+--                     Copyright (C) 2004-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -35,6 +35,8 @@ with Input_Sources.Strings;
 with Sax.Readers;
 with Unicode.CES.Basic_8bit;
 with Unicode.CES.Utf8;
+
+with Templates_Parser.Utils;
 
 package body Templates_Parser.XML is
 
@@ -224,12 +226,12 @@ package body Templates_Parser.XML is
             begin
                pragma Assert (T.Data.Nested_Level = 1);
 
-               Add ("      <Dim n=""" & Image (N) & """>");
-               Add_Description (Var & "_DIM" & Image (N));
+               Add ("      <Dim n=""" & Utils.Image (N) & """>");
+               Add_Description (Var & "_DIM" & Utils.Image (N));
                Add ("         <Labels>");
 
                while P /= null loop
-                  Add ("            <Label ind=""" & Image (K) & """>"
+                  Add ("            <Label ind=""" & Utils.Image (K) & """>"
                        & To_Utf8 (P.V) & "</Label>");
                   K := K + 1;
                   P := P.Next;
@@ -264,8 +266,8 @@ package body Templates_Parser.XML is
                   for K in Pos'Range loop
                      Append
                        (V,
-                        "<Ind n=""" & Image (K) & """>"
-                        & Image (Pos (K)) & "</Ind>");
+                        "<Ind n=""" & Utils.Image (K) & """>"
+                        & Utils.Image (Pos (K)) & "</Ind>");
                   end loop;
 
                   Append (V, "<V>" & Value & "</V></Entry>");
@@ -299,8 +301,8 @@ package body Templates_Parser.XML is
 
             for K in 1 .. Item.Comp_Value.Data.Nested_Level loop
                declare
-                  Label_Var : constant String
-                    := Var & "_DIM" & Image (K) & Labels_Suffix;
+                  Label_Var : constant String :=
+                                Var & "_DIM" & Utils.Image (K) & Labels_Suffix;
                begin
                   if Translations.Set.Contains (Label_Var) then
                      declare
@@ -547,7 +549,7 @@ package body Templates_Parser.XML is
 
             function B_Tag (Key : String; N : Positive) return Tag is
                use type Str_Map.Cursor;
-               Max_Key : constant String := Image (N) & "_MAX";
+               Max_Key : constant String := Utils.Image (N) & "_MAX";
                Cursor  : Str_Map.Cursor;
                Max     : Natural;
                T       : Tag;
@@ -560,14 +562,14 @@ package body Templates_Parser.XML is
                   --  We have reached the last level
 
                   for K in 1 .. Max loop
-                     Cursor := Data.Find (Key & "_" & Image (K));
+                     Cursor := Data.Find (Key & "_" & Utils.Image (K));
                      exit when Cursor = Str_Map.No_Element;
                      T := T & Str_Map.Element (Cursor);
                   end loop;
 
                else
                   for K in 1 .. Max loop
-                     T := T & B_Tag ("_" & Image (K), N + 1);
+                     T := T & B_Tag ("_" & Utils.Image (K), N + 1);
                   end loop;
                end if;
 
@@ -648,7 +650,7 @@ package body Templates_Parser.XML is
 
                for K in 1 .. Max loop
                   declare
-                     K_Img : constant String := Image (K);
+                     K_Img : constant String := Utils.Image (K);
                   begin
                      Cursor := Map.Find (K_Img);
 
@@ -664,8 +666,9 @@ package body Templates_Parser.XML is
 
                Insert
                  (Result,
-                  Assoc (To_String (Name) & "_DIM" & Image (D) & "_LABELS",
-                         T));
+                  Assoc
+                    (To_String (Name) & "_DIM" & Utils.Image (D) & "_LABELS",
+                     T));
 
                return Result;
             end Parse_Labels;
@@ -705,7 +708,7 @@ package body Templates_Parser.XML is
                        (Result,
                         Assoc
                           (To_String (Name) & "_DIM"
-                           & Image (D) & "_DESCRIPTION",
+                           & Utils.Image (D) & "_DESCRIPTION",
                            Get_Value (DOM.Core.Nodes.First_Child (C))));
 
                   elsif N_Name = "Labels" then
@@ -762,7 +765,8 @@ package body Templates_Parser.XML is
                      Data.Replace_Element
                        (Cursor,
                         To_Unbounded_String
-                          (Image (Natural'Max (Item, Natural'Value (Value)))));
+                          (Utils.Image
+                             (Natural'Max (Item, Natural'Value (Value)))));
                   end;
 
                else
@@ -854,7 +858,7 @@ package body Templates_Parser.XML is
                Success : Boolean;
             begin
                for K in 1 .. Level loop
-                  Cursor := Map.Find (Image (K));
+                  Cursor := Map.Find (Utils.Image (K));
 
                   Append (Key, "_" & To_String (Str_Map.Element (Cursor)));
                end loop;

@@ -285,7 +285,7 @@ package body Filter is
       if S = "" or else not Is_Number (S) then
          return "";
       else
-         return Image (abs Integer'Value (S));
+         return Utils.Image (abs Integer'Value (S));
       end if;
    end Absolute;
 
@@ -633,7 +633,7 @@ package body Filter is
 
       begin
          V := Integer'Value (S);
-         return Image (V / N);
+         return Utils.Image (V / N);
       exception
          when others =>
             return "";
@@ -866,7 +866,8 @@ package body Filter is
             when Regpat       => return
                  '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
             when Slice        =>
-               return '(' & Image (P.First) & " .. " & Image (P.Last) & ')';
+               return '(' & Utils.Image (P.First)
+                 & " .. " & Utils.Image (P.Last) & ')';
             when User_Callback =>
                return '(' & To_String (P.P) & ')';
          end case;
@@ -997,7 +998,8 @@ package body Filter is
       V_Str : constant String := To_String (P.S);
    begin
       if Is_Number (V_Str) and then Is_Number (S) then
-         return Image (Integer'Max (Integer'Value (V_Str), Integer'Value (S)));
+         return Utils.Image
+           (Integer'Max (Integer'Value (V_Str), Integer'Value (S)));
       else
          return "";
       end if;
@@ -1016,7 +1018,8 @@ package body Filter is
       V_Str : constant String := To_String (P.S);
    begin
       if Is_Number (V_Str) and then Is_Number (S) then
-         return Image (Integer'Min (Integer'Value (V_Str), Integer'Value (S)));
+         return Utils.Image
+           (Integer'Min (Integer'Value (V_Str), Integer'Value (S)));
       else
          return "";
       end if;
@@ -1048,7 +1051,7 @@ package body Filter is
 
       begin
          V := Integer'Value (S);
-         return Image (V - N);
+         return Utils.Image (V - N);
       exception
          when others =>
             return "";
@@ -1128,7 +1131,7 @@ package body Filter is
 
       begin
          V := Integer'Value (S);
-         return Image (V mod N);
+         return Utils.Image (V mod N);
       exception
          when others =>
             return "";
@@ -1161,7 +1164,7 @@ package body Filter is
 
       begin
          V := Integer'Value (S);
-         return Image (V * N);
+         return Utils.Image (V * N);
       exception
          when others =>
             return "";
@@ -1199,7 +1202,7 @@ package body Filter is
       if S = "" or else not Is_Number (S) then
          return "";
       else
-         return Image (Integer'Value (S) * (-1));
+         return Utils.Image (Integer'Value (S) * (-1));
       end if;
    end Neg;
 
@@ -1368,7 +1371,7 @@ package body Filter is
 
       begin
          V := Integer'Value (S);
-         return Image (V + N);
+         return Utils.Image (V + N);
       exception
          when others =>
             return "";
@@ -1579,7 +1582,8 @@ package body Filter is
             N := 1;
 
             loop
-               N := Index (Slice (Temp, N, Length (Temp)), '\' & Image (K));
+               N := Index
+                 (Slice (Temp, N, Length (Temp)), '\' & Utils.Image (K));
 
                exit when N = 0;
 
@@ -1674,7 +1678,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      return Image (S'Length);
+      return Utils.Image (S'Length);
    end Size;
 
    -----------
@@ -1886,7 +1890,7 @@ package body Filter is
            or else Code = C_And or else Code = C_Quo
          then
             declare
-               I_Code : constant String := Image (Code);
+               I_Code : constant String := Utils.Image (Code);
             begin
                Append_To_Result ("&#" & I_Code & ";", Last, K - 1);
             end;

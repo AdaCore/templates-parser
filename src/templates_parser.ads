@@ -590,10 +590,6 @@ private
    overriding procedure Finalize   (Set : in out Translate_Set);
    overriding procedure Adjust     (Set : in out Translate_Set);
 
-   function Image (N : Integer) return String;
-   pragma Inline (Image);
-   --  Returns N image without leading blank
-
    Null_Set : constant Translate_Set :=
                 (Ada.Finalization.Controlled with null, null);
 

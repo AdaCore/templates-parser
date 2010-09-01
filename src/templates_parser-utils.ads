@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2009, AdaCore                     --
+--                     Copyright (C) 2004-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -30,6 +30,10 @@ with Ada.Environment_Variables;
 package Templates_Parser.Utils is
 
    use Ada;
+
+   function Image (N : Integer) return String;
+   pragma Inline (Image);
+   --  Returns N image without leading blank
 
    function Image (T : Tag) return String;
    --  Returns a string representation for this tag

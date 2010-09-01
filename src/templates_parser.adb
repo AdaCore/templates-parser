@@ -1181,7 +1181,7 @@ package body Templates_Parser is
 
    function "&" (T : Tag; Value : Integer) return Tag is
    begin
-      return T & Image (Value);
+      return T & Utils.Image (Value);
    end "&";
 
    function "&" (Value : Character; T : Tag) return Tag is
@@ -1201,7 +1201,7 @@ package body Templates_Parser is
 
    function "&" (Value : Integer; T : Tag) return Tag is
    begin
-      return Image (Value) & T;
+      return Utils.Image (Value) & T;
    end "&";
 
    function "&"
@@ -1264,7 +1264,7 @@ package body Templates_Parser is
 
    function "+" (Value : Integer) return Tag is
    begin
-      return +Image (Value);
+      return +Utils.Image (Value);
    end "+";
 
    function "+" (Value : Tag) return Tag is
@@ -1376,7 +1376,7 @@ package body Templates_Parser is
 
    procedure Append (T : in out Tag; Value : Integer) is
    begin
-      Append (T, To_Unbounded_String (Image (Value)));
+      Append (T, To_Unbounded_String (Utils.Image (Value)));
    end Append;
 
    -----------
@@ -1405,7 +1405,7 @@ package body Templates_Parser is
      (Variable : String;
       Value    : Integer) return Association is
    begin
-      return Assoc (Variable, Image (Value));
+      return Assoc (Variable, Utils.Image (Value));
    end Assoc;
 
    function Assoc
@@ -1886,20 +1886,6 @@ package body Templates_Parser is
          raise Constraint_Error;
       end if;
    end Get;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (N : Integer) return String is
-      N_Img : constant String := Integer'Image (N);
-   begin
-      if N_Img (N_Img'First) = '-' then
-         return N_Img;
-      else
-         return N_Img (N_Img'First + 1 .. N_Img'Last);
-      end if;
-   end Image;
 
    ----------------
    -- Initialize --
@@ -5007,7 +4993,8 @@ package body Templates_Parser is
                            if Var.Attribute.Attr = Data.Length then
                               return Data.Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Count), C'Access);
+                                 Utils.Image
+                                   (Tk.Comp_Value.Data.Count), C'Access);
 
                            elsif Var.Attribute.Attr = Data.Up_Level then
                               Up_Value := Var.Attribute.Value;
@@ -5023,19 +5010,22 @@ package body Templates_Parser is
                               --  'Line on a matrix
                               return Data.Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Count), C'Access);
+                                 Utils.Image (Tk.Comp_Value.Data.Count),
+                                 C'Access);
 
                            elsif Var.Attribute.Attr = Data.Min_Column then
                               --  'Min_Column on a matrix
                               return Data.Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Min), C'Access);
+                                 Utils.Image (Tk.Comp_Value.Data.Min),
+                                 C'Access);
 
                            elsif Var.Attribute.Attr = Data.Max_Column then
                               --  'Max_Column on a matrix
                               return Data.Translate
                                 (Var,
-                                 Image (Tk.Comp_Value.Data.Max), C'Access);
+                                 Utils.Image (Tk.Comp_Value.Data.Max),
+                                 C'Access);
 
                            elsif Var.Attribute.Attr /= Data.Nil then
                               raise Template_Error
@@ -5068,7 +5058,7 @@ package body Templates_Parser is
                   else
                      return Data.Translate
                        (Var,
-                        Image (State.Cursor (State.Table_Level - 1)),
+                        Utils.Image (State.Cursor (State.Table_Level - 1)),
                         C'Access);
                   end if;
 
@@ -5078,17 +5068,17 @@ package body Templates_Parser is
                   else
                      return Data.Translate
                        (Var,
-                        Image (State.Cursor (State.Table_Level)),
+                        Utils.Image (State.Cursor (State.Table_Level)),
                         C'Access);
                   end if;
 
                when Data.Number_Line =>
                   return Data.Translate
-                    (Var, Image (State.Max_Lines), C'Access);
+                    (Var, Utils.Image (State.Max_Lines), C'Access);
 
                when Data.Table_Level =>
                   return Data.Translate
-                    (Var, Image (State.Table_Level), C'Access);
+                    (Var, Utils.Image (State.Table_Level), C'Access);
 
                when Data.Now =>
                   return Data.Translate

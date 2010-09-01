@@ -736,7 +736,7 @@ package body Data is
          when Up_Level   =>
             Append (R, "'Up_Level");
             if T.Attribute.Value /= 1 then
-               Append (R, '(' & Image (T.Attribute.Value) & ')');
+               Append (R, '(' & Utils.Image (T.Attribute.Value) & ')');
             end if;
       end case;
 

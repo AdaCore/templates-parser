@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2009, AdaCore                     --
+--                     Copyright (C) 2004-2010, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -246,6 +246,16 @@ package body Templates_Parser.Utils is
       end loop;
 
       return "(" & To_String (Result) & ")";
+   end Image;
+
+   function Image (N : Integer) return String is
+      N_Img : constant String := Integer'Image (N);
+   begin
+      if N_Img (N_Img'First) = '-' then
+         return N_Img;
+      else
+         return N_Img (N_Img'First + 1 .. N_Img'Last);
+      end if;
    end Image;
 
    -----------

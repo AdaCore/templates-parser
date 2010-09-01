@@ -111,10 +111,11 @@ package body Definitions is
          when Const       =>
             Text_IO.Put (Quote (To_String (N.Value)));
          when Ref         =>
-            Text_IO.Put ('$' & Image (N.Ref));
+            Text_IO.Put ('$' & Utils.Image (N.Ref));
          when Ref_Default =>
             Text_IO.Put
-              ('$' & Image (N.Ref) & " | " & Quote (To_String (N.Value)));
+              ('$' & Utils.Image (N.Ref)
+               & " | " & Quote (To_String (N.Value)));
       end case;
    end Print_Tree;
 

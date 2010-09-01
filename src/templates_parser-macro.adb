@@ -106,264 +106,410 @@ package body Macro is
      (T          : in out Tree;
       Parameters : not null access Data.Parameter_Set)
    is
+      use type Definitions.Tree;
 
-      procedure Rewrite (T : in out Data.Tree);
-      --  Rewrite every variable references @_$N_@ (where N is a
-      --  number) by the corresponding variable or value found in
-      --  Parameters(N).
-
-      procedure Rewrite (T : in out Expr.Tree);
-      --  Rewrite condition.
-      --  In @@IF@@ @_$N_@ = val, replace $N by Parameters(N) or does nothing
-      --                          if Parameters(N) does not exists.
-
-      procedure Rewrite (T : in out Definitions.Tree);
-      --  Rewrite variable references with and without default value.
-      --  In @@SET@@ VAR=$N, replace $N by Parameters(N) or does
-      --                     nothing if Parameters(N) does not exists.
-      --  In @@SET@@ VAR=$N|val replace $N|val by Parameters(N) if it
-      --                        exists or by val otherwise.
+      procedure Rewrite_Tree
+        (T          : in out Tree;
+         Parameters : not null access Data.Parameter_Set);
+      --  Recursivelly rewrite the whole tree
 
       package Set_Var is new Containers.Indefinite_Hashed_Maps
-        (String, String, Strings.Hash_Case_Insensitive, "=");
+        (String, Definitions.Tree, Strings.Hash_Case_Insensitive, "=");
+
+      procedure Release_Definition (Position : Set_Var.Cursor);
+      --  Release definition tree pointed to by Position
 
       Vars : Set_Var.Map;
 
-      -------------
-      -- Rewrite --
-      -------------
+      ------------------
+      -- Rewrite_Tree --
+      ------------------
 
-      procedure Rewrite (T : in out Data.Tree) is
-         use type Data.Tree;
-         D, Prev : Data.Tree;
-      begin
-         D    := T;
-         Prev := null;
+      procedure Rewrite_Tree
+        (T          : in out Tree;
+         Parameters : not null access Data.Parameter_Set)
+      is
+         procedure Rewrite (T : in out Data.Tree);
+         --  Rewrite every variable references @_$N_@ (where N is a
+         --  number) by the corresponding variable or value found in
+         --  Parameters(N) or by the corresponding variable mapping in Vars.
 
-         while D /= null loop
-            case D.Kind is
-               when Data.Text =>
+         procedure Rewrite (T : in out Expr.Tree);
+         --  Rewrite condition.
+         --  In @@IF@@ @_$N_@ = val
+         --  Replace $N by Parameters(N) or by the corresponding value in the
+         --  variable mapping or does nothing if Parameters(N) does not exists
+         --  or no variable mapping found.
+
+         -------------
+         -- Rewrite --
+         -------------
+
+         procedure Rewrite (T : in out Data.Tree) is
+
+            procedure Replace
+              (T, C, Prev : in out Data.Tree; Ref : Positive);
+            --  Replace node C with the parameters pointed to by Ref
+
+            procedure Replace
+              (T, C, Prev : in out Data.Tree; Value : String);
+            --  As above, but replace by Value
+
+            procedure Delete_Node (T : in out Data.Tree; C, Prev : Data.Tree);
+            --  Delete node C
+
+            -----------------
+            -- Delete_Note --
+            -----------------
+
+            procedure Delete_Node
+              (T : in out Data.Tree; C, Prev : Data.Tree)
+            is
+               use type Data.Tree;
+               Old : Data.Tree;
+            begin
+               if Prev = null then
+                  Old := T;
+                  T := C.Next;
+               else
+                  Old := C;
+                  Prev.Next := C.Next;
+               end if;
+               Data.Release (Old, Single => True);
+            end Delete_Node;
+
+            -------------
+            -- Replace --
+            -------------
+
+            procedure Replace
+              (T, C, Prev : in out Data.Tree; Ref : Positive)
+            is
+               use type Data.NKind;
+               use type Data.Tree;
+               New_Node : constant Data.Tree := Data.Clone (Parameters (Ref));
+            begin
+               New_Node.Next := C.Next;
+               if Prev = null then
+                  Data.Release (T, Single => True);
+                  T := New_Node;
+               else
+                  Data.Release (Prev.Next, Single => True);
+                  Prev.Next := New_Node;
+               end if;
+
+               Prev := New_Node;
+               C := New_Node.Next;
+            end Replace;
+
+            procedure Replace
+              (T, C, Prev : in out Data.Tree; Value : String)
+            is
+               use type Data.Tree;
+               New_Node : constant Data.Tree :=
+                            new Data.Node'
+                              (Data.Text,
+                               Next  => C.Next,
+                               Value => To_Unbounded_String (Value));
+            begin
+               if Prev = null then
+                  Data.Release (T, Single => True);
+                  T := New_Node;
+               else
+                  Data.Release (Prev.Next, Single => True);
+                  Prev.Next := New_Node;
+               end if;
+
+               Prev := New_Node;
+               C := New_Node.Next;
+            end Replace;
+
+            use type Data.Tree;
+            D, Prev : Data.Tree;
+            Moved   : Boolean := False;
+
+         begin
+            D    := T;
+            Prev := null;
+
+            while D /= null loop
+               case D.Kind is
+                  when Data.Text =>
+                     null;
+
+                  when Data.Var =>
+                     --  Rewrite also the macro call if any
+
+                     if D.Var.Is_Macro then
+                        Rewrite_Tree (D.Var.Def, Parameters);
+
+                     else
+                        if D.Var.N > 0 then
+                           --  This is a reference to a parameter
+
+                           if D.Var.N <= Parameters'Length
+                             and then Parameters (D.Var.N) /= null
+                           then
+                              --  This is a reference to replace
+                              Replace (T, D, Prev, D.Var.N);
+
+                           else
+                              --  This variable does not have reference, remove
+                              --  it.
+                              Delete_Node (T, D, Prev);
+
+                              D := D.Next;
+                           end if;
+
+                           Moved := True;
+
+                        elsif Vars.Contains (To_String (D.Var.Name)) then
+                           --  This is a variable that exists into the map.
+                           --  It means that this variable is actually the
+                           --  name of a SET which actually has been passed
+                           --  a reference to another variable.
+
+                           declare
+                              E : constant Definitions.Tree :=
+                                    Vars.Element (To_String (D.Var.Name));
+                           begin
+                              case E.N.Kind is
+                                 when Definitions.Const =>
+                                    Replace
+                                      (T, D, Prev, To_String (E.N.Value));
+
+                                 when Definitions.Ref =>
+                                    if E.N.Ref <= Parameters'Length
+                                      and then Parameters (E.N.Ref) /= null
+                                    then
+                                       Replace (T, D, Prev, E.N.Ref);
+                                    else
+                                       Replace (T, D, Prev, "");
+                                    end if;
+
+                                 when Definitions.Ref_Default =>
+                                    if E.N.Ref <= Parameters'Length
+                                      and then Parameters (E.N.Ref) /= null
+                                    then
+                                       Replace (T, D, Prev, E.N.Ref);
+                                    else
+                                       Replace
+                                         (T, D, Prev, To_String (E.N.Value));
+                                    end if;
+                              end case;
+                           end;
+
+                           Moved := True;
+                        end if;
+                     end if;
+               end case;
+
+               if Moved then
+                  Moved := False;
+               else
+                  Prev := D;
+                  D    := D.Next;
+               end if;
+            end loop;
+         end Rewrite;
+
+         -------------
+         -- Rewrite --
+         -------------
+
+         procedure Rewrite (T : in out Expr.Tree) is
+            use type Expr.Tree;
+            use type Data.Tree;
+
+            procedure Replace (T : in out Expr.Tree; Ref : Positive);
+            pragma Inline (Replace);
+            --  Replace T with the parameters pointed to by Ref
+
+            procedure Replace (T : in out Expr.Tree; Value : String);
+            pragma Inline (Replace);
+            --  Replace the node by the given value
+
+            -------------
+            -- Replace --
+            -------------
+
+            procedure Replace (T : in out Expr.Tree; Value : String) is
+            begin
+               Expr.Release (T, Single => True);
+               T := new Expr.Node'
+                 (Expr.Value, V => To_Unbounded_String (Value));
+            end Replace;
+
+            procedure Replace (T : in out Expr.Tree; Ref : Positive) is
+               Tag_Var : Data.Tag_Var;
+            begin
+               case Parameters (Ref).Kind is
+                  when Data.Text =>
+                     Replace (T, To_String (Parameters (Ref).Value));
+
+                  when Data.Var =>
+                     Tag_Var := Data.Clone (Parameters (Ref).Var);
+                     Data.Release (T.Var);
+                     T.Var := Tag_Var;
+               end case;
+            end Replace;
+
+         begin
+            case T.Kind is
+               when Expr.Value =>
                   null;
 
-               when Data.Var =>
-                  if D.Var.N > 0 then
+               when Expr.Var =>
+                  if T.Var.N > 0
+                    and then T.Var.N <= Parameters'Length
+                    and then Parameters (T.Var.N) /= null
+                  then
+                     --  This is a reference to replace
+                     Replace (T, T.Var.N);
 
-                     if D.Var.N <= Parameters'Length
-                       and then Parameters (D.Var.N) /= null
-                     then
-                        --  This is a reference to replace
-                        declare
-                           New_Node : constant Data.Tree :=
-                                        Data.Clone (Parameters (D.Var.N));
-                        begin
-                           New_Node.Next := D.Next;
-                           if Prev = null then
-                              Data.Release (T, Single => True);
-                              T := New_Node;
-                           else
-                              Data.Release (Prev.Next, Single => True);
-                              Prev.Next := New_Node;
-                           end if;
-                        end;
+                  elsif Vars.Contains (To_String (T.Var.Name)) then
+                     --  This is a variable that exists into the map.
+                     --  It means that this variable is actually the
+                     --  name of a SET which actually has been passed
+                     --  a reference to another variable.
 
-                     elsif Vars.Contains (To_String (D.Var.Name)) then
-                        --  This is a variable that exists into the map.
-                        --  It means that this variable is actually the
-                        --  name of a SET which actually has been passed
-                        --  a reference to another variable.
+                     declare
+                        E : constant Definitions.Tree :=
+                              Vars.Element (To_String (T.Var.Name));
+                     begin
+                        case E.N.Kind is
+                           when Definitions.Const =>
+                              Replace (T, To_String (E.N.Value));
 
-                        D.Var.Name := To_Unbounded_String
-                          (Vars.Element (To_String (D.Var.Name)));
+                           when Definitions.Ref =>
+                              if E.N.Ref <= Parameters'Length
+                                and then Parameters (E.N.Ref) /= null
+                              then
+                                 Replace (T, E.N.Ref);
+                              else
+                                 Replace (T, "");
+                              end if;
+
+                           when Definitions.Ref_Default =>
+                              null;
+                        end case;
+                     end;
+
+                  else
+                     --  This is undefined, replace by an empty string
+                     Replace (T, "");
+                  end if;
+
+               when Expr.Op =>
+                  Rewrite (T.Left);
+                  Rewrite (T.Right);
+
+               when Expr.U_Op =>
+                  Rewrite (T.Next);
+            end case;
+         end Rewrite;
+
+         N     : Tree := T;
+         Prev  : Tree;
+         Moved : Boolean := False;
+
+      begin
+         T := N;
+
+         while N /= null loop
+            case N.Kind is
+               when Text =>
+                  Rewrite (N.Text);
+
+               when If_Stmt =>
+                  Rewrite (N.Cond);
+
+                  --  ??? After the rewrite above we could check the
+                  --  condition to see if it is always true or false and
+                  --  remove the corresponding branch.
+
+                  Rewrite_Tree (N.N_True, Parameters);
+                  Rewrite_Tree (N.N_False, Parameters);
+
+               when Set_Stmt =>
+                  --  Record definition and delete node, note that the
+                  --  defintion tree will be freed later as we need the tree
+                  --  for the rewriting.
+
+                  Vars.Include (To_String (N.Def.Name), N.Def);
+
+                  declare
+                     Old : Tree := N;
+                  begin
+                     if Prev = null then
+                        T := N.Next;
+                        N := T;
+                     else
+                        Prev.Next := N.Next;
+                        N := Prev.Next;
                      end if;
-                  end if;
 
-                  --  Rewrite also the macro call if any
+                     Free (Old);
 
-                  if D.Var.Is_Macro then
-                     Rewrite (D.Var.Def, Parameters);
-                  end if;
+                     Moved := True;
+                  end;
+
+               when Table_Stmt =>
+                  Rewrite_Tree (N.Blocks, Parameters);
+
+               when Section_Block =>
+                  Rewrite_Tree (N.Common, Parameters);
+                  Rewrite_Tree (N.Sections, Parameters);
+
+               when Section_Stmt =>
+                  Rewrite_Tree (N.N_Section, Parameters);
+
+               when Include_Stmt =>
+                  for K in N.I_Params'Range loop
+                     declare
+                        use type Data.Tree;
+                        use type Data.NKind;
+                        P   : Data.Tree renames N.I_Params (K);
+                        Old : Data.Tree;
+                     begin
+                        if P /= null
+                          and then P.Kind = Data.Var
+                          and then P.Var.N > 0
+                        then
+                           Old := N.I_Params (K);
+                           N.I_Params (K) := Data.Clone (Parameters (P.Var.N));
+                           Data.Release (Old);
+                        end if;
+                     end;
+                  end loop;
+
+               when others =>
+                  null;
             end case;
 
-            Prev := D;
-            D    := D.Next;
+            if Moved then
+               Moved := False;
+            else
+               Prev := N;
+               N := N.Next;
+            end if;
          end loop;
-      end Rewrite;
+      end Rewrite_Tree;
 
-      -------------
-      -- Rewrite --
-      -------------
+      ------------------------
+      -- Release_Definition --
+      ------------------------
 
-      procedure Rewrite (T : in out Definitions.Tree) is
-
-         use type Data.Tree;
-
-         procedure Replace
-           (Def   : in out Definitions.Tree;
-            Value : Data.Tree);
-         pragma Inline (Replace);
-         --  Replace the given Def with the Value. Raises
-         --  Templates_Error if Value is a tag variable.
-
-         procedure Replace
-           (Def   : in out Definitions.Tree;
-            Value : Unbounded_String);
-         pragma Inline (Replace);
-         --  As above but for a string
-
-         -------------
-         -- Replace --
-         -------------
-
-         procedure Replace
-           (Def   : in out Definitions.Tree;
-            Value : Unbounded_String)
-         is
-            Name : constant Unbounded_String := Def.Name;
-            V    : constant Unbounded_String := Value;
-         begin
-            Definitions.Release (Def);
-            Def := new Definitions.Def'(Name, (Definitions.Const, V, 1));
-         end Replace;
-
-         procedure Replace
-           (Def   : in out Definitions.Tree;
-            Value : Data.Tree)
-         is
-            use type Data.NKind;
-         begin
-            case Value.Kind is
-               when Data.Var  =>
-                  --  This is a variable reference, record this association
-                  --  into the map. The variable name will be changed later.
-                  Vars.Include
-                    (To_String (Def.Name), To_String (Value.Var.Name));
-               when Data.Text =>
-                  Replace (Def, Value.Value);
-            end case;
-         end Replace;
-
+      procedure Release_Definition (Position : Set_Var.Cursor) is
+         E : Definitions.Tree := Set_Var.Element (Position);
       begin
-         case T.N.Kind is
-            when Definitions.Const =>
-               null;
-
-            when Definitions.Ref =>
-               if T.N.Ref <= Parameters'Length
-                 and then Parameters (T.N.Ref) /= null
-               then
-                  Replace (T, Parameters (T.N.Ref));
-               end if;
-
-            when Definitions.Ref_Default =>
-               if T.N.Ref <= Parameters'Length
-                 and then Parameters (T.N.Ref) /= null
-               then
-                  Replace (T, Parameters (T.N.Ref));
-               else
-                  Replace (T, T.N.Value);
-               end if;
-         end case;
-      end Rewrite;
-
-      -------------
-      -- Rewrite --
-      -------------
-
-      procedure Rewrite (T : in out Expr.Tree) is
-         use type Expr.Tree;
-         Value   : Unbounded_String;
-         Tag_Var : Data.Tag_Var;
-      begin
-         case T.Kind is
-            when Expr.Value =>
-               null;
-
-            when Expr.Var =>
-               if T.Var.N > 0
-                 and then T.Var.N <= Parameters'Length
-               then
-                  --  This is a reference to replace
-
-                  case Parameters (T.Var.N).Kind is
-                     when Data.Text =>
-                        Value := Parameters (T.Var.N).Value;
-                        Expr.Release (T, Single => True);
-                        T := new Expr.Node'(Expr.Value, V => Value);
-
-                     when Data.Var =>
-                        Tag_Var := Data.Clone (Parameters (T.Var.N).Var);
-                        Data.Release (T.Var);
-                        T.Var := Tag_Var;
-                  end case;
-               end if;
-
-            when Expr.Op =>
-               Rewrite (T.Left);
-               Rewrite (T.Right);
-
-            when Expr.U_Op =>
-               Rewrite (T.Next);
-         end case;
-      end Rewrite;
-
-      N : Tree := T;
+         Definitions.Release (E);
+      end Release_Definition;
 
    begin
-      T := N;
+      Rewrite_Tree (T, Parameters);
 
-      while N /= null loop
-         case N.Kind is
-            when Text =>
-               Rewrite (N.Text);
-
-            when If_Stmt =>
-               Rewrite (N.Cond);
-
-               --  ??? After the rewrite above we could check the condition to
-               --  see if it is always true or false and remove the
-               --  corresponding branch.
-
-               Rewrite (N.N_True, Parameters);
-               Rewrite (N.N_False, Parameters);
-
-            when Set_Stmt =>
-               Rewrite (N.Def);
-
-            when Table_Stmt =>
-               Rewrite (N.Blocks, Parameters);
-
-            when Section_Block =>
-               Rewrite (N.Common, Parameters);
-               Rewrite (N.Sections, Parameters);
-
-            when Section_Stmt =>
-               Rewrite (N.N_Section, Parameters);
-
-            when Include_Stmt =>
-               for K in N.I_Params'Range loop
-                  declare
-                     use type Data.Tree;
-                     use type Data.NKind;
-                     P   : Data.Tree renames N.I_Params (K);
-                     Old : Data.Tree;
-                  begin
-                     if P /= null
-                       and then P.Kind = Data.Var
-                       and then P.Var.N > 0
-                     then
-                        Old := N.I_Params (K);
-                        N.I_Params (K) := Data.Clone (Parameters (P.Var.N));
-                        Data.Release (Old);
-                     end if;
-                  end;
-               end loop;
-
-            when others =>
-               null;
-         end case;
-
-         N := N.Next;
-      end loop;
+      Vars.Iterate (Release_Definition'Access);
    end Rewrite;
 
    ----------------------

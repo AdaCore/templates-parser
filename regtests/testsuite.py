@@ -65,11 +65,8 @@ def main():
     results_file = result_dir + '/results'
 
     if os.path.exists(result_dir):
-        for file in (results_file, result_dir + '/report', 'discs'):
-            rm(file, True)
-        for ext in ('.diff', '.expected', '.out', '.result'):
-            for file in glob(result_dir + '/*' + ext):
-                rm(file, True)
+        rm(result_dir, True)
+
     mkdir(result_dir)
 
     discs = env.discriminants

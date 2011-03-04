@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2010, AdaCore                     --
+--                     Copyright (C) 1999-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -762,7 +762,7 @@ package body Expr is
    -------------
 
    procedure Release (E : in out Tree; Single : Boolean := False) is
-      procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
+      procedure Unchecked_Free is new Ada.Unchecked_Deallocation (Node, Tree);
    begin
       case E.Kind is
          when Value =>
@@ -783,7 +783,7 @@ package body Expr is
             end if;
       end case;
 
-      Free (E);
+      Unchecked_Free (E);
    end Release;
 
 end Expr;

@@ -203,7 +203,7 @@ package body Simplifier is
                         end if;
 
                         N := N.Next;
-                        Free (Old);
+                        Unchecked_Free (Old);
                      end;
 
                      Moved := True;
@@ -216,11 +216,11 @@ package body Simplifier is
 
                      if Prev = null then
                         Link_End (N.N_True, T.Next, Link => P);
-                        Free (T);
+                        Unchecked_Free (T);
                         T := N.N_True;
                      else
                         Link_End (N.N_True, N.Next, Link => P);
-                        Free (Prev.Next);
+                        Unchecked_Free (Prev.Next);
                         Prev.Next := N.N_True;
                      end if;
 
@@ -236,11 +236,11 @@ package body Simplifier is
 
                      if Prev = null then
                         Link_End (N.N_False, T.Next, Link => P);
-                        Free (T);
+                        Unchecked_Free (T);
                         T := N.N_False;
                      else
                         Link_End (N.N_False, N.Next, Link => P);
-                        Free (Prev.Next);
+                        Unchecked_Free (Prev.Next);
                         Prev.Next := N.N_False;
                      end if;
 

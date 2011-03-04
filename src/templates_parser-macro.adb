@@ -444,7 +444,7 @@ package body Macro is
                         N := Prev.Next;
                      end if;
 
-                     Free (Old);
+                     Unchecked_Free (Old);
 
                      Moved := True;
                   end;

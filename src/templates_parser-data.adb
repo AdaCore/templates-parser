@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2010, AdaCore                     --
+--                     Copyright (C) 1999-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -876,19 +876,19 @@ package body Data is
 
    procedure Release (T : in out Tag_Var) is
       use type Filter.Set_Access;
-      procedure Free is
+      procedure Unchecked_Free is
          new Ada.Unchecked_Deallocation (Filter.Set, Filter.Set_Access);
    begin
       if T.Filters /= null then
          Filter.Release (T.Filters.all);
-         Free (T.Filters);
+         Unchecked_Free (T.Filters);
       end if;
 
       if T.Parameters /= null then
          for K in T.Parameters'Range loop
             Data.Release (T.Parameters (K));
          end loop;
-         Data.Free (T.Parameters);
+         Data.Unchecked_Free (T.Parameters);
       end if;
 
       Release (T.Def, Include => False);
@@ -896,7 +896,7 @@ package body Data is
 
    procedure Release (D : in out Tree; Single : Boolean := False) is
 
-      procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
+      procedure Unchecked_Free is new Ada.Unchecked_Deallocation (Node, Tree);
 
       P : Tree;
       T : Tree := D;
@@ -911,7 +911,7 @@ package body Data is
             when Text => null;
          end case;
 
-         Free (P);
+         Unchecked_Free (P);
          exit when Single;
       end loop;
 

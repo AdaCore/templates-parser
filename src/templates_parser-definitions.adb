@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2010, AdaCore                     --
+--                     Copyright (C) 2004-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -124,9 +124,9 @@ package body Definitions is
    -------------
 
    procedure Release (D : in out Tree) is
-      procedure Free is new Unchecked_Deallocation (Def, Tree);
+      procedure Unchecked_Free is new Unchecked_Deallocation (Def, Tree);
    begin
-      Free (D);
+      Unchecked_Free (D);
    end Release;
 
 end Definitions;

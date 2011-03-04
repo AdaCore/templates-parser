@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2010, AdaCore                     --
+--                     Copyright (C) 1999-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -698,7 +698,7 @@ package body Templates_Parser is
       procedure Release (T : in out Tag_Var);
       --  Release all memory associated with Tag
 
-      procedure Free is
+      procedure Unchecked_Free is
         new Ada.Unchecked_Deallocation (Parameter_Set, Parameters);
 
       function Parse (Line : String) return Tree;
@@ -927,7 +927,7 @@ package body Templates_Parser is
    function Clone (T : Tree) return Tree;
    --  Returns a Clone of T
 
-   procedure Free is new Ada.Unchecked_Deallocation (Node, Tree);
+   procedure Unchecked_Free is new Ada.Unchecked_Deallocation (Node, Tree);
 
    -------------------
    --  Cached Files --
@@ -1038,9 +1038,10 @@ package body Templates_Parser is
    pragma Inline (Is_Number);
    --  Returns True if S is a decimal number
 
-   procedure Free is new Ada.Unchecked_Deallocation (Integer, Integer_Access);
+   procedure Unchecked_Free is
+     new Ada.Unchecked_Deallocation (Integer, Integer_Access);
 
-   procedure Free is
+   procedure Unchecked_Free is
      new Unchecked_Deallocation (Tag_Node_Arr, Tag_Node_Arr_Access);
 
    function Build_Include_Pathname
@@ -1073,7 +1074,7 @@ package body Templates_Parser is
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
-      Free (T.Data.Tag_Nodes);
+      Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
@@ -1114,7 +1115,7 @@ package body Templates_Parser is
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
-      Free (T.Data.Tag_Nodes);
+      Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
@@ -1153,7 +1154,7 @@ package body Templates_Parser is
    begin
       T.Ref_Count.all := T.Ref_Count.all + 1;
 
-      Free (T.Data.Tag_Nodes);
+      Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
@@ -1355,7 +1356,7 @@ package body Templates_Parser is
              (T.Data.Nested_Level, Value.Data.Nested_Level + 1);
       end if;
 
-      Free (T.Data.Tag_Nodes);
+      Unchecked_Free (T.Data.Tag_Nodes);
       T.Data.Tag_Nodes := null;
       T.Data.Count     := T.Data.Count + 1;
       T.Data.Min       := Natural'Min (T.Data.Min, T_Size);
@@ -1376,7 +1377,7 @@ package body Templates_Parser is
          T.Data.Last.Next := Item;
       end if;
 
-      Free (T.Data.Tag_Nodes);
+      Unchecked_Free (T.Data.Tag_Nodes);
       T.Data.Tag_Nodes := null;
       T.Data.Count     := T.Data.Count + 1;
       T.Data.Min       := Natural'Min (T.Data.Min, 1);
@@ -1797,70 +1798,82 @@ package body Templates_Parser is
    --------------
 
    overriding procedure Finalize (Set : in out Translate_Set) is
-      procedure Free is new Unchecked_Deallocation
+      procedure Unchecked_Free is new Unchecked_Deallocation
         (Association_Map.Map, Map_Access);
+      Ref_Count : Integer_Access := Set.Ref_Count;
    begin
-      if Set.Ref_Count /= null then
-         Templates_Parser_Tasking.Lock;
-         Set.Ref_Count.all := Set.Ref_Count.all - 1;
+      --  Ensure call is idempotent
 
-         if Set.Ref_Count.all = 0 then
-            Free (Set.Ref_Count);
-            Free (Set.Set);
+      Set.Ref_Count := null;
+
+      if Ref_Count /= null then
+         Templates_Parser_Tasking.Lock;
+         Ref_Count.all := Ref_Count.all - 1;
+
+         if Ref_Count.all = 0 then
+            Unchecked_Free (Ref_Count);
+            Unchecked_Free (Set.Set);
          end if;
          Templates_Parser_Tasking.Unlock;
       end if;
    end Finalize;
 
    overriding procedure Finalize (T : in out Tag) is
+      Ref_Count : Integer_Access := T.Ref_Count;
    begin
-      Templates_Parser_Tasking.Lock;
+      --  Ensure call is idempotent
 
-      T.Ref_Count.all := T.Ref_Count.all - 1;
+      T.Ref_Count := null;
 
-      if T.Ref_Count.all = 0 then
-         Templates_Parser_Tasking.Unlock;
+      if Ref_Count /= null then
+         Templates_Parser_Tasking.Lock;
 
-         declare
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Node, Tag_Node_Access);
+         Ref_Count.all := Ref_Count.all - 1;
 
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag, Tag_Access);
+         if Ref_Count.all = 0 then
+            Templates_Parser_Tasking.Unlock;
 
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Data, Tag_Data_Access);
+            declare
+               procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+                 (Tag_Node, Tag_Node_Access);
 
-            procedure Free is new Ada.Unchecked_Deallocation
-              (Tag_Values.Set, Tag_Values_Access);
+               procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+                 (Tag, Tag_Access);
 
-            P, N : Tag_Node_Access;
-         begin
-            P := T.Data.Head;
+               procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+                 (Tag_Data, Tag_Data_Access);
 
-            while P /= null loop
-               N := P.Next;
+               procedure Unchecked_Free is new Ada.Unchecked_Deallocation
+                 (Tag_Values.Set, Tag_Values_Access);
 
-               if P.Kind = Value_Set then
-                  Free (P.VS);
-               end if;
+               P, N : Tag_Node_Access;
+            begin
+               P := T.Data.Head;
 
-               Free (P);
+               while P /= null loop
+                  N := P.Next;
 
-               P := N;
-            end loop;
+                  if P.Kind = Value_Set then
+                     Unchecked_Free (P.VS);
+                  end if;
 
-            T.Data.Head := null;
-            T.Data.Last := null;
+                  Unchecked_Free (P);
 
-            Free (T.Ref_Count);
-            Free (T.Data.Tag_Nodes);
-            Free (T.Data.Values);
-            Free (T.Data);
-         end;
+                  P := N;
+               end loop;
 
-      else
-         Templates_Parser_Tasking.Unlock;
+               T.Data.Head := null;
+               T.Data.Last := null;
+
+               Unchecked_Free (Ref_Count);
+               Unchecked_Free (T.Data.Tag_Nodes);
+               Unchecked_Free (T.Data.Values);
+               Unchecked_Free (T.Data);
+            end;
+
+         else
+            Templates_Parser_Tasking.Unlock;
+         end if;
       end if;
    end Finalize;
 
@@ -2653,7 +2666,7 @@ package body Templates_Parser is
 
                      --  Now free the Section_Stmt container
 
-                     Free (Tmp);
+                     Unchecked_Free (Tmp);
 
                      T.Sections := Parse (Parse_Section, In_If);
 
@@ -2671,7 +2684,7 @@ package body Templates_Parser is
                   --  A single section and no common section, rewrite it as a
                   --  simple common section.
                   T.Common := T.Sections.Next;
-                  Free (T.Sections);
+                  Unchecked_Free (T.Sections);
                   T.Sections_Count := 0;
                end if;
 
@@ -2698,7 +2711,7 @@ package body Templates_Parser is
                   --  Check if this section was empty, this happen when
                   --  we parse a section after @@END@@ followed by the end
                   --  of the table.
-                  Free (T);
+                  Unchecked_Free (T);
                   return null;
                end if;
 
@@ -2892,7 +2905,7 @@ package body Templates_Parser is
                            Error_Include_Message :=
                              To_Unbounded_String
                                ("Include file " & I_Filename & " not found.");
-                           Free (T);
+                           Unchecked_Free (T);
                            return null;
                         end if;
 
@@ -2905,7 +2918,7 @@ package body Templates_Parser is
                         Error_Include_Message :=
                           To_Unbounded_String (Exception_Message (E));
 
-                        Free (T);
+                        Unchecked_Free (T);
                         return null;
                   end;
 
@@ -5596,7 +5609,7 @@ package body Templates_Parser is
                while I /= null loop
                   O := I;
                   I := I.Next;
-                  Free (O);
+                  Unchecked_Free (O);
                end loop;
             end;
 
@@ -5616,7 +5629,7 @@ package body Templates_Parser is
                   Data.Release (N.Text);
                   Tmp := N;
                   N := N.Next;
-                  Free (Tmp);
+                  Unchecked_Free (Tmp);
                end loop;
 
                Release (N, Include);
@@ -5656,7 +5669,7 @@ package body Templates_Parser is
                for K in T.I_Params'Range loop
                   Data.Release (T.I_Params (K));
                end loop;
-               Data.Free (T.I_Params);
+               Data.Unchecked_Free (T.I_Params);
             end if;
 
             Release (T.Next, Include);
@@ -5666,7 +5679,7 @@ package body Templates_Parser is
             Release (T.Next, Include);
       end case;
 
-      Free (T);
+      Unchecked_Free (T);
    end Release;
 
    -------------------

@@ -153,39 +153,39 @@ setup_config:
 	echo 'end TP_Config;' >> $(CONFGPR)
 
 install_dirs:
-	$(MKDIR) -p $(I_BIN)
-	$(MKDIR) -p $(I_INC)
-	$(MKDIR) -p $(I_LIB)/static
+	$(MKDIR) -p $(DESTDIR)$(I_BIN)
+	$(MKDIR) -p $(DESTDIR)$(I_INC)
+	$(MKDIR) -p $(DESTDIR)$(I_LIB)/static
 ifeq ($(ENABLE_SHARED), true)
-	$(MKDIR) -p $(I_LIB)/relocatable
+	$(MKDIR) -p $(DESTDIR)$(I_LIB)/relocatable
 endif
-	$(MKDIR) -p $(I_GPR)
-	$(MKDIR) -p $(I_TGP)
-	$(MKDIR) -p $(I_DOC)
+	$(MKDIR) -p $(DESTDIR)$(I_GPR)
+	$(MKDIR) -p $(DESTDIR)$(I_TGP)
+	$(MKDIR) -p $(DESTDIR)$(I_DOC)
 
 install: install_dirs
-	$(CP) src/*.ad* $(I_INC)
-	$(CP) $(BDIR)/static/lib/* $(I_LIB)/static
+	$(CP) src/*.ad* $(DESTDIR)$(I_INC)
+	$(CP) $(BDIR)/static/lib/* $(DESTDIR)$(I_LIB)/static
 ifeq ($(ENABLE_SHARED), true)
-	$(CP) $(BDIR)/relocatable/lib/* $(I_LIB)/relocatable
+	$(CP) $(BDIR)/relocatable/lib/* $(DESTDIR)$(I_LIB)/relocatable
 endif
-	$(CP) $(BDIR)/static/bin/* $(I_BIN)
-	$(CP) config/templates_parser.gpr $(I_GPR)
-	$(CP) config/tp_shared.gpr $(I_TGP)
-	$(CP) tp_xmlada.gpr $(I_TGP)
-	$(CP) $(CONFGPR) $(I_TGP)
+	$(CP) $(BDIR)/static/bin/* $(DESTDIR)$(I_BIN)
+	$(CP) config/templates_parser.gpr $(DESTDIR)$(I_GPR)
+	$(CP) config/tp_shared.gpr $(DESTDIR)$(I_TGP)
+	$(CP) tp_xmlada.gpr $(DESTDIR)$(I_TGP)
+	$(CP) $(CONFGPR) $(DESTDIR)$(I_TGP)
 ifeq ($(TP_XMLADA), Installed)
-	$(CP) xsrc/*.ad* $(I_INC)
+	$(CP) xsrc/*.ad* $(DESTDIR)$(I_INC)
 endif
-	$(RM) -f $(I_LIB)/../libtemplates_parser$(SOEXT)
+	$(RM) -f $(DESTDIR)$(I_LIB)/../libtemplates_parser$(SOEXT)
 ifeq ($(ENABLE_SHARED), true)
 ifeq ($(OS), Windows_NT)
-	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(I_BIN)
+	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(DESTDIR)$(I_BIN)
 endif
 endif
-	-$(CP) docs/templates_parser*html $(I_DOC)
-	-$(CP) docs/templates_parser*pdf $(I_DOC)
-	-$(CP) docs/templates_parser*info* $(I_DOC)
+	-$(CP) docs/templates_parser*html $(DESTDIR)$(I_DOC)
+	-$(CP) docs/templates_parser*pdf $(DESTDIR)$(I_DOC)
+	-$(CP) docs/templates_parser*info* $(DESTDIR)$(I_DOC)
 
 clean:
 ifeq ($(AWS),)

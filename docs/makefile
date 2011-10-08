@@ -68,9 +68,9 @@ ifneq (${PDFTEX},)
 	echo Building $@
 	${TEXI2DVI} -p --expand --clean --quiet $<
 else
-	@echo "-----------------------------------------------"
-	@echo "pdftex not fond, cannot build PDF documentation"
-	@echo "-----------------------------------------------"
+	@echo "------------------------------------------------"
+	@echo "pdftex not found, cannot build PDF documentation"
+	@echo "------------------------------------------------"
 endif
 else
 	@echo "--------------------------------------------------"

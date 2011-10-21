@@ -1,0 +1,5 @@
+﻿@@IF@@ @_ONE_@ = 1
+ONE is properly set
+@@ELSE@@
+ONE is not OK
+@@END_IF@@

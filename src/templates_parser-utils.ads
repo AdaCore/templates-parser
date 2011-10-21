@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2010, AdaCore                     --
+--                     Copyright (C) 2004-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -61,6 +61,13 @@ package Templates_Parser.Utils is
 
    function Is_Number (S : String) return Boolean;
    --  Returns true if S is composed of digits only
+
+   --  Byte Order Mark
+
+   BOM_Utf8 : constant String :=
+                Character'Val (16#EF#)
+                & Character'Val (16#BB#)
+                & Character'Val (16#BF#);
 
 private
 

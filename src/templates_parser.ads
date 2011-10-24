@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2010, AdaCore                     --
+--                     Copyright (C) 1999-2011, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -41,6 +41,8 @@ pragma Warnings (Off, Templates_Parser_Tasking);
 package Templates_Parser is
 
    use Ada.Strings.Unbounded;
+
+   Version : constant String := "11.6";
 
    Template_Error : exception;
 

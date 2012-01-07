@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2005-2010, AdaCore                    --
+--                      Copyright (C) 2005-2012, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -160,11 +160,11 @@ procedure Testme is
 
 begin
    if Command_Line.Argument_Count = 2 then
-     if Command_Line.Argument (2) = "kut" then
-        KUT := True;
-     elsif Command_Line.Argument (2) = "cache" then
-        Cached := True;
-     end if;
+      if Command_Line.Argument (2) = "kut" then
+         KUT := True;
+      elsif Command_Line.Argument (2) = "cache" then
+         Cached := True;
+      end if;
    end if;
 
    declare

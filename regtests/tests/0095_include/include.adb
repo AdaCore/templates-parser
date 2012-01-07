@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2005-2010, AdaCore                    --
+--                      Copyright (C) 2005-2012, AdaCore                    --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -42,6 +42,6 @@ begin
    Text_IO.Put_Line (Templates_Parser.Parse ("include_1.html", Translations));
 exception
    when E : others =>
-      Text_IO.Put_Line 
-	("raised " & Exception_Name (E) & " : " & Exception_Message (E));
+      Text_IO.Put_Line
+        ("raised " & Exception_Name (E) & " : " & Exception_Message (E));
 end Include;

@@ -1,8 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                          Copyright (C) 2005-2007                         --
---                                  AdaCore                                 --
+--                     Copyright (C) 2005-2012, AdaCore                     --
 --                                                                          --
 --  This library is free software; you can redistribute it and/or modify    --
 --  it under the terms of the GNU General Public License as published by    --
@@ -56,12 +55,12 @@ procedure Regtst2 is
       procedure Start is
       begin
          State := True;
-      end;
+      end Start;
 
       entry Wait when State is
       begin
          null;
-      end;
+      end Wait;
 
    end Start_Line;
 
@@ -86,7 +85,7 @@ procedure Regtst2 is
    exception
       when E : others =>
          Put_Line (Ada.Exceptions.Exception_Information (E));
-   end;
+   end Parser;
 
    Parsers : array (1 .. 20) of Parser;
 

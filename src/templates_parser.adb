@@ -27,9 +27,9 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-with Ada.Exceptions;
-with Ada.Characters.Handling;
 with Ada.Calendar;
+with Ada.Characters.Handling;
+with Ada.Exceptions;
 with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
@@ -4581,8 +4581,9 @@ package body Templates_Parser is
                end Check;
 
                function Check (T : Data.Tree) return Natural is
-                  use type Data.NKind;
                   use type Data.Attribute;
+                  use type Data.NKind;
+
                   Iteration : Natural := Natural'First;
                   D         : Data.Tree := T;
                begin
@@ -4711,8 +4712,8 @@ package body Templates_Parser is
            (Var   : Data.Tag_Var;
             State : Parse_State) return String
          is
-            use type Data.NKind;
             use type Data.Attribute;
+            use type Data.NKind;
             use type Data.Parameters;
          begin
             pragma Assert (Var.N /= -1);
@@ -4869,8 +4870,8 @@ package body Templates_Parser is
             State        : Parse_State;
             Is_Composite : access Boolean) return String
          is
-            use type Filter.Set_Access;
             use type Data.Parameters;
+            use type Filter.Set_Access;
 
             C        : aliased Filter.Filter_Context :=
                          (State.F_Params'Length,

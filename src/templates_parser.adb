@@ -3589,7 +3589,8 @@ package body Templates_Parser is
             --  Then check for named ones
 
             declare
-               Sep, SP, EP : Natural := Parameters'First;
+               SP, EP : Natural;
+               Sep    : Natural := Parameters'First;
             begin
                loop
                   Sep := Strings.Fixed.Index (Parameters, "=>", From => Sep);
@@ -3617,7 +3618,7 @@ package body Templates_Parser is
                      SP := SP - 1;
                   end loop;
 
-                  if EP >= SP and then Parameters (EP) in '0' .. '9' then
+                  if Parameters (EP) in '0' .. '9' then
                      Count := Natural'Max
                        (Count, Natural'Value (Parameters (SP .. EP)));
                   end if;

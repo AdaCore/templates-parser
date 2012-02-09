@@ -7,6 +7,7 @@ docs/ada.sed
 docs/demo*
 docs/genout
 docs/if_inline*
+docs/macro*
 docs/matrix*
 docs/table*
 docs/table_if*
@@ -25,6 +26,6 @@ docs/user.tmplt.texi
 docs/user1*
 docs/user2*
 makefile.setup
-tp_xmlada.gpr
-regtests/out
 regtests/*.pyc
+regtests/out
+tp_xmlada.gpr

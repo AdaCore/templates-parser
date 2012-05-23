@@ -370,11 +370,10 @@ package body Macro is
                      Replace (T, T.Var.N);
 
                   elsif Vars.Contains (To_String (T.Var.Name)) then
-                     --  This is a variable that exists into the map.
+                     --  This is a variable that exists in the map.
                      --  It means that this variable is actually the
                      --  name of a SET which actually has been passed
                      --  a reference to another variable.
-
                      declare
                         E : constant Definitions.Tree :=
                               Vars.Element (To_String (T.Var.Name));
@@ -398,8 +397,9 @@ package body Macro is
                      end;
 
                   else
-                     --  This is undefined, replace by an empty string
-                     Replace (T, "");
+                     --  Preserve the node as it is. It is likely refering to a
+                     --  variable that was defined outside of the macro.
+                     null;
                   end if;
 
                when Expr.Op =>

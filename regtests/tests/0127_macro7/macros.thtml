@@ -1,0 +1,12 @@
+@@SET@@ ACTIVE = $1
+
+@@MACRO(CREATE_LINK)@@
+@@IF@@ @_ACTIVE_@ = @_$1_@
+same
+@@ELSE@@
+different
+@@END_IF@@
+@@END_MACRO@@
+
+@_CREATE_LINK(Page1)_@
+@_CREATE_LINK(Page2)_@

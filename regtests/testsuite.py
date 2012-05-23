@@ -1,4 +1,4 @@
-#!/usr/bin/env gnatpython
+#!/usr/bin/env python
 """./testsuite.py [options] [test name]
 
 Run the templates_parser testsuite

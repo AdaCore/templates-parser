@@ -23,7 +23,7 @@ build:
 		-XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
 
 test:  build
-	./testsuite.py --jobs=4
+	PATH=.:${PATH} ./testsuite.py --jobs=4
 
 clean:
 	-$(GNAT) clean -XLIBRARY_TYPE=static \

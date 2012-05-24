@@ -365,12 +365,16 @@ package body Macro is
                   null;
 
                when Expr.Var =>
-                  if T.Var.N > 0
-                    and then T.Var.N <= Parameters'Length
-                    and then Parameters (T.Var.N) /= null
-                  then
-                     --  This is a reference to replace
-                     Replace (T, T.Var.N);
+                  if T.Var.N > 0 then
+                     if T.Var.N <= Parameters'Length
+                       and then Parameters (T.Var.N) /= null
+                     then
+                        --  This is a reference to replace
+                        Replace (T, T.Var.N);
+                     else
+                        --  Referencing a parameter that does not exist
+                        Replace (T, "");
+                     end if;
 
                   elsif Vars.Contains (To_String (T.Var.Name)) then
                      --  This is a variable that exists in the map.

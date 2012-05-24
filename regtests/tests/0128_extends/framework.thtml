@@ -1,0 +1,16 @@
+Param is @_$1_@
+<div class="block1">
+   @@BLOCK(BLOCK1)@@
+default for @_$1_@ block1
+   @@END_BLOCK@@
+</div>
+<div class="block2">
+   @@BLOCK(BLOCK2)@@
+default for @_$1_@ block2
+   @@END_BLOCK@@
+</div>
+<div class="block3">
+   @@BLOCK(BLOCK3)@@
+default for @_$1_@ block3
+   @@END_BLOCK@@
+</div>

@@ -34,7 +34,7 @@ with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Unchecked_Deallocation;
-
+with Ada.Text_IO;
 with GNAT.Calendar.Time_IO;
 with GNAT.Regpat;
 
@@ -77,6 +77,10 @@ package body Templates_Parser is
    Else_Token                 : constant String := "@@ELSE@@";
    End_If_Token               : constant String := "@@END_IF@@";
    Include_Token              : constant String := "@@INCLUDE@@";
+   Extends_Token              : constant String := "@@EXTENDS@@";
+   End_Extends_Token          : constant String := "@@END_EXTENDS@@";
+   Block_Token                : constant String := "@@BLOCK@@";
+   End_Block_Token            : constant String := "@@END_BLOCK@@";
    Inline_Token               : constant String := "@@INLINE@@";
    End_Inline_Token           : constant String := "@@END_INLINE@@";
    A_Terminate_Sections_Token : constant String := "TERMINATE_SECTIONS";
@@ -844,6 +848,8 @@ package body Templates_Parser is
                   Section_Block, --  a TABLE block (common, section)
                   Section_Stmt,  --  a TABLE section
                   Include_Stmt,  --  an INCLUDE tag statement
+                  Extends_Stmt,  --  an EXTENDS tag statement
+                  Block_Stmt,    --  a BLOCK tag statement
                   Inline_Stmt);  --  an INLINE tag statement
 
    --  A template line is coded as a suite of Data and Var elements
@@ -870,6 +876,16 @@ package body Templates_Parser is
 
    Null_Static_Tree : constant Static_Tree := (null, null);
 
+   package Tree_Map is
+      new Containers.Indefinite_Hashed_Maps
+     (String, Tree, Strings.Hash, "=", "=");
+
+   type Included_File_Info is record
+      File       : Static_Tree;
+      Filename : Data.Tree;
+      Params   : Data.Parameters;
+   end record;
+
    type Node (Kind : Nkind) is record
       Next : Tree;
       Line : Natural;
@@ -878,7 +894,10 @@ package body Templates_Parser is
          when Info =>
             Filename  : Unbounded_String;         -- Name of the file
             Timestamp : Configuration.Time_Stamp; -- Date/Time of last change
-            I_File    : Tree;                     -- Included file references
+
+            I_File    : Tree;
+            --  Included file references; Nodes are Include_Stmt or
+            --  Extends_Stmt
 
          when C_Info =>
             Obsolete  : Boolean := False;    -- True if newer version in cache
@@ -894,6 +913,14 @@ package body Templates_Parser is
             Cond      : Expr.Tree;
             N_True    : Tree;
             N_False   : Tree;
+
+         when Extends_Stmt =>
+            N_Extends : Tree;  --  The BLOCK children
+            E_Included : Included_File_Info;  --  Extended file
+
+         when Block_Stmt =>
+            B_Name    : Unbounded_String;
+            N_Block   : Tree;
 
          when Table_Stmt =>
             Terminate_Sections : Boolean;
@@ -911,9 +938,7 @@ package body Templates_Parser is
             N_Section : Tree;
 
          when Include_Stmt =>
-            File       : Static_Tree;
-            I_Filename : Data.Tree;
-            I_Params   : Data.Parameters;
+            I_Included : Included_File_Info;
 
          when Inline_Stmt =>
             Before  : Unbounded_String;
@@ -1530,6 +1555,19 @@ package body Templates_Parser is
    -----------
 
    function Clone (T : Tree) return Tree is
+      procedure Clone (Included : in out Included_File_Info);
+      --  Clone the fields in Included
+
+      procedure Clone (Included : in out Included_File_Info) is
+      begin
+         Included.Filename := Data.Clone (Included.Filename);
+         Included.Params :=
+           new Data.Parameter_Set'(Included.Params.all);
+         for K in Included.Params'Range loop
+            Included.Params (K) := Data.Clone (Included.Params (K));
+         end loop;
+      end Clone;
+
       N : Tree;
    begin
       if T /= null then
@@ -1550,6 +1588,13 @@ package body Templates_Parser is
             when Table_Stmt =>
                N.Blocks := Clone (N.Blocks);
 
+            when Extends_Stmt =>
+               N.N_Extends := Clone (N.N_Extends);
+               Clone (N.E_Included);
+
+            when Block_Stmt =>
+               N.N_Block := Clone (N.N_Block);
+
             when Section_Block =>
                N.Common := Clone (N.Common);
                N.Sections := Clone (N.Sections);
@@ -1564,11 +1609,7 @@ package body Templates_Parser is
                N.Def := Definitions.Clone (N.Def);
 
             when Include_Stmt =>
-               N.I_Filename := Data.Clone (N.I_Filename);
-               N.I_Params := new Data.Parameter_Set'(N.I_Params.all);
-               for K in N.I_Params'Range loop
-                  N.I_Params (K) := Data.Clone (N.I_Params (K));
-               end loop;
+               Clone (N.I_Included);
 
             when C_Info =>
                null;
@@ -2077,8 +2118,10 @@ package body Templates_Parser is
          Parse_If,               --  in a if statement
          Parse_Elsif,            --  in elsif part of a if statement
          Parse_Else,             --  in else part of a if statement
+         Parse_Extends,          --  in an extends statement
+         Parse_Block,            --  in an extends' block statement
          Parse_Table,            --  in a table statement
-         Parse_Block,            --  in a table block statement
+         Parse_Table_Block,      --  in a table block statement
          Parse_Section,          --  in new section
          Parse_Section_Content,  --  in section content
          Parse_Inline,           --  in an inline block statement
@@ -2446,6 +2489,12 @@ package body Templates_Parser is
          --  block. In such a block the spaces before and after text are
          --  meaningless and LF are replaced by the given separator.
 
+         procedure Parse_Included_File
+           (Included : in out Included_File_Info;
+            Error    : out Boolean);
+         --  Parse the include file and parameters for a @@INCLUDE@@ or
+         --  @@EXTENDS@@ statement
+
          ------------------
          -- Count_Blocks --
          ------------------
@@ -2567,13 +2616,84 @@ package body Templates_Parser is
             Rewrite (T, Last => True, In_Table => False);
          end Rewrite_Inlined_Block;
 
+         -------------------------
+         -- Parse_Included_File --
+         -------------------------
+
+         procedure Parse_Included_File
+           (Included : in out Included_File_Info;
+            Error    : out Boolean)
+         is
+            File : constant String := To_String (Get_First_Parameter);
+         begin
+            Error := False;
+            Included.Filename := Data.Parse (File);
+
+            if Included.Filename.Kind = Data.Text
+              and then Included.Filename.Next = null
+            then
+               --  In the case of static strings we load the include file
+               --  now.
+               declare
+                  I_Filename : constant String :=
+                    Build_Include_Pathname (Filename, File);
+               begin
+                  Included.File := Load (I_Filename, Cached, True);
+               exception
+                  when IO_Exceptions.Name_Error =>
+                     --  File not found, this is an error only if we are not
+                     --  inside a conditional.
+                     if not In_If then
+                        Error_Include_Message :=
+                          To_Unbounded_String
+                          ("Include file " & I_Filename & " not found.");
+                        Error := True;
+                        return;
+                     end if;
+
+                  when E : others =>
+                     --  Error while parsing the include file, record this
+                     --  error. Let the parser exit properly from the
+                     --  recursion to be able to release properly the memory
+                     --  before raising an exception.
+
+                     Error_Include_Message :=
+                       To_Unbounded_String (Exception_Message (E));
+                     Error := True;
+                     return;
+               end;
+
+               --  We do not need to keep reference to the include file in
+               --  this case. The filename is static and already loaded.
+               Data.Release (Included.Filename);
+            end if;
+
+            --  Move past @@INCLUDE@@
+
+            First := First + 11;
+
+            while First < Last and then Buffer (First) = ' ' loop
+               First := First + 1;
+            end loop;
+
+            declare
+               P_Set : constant Parameter_Set :=
+                 (0 => To_Unbounded_String (File))
+                 & Get_Parameters
+                 (Get_All_Parameters (At_Least_One => False));
+            begin
+               Included.Params := Data.To_Data_Parameters (P_Set);
+            end;
+         end Parse_Included_File;
+
          T : Tree;
+         Error : Boolean;
 
       begin
          if not No_Read
            and then Mode /= Parse_Section
            and then Mode /= Parse_Elsif
-           and then Mode /= Parse_Block
+           and then Mode /= Parse_Table_Block
          then
             if Get_Next_Line then
                return null;
@@ -2629,6 +2749,16 @@ package body Templates_Parser is
                     ("@@END_MACRO@@ found outside a @@MACRO@@ statement");
                end if;
 
+            when Parse_Extends =>
+               if Is_Stmt (End_Extends_Token) then
+                  return null;
+               end if;
+
+            when Parse_Block =>
+               if Is_Stmt (End_Block_Token) then
+                  return null;
+               end if;
+
             when Parse_If =>
                if Is_Stmt (Else_Token)
                  or else Is_Stmt (Elsif_Token)
@@ -2665,7 +2795,7 @@ package body Templates_Parser is
                   Fatal_Error ("@@ELSIF@@ found after @@ELSE@@");
                end if;
 
-            when Parse_Block =>
+            when Parse_Table_Block =>
                if Is_Stmt (End_Table_Token) then
                   return null;
                end if;
@@ -2715,7 +2845,7 @@ package body Templates_Parser is
                if Is_Stmt (End_Table_Token) then
                   T.Next := null;
                else
-                  T.Next := Parse (Parse_Block, In_If);
+                  T.Next := Parse (Parse_Table_Block, In_If);
                end if;
 
                return T;
@@ -2816,6 +2946,33 @@ package body Templates_Parser is
 
             return T;
 
+         elsif Is_Stmt (Extends_Token) then
+            T := new Node (Extends_Stmt);
+            Parse_Included_File (T.E_Included, Error);
+
+            if Error then
+               Unchecked_Free (T);
+               return null;
+            end if;
+
+            I_File := new Node'
+              (Kind       => Extends_Stmt,
+               Next       => I_File,
+               Line       => Line,
+               N_Extends  => null,
+               E_Included => T.E_Included);
+
+            T.N_Extends := Parse (Parse_Extends, In_If => In_If);
+            T.Next := Parse (Mode, In_If);
+            return T;
+
+         elsif Is_Stmt (Block_Token, Extended => True) then
+            T := new Node (Block_Stmt);
+            T.B_Name := To_Unbounded_String (Get_Tag_Parameter (1));
+            T.N_Block := Parse (Parse_Block, In_If => In_If);
+            T.Next := Parse (Mode, In_If);
+            return T;
+
          elsif Is_Stmt (Table_Token, Extended => True) then
             T := new Node (Table_Stmt);
 
@@ -2861,7 +3018,7 @@ package body Templates_Parser is
                end;
             end loop;
 
-            T.Blocks       := Parse (Parse_Block, In_If);
+            T.Blocks       := Parse (Parse_Table_Block, In_If);
             T.Next         := Parse (Mode, In_If);
             T.Blocks_Count := Count_Blocks (T.Blocks);
 
@@ -2903,77 +3060,21 @@ package body Templates_Parser is
 
          elsif Is_Stmt (Include_Token) then
             T := new Node (Include_Stmt);
-
             T.Line := Line;
 
-            declare
-               File : constant String := To_String (Get_First_Parameter);
-            begin
-               T.I_Filename := Data.Parse (File);
+            Parse_Included_File (T.I_Included, Error);
 
-               if T.I_Filename.Kind = Data.Text
-                 and then T.I_Filename.Next = null
-               then
-                  --  In the case of static strings we load the include file
-                  --  now.
-                  declare
-                     I_Filename : constant String :=
-                                    Build_Include_Pathname (Filename, File);
-                  begin
-                     T.File := Load (I_Filename, Cached, True);
-                  exception
-                     when IO_Exceptions.Name_Error =>
-                        --  File not found, this is an error only if we are not
-                        --  inside a conditional.
-                        if not In_If then
-                           Error_Include_Message :=
-                             To_Unbounded_String
-                               ("Include file " & I_Filename & " not found.");
-                           Unchecked_Free (T);
-                           return null;
-                        end if;
-
-                     when E : others =>
-                        --  Error while parsing the include file, record this
-                        --  error. Let the parser exit properly from the
-                        --  recursion to be able to release properly the memory
-                        --  before raising an exception.
-
-                        Error_Include_Message :=
-                          To_Unbounded_String (Exception_Message (E));
-
-                        Unchecked_Free (T);
-                        return null;
-                  end;
-
-                  --  We do not need to keep reference to the include file in
-                  --  this case. The filename is static and already loaded.
-                  Data.Release (T.I_Filename);
-               end if;
-
-               --  Move past @@INCLUDE@@
-
-               First := First + 11;
-
-               while First < Last and then Buffer (First) = ' ' loop
-                  First := First + 1;
-               end loop;
-
-               declare
-                  P_Set : constant Parameter_Set :=
-                            (0 => To_Unbounded_String (File))
-                            & Get_Parameters
-                                (Get_All_Parameters (At_Least_One => False));
-               begin
-                  T.I_Params := Data.To_Data_Parameters (P_Set);
-               end;
-            end;
+            if Error then
+               Unchecked_Free (T);
+               return null;
+            end if;
 
             I_File := new Node'
-              (Include_Stmt, I_File, Line, T.File, T.I_Filename, T.I_Params);
-
+              (Kind       => Include_Stmt,
+               Next       => I_File,
+               Line       => Line,
+               I_Included => T.I_Included);
             T.Next := Parse (Mode, In_If);
-
             return T;
 
          elsif Is_Stmt (Macro_Token, Extended => True) then
@@ -3219,6 +3320,10 @@ package body Templates_Parser is
                     or else Is_Stmt (Table_Token, Extended => True)
                     or else Is_Stmt (Section_Token)
                     or else Is_Stmt (End_Table_Token)
+                    or else Is_Stmt (End_Extends_Token)
+                    or else Is_Stmt (End_Block_Token)
+                    or else Is_Stmt (Extends_Token)
+                    or else Is_Stmt (Block_Token, Extended => True)
                     or else Is_Stmt (Begin_Token)
                     or else Is_Stmt (End_Token)
                     or else Is_Stmt (Set_Token)
@@ -3770,6 +3875,13 @@ package body Templates_Parser is
       Lazy_Set : Translate_Set;
       Output   : Boolean;
 
+      Named_Blocks  : Tree_Map.Map;
+      --  The blocks for @@EXTENDS@@
+
+      In_Extends    : Natural := 0;
+      --  nesting level of @@EXTENDS@@ block we are analyzing. 0 outside
+      --  such a block.
+
       procedure Analyze
         (T     : Tree;
          State : Parse_State);
@@ -3802,6 +3914,9 @@ package body Templates_Parser is
          --  Analyse the data tree and replace all variables by the
          --  correspinding value specified in Translations. This procedure
          --  catenate the result into Results variable.
+
+         procedure Analyze (Included : in out Included_File_Info);
+         --  Analyze the imported file
 
          procedure Get_Max
            (T          : Tree;
@@ -4407,6 +4522,11 @@ package body Templates_Parser is
                --  Returns the length of the largest vector tag found on the
                --  include parameters.
 
+               function Get_Max_Lines
+                 (Included : Included_File_Info;
+                  N        : Positive) return Natural;
+               --  Return the max lines for Included
+
                -----------
                -- Check --
                -----------
@@ -4628,6 +4748,15 @@ package body Templates_Parser is
                   return Iteration;
                end Check;
 
+               function Get_Max_Lines
+                 (Included : Included_File_Info;
+                  N        : Positive) return Natural is
+               begin
+                  return Natural'Max
+                    (Get_Max_Lines (Included.File.Info, N),
+                     Check (Included.Params));
+               end Get_Max_Lines;
+
             begin
                if T = null then
                   return Natural'First;
@@ -4662,6 +4791,18 @@ package body Templates_Parser is
                           (Get_Max_Lines (T.Common, N),
                            Get_Max_Lines (T.Sections, N)));
 
+                  when Extends_Stmt =>
+                     return Natural'Max
+                       (Get_Max_Lines (T.E_Included, N),
+                        Natural'Max
+                          (Get_Max_Lines (T.N_Extends, N),
+                           Get_Max_Lines (T.Next, N)));
+
+                  when Block_Stmt =>
+                     return Natural'Max
+                       (Get_Max_Lines (T.Next, N),
+                        Get_Max_Lines (T.N_Block, N));
+
                   when Section_Stmt =>
                      return Natural'Max
                        (Get_Max_Lines (T.Next, N),
@@ -4669,10 +4810,8 @@ package body Templates_Parser is
 
                   when Include_Stmt =>
                      return Natural'Max
-                       (Get_Max_Lines (T.File.Info, N),
-                        Natural'Max
-                          (Check (T.I_Params),
-                           Get_Max_Lines (T.Next, N)));
+                       (Get_Max_Lines (T.I_Included, N),
+                        Get_Max_Lines (T.Next, N));
 
                   when Inline_Stmt =>
                      return Natural'Max
@@ -5204,6 +5343,60 @@ package body Templates_Parser is
             end if;
          end Translate;
 
+         -------------
+         -- Analyze --
+         -------------
+
+         procedure Analyze (Included : in out Included_File_Info) is
+         begin
+            if Included.Filename /= null then
+               --  This is a deferred include file load as the name of the
+               --  include file was not a static string.
+               Flush;
+               Analyze (Included.Filename);
+
+               declare
+                  Filename : constant String := Buffer (1 .. Last);
+                  S_File   : Static_Tree;
+               begin
+                  Last := 0; --  Removes include filename from the buffer
+
+                  S_File := Load (Build_Include_Pathname
+                                  (To_String (State.Filename), Filename),
+                                  Cached, True);
+
+                  if S_File /= Included.File then
+                     if Cached then
+                        if Included.File.C_Info /= null then
+                           Cached_Files.Release (Included.File);
+                        end if;
+                     else
+                        Release (Included.File.Info);
+                     end if;
+                  end if;
+
+                  Included.File := S_File;
+               end;
+            end if;
+
+            Analyze (Included.File.Info,
+                     Parse_State'(Included.Params'Length,
+                                  Cursor        => State.Cursor,
+                                  Max_Lines     => State.Max_Lines,
+                                  Max_Expand    => State.Max_Expand,
+                                  Reverse_Index => State.Reverse_Index,
+                                  Table_Level   => State.Table_Level,
+                                  Inline_Sep    => State.Inline_Sep,
+                                  Filename      => State.Filename,
+                                  Blocks_Count  => State.Blocks_Count,
+                                  I_Params      => Included.Params,
+                                  F_Params      => Flatten_Parameters
+                                     (Included.Params),
+                                  Block         => State.Block,
+                                  Terse_Table   => State.Terse_Table,
+                                  Parent      => L_State'Unchecked_Access));
+         end Analyze;
+
       begin
          if T = null then
             return;
@@ -5310,6 +5503,39 @@ package body Templates_Parser is
                Analyze (T.Next, State);
 
                Pop_Sep (State);
+
+            when Extends_Stmt =>
+               --  Expand all the blocks, and create temporary variables from
+               --  them.
+
+               In_Extends := In_Extends + 1;
+               Analyze (T.N_Extends, State);
+               In_Extends := In_Extends - 1;
+
+               Analyze (T.E_Included);
+
+               --  ??? Should now remove the temporary variables
+
+               Analyze (T.Next, State);
+
+            when Block_Stmt =>
+               if In_Extends = 0 then
+                  declare
+                     B : constant Tree_Map.Cursor :=
+                       Named_Blocks.Find (To_String (T.B_Name));
+                  begin
+                     if Tree_Map.Has_Element (B) then
+                        Analyze (Tree_Map.Element (B), State);
+                     else
+                        --  Use default value
+                        Analyze (T.N_Block, State);
+                     end if;
+                  end;
+               else
+                  --  add the block's expansion to the variables
+                  Named_Blocks.Include (To_String (T.B_Name), T.N_Block);
+               end if;
+               Analyze (T.Next, State);
 
             when Section_Block =>
                declare
@@ -5419,52 +5645,7 @@ package body Templates_Parser is
                                L_State'Unchecked_Access));
 
             when Include_Stmt =>
-               if T.I_Filename /= null then
-                  --  This is a deferred include file load as the name of the
-                  --  include file was not a static string.
-                  Flush;
-                  Analyze (T.I_Filename);
-
-                  declare
-                     Filename : constant String := Buffer (1 .. Last);
-                     S_File   : Static_Tree;
-                  begin
-                     Last := 0; --  Removes include filename from the buffer
-
-                     S_File := Load (Build_Include_Pathname
-                                     (To_String (State.Filename), Filename),
-                                     Cached, True);
-
-                     if S_File /= T.File then
-                        if Cached then
-                           if T.File.C_Info /= null then
-                              Cached_Files.Release (T.File);
-                           end if;
-                        else
-                           Release (T.File.Info);
-                        end if;
-                     end if;
-
-                     T.File := S_File;
-                  end;
-               end if;
-
-               Analyze (T.File.Info,
-                        Parse_State'(T.I_Params'Length,
-                                     Cursor        => State.Cursor,
-                                     Max_Lines     => State.Max_Lines,
-                                     Max_Expand    => State.Max_Expand,
-                                     Reverse_Index => State.Reverse_Index,
-                                     Table_Level   => State.Table_Level,
-                                     Inline_Sep    => State.Inline_Sep,
-                                     Filename      => State.Filename,
-                                     Blocks_Count  => State.Blocks_Count,
-                                     I_Params      => T.I_Params,
-                                     F_Params      => Flatten_Parameters
-                                                        (T.I_Params),
-                                     Block         => State.Block,
-                                     Terse_Table   => State.Terse_Table,
-                                     Parent      => L_State'Unchecked_Access));
+               Analyze (T.I_Included);
                Analyze (T.Next, State);
 
             when Inline_Stmt =>
@@ -5621,6 +5802,22 @@ package body Templates_Parser is
 
    procedure Release (T : in out Tree; Include : Boolean := True) is
       use type Data.Tree;
+
+      procedure Release (Included : in out Included_File_Info);
+      --  Release for Included
+
+      procedure Release (Included : in out Included_File_Info) is
+      begin
+         if Include then
+            Release (Included.File.Info, Include);
+
+            for K in Included.Params'Range loop
+               Data.Release (Included.Params (K));
+            end loop;
+            Data.Unchecked_Free (Included.Params);
+         end if;
+      end Release;
+
    begin
       if T = null then
          return;
@@ -5684,20 +5881,20 @@ package body Templates_Parser is
             Release (T.Common, Include);
             Release (T.Next, Include);
 
+         when Extends_Stmt =>
+            Release (T.N_Extends, Include);
+            Release (T.E_Included);
+            Release (T.Next, Include);
+
+         when Block_Stmt =>
+            Release (T.N_Block, Include);
+
          when Section_Stmt =>
             Release (T.Next, Include);
             Release (T.N_Section, Include);
 
          when Include_Stmt =>
-            if Include then
-               Release (T.File.Info, Include);
-
-               for K in T.I_Params'Range loop
-                  Data.Release (T.I_Params (K));
-               end loop;
-               Data.Unchecked_Free (T.I_Params);
-            end if;
-
+            Release (T.I_Included);
             Release (T.Next, Include);
 
          when Inline_Stmt =>

@@ -1,0 +1,11 @@
+@@EXTENDS@@ framework.thtml (1 => Param1)
+  @@SET@@ P = Param2
+  @@BLOCK(BLOCK1)@@
+  The block1 @_P_@
+  @@END_BLOCK@@
+
+  @@BLOCK(BLOCK2)@@
+  The block2 @_P_@
+  @@END_BLOCK@@
+@@END_EXTENDS@@
+Some text in including file

@@ -1,5 +1,13 @@
 \input texinfo   @c -*-texinfo-*-
 
+@c oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+@c                                                                            o
+@c                   TEMPLATES PARSER DOCUMENTATION                           o
+@c                                                                            o
+@c           Copyright (C) 2005-2012, AdaCore                                 o
+@c oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+
+
 @c %**start of header
 @setfilename templates_parser.info
 @settitle Templates Parser User's Guide
@@ -50,7 +58,7 @@
 
 Copyright @copyright{} 1999-2004, Pascal Obry
 
-Copyright @copyright{} 2005-2010, AdaCore
+Copyright @copyright{} 2005-2012, AdaCore
 
 @*
 
@@ -1151,6 +1159,7 @@ by @code{@@@@}. The tag statements are:
 * TABLE statement::
 * SET statement::
 * INLINE statement::
+* EXTENDS and BLOCK statements::
 * MACRO statement::
 @end menu
 
@@ -1737,6 +1746,51 @@ For example:
 @include macro.tmplt.texi
 
 For using macros @pxref{Macros}.
+
+@c ---------------------------------------------------------------------------
+@node EXTENDS and BLOCK statements
+@section EXTENDS and BLOCK statements
+@cindex Command, EXTENDS
+@cindex Command, BLOCK
+@c ---------------------------------------------------------------------------
+
+@noindent
+The @code{EXTENDS} statement is similar to @code{INCLUDE}. However, it is
+possible to replace parts of the included file. These parts are defined
+with the @code{BLOCK} statement.
+
+@noindent
+Syntax:
+
+@TPEXP{@@@@EXTENDS@@@@ filename [variables]
+   @@@@BLOCK(name1)@@@@
+      ...
+   @@@@END_BLOCK@@@@
+
+   @@@@BLOCK(name2)@@@@
+      ...
+   @@@@END_BLOCK@@@@
+@@@@END_EXTENDS@@@@}
+
+And in the included file (@file{filename} in the above example):
+
+@TPEXP{...
+
+   @@@@BLOCK(name1)@@@@
+      default contents1
+   @@@@END_BLOCK@@@@
+
+   @@@@BLOCK(name3)@@@@
+      default contents3
+   @@@@END_BLOCK@@@@
+   ...
+}
+
+When parsing the first file, it will automatically include the
+contents of the second file. However, the various @code{BLOCK}s
+will be replaced by the value given in the @code{EXTENDS} statement,
+if a value is provided. If no value is provided, the default value
+given in the included file will be used.
 
 @c ----------------------------------------------------------------------
 @node Macros

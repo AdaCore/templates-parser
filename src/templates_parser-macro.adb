@@ -143,6 +143,9 @@ package body Macro is
          --  variable mapping or does nothing if Parameters(N) does not exists
          --  or no variable mapping found.
 
+         procedure Rewrite (Included : in out Included_File_Info);
+         --  Process included files (from @@INCLUDE@@ or @@EXTENDS@@)
+
          -------------
          -- Rewrite --
          -------------
@@ -411,6 +414,31 @@ package body Macro is
             end case;
          end Rewrite;
 
+         -------------
+         -- Rewrite --
+         -------------
+
+         procedure Rewrite (Included : in out Included_File_Info) is
+         begin
+            for K in Included.Params'Range loop
+               declare
+                  use type Data.Tree;
+                  use type Data.NKind;
+                  P   : Data.Tree renames Included.Params (K);
+                  Old : Data.Tree;
+               begin
+                  if P /= null
+                    and then P.Kind = Data.Var
+                    and then P.Var.N > 0
+                  then
+                     Old := Included.Params (K);
+                     Included.Params (K) := Data.Clone (Parameters (P.Var.N));
+                     Data.Release (Old);
+                  end if;
+               end;
+            end loop;
+         end Rewrite;
+
          N     : Tree := T;
          Prev  : Tree;
          Moved : Boolean := False;
@@ -462,23 +490,10 @@ package body Macro is
                   Rewrite_Tree (N.N_Section, Parameters);
 
                when Include_Stmt =>
-                  for K in N.I_Params'Range loop
-                     declare
-                        use type Data.Tree;
-                        use type Data.NKind;
-                        P   : Data.Tree renames N.I_Params (K);
-                        Old : Data.Tree;
-                     begin
-                        if P /= null
-                          and then P.Kind = Data.Var
-                          and then P.Var.N > 0
-                        then
-                           Old := N.I_Params (K);
-                           N.I_Params (K) := Data.Clone (Parameters (P.Var.N));
-                           Data.Release (Old);
-                        end if;
-                     end;
-                  end loop;
+                  Rewrite (N.I_Included);
+
+               when Extends_Stmt =>
+                  Rewrite (N.E_Included);
 
                when others =>
                   null;

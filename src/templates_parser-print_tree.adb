@@ -38,6 +38,9 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
    procedure Print_Indent (L : Natural);
    --  Output proper number of spaces for identation
 
+   procedure Print (Included : Included_File_Info);
+   --  Print info for included file
+
    ------------------
    -- Print_Indent --
    ------------------
@@ -47,6 +50,33 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
    begin
       Text_IO.Put ((L * 2) * ' ');
    end Print_Indent;
+
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print (Included : Included_File_Info) is
+   begin
+      if Included.File = Null_Static_Tree then
+         Data.Print_Tree (Included.Filename);
+      else
+         Text_IO.Put_Line (To_String (Included.File.Info.Filename));
+      end if;
+
+      declare
+         use type Data.Tree;
+      begin
+         for K in Included.Params'Range loop
+            if Included.Params (K) /= null then
+               Print_Indent (Level + 2);
+               Text_IO.Put ("$" & Utils.Image (K) & " = ");
+               Data.Print_Tree (Included.Params (K));
+            end if;
+         end loop;
+      end;
+
+      Print_Tree (Included.File.Info, Level + 1);
+   end Print;
 
 begin
    if T = null then
@@ -60,14 +90,25 @@ begin
          Text_IO.Put_Line ("[INFO] " & To_String (T.Filename));
          declare
             I : Tree := T.I_File;
+            Included : Included_File_Info;
          begin
             while I /= null loop
                Text_IO.Put (" -> ");
-               if I.File = Null_Static_Tree then
-                  Data.Print_Tree (I.I_Filename);
+
+               if I.Kind = Include_Stmt then
+                  Included := I.I_Included;
+               elsif I.Kind = Extends_Stmt then
+                  Included := I.E_Included;
                else
-                  Text_IO.Put_Line (To_String (I.File.Info.Filename));
+                  raise Program_Error;
                end if;
+
+               if Included.File = Null_Static_Tree then
+                  Data.Print_Tree (Included.Filename);
+               else
+                  Text_IO.Put_Line (To_String (Included.File.Info.Filename));
+               end if;
+
                I := I.Next;
             end loop;
          end;
@@ -127,6 +168,16 @@ begin
          Text_IO.Put_Line ("[END_TABLE]");
          Print_Tree (T.Next, Level);
 
+      when Extends_Stmt =>
+         Text_IO.Put_Line ("[EXTENDS]");
+         Print_Tree (T.Next, Level + 1);
+         Print_Tree (T.N_Extends, Level);
+
+      when Block_Stmt =>
+         Text_IO.Put_Line ("[BLOCK]");
+         Print_Tree (T.Next, Level + 1);
+         Print_Tree (T.N_Block, Level);
+
       when Section_Block =>
          Text_IO.Put_Line ("[BLOCK]");
 
@@ -151,26 +202,7 @@ begin
 
       when Include_Stmt =>
          Text_IO.Put ("[INCLUDE] ");
-
-         if T.File = Null_Static_Tree then
-            Data.Print_Tree (T.I_Filename);
-         else
-            Text_IO.Put_Line (To_String (T.File.Info.Filename));
-         end if;
-
-         declare
-            use type Data.Tree;
-         begin
-            for K in T.I_Params'Range loop
-               if T.I_Params (K) /= null then
-                  Print_Indent (Level + 2);
-                  Text_IO.Put ("$" & Utils.Image (K) & " = ");
-                  Data.Print_Tree (T.I_Params (K));
-               end if;
-            end loop;
-         end;
-
-         Print_Tree (T.File.Info, Level + 1);
+         Print (T.I_Included);
          Print_Tree (T.Next, Level);
 
       when Inline_Stmt =>

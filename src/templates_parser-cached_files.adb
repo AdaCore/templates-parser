@@ -303,12 +303,18 @@ package body Cached_Files is
          return False;
       end if;
 
-      --  Check all include files
+      --  Check all included files
 
       P := T.I_File;
 
       while P /= null loop
-         Result := Up_To_Date (P.File.Info);
+         if P.Kind = Include_Stmt then
+            Result := Up_To_Date (P.I_Included.File.Info);
+         elsif P.Kind = Extends_Stmt then
+            Result := Up_To_Date (P.E_Included.File.Info);
+         else
+            raise Program_Error;
+         end if;
 
          if not Result then
             return False;
@@ -340,12 +346,19 @@ package body Cached_Files is
             T.Info.Next.Used := T.Info.Next.Used - 1;
       end case;
 
-      --  And mark all include files
+      --  And mark all included files
 
       P := T.Info.I_File;
 
       while P /= null loop
-         Update_Used_Counter (P.File, Mode);
+         if P.Kind = Include_Stmt then
+            Update_Used_Counter (P.I_Included.File, Mode);
+         elsif P.Kind = Extends_Stmt then
+            Update_Used_Counter (P.E_Included.File, Mode);
+         else
+            raise Program_Error;
+         end if;
+
          P := P.Next;
       end loop;
    end Update_Used_Counter;

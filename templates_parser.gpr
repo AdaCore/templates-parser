@@ -28,6 +28,7 @@ project Templates_Parser is
 
    for Library_Name use "templates_parser";
    for Library_Kind use TP_Shared.Library_Type;
+   for Library_Version use "libtemplates_parser-" & external("VERSION") & ".so";
 
    case TP_Shared.XMLAda is
       when "Installed" =>

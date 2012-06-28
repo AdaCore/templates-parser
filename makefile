@@ -101,10 +101,10 @@ GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 
 build: setup_config tp_xmlada.gpr
 	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=static \
-		-Ptools/tools
+		-Ptools/tools $(GNATMAKE_FLAGS)
 ifeq ($(ENABLE_SHARED), true)
 	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
-		-Ptemplates_parser
+		-Ptemplates_parser $(GNATMAKE_FLAGS)
 endif
 
 tp_xmlada.gpr: setup

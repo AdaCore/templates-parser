@@ -40,6 +40,8 @@ TEXIFILES = $(ADBFILES:=.texi) $(ADSFILES:=.texi) $(ADAFILES_NORUN:=.texi) \
 
 GFLAGS	  = -I../src -I../include
 
+GNATMAKE_FLAGS ?= -q
+
 DOCS	  = templates_parser.info templates_parser.html \
 		templates_parser.txt templates_parser.pdf
 
@@ -106,8 +108,8 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
-	$(GNAT) make -p -q -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
-		-XTP_XMLADA=Disabled -Pdocs $(EXEFILES)
+	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+		-XTP_XMLADA=Disabled -Pdocs $(EXEFILES) $(GNATMAKE_FLAGS)
 
 %.adb.res: %.adb
 	echo "@TPEXP{"         	  > $<.res

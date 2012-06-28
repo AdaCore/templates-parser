@@ -19,7 +19,7 @@
 .SILENT:
 
 build:
-	$(GNAT) make -q -p -XLIBRARY_TYPE=static \
+	$(GNAT) make -q -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
 		-XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
 
 test:  build

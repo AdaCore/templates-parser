@@ -34,6 +34,7 @@ BDIR           = .build/$(PLATFORM)/$(DR_BUILD)
 
 prefix	= $(dir $(shell which gnatls))..
 
+ENABLE_STATIC = true
 ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
 		-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 TP_XMLADA    = $(shell $(GNAT) make -c -q -p \
@@ -94,18 +95,23 @@ ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
+		ENABLE_STATIC="$(ENABLE_STATIC)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
 
 GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 		-XPROCESSORS=$(PROCESSORS)
 
 build: setup_config tp_xmlada.gpr
+ifeq ($(ENABLE_STATIC), true)
 	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=static \
-		-Ptools/tools $(GNATMAKE_FLAGS)
+		-Ptemplates_parser $(GNATMAKE_FLAGS)
+endif
 ifeq ($(ENABLE_SHARED), true)
 	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
 		-Ptemplates_parser $(GNATMAKE_FLAGS)
 endif
+	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
+		-Ptools/tools $(GNATMAKE_FLAGS)
 
 tp_xmlada.gpr: setup
 
@@ -122,14 +128,18 @@ ifeq ($(TP_XMLADA), Installed)
 else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 endif
+ifeq ($(ENABLE_STATIC), true)
 	$(MKDIR) -p $(BDIR)/static/obj
 	$(MKDIR) -p $(BDIR)/static/lib
+endif
 ifeq ($(ENABLE_SHARED), true)
 	$(MKDIR) -p $(BDIR)/relocatable/obj
 	$(MKDIR) -p $(BDIR)/relocatable/lib
 endif
 	echo "prefix=$(prefix)" > makefile.setup
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
+	echo "LIBRARY_TYPE=$(LIBRARY_TYPE)" >> makefile.setup
+	echo "ENABLE_STATIC=$(ENABLE_STATIC)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
 	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
@@ -146,7 +156,9 @@ setup_config:
 install_dirs:
 	$(MKDIR) -p $(DESTDIR)$(I_BIN)
 	$(MKDIR) -p $(DESTDIR)$(I_INC)
+ifeq ($(ENABLE_STATIC), true)
 	$(MKDIR) -p $(DESTDIR)$(I_LIB)/static
+endif
 ifeq ($(ENABLE_SHARED), true)
 	$(MKDIR) -p $(DESTDIR)$(I_LIB)/relocatable
 endif
@@ -156,11 +168,13 @@ endif
 
 install: install_dirs
 	$(CP) src/*.ad* $(DESTDIR)$(I_INC)
+ifeq ($(ENABLE_STATIC), true)
 	$(CP) $(BDIR)/static/lib/* $(DESTDIR)$(I_LIB)/static
+endif
 ifeq ($(ENABLE_SHARED), true)
 	$(CP) $(BDIR)/relocatable/lib/* $(DESTDIR)$(I_LIB)/relocatable
 endif
-	$(CP) $(BDIR)/static/bin/* $(DESTDIR)$(I_BIN)
+	$(CP) $(BDIR)/$(LIBRARY_TYPE)/bin/* $(DESTDIR)$(I_BIN)
 	$(CP) config/templates_parser.gpr $(DESTDIR)$(I_GPR)
 	$(CP) config/tp_shared.gpr $(DESTDIR)$(I_TGP)
 	$(CP) tp_xmlada.gpr $(DESTDIR)$(I_TGP)
@@ -180,8 +194,10 @@ endif
 
 clean:
 ifeq ($(AWS),)
+ifeq ($(ENABLE_STATIC), true)
 	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
 		-Ptemplates_parser
+endif
 	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
 		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)

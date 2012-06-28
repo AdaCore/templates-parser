@@ -108,7 +108,7 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
-	$(GNAT) make -p -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
+	$(GNAT) make -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) -XPRJ_BUILD=$(PRJ_BUILD) \
 		-XTP_XMLADA=Disabled -Pdocs $(EXEFILES) $(GNATMAKE_FLAGS)
 
 %.adb.res: %.adb

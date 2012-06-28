@@ -7,8 +7,14 @@ Some make variables can be adjusted to change the default setup:
    DEFAULT_LIBRARY_TYPE=[static|relocatable]
         (default is static)
 
+   LIBRARY_TYPE=[static|relocatable]
+        whether to link the tools statically or dynamically (default is static)
+
    prefix=<install directory>
         (default to compiler root directory)
+
+   ENABLE_STATIC=[true|false]
+        (default true)
 
    ENABLE_SHARED=[true|false]
         (default yes on platforms supporting shared libraries)

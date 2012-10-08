@@ -20,11 +20,11 @@
 
 build:
 	$(GNAT) make -q -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
-		-XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
+		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
 
 test:  build
 	PATH=.:${PATH} ./testsuite.py --jobs=4
 
 clean:
 	-$(GNAT) clean -XLIBRARY_TYPE=static \
-		-XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
+		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests

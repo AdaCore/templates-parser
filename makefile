@@ -19,36 +19,52 @@
 .SILENT:
 
 VERSION	= 11.7w
-GNAT	= gnat
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
 LIBRARY_TYPE = static
 PROCESSORS   = 2
-PLATFORM     = native
+HOST	     = $(shell gcc -dumpmachine)
+TARGET	     = $(shell gcc -dumpmachine)
 
 TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
 			else echo tr; fi)
 DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
-BDIR           = .build/$(PLATFORM)/$(DR_BUILD)
+BDIR           = .build/$(TARGET)/$(DR_BUILD)
 
 prefix	= $(dir $(shell which gnatls))..
 
 ENABLE_STATIC = true
-ENABLE_SHARED=$(shell $(GNAT) make -c -q -p \
-		-Pconfig/setup/test_shared 2>/dev/null && echo "true")
-TP_XMLADA    = $(shell $(GNAT) make -c -q -p \
-		-Pconfig/setup/test_xmlada 2>/dev/null \
+ENABLE_SHARED =$(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
+			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
+TP_XMLADA    = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
+			-Pconfig/setup/test_xmlada 2>/dev/null \
 		&& echo "Installed")
 
 -include makefile.setup
 
-I_BIN	= $(prefix)/bin
-I_INC	= $(prefix)/include/templates_parser
-I_LIB	= $(prefix)/lib/templates_parser
-I_GPR	= $(prefix)/lib/gnat
-I_TGP	= $(prefix)/lib/gnat/templates_parser
-I_DOC	= $(prefix)/share/doc/templates_parser
+ifeq ($(HOST), $(TARGET))
+IS_CROSS	= false
+GPROPTS		=
+TPREFIX=$(prefix)
+else
+IS_CROSS	= true
+GPROPTS		= --target=$(TARGET)
+TPREFIX=$(prefix)/$(TARGET)
+endif
+
+GNAT		= gnat
+GPRBUILD	= gprbuild
+GPRCLEAN	= gprclean
+
+#  Install directories
+
+I_BIN	= $(TPREFIX)/bin
+I_INC	= $(TPREFIX)/include/templates_parser
+I_LIB	= $(TPREFIX)/lib/templates_parser
+I_DOC	= $(TPREFIX)/share/doc/templates_parser
+I_GPR	= $(TPREFIX)/lib/gnat
+I_TGP	= $(TPREFIX)/lib/gnat/templates_parser
 
 CP	= cp -p
 MKDIR	= mkdir -p
@@ -95,23 +111,24 @@ ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
-		ENABLE_STATIC="$(ENABLE_STATIC)" \
-		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)"
+		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)" \
+		ENABLE_STATIC="$(ENABLE_STATIC)" TARGET="$(TARGET)"
 
-GPROPTS = -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
-		-XPROCESSORS=$(PROCESSORS) -XVERSION=$(VERSION)
+GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
+		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
+		-XVERSION=$(VERSION)
 
 build: setup_config tp_xmlada.gpr
 ifeq ($(ENABLE_STATIC), true)
-	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=static \
-		-Ptemplates_parser $(GNATMAKE_FLAGS)
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=static \
+		-Ptemplates_parser
 endif
 ifeq ($(ENABLE_SHARED), true)
-	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
-		-Ptemplates_parser $(GNATMAKE_FLAGS)
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
+		-Ptemplates_parser
 endif
-	$(GNAT) make -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
-		-Ptools/tools $(GNATMAKE_FLAGS)
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
+		-Ptools/tools
 
 tp_xmlada.gpr: setup
 
@@ -144,6 +161,7 @@ endif
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
 	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
 	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
+	echo "TARGET=$(TARGET)" >> makefile.setup
 
 setup_config:
 	echo 'project TP_Config is' > $(CONFGPR)
@@ -151,6 +169,7 @@ setup_config:
 	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
 		>> $(CONFGPR)
 	echo '   Tasking := "$(TP_TASKING)";' >> $(CONFGPR)
+	echo '   Target := "$(TARGET)";' >> $(CONFGPR)
 	echo 'end TP_Config;' >> $(CONFGPR)
 
 install_dirs:
@@ -195,13 +214,13 @@ endif
 clean:
 ifeq ($(AWS),)
 ifeq ($(ENABLE_STATIC), true)
-	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
+	-$(GPRCLEAN) -XLIBRARY_TYPE=static $(GPROPTS) \
 		-Ptemplates_parser
 endif
-	-$(GNAT) clean -XLIBRARY_TYPE=static $(GPROPTS) \
+	-$(GPRCLEAN) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" $(GPROPTS) \
 		-Ptools/tools
 ifeq ($(ENABLE_SHARED), true)
-	-$(GNAT) clean -XLIBRARY_TYPE=relocatable $(GPROPTS) \
+	-$(GPRCLEAN) -XLIBRARY_TYPE=relocatable $(GPROPTS) \
 		-Ptemplates_parser
 endif
 endif

@@ -20,20 +20,20 @@ import sys
 
 #  Compute PATH to global test drivers (testme, print_tree)
 
-PLATFORM = os.environ.get("PLATFORM")
+TARGET = os.environ.get("TARGET")
 PRJ_BUILD = os.environ.get("PRJ_BUILD")
 
-if PLATFORM == None:
-    PLATFORM = "native"
+if TARGET != None:
+    TARGET = Run (['gcc', '-dumpmachine']).out.strip('\n')
 else:
-    PLATFORM = PLATFORM.lower()
+    TARGET = TARGET.lower()
 
 if PRJ_BUILD == None:
     PRJ_BUILD = "debug"
 else:
     PRJ_BUILD = PRJ_BUILD.lower()
 
-ep = os.getcwd() + "/../.build/" + PLATFORM + "/" + PRJ_BUILD + "/static/"
+ep = os.getcwd() + "/../.build/" + TARGET + "/" + PRJ_BUILD + "/static/"
 
 
 os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + ep \

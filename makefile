@@ -208,11 +208,3 @@ endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)
 	$(RM) -fr .build makefile.setup
-
-distrib:
-	-rm templates_parser-?.?.tar*
-	tar cf templates_parser-$(VERSION).tar src/templates_parser*ad[sb] \
-		config tools docs xsrc/*.ad* tp_shared.gpr \
-		makefile \
-		templates_parser.gpr
-	gzip -9 templates_parser-$(VERSION).tar

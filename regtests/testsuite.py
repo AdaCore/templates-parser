@@ -23,7 +23,7 @@ import sys
 TARGET = os.environ.get("TARGET")
 PRJ_BUILD = os.environ.get("PRJ_BUILD")
 
-if TARGET != None:
+if TARGET == None:
     TARGET = Run (['gcc', '-dumpmachine']).out.strip('\n')
 else:
     TARGET = TARGET.lower()

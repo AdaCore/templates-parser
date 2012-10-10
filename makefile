@@ -23,7 +23,7 @@ VERSION	= 11.7w
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
 LIBRARY_TYPE = static
-PROCESSORS   = 2
+PROCESSORS   = 0
 HOST	     = $(shell gcc -dumpmachine)
 TARGET	     = $(shell gcc -dumpmachine)
 

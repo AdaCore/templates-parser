@@ -18,6 +18,8 @@
 
 .SILENT:
 
+-include ../makefile.setup
+
 build:
 	$(GNAT) make -q -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
 		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests

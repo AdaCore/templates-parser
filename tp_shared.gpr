@@ -34,7 +34,7 @@ project TP_Shared is
 
    Target := external ("TARGET");
 
-   Processors := External ("PROCESSORS", "2");
+   Processors := External ("PROCESSORS", "0");
 
    -----------------------
    -- Build directories --

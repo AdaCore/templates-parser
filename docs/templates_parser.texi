@@ -730,7 +730,7 @@ occurrences by the corresponding match from @i{REGEXP}. The first match
 in @i{REGEXP} will replace @b{\1}, the second match @b{\2} and so
 on. Each match in @i{REGEXP} must be parenthesized. It replaces only
 the first match. @i{STR} is an optional parameter, its default value
-is @b{\1}. It is possible to space characters in @i{STR} to avoid
+is @b{\1}. It is possible to escape characters in @i{STR} to avoid
 parsing confusions. This is required if you need to have @b{@@_} or
 @b{_@@} or a parenthesis in @i{STR} for example. @i{STR} can be a tag
 variable name. @i{STR} can contain the following escaped characters :

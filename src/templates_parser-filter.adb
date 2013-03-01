@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2012, AdaCore                     --
+--                     Copyright (C) 2003-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -1552,8 +1552,8 @@ package body Filter is
       I   : Parameter_Set;
       One : Boolean) return String
    is
-      use type GNAT.Regpat.Match_Location;
       use Ada.Strings.Fixed;
+      use type GNAT.Regpat.Match_Location;
 
       Param   : constant String  := Value (To_String (P.Param), T, I);
 

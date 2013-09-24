@@ -1,0 +1,57 @@
+A=filename
+B=filename
+C=filename2
+  A=B is TRUE
+
+  /A=/B is TRUE
+
+  /A=/C is FALSE
+
+  /A="/filename" is TRUE
+
+  /A="filename" is FALSE
+
+  /A="filename" is TRUE
+[INFO] testme.tmplt
+[C_INFO]  1 FALSE
+[SET] A = filename
+[SET] B = filename
+[SET] C = filename2
+[TEXT] A=@_A_@
+[TEXT] B=@_B_@
+[TEXT] C=@_C_@
+[IF] (@_A_@ = @_B_@)
+  [TEXT]   A=B is TRUE
+[ELSE]
+  [TEXT]   A=B is FALSE
+[END_IF]
+[TEXT]
+[IF] ((/ & @_A_@) = (/ & @_B_@))
+  [TEXT]   /A=/B is TRUE
+[ELSE]
+  [TEXT]   /A=/B is FALSE
+[END_IF]
+[TEXT]
+[IF] ((/ & @_A_@) = (/ & @_C_@))
+  [TEXT]   /A=/B is TRUE
+[ELSE]
+  [TEXT]   /A=/C is FALSE
+[END_IF]
+[TEXT]
+[IF] ((/ & @_A_@) = /filename)
+  [TEXT]   /A="/filename" is TRUE
+[ELSE]
+  [TEXT]   /A="/filename" is FALSE
+[END_IF]
+[TEXT]
+[IF] ((/ & @_A_@) = filename)
+  [TEXT]   /A="filename" is TRUE
+[ELSE]
+  [TEXT]   /A="filename" is FALSE
+[END_IF]
+[TEXT]
+[IF] ((/ & @_A_@) /= filename)
+  [TEXT]   /A="filename" is TRUE
+[ELSE]
+  [TEXT]   /A="filename" is FALSE
+[END_IF]

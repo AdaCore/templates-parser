@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2012, AdaCore                     --
+--                     Copyright (C) 1999-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -770,7 +770,7 @@ package body Templates_Parser is
 
    package Expr is
 
-      type Ops is (O_And, O_Or, O_Xor,
+      type Ops is (O_And, O_Or, O_Xor, O_Cat,
                    O_Sup, O_Inf, O_Esup, O_Einf, O_Equal, O_Diff, O_In);
 
       function Image (O : Ops) return String;
@@ -4074,6 +4074,7 @@ package body Templates_Parser is
             function F_Equ  (L, R : Expr.Tree) return String;
             function F_Diff (L, R : Expr.Tree) return String;
             function F_In   (L, R : Expr.Tree) return String;
+            function F_Cat  (L, R : Expr.Tree) return String;
 
             type U_Ops_Fct is access function (N : Expr.Tree) return String;
 
@@ -4106,6 +4107,15 @@ package body Templates_Parser is
                   return "FALSE";
                end if;
             end F_Diff;
+
+            -----------
+            -- F_Cat --
+            -----------
+
+            function F_Cat (L, R : Expr.Tree) return String is
+            begin
+               return Analyze (L) & Analyze (R);
+            end F_Cat;
 
             ------------
             -- F_Einf --
@@ -4345,7 +4355,8 @@ package body Templates_Parser is
                               Expr.O_Einf  => F_Einf'Access,
                               Expr.O_Equal => F_Equ'Access,
                               Expr.O_Diff  => F_Diff'Access,
-                              Expr.O_In    => F_In'Access);
+                              Expr.O_In    => F_In'Access,
+                              Expr.O_Cat   => F_Cat'Access);
 
             U_Op_Table   : constant array (Expr.U_Ops) of U_Ops_Fct :=
                              (Expr.O_Not => F_Not'Access);

@@ -426,8 +426,8 @@ package body Macro is
          begin
             for K in Included.Params'Range loop
                declare
-                  use type Data.Tree;
                   use type Data.NKind;
+                  use type Data.Tree;
                   P   : Data.Tree renames Included.Params (K);
                   Old : Data.Tree;
                begin

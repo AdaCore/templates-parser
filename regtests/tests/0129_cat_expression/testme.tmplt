@@ -1,0 +1,41 @@
+@@SET@@ A=filename
+@@SET@@ B=filename
+@@SET@@ C=filename2
+A=@_A_@
+B=@_B_@
+C=@_C_@
+@@IF@@ @_A_@ = @_B_@
+  A=B is TRUE
+@@ELSE@@
+  A=B is FALSE
+@@END_IF@@
+
+@@IF@@ ("/" & @_A_@) = ("/" & @_B_@)
+  /A=/B is TRUE
+@@ELSE@@
+  /A=/B is FALSE
+@@END_IF@@
+
+@@IF@@ "/" & @_A_@ = "/" & @_C_@
+  /A=/B is TRUE
+@@ELSE@@
+  /A=/C is FALSE
+@@END_IF@@
+
+@@IF@@ "/" & @_A_@ = "/filename"
+  /A="/filename" is TRUE
+@@ELSE@@
+  /A="/filename" is FALSE
+@@END_IF@@
+
+@@IF@@ "/" & @_A_@ = "filename"
+  /A="filename" is TRUE
+@@ELSE@@
+  /A="filename" is FALSE
+@@END_IF@@
+
+@@IF@@ / & @_A_@ /= "filename"
+  /A="filename" is TRUE
+@@ELSE@@
+  /A="filename" is FALSE
+@@END_IF@@

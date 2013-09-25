@@ -4,9 +4,8 @@
 @c                                                                            o
 @c                   TEMPLATES PARSER DOCUMENTATION                           o
 @c                                                                            o
-@c           Copyright (C) 2005-2012, AdaCore                                 o
+@c           Copyright (C) 2005-2013, AdaCore                                 o
 @c oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
 
 @c %**start of header
 @setfilename templates_parser.info
@@ -1309,6 +1308,9 @@ expression is equivalent to (A = B).
 
 @item not A
 Returns TRUE if either A is FALSE and FALSE otherwise.
+
+@item A & B
+Returns the catenation of A and B. A and B can be either strings or variables.
 @end table
 
 The default evaluation order is done from left to right, all operators
@@ -1322,7 +1324,9 @@ spaces must be quoted as a string. So valid expressions could be:
 
 @@@@IF@@@@ (@@_VAR1_@@ > 3) and not @@_COND1_@@
 
-@@@@IF@@@@ @@_VAR1_@@ = "a value"}
+@@@@IF@@@@ @@_VAR1_@@ = "a value"
+
+@@@@IF@@@@ "/" & @@_FILE_@@ = "/filename"}
 
 @noindent
 Note also that variables and values can be surrounded by quotes if needed.

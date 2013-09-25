@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2012, AdaCore                     --
+--                     Copyright (C) 1999-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -40,12 +40,13 @@ package body Expr is
    --  <expr>     ::= <relation> {<Logic_Op> <relation>}
    --  <relation> ::= <term> {<comp_op> <term>}
    --  <term>     ::= ["not"] <primary>
-   --  <primary>  ::= <value> | <var> | "(" <expr> ")"
+   --  <primary>  ::= <valvar> | "(" <expr> ")"
+   --  <varval>   ::= {<value> | <var>} [ "&" <varval>]
    --  <logic_op> ::= "and" | "or" | "xor"
    --  <comp_op>  ::= "<" | "<=" | "=" | ">=" | ">" | "/="
 
    subtype Comp_Op  is Ops range O_Sup .. O_In;
-   subtype Logic_Op is Ops range O_And .. O_Xor;
+   subtype Logic_Op is Ops range O_And .. O_Cat;
 
    Separator : constant Character_Set := Blank or To_Set ("<>=/()");
 
@@ -67,6 +68,7 @@ package body Expr is
       function F_Equ  (L, R : Expr.Tree) return String;
       function F_Diff (L, R : Expr.Tree) return String;
       function F_In   (L, R : Expr.Tree) return String;
+      function F_Cat  (L, R : Expr.Tree) return String;
 
       type U_Ops_Fct is access function (N : Expr.Tree) return String;
 
@@ -88,6 +90,21 @@ package body Expr is
             return "FALSE";
          end if;
       end F_And;
+
+      -----------
+      -- F_Cat --
+      -----------
+
+      function F_Cat (L, R : Expr.Tree) return String is
+         LV : constant String := Analyze (L);
+         RV : constant String := Analyze (R);
+      begin
+         if LV = Unknown or else RV = Unknown then
+            return Unknown;
+         else
+            return LV & RV;
+         end if;
+      end F_Cat;
 
       ------------
       -- F_Diff --
@@ -302,7 +319,8 @@ package body Expr is
                       Expr.O_Einf  => F_Einf'Access,
                       Expr.O_Equal => F_Equ'Access,
                       Expr.O_Diff  => F_Diff'Access,
-                      Expr.O_In    => F_In'Access);
+                      Expr.O_In    => F_In'Access,
+                      Expr.O_Cat   => F_Cat'Access);
 
       U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
                      (Expr.O_Not => F_Not'Access);
@@ -365,6 +383,7 @@ package body Expr is
          when O_Equal => return "=";
          when O_Diff  => return "/=";
          when O_In    => return "in";
+         when O_Cat   => return "&";
       end case;
    end Image;
 
@@ -584,6 +603,9 @@ package body Expr is
                elsif Token_Image = "in" then
                   Current_Token := (Kind => Binary_Op, Bin_Op => O_In);
 
+               elsif Token_Image = "&" then
+                  Current_Token := (Kind => Binary_Op, Bin_Op => O_Cat);
+
                elsif Token_Image'Length > Length (Begin_Tag)
                  and then
                    Token_Image (Token_Image'First
@@ -626,8 +648,50 @@ package body Expr is
       -------------
 
       function Primary return Tree is
-         Result      : Tree;
-         Start, Stop : Natural;
+
+         function Var_Val return Tree;
+         --  Handles a set of catenated values and variables
+
+         -------------
+         -- Var_Val --
+         -------------
+
+         function Var_Val return Tree is
+            N           : Tree;
+            Start, Stop : Natural;
+         begin
+            case Current_Token.Kind is
+               when Value =>
+                  Start := Current_Token.Start;
+                  Stop  := Current_Token.Stop;
+                  N := new Node'
+                    (Value,
+                     V => To_Unbounded_String (Expression (Start .. Stop)));
+
+               when Var =>
+                  Start := Current_Token.Start;
+                  Stop  := Current_Token.Stop;
+                  N := new Node'
+                    (Var, Var => Data.Build (Expression (Start .. Stop)));
+
+               when others =>
+                  return null;
+            end case;
+
+            Next_Token;
+            if Current_Token.Kind = Binary_Op
+              and then Current_Token.Bin_Op = O_Cat
+            then
+               --  We have a &, let's catenate the result
+               Next_Token;
+               return new Node'(Op, O_Cat, N, Var_Val);
+            else
+               return N;
+            end if;
+         end Var_Val;
+
+         Result : Tree;
+
       begin
          case Current_Token.Kind is
             --  Normal cases
@@ -641,20 +705,8 @@ package body Expr is
                   Error ("missing closing parenthesis");
                end if;
 
-            when Value =>
-               Start := Current_Token.Start;
-               Stop  := Current_Token.Stop;
-               Next_Token;
-               return new Node'
-                 (Value,
-                  V => To_Unbounded_String (Expression (Start .. Stop)));
-
-            when Var =>
-               Start := Current_Token.Start;
-               Stop  := Current_Token.Stop;
-               Next_Token;
-               return new Node'
-                 (Var, Var => Data.Build (Expression (Start .. Stop)));
+            when Value | Var =>
+               return Var_Val;
 
             --  Errors
 

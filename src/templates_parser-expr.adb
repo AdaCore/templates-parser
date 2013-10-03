@@ -355,8 +355,10 @@ package body Expr is
       end if;
 
       case E.Kind is
-         when Value | Var =>
+         when Value =>
             null;
+         when Var =>
+            N.Var := Data.Clone (E.Var);
          when Op =>
             N.Left := Clone (N.Left);
             N.Right := Clone (N.Right);

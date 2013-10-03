@@ -1,0 +1,15 @@
+       Valeur: Essai1
+       Valeur: Essai2
+       Valeur: ""
+       C'est vide
+       C'est vide
+
+[INFO] macro_filter.tmplt
+[C_INFO]  1 FALSE
+[TEXT]
+[TEXT]
+[TEXT]        Valeur: Essai1
+[TEXT]        Valeur: Essai2
+[TEXT]        Valeur: ""
+[TEXT]        C'est vide
+[TEXT]        C'est vide

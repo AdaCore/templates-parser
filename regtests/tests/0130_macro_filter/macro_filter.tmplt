@@ -1,0 +1,14 @@
+@@MACRO(MAC)@@
+   @@IF@@ @_IS_EMPTY:$1_@ OR (@_LOWER:$1_@ = "vide")
+       C'est vide
+   @@ELSE@@
+       Valeur: @_$1_@
+   @@END_IF@@
+@@END_MACRO@@
+
+
+@_MAC(Essai1)_@
+@_MAC(Essai2)_@
+@_MAC("")_@
+@_MAC(,)_@
+@_MAC(VIDE)_@

@@ -339,18 +339,30 @@ package body Macro is
             -------------
 
             procedure Replace (T : in out Expr.Tree; Value : String) is
+               Ctx     : aliased Filter.Filter_Context (0);
+               N_Value : constant String :=
+                           Data.Translate
+                             (T.Var, Value, Ctx'Access);
             begin
                Expr.Release (T, Single => True);
                T := new Expr.Node'
-                 (Expr.Value, V => To_Unbounded_String (Value));
+                 (Expr.Value, V => To_Unbounded_String (N_Value));
             end Replace;
 
             procedure Replace (T : in out Expr.Tree; Ref : Positive) is
+               Ctx     : aliased Filter.Filter_Context (0);
                Tag_Var : Data.Tag_Var;
             begin
                case Parameters (Ref).Kind is
                   when Data.Text =>
-                     Replace (T, To_String (Parameters (Ref).Value));
+                     --  We need to evaluate the value against the filters
+
+                     Replace
+                       (T,
+                        Data.Translate
+                          (T.Var,
+                           To_String (Parameters (Ref).Value),
+                           Ctx'Access));
 
                   when Data.Var =>
                      Tag_Var := Data.Clone (Parameters (Ref).Var);

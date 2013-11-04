@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2012, AdaCore                     #
+#                     Copyright (C) 2003-2013, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -18,7 +18,7 @@
 
 .SILENT:
 
-VERSION	= 11.8.0w
+VERSION	= 11.9.0w
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking

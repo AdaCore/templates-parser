@@ -20,4 +20,9 @@ with "xmlada";
 
 abstract project TP_XMLAda is
    for Source_Dirs use ();
+
+   package Install is
+      for Active use "False";
+   end Install;
+
 end TP_XMLAda;

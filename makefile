@@ -118,6 +118,9 @@ GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
 		-XVERSION=$(VERSION)
 
+#######################################################################
+#  build
+
 build: setup_config tp_xmlada.gpr
 ifeq ($(ENABLE_STATIC), true)
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=static \
@@ -130,14 +133,17 @@ endif
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		-Ptools/tools
 
-tp_xmlada.gpr: setup
-
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
 doc:
 	$(MAKE) -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
+
+#######################################################################
+#  setup
+
+tp_xmlada.gpr: setup
 
 setup:
 ifeq ($(TP_XMLADA), Installed)
@@ -171,6 +177,9 @@ setup_config:
 	echo '   Tasking := "$(TP_TASKING)";' >> $(CONFGPR)
 	echo '   Target := "$(TARGET)";' >> $(CONFGPR)
 	echo 'end TP_Config;' >> $(CONFGPR)
+
+#######################################################################
+#  install
 
 install_dirs:
 	$(MKDIR) -p $(DESTDIR)$(I_BIN)
@@ -210,6 +219,9 @@ endif
 	-$(CP) docs/templates_parser*html $(DESTDIR)$(I_DOC)
 	-$(CP) docs/templates_parser*pdf $(DESTDIR)$(I_DOC)
 	-$(CP) docs/templates_parser*info* $(DESTDIR)$(I_DOC)
+
+#######################################################################
+#  clean
 
 clean:
 ifeq ($(AWS),)

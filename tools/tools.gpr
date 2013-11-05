@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2008-2012, AdaCore                    --
+--                      Copyright (C) 2008-2013, AdaCore                    --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -23,8 +23,8 @@ project Tools is
 
    for Source_Dirs use (".");
 
-   for Object_Dir use "../" & TP_Shared'Exec_Dir & "/tobj";
-   for Exec_Dir use "../" & TP_Shared'Exec_Dir & "/bin";
+   for Object_Dir use "../" & TP_Shared.Build_Dir & "/tobj";
+   for Exec_Dir use "../" & TP_Shared.Build_Dir & "/bin";
 
    for Main use ("templates2ada", "templatespp");
 

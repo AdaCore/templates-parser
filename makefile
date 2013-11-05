@@ -164,7 +164,7 @@ endif
 	echo "TARGET=$(TARGET)" >> makefile.setup
 
 setup_config:
-	echo 'project TP_Config is' > $(CONFGPR)
+	echo 'abstract project TP_Config is' > $(CONFGPR)
 	echo '   for Source_Dirs use ();' >> $(CONFGPR)
 	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
 		>> $(CONFGPR)

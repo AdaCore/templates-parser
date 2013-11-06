@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2007-2012, AdaCore                     --
+--                     Copyright (C) 2007-2013, AdaCore                     --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -18,6 +18,11 @@
 
 with "xmlada";
 
-project TP_XMLAda is
+abstract project TP_XMLAda is
    for Source_Dirs use ();
+
+   package Install is
+      for Active use "False";
+   end Install;
+
 end TP_XMLAda;

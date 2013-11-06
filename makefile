@@ -46,25 +46,21 @@ TP_XMLADA    = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 ifeq ($(HOST), $(TARGET))
 IS_CROSS	= false
 GPROPTS		=
-TPREFIX=$(prefix)
+TPREFIX=$(DESTDIR)$(prefix)
 else
 IS_CROSS	= true
 GPROPTS		= --target=$(TARGET)
-TPREFIX=$(prefix)/$(TARGET)
+TPREFIX=$(DESTDIR)$(prefix)/$(TARGET)
 endif
 
 GNAT		= gnat
 GPRBUILD	= gprbuild
+GPRINSTALL	= gprinstall
 GPRCLEAN	= gprclean
 
 #  Install directories
 
-I_BIN	= $(TPREFIX)/bin
-I_INC	= $(TPREFIX)/include/templates_parser
-I_LIB	= $(TPREFIX)/lib/templates_parser
 I_DOC	= $(TPREFIX)/share/doc/templates_parser
-I_GPR	= $(TPREFIX)/lib/gnat
-I_TGP	= $(TPREFIX)/lib/gnat/templates_parser
 
 CP	= cp -p
 MKDIR	= mkdir -p
@@ -118,6 +114,9 @@ GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
 		-XVERSION=$(VERSION)
 
+#######################################################################
+#  build
+
 build: setup_config tp_xmlada.gpr
 ifeq ($(ENABLE_STATIC), true)
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=static \
@@ -130,8 +129,6 @@ endif
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		-Ptools/tools
 
-tp_xmlada.gpr: setup
-
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
@@ -139,19 +136,16 @@ doc:
 	$(MAKE) -C docs $(ALL_OPTIONS) doc
 	echo Templates_Parser Documentation built with success.
 
+#######################################################################
+#  setup
+
+tp_xmlada.gpr: setup
+
 setup:
 ifeq ($(TP_XMLADA), Installed)
 	cp config/tp_xmlada_installed.gpr tp_xmlada.gpr
 else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
-endif
-ifeq ($(ENABLE_STATIC), true)
-	$(MKDIR) -p $(BDIR)/static/obj
-	$(MKDIR) -p $(BDIR)/static/lib
-endif
-ifeq ($(ENABLE_SHARED), true)
-	$(MKDIR) -p $(BDIR)/relocatable/obj
-	$(MKDIR) -p $(BDIR)/relocatable/lib
 endif
 	echo "prefix=$(prefix)" > makefile.setup
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
@@ -164,7 +158,7 @@ endif
 	echo "TARGET=$(TARGET)" >> makefile.setup
 
 setup_config:
-	echo 'project TP_Config is' > $(CONFGPR)
+	echo 'abstract project TP_Config is' > $(CONFGPR)
 	echo '   for Source_Dirs use ();' >> $(CONFGPR)
 	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
 		>> $(CONFGPR)
@@ -172,44 +166,36 @@ setup_config:
 	echo '   Target := "$(TARGET)";' >> $(CONFGPR)
 	echo 'end TP_Config;' >> $(CONFGPR)
 
-install_dirs:
-	$(MKDIR) -p $(DESTDIR)$(I_BIN)
-	$(MKDIR) -p $(DESTDIR)$(I_INC)
-ifeq ($(ENABLE_STATIC), true)
-	$(MKDIR) -p $(DESTDIR)$(I_LIB)/static
-endif
-ifeq ($(ENABLE_SHARED), true)
-	$(MKDIR) -p $(DESTDIR)$(I_LIB)/relocatable
-endif
-	$(MKDIR) -p $(DESTDIR)$(I_GPR)
-	$(MKDIR) -p $(DESTDIR)$(I_TGP)
-	$(MKDIR) -p $(DESTDIR)$(I_DOC)
+#######################################################################
+#  install
 
-install: install_dirs
-	$(CP) src/*.ad* $(DESTDIR)$(I_INC)
+install-dirs:
+	$(MKDIR) -p $(I_DOC)
+
+install-clean:
+	-$(GPRINSTALL) $(GPROPTS) -q --uninstall \
+		--prefix=$(TPREFIX) -Ptemplates_parser
+	-$(GPRINSTALL) $(GPROPTS) -q --uninstall \
+		--prefix=$(TPREFIX) -Ptools/tools
+	$(RM) -fr $(I_DOC)
+
+install: install-dirs
 ifeq ($(ENABLE_STATIC), true)
-	$(CP) $(BDIR)/static/lib/* $(DESTDIR)$(I_LIB)/static
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=static \
+		--prefix=$(TPREFIX) -Ptemplates_parser
 endif
 ifeq ($(ENABLE_SHARED), true)
-	$(CP) $(BDIR)/relocatable/lib/* $(DESTDIR)$(I_LIB)/relocatable
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=relocatable \
+		--prefix=$(TPREFIX) --build-name=relocatable -Ptemplates_parser
 endif
-	$(CP) $(BDIR)/$(LIBRARY_TYPE)/bin/* $(DESTDIR)$(I_BIN)
-	$(CP) config/templates_parser.gpr $(DESTDIR)$(I_GPR)
-	$(CP) config/tp_shared.gpr $(DESTDIR)$(I_TGP)
-	$(CP) tp_xmlada.gpr $(DESTDIR)$(I_TGP)
-	$(CP) $(CONFGPR) $(DESTDIR)$(I_TGP)
-ifeq ($(TP_XMLADA), Installed)
-	$(CP) xsrc/*.ad* $(DESTDIR)$(I_INC)
-endif
-	$(RM) -f $(DESTDIR)$(I_LIB)/../libtemplates_parser$(SOEXT)
-ifeq ($(ENABLE_SHARED), true)
-ifeq ($(OS), Windows_NT)
-	$(LN) $(I_LIB)/relocatable/libtemplates_parser$(SOEXT) $(DESTDIR)$(I_BIN)
-endif
-endif
-	-$(CP) docs/templates_parser*html $(DESTDIR)$(I_DOC)
-	-$(CP) docs/templates_parser*pdf $(DESTDIR)$(I_DOC)
-	-$(CP) docs/templates_parser*info* $(DESTDIR)$(I_DOC)
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
+		--prefix=$(TPREFIX) --mode=usage -Ptools/tools
+	-$(CP) docs/templates_parser*html $(I_DOC)
+	-$(CP) docs/templates_parser*pdf $(I_DOC)
+	-$(CP) docs/templates_parser*info* $(I_DOC)
+
+#######################################################################
+#  clean
 
 clean:
 ifeq ($(AWS),)

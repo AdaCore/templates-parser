@@ -26,13 +26,7 @@ LIBRARY_TYPE = static
 PROCESSORS   = 0
 HOST	     = $(shell gcc -dumpmachine)
 TARGET	     = $(shell gcc -dumpmachine)
-
-TR             = $(shell if [ -f /usr/bin/tr ]; then echo /usr/bin/tr; \
-			else echo tr; fi)
-DR_BUILD       = $(shell echo $(PRJ_BUILD) | $(TR) "[[:upper:]]" "[[:lower:]]")
-BDIR           = .build/$(TARGET)/$(DR_BUILD)
-
-prefix	= $(dir $(shell which gnatls))..
+prefix	     = $(dir $(shell which gnatls))..
 
 ENABLE_STATIC = true
 ENABLE_SHARED =$(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
@@ -52,6 +46,9 @@ IS_CROSS	= true
 GPROPTS		= --target=$(TARGET)
 TPREFIX=$(DESTDIR)$(prefix)/$(TARGET)
 endif
+
+MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
+SDIR		= $(TARGET)/$(MODE)
 
 GNAT		= gnat
 GPRBUILD	= gprbuild
@@ -106,7 +103,7 @@ endif
 ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
-		BDIR="$(BDIR)" DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
+		DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
 		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)" \
 		ENABLE_STATIC="$(ENABLE_STATIC)" TARGET="$(TARGET)"
 
@@ -120,14 +117,14 @@ GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 build: setup_config tp_xmlada.gpr
 ifeq ($(ENABLE_STATIC), true)
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=static \
-		-Ptemplates_parser
+		--subdirs=$(SDIR)/static -Ptemplates_parser
 endif
 ifeq ($(ENABLE_SHARED), true)
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
-		-Ptemplates_parser
+		--subdirs=$(SDIR)/relocatable -Ptemplates_parser
 endif
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
-		-Ptools/tools
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(LIBRARY_TYPE) -Ptools/tools
 
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
@@ -182,14 +179,16 @@ install-clean:
 install: install-dirs
 ifeq ($(ENABLE_STATIC), true)
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=static \
-		--prefix=$(TPREFIX) -Ptemplates_parser
+		--subdirs=$(SDIR)/static --prefix=$(TPREFIX) -Ptemplates_parser
 endif
 ifeq ($(ENABLE_SHARED), true)
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=relocatable \
-		--prefix=$(TPREFIX) --build-name=relocatable -Ptemplates_parser
+		--prefix=$(TPREFIX) --build-name=relocatable \
+		--subdirs=$(SDIR)/relocatable -Ptemplates_parser
 endif
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE="$(LIBRARY_TYPE)" \
-		--prefix=$(TPREFIX) --mode=usage -Ptools/tools
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
+		--prefix=$(TPREFIX) --mode=usage \
+		--subdirs=$(SDIR)/$(LIBRARY_TYPE) -Ptools/tools
 	-$(CP) docs/templates_parser*html $(I_DOC)
 	-$(CP) docs/templates_parser*pdf $(I_DOC)
 	-$(CP) docs/templates_parser*info* $(I_DOC)

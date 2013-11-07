@@ -64,18 +64,8 @@ MKDIR	= mkdir -p
 
 ifeq (${OS}, Windows_NT)
 EXEEXT	= .exe
-SOEXT	= .dll
 LN	= cp -p
 else
-ifeq ($(UNAME), Darwin)
-SOEXT   = .dylib
-else
-ifeq ($(UNAME), HP-UX)
-SOEXT	= .sl
-else
-SOEXT	= .so
-endif
-endif
 EXEEXT	=
 LN	= ln -s
 endif
@@ -100,7 +90,7 @@ ifeq ($(TP_XMLADA),)
 TP_XMLADA=Disabled
 endif
 
-ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
+ALL_OPTIONS = INCLUDES="$(INCLUDES)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
 		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
 		DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \

@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2012, AdaCore                     #
+#                     Copyright (C) 2003-2013, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -20,13 +20,17 @@
 
 -include ../makefile.setup
 
+MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
+
 build:
-	$(GNAT) make -q -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
-		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
+	$(GPRBUILD) -q -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
 test:  build
 	PATH=.:${PATH} ./testsuite.py --jobs=4
 
 clean:
-	-$(GNAT) clean -XLIBRARY_TYPE=static \
-		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) -Pregtests
+	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests

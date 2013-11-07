@@ -1,7 +1,7 @@
 ############################################################################
 #                             Templates_Parser                             #
 #                                                                          #
-#                      Copyright (C) 2003-2012, AdaCore                    #
+#                      Copyright (C) 2003-2013, AdaCore                    #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -108,7 +108,8 @@ $(ADBFILES) $(ADSFILES): all_sources.ada
 	cp ../config/tp_xmlada_dummy.gpr ../tp_xmlada.gpr
 
 $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
-	$(GNAT) make -p -XLIBRARY_TYPE=$(LIBRARY_TYPE) -XPRJ_BUILD=$(PRJ_BUILD) \
+	$(GNAT) make -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XPRJ_BUILD=$(PRJ_BUILD) \
 		-XTP_XMLADA=Disabled -Pdocs $(EXEFILES) $(GNATMAKE_FLAGS)
 
 %.adb.res: %.adb
@@ -131,10 +132,8 @@ $(EXEFILES): ../tp_xmlada.gpr $(ADBFILES) $(ADSFILES)
 force:
 
 clean:
-ifeq ($(AWS),)
-	-$(GNAT) clean -q -XLIBRARY_TYPE=static -XPRJ_BUILD=$(PRJ_BUILD) \
-		-Pdocs $(EXEFILES)
-endif
+	-$(GNAT) clean -q -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XPRJ_BUILD=$(PRJ_BUILD) -Pdocs $(EXEFILES)
 	-rm -f $(EXEFILES) $(ADAFILES) $(TEXIFILES) *.res *.o *.ali genout \
 		*.aux *.cp* *.fn *.ky *.pg *.toc *.tp *.vr *.dvi *.log \
 		*.exe templates_parser*.ads.texi ada.sed \

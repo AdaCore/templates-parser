@@ -33,11 +33,12 @@ if PRJ_BUILD == None:
 else:
     PRJ_BUILD = PRJ_BUILD.lower()
 
-ep = os.getcwd() + "/../.build/" + TARGET + "/" + PRJ_BUILD + "/static/"
+def makedir(dir):
+    return os.getcwd() + "/../.build/" + dir + "/" \
+        + TARGET + "/" + PRJ_BUILD + "/static/"
 
-
-os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + ep \
-        + "bin" + os.pathsep + ep + "rbin"
+os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + makedir("bin") \
+        + os.pathsep + makedir("rbin")
 
 from gnatpython.ex import Run
 
@@ -53,7 +54,10 @@ def gnatmake(prj):
 def main():
     """Run the testsuite"""
     options = __parse_options()
-    assert os.path.exists(ep), "cannot find %s directory" % ep
+    assert os.path.exists(makedir("bin")), \
+        "cannot find %s directory" % makedir("bin")
+    assert os.path.exists(makedir("rbin")), \
+        "cannot find %s directory" % makedir("rbin")
     env = Env()
     env.add_search_path("PYTHONPATH", os.getcwd())
 

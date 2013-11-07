@@ -22,11 +22,11 @@ VERSION	= 11.9.0w
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
-LIBRARY_TYPE = static
 PROCESSORS   = 0
 HOST	     = $(shell gcc -dumpmachine)
 TARGET	     = $(shell gcc -dumpmachine)
 prefix	     = $(dir $(shell which gnatls))..
+DEFAULT_LIBRARY_TYPE	= static
 
 ENABLE_STATIC = true
 ENABLE_SHARED =$(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
@@ -64,30 +64,32 @@ MKDIR	= mkdir -p
 
 ifeq (${OS}, Windows_NT)
 EXEEXT	= .exe
-SOEXT	= .dll
 LN	= cp -p
 else
-ifeq ($(UNAME), Darwin)
-SOEXT   = .dylib
-else
-ifeq ($(UNAME), HP-UX)
-SOEXT	= .sl
-else
-SOEXT	= .so
-endif
-endif
 EXEEXT	=
 LN	= ln -s
 endif
 
-CONFGPR	= config/tp_config.gpr
+#  Compute the default library kind, and possibly the other that are to
+#  be built.
 
-ifeq ($(DEFAULT_LIBRARY_TYPE),)
-DEFAULT_LIBRARY_TYPE=static
+ifeq ($(DEFAULT_LIBRARY_TYPE),static)
+ifneq ($(ENABLE_STATIC),true)
+$(error static not enabled, cannot be the default)
+else
+ifeq ($(ENABLE_SHARED),true)
+OTHER_LIBRARY_TYPE	= relocatable
+endif
 endif
 
-ifeq ($(LIBRARY_TYPE),)
-LIBRARY_TYPE=static
+else
+ifneq ($(ENABLE_SHARED),true)
+$(error shared not enabled, cannot be the default)
+else
+ifeq ($(ENABLE_STATIC),true)
+OTHER_LIBRARY_TYPE	= static
+endif
+endif
 endif
 
 ifeq ($(DEBUG), true)
@@ -100,12 +102,12 @@ ifeq ($(TP_XMLADA),)
 TP_XMLADA=Disabled
 endif
 
-ALL_OPTIONS = INCLUDES="$(INCLUDES)" LIBS="$(LIBS)" PRJ_BUILD="$(PRJ_BUILD)" \
+ALL_OPTIONS = INCLUDES="$(INCLUDES)" PRJ_BUILD="$(PRJ_BUILD)" \
 		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
-		PRJ_BUILD="$(PRJ_BUILD)" LIBRARY_TYPE="$(LIBRARY_TYPE)" \
+		PRJ_BUILD="$(PRJ_BUILD)" TARGET="$(TARGET)" \
 		DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
-		ENABLE_SHARED="$(ENABLE_SHARED)" AWS="$(AWS)" \
-		ENABLE_STATIC="$(ENABLE_STATIC)" TARGET="$(TARGET)"
+		ENABLE_SHARED="$(ENABLE_SHARED)" \
+		ENABLE_STATIC="$(ENABLE_STATIC)"
 
 GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
@@ -114,17 +116,15 @@ GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 #######################################################################
 #  build
 
-build: setup_config tp_xmlada.gpr
-ifeq ($(ENABLE_STATIC), true)
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=static \
-		--subdirs=$(SDIR)/static -Ptemplates_parser
+build: tp_xmlada.gpr
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
+ifneq ($(OTHER_LIBRARY_TYPE),)
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
 endif
-ifeq ($(ENABLE_SHARED), true)
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=relocatable \
-		--subdirs=$(SDIR)/relocatable -Ptemplates_parser
-endif
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
-		--subdirs=$(SDIR)/$(LIBRARY_TYPE) -Ptools/tools
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
@@ -146,22 +146,12 @@ else
 endif
 	echo "prefix=$(prefix)" > makefile.setup
 	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
-	echo "LIBRARY_TYPE=$(LIBRARY_TYPE)" >> makefile.setup
 	echo "ENABLE_STATIC=$(ENABLE_STATIC)" >> makefile.setup
 	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
 	echo "DEBUG=$(DEBUG)" >> makefile.setup
 	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
 	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
 	echo "TARGET=$(TARGET)" >> makefile.setup
-
-setup_config:
-	echo 'abstract project TP_Config is' > $(CONFGPR)
-	echo '   for Source_Dirs use ();' >> $(CONFGPR)
-	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
-		>> $(CONFGPR)
-	echo '   Tasking := "$(TP_TASKING)";' >> $(CONFGPR)
-	echo '   Target := "$(TARGET)";' >> $(CONFGPR)
-	echo 'end TP_Config;' >> $(CONFGPR)
 
 #######################################################################
 #  install
@@ -177,18 +167,17 @@ install-clean:
 	$(RM) -fr $(I_DOC)
 
 install: install-dirs
-ifeq ($(ENABLE_STATIC), true)
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=static \
-		--subdirs=$(SDIR)/static --prefix=$(TPREFIX) -Ptemplates_parser
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
+		--prefix=$(TPREFIX) -Ptemplates_parser
+ifneq ($(OTHER_LIBRARY_TYPE),)
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
+		--prefix=$(TPREFIX) --build-name=$(OTHER_LIBRARY_TYPE) \
+		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
 endif
-ifeq ($(ENABLE_SHARED), true)
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=relocatable \
-		--prefix=$(TPREFIX) --build-name=relocatable \
-		--subdirs=$(SDIR)/relocatable -Ptemplates_parser
-endif
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) --mode=usage \
-		--subdirs=$(SDIR)/$(LIBRARY_TYPE) -Ptools/tools
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 	-$(CP) docs/templates_parser*html $(I_DOC)
 	-$(CP) docs/templates_parser*pdf $(I_DOC)
 	-$(CP) docs/templates_parser*info* $(I_DOC)
@@ -197,17 +186,13 @@ endif
 #  clean
 
 clean:
-ifeq ($(AWS),)
-ifeq ($(ENABLE_STATIC), true)
-	-$(GPRCLEAN) -XLIBRARY_TYPE=static $(GPROPTS) \
+	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) $(GPROPTS) \
 		-Ptemplates_parser
-endif
-	-$(GPRCLEAN) -XLIBRARY_TYPE="$(LIBRARY_TYPE)" $(GPROPTS) \
+	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) $(GPROPTS) \
 		-Ptools/tools
-ifeq ($(ENABLE_SHARED), true)
-	-$(GPRCLEAN) -XLIBRARY_TYPE=relocatable $(GPROPTS) \
+ifneq ($(OTHER_LIBRARY_TYPE),)
+	-$(GPRCLEAN) -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) $(GPROPTS) \
 		-Ptemplates_parser
-endif
 endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)

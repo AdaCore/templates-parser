@@ -70,7 +70,6 @@ EXEEXT	=
 LN	= ln -s
 endif
 
-CONFGPR	= config/tp_config.gpr
 
 ifeq ($(DEFAULT_LIBRARY_TYPE),)
 DEFAULT_LIBRARY_TYPE=static
@@ -143,15 +142,6 @@ endif
 	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
 	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
 	echo "TARGET=$(TARGET)" >> makefile.setup
-
-setup_config:
-	echo 'abstract project TP_Config is' > $(CONFGPR)
-	echo '   for Source_Dirs use ();' >> $(CONFGPR)
-	echo '   Default_Library_Type := "$(DEFAULT_LIBRARY_TYPE)";' \
-		>> $(CONFGPR)
-	echo '   Tasking := "$(TP_TASKING)";' >> $(CONFGPR)
-	echo '   Target := "$(TARGET)";' >> $(CONFGPR)
-	echo 'end TP_Config;' >> $(CONFGPR)
 
 #######################################################################
 #  install

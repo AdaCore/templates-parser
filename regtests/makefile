@@ -21,6 +21,7 @@
 -include ../makefile.setup
 
 MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
+SDIR		= $(TARGET)/$(MODE)
 
 build:
 	$(GPRBUILD) -q -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \

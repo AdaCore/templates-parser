@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Text_IO;
@@ -49,27 +51,20 @@ package body Macro is
    --------------------------
 
    procedure Print_Defined_Macros is
-
-      procedure Print (Position : Registry.Cursor);
-      --  Print the given macro
-
-      -----------
-      -- Print --
-      -----------
-
-      procedure Print (Position : Registry.Cursor) is
-         Name  : constant String := Registry.Key (Position);
-         Macro : constant Tree := Registry.Element (Position);
-      begin
-         Text_IO.Put_Line ("[MACRO] " & Name);
-         Print_Tree (Macro);
-         Text_IO.Put_Line ("[END_MACRO]");
-         Text_IO.New_Line;
-      end Print;
-
    begin
       Text_IO.Put_Line ("------------------------------------- MACROS");
-      Set.Iterate (Print'Access);
+
+      for C in Set.Iterate loop
+         declare
+            Name  : constant String := Registry.Key (C);
+            Macro : constant Tree := Registry.Element (C);
+         begin
+            Text_IO.Put_Line ("[MACRO] " & Name);
+            Print_Tree (Macro);
+            Text_IO.Put_Line ("[END_MACRO]");
+            Text_IO.New_Line;
+         end;
+      end loop;
    end Print_Defined_Macros;
 
    --------------

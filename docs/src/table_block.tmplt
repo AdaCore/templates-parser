@@ -1,0 +1,15 @@
+<p>Here are some available computer devices:
+
+<table>
+@@TABLE@@
+   <tr bgcolor=
+   @@BEGIN@@
+      "#FF0000"
+   @@SECTION@@
+      "#000000F"
+   @@END@@
+   >
+   <td>@_DEVICES_@
+   <td>@_PRICES_@
+@@END_TABLE@@
+</table>

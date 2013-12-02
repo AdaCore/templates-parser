@@ -1,0 +1,26 @@
+<p>Here are some available computer devices:
+
+<table>
+@@TABLE@@
+   <tr bgcolor=#FF0000>
+   <td>@_DEVICES_@
+   <td>@_PRICES_@
+@@SECTION@@
+   <tr bgcolor=#00000F>
+   <td>@_DEVICES_@
+   <td>@_PRICES_@
+@@END_TABLE@@
+</table>
+
+<table>
+@@TABLE@@ @@TERMINATE_SECTIONS@@
+   <tr>
+   <td bgcolor=#00000F width=10>
+   <td width=150>@_DEVICES_@
+@@SECTION@@
+   <td width=150>@_DEVICES_@
+@@SECTION@@
+   <td width=150>@_DEVICES_@
+   <td bgcolor=#00000F width=10>
+@@END_TABLE@@
+</table>

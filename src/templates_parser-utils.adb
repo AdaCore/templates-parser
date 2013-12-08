@@ -210,8 +210,7 @@ package body Templates_Parser.Utils is
 
    function Image (T : Tag) return String is
 
-      function Quote (Str : String) return String;
-      pragma Inline (Quote);
+      function Quote (Str : String) return String with Inline;
       --  Quote Str and double quote inside Str if needed
 
       -----------
@@ -284,8 +283,7 @@ package body Templates_Parser.Utils is
       function Value (T : String) return Tag;
       --  Returns the Tag for T string
 
-      function Clear_Quote (Str : String) return String;
-      pragma Inline (Clear_Quote);
+      function Clear_Quote (Str : String) return String with Inline;
       --  Removes double quote in Str
 
       -----------------

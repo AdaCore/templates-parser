@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2012, AdaCore                     --
+--                     Copyright (C) 1999-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -41,16 +41,6 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
    procedure Print (Included : Included_File_Info);
    --  Print info for included file
 
-   ------------------
-   -- Print_Indent --
-   ------------------
-
-   procedure Print_Indent (L : Natural) is
-      use Ada.Strings.Fixed;
-   begin
-      Text_IO.Put ((L * 2) * ' ');
-   end Print_Indent;
-
    -----------
    -- Print --
    -----------
@@ -77,6 +67,16 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
 
       Print_Tree (Included.File.Info, Level + 1);
    end Print;
+
+   ------------------
+   -- Print_Indent --
+   ------------------
+
+   procedure Print_Indent (L : Natural) is
+      use Ada.Strings.Fixed;
+   begin
+      Text_IO.Put ((L * 2) * ' ');
+   end Print_Indent;
 
 begin
    if T = null then

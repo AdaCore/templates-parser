@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2012, AdaCore                     --
+--                     Copyright (C) 2004-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -61,8 +61,7 @@ package body Templates_Parser.XML is
       procedure Process (Cursor : Association_Map.Cursor);
       --  Iterator
 
-      procedure Add (Str : String);
-      pragma Inline (Add);
+      procedure Add (Str : String) with Inline;
       --  Add a new line (str) into Result, a LF is added at the end of Str
 
       function To_Utf8 (Str : Unbounded_String) return String;
@@ -427,8 +426,7 @@ package body Templates_Parser.XML is
       use Input_Sources;
       use Sax.Readers;
 
-      procedure Error (Node : DOM.Core.Node; Message : String);
-      pragma No_Return (Error);
+      procedure Error (Node : DOM.Core.Node; Message : String) with No_Return;
       --  Raises Constraint_Error with the Message as exception message
 
       function First_Child (Parent : DOM.Core.Node) return DOM.Core.Node;

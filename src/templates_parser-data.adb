@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2012, AdaCore                     --
+--                     Copyright (C) 1999-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,6 +26,8 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
+
+pragma Ada_2012;
 
 with Ada.Text_IO;
 
@@ -53,8 +55,7 @@ package body Data is
       function Is_Internal (Name : String) return Internal_Tag;
       --  Returns True if Name is an internal tag
 
-      function Is_Macro return Boolean;
-      pragma Inline (Is_Macro);
+      function Is_Macro return Boolean with Inline;
       --  Returns True if we are parsing a macro
 
       F_Sep : constant Natural :=
@@ -571,7 +572,7 @@ package body Data is
 
       function Is_Macro return Boolean is
       begin
-         return MP_Start /= 0 and MP_End /= 0;
+         return MP_Start /= 0 and then MP_End /= 0;
       end Is_Macro;
 
       Result : Tag_Var;

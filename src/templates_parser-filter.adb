@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 pragma Wide_Character_Encoding (Brackets);
 
 with Ada.Containers.Indefinite_Hashed_Maps;
@@ -302,8 +304,7 @@ package body Filter is
       C : not null access Filter_Context;
       P : Parameter_Data := No_Parameter) return String
    is
-      function Get (Str : String) return String;
-      pragma Inline (Get);
+      function Get (Str : String) return String with Inline;
       --  Returns the parameter key=value to be added
 
       ---------
@@ -471,10 +472,10 @@ package body Filter is
 
       Result : String (S'Range);
 
-      Clean_Set : constant Strings.Maps.Character_Set
-        := Strings.Maps.Constants.Letter_Set
-             or Strings.Maps.Constants.Decimal_Digit_Set
-             or Strings.Maps.To_Set (" йикопафз");
+      Clean_Set : constant Strings.Maps.Character_Set :=
+                    Strings.Maps.Constants.Letter_Set
+                      or Strings.Maps.Constants.Decimal_Digit_Set
+                      or Strings.Maps.To_Set (" йикопафз");
 
    begin
       Check_Null_Parameter (P);

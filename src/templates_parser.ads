@@ -27,18 +27,20 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
-
-private with Ada.Containers.Indefinite_Hashed_Maps;
-private with Ada.Containers.Indefinite_Hashed_Sets;
-private with Ada.Strings.Hash;
 
 with Templates_Parser_Tasking;
 pragma Elaborate_All (Templates_Parser_Tasking);
 pragma Warnings (Off, Templates_Parser_Tasking);
 --  This unit is not used in the spec but is placed here to force proper
 --  finalization order.
+
+private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Indefinite_Hashed_Sets;
+private with Ada.Strings.Hash;
 
 package Templates_Parser is
 
@@ -213,23 +215,22 @@ package Templates_Parser is
    --  Items already exists it just replaces it by the new one.
 
    function "&"
-     (Left : Association; Right : Association) return Translate_Set;
-   pragma Inline ("&");
+     (Left : Association; Right : Association) return Translate_Set
+     with Inline;
    --  Returns new translate set created from 2 associations. If names of
    --  both associations are the same, the returned translate set will
    --  contain only Right.
 
    function "&"
-     (Set : Translate_Set; Item : Association) return Translate_Set;
-   pragma Inline ("&");
+     (Set : Translate_Set; Item : Association) return Translate_Set
+     with Inline;
    --  Adds Item into Set. If an association with the same name already exists
    --  in Set it is replaced by the new one. Note that "&" will modify its
    --  first parameter. It is intended to be used as [T := T & Assoc],
    --  doing [T1 := T2 & Assoc] will add Assoc into T2 and set T1 as an
    --  alias. This is designed this way for efficiency.
 
-   function "+" (Item : Association) return Translate_Set;
-   pragma Inline ("+");
+   function "+" (Item : Association) return Translate_Set with Inline;
    --  Create translate set from one association
 
    procedure Remove (Set : in out Translate_Set; Name : String);

@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 with Ada.Text_IO;
 
 separate (Templates_Parser)
@@ -434,8 +436,7 @@ package body Expr is
 
       Current_Token : Token;
 
-      procedure Error (Mess : String);
-      pragma No_Return (Error);
+      procedure Error (Mess : String) with No_Return;
       --  Raises Internal_Error with the column of the condition
 
       function Expr return Tree;

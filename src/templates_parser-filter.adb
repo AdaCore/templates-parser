@@ -472,10 +472,10 @@ package body Filter is
 
       Result : String (S'Range);
 
-      Clean_Set : constant Strings.Maps.Character_Set
-        := Strings.Maps.Constants.Letter_Set
-             or Strings.Maps.Constants.Decimal_Digit_Set
-             or Strings.Maps.To_Set (" йикопафз");
+      Clean_Set : constant Strings.Maps.Character_Set :=
+                    Strings.Maps.Constants.Letter_Set
+                      or Strings.Maps.Constants.Decimal_Digit_Set
+                      or Strings.Maps.To_Set (" йикопафз");
 
    begin
       Check_Null_Parameter (P);

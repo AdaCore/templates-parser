@@ -32,15 +32,15 @@ pragma Ada_2012;
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
 
-private with Ada.Containers.Indefinite_Hashed_Maps;
-private with Ada.Containers.Indefinite_Hashed_Sets;
-private with Ada.Strings.Hash;
-
 with Templates_Parser_Tasking;
 pragma Elaborate_All (Templates_Parser_Tasking);
 pragma Warnings (Off, Templates_Parser_Tasking);
 --  This unit is not used in the spec but is placed here to force proper
 --  finalization order.
+
+private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Indefinite_Hashed_Sets;
+private with Ada.Strings.Hash;
 
 package Templates_Parser is
 

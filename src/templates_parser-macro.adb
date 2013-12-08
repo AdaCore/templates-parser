@@ -46,6 +46,53 @@ package body Macro is
 
    Set : Registry.Map;
 
+   ----------------------
+   -- Default_Callback --
+   ----------------------
+
+   function Default_Callback
+     (Name : String; Params : Parameter_Set) return String
+   is
+      function Parameters return String;
+      --  Returns parameters
+
+      ----------------
+      -- Parameters --
+      ----------------
+
+      function Parameters return String is
+         R : Unbounded_String;
+      begin
+         for K in Params'Range loop
+            Append (R, Params (K));
+
+            if K /= Params'Last then
+               Append (R, ",");
+            end if;
+         end loop;
+
+         return To_String (R);
+      end Parameters;
+
+   begin
+      return To_String (Begin_Tag) & Name
+        & "(" & Parameters & ")" & To_String (End_Tag);
+   end Default_Callback;
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get (Name : String) return Tree is
+      Position : constant Registry.Cursor := Set.Find (Name);
+   begin
+      if Registry.Has_Element (Position) then
+         return Registry.Element (Position);
+      else
+         return null;
+      end if;
+   end Get;
+
    --------------------------
    -- Print_Defined_Macros --
    --------------------------
@@ -81,20 +128,6 @@ package body Macro is
       Set.Insert (Name, T);
    end Register;
 
-   ---------
-   -- Get --
-   ---------
-
-   function Get (Name : String) return Tree is
-      Position : constant Registry.Cursor := Set.Find (Name);
-   begin
-      if Registry.Has_Element (Position) then
-         return Registry.Element (Position);
-      else
-         return null;
-      end if;
-   end Get;
-
    -------------
    -- Rewrite --
    -------------
@@ -117,6 +150,16 @@ package body Macro is
       --  Release definition tree pointed to by Position
 
       Vars : Set_Var.Map;
+
+      ------------------------
+      -- Release_Definition --
+      ------------------------
+
+      procedure Release_Definition (Position : Set_Var.Cursor) is
+         E : Definitions.Tree := Set_Var.Element (Position);
+      begin
+         Definitions.Release (E);
+      end Release_Definition;
 
       ------------------
       -- Rewrite_Tree --
@@ -519,54 +562,11 @@ package body Macro is
          end loop;
       end Rewrite_Tree;
 
-      ------------------------
-      -- Release_Definition --
-      ------------------------
-
-      procedure Release_Definition (Position : Set_Var.Cursor) is
-         E : Definitions.Tree := Set_Var.Element (Position);
-      begin
-         Definitions.Release (E);
-      end Release_Definition;
-
    begin
       Rewrite_Tree (T, Parameters);
 
       Vars.Iterate (Release_Definition'Access);
    end Rewrite;
-
-   ----------------------
-   -- Default_Callback --
-   ----------------------
-
-   function Default_Callback
-     (Name : String; Params : Parameter_Set) return String
-   is
-      function Parameters return String;
-      --  Returns parameters
-
-      ----------------
-      -- Parameters --
-      ----------------
-
-      function Parameters return String is
-         R : Unbounded_String;
-      begin
-         for K in Params'Range loop
-            Append (R, Params (K));
-
-            if K /= Params'Last then
-               Append (R, ",");
-            end if;
-         end loop;
-
-         return To_String (R);
-      end Parameters;
-
-   begin
-      return To_String (Begin_Tag) & Name
-        & "(" & Parameters & ")" & To_String (End_Tag);
-   end Default_Callback;
 
 begin
    Callback := Default_Callback'Access;

@@ -321,12 +321,12 @@ package body Macro is
             use type Data.Tree;
             use type Expr.Tree;
 
-            procedure Replace (T : in out Expr.Tree; Ref : Positive);
-            pragma Inline (Replace);
+            procedure Replace (T : in out Expr.Tree; Ref : Positive)
+              with Inline;
             --  Replace T with the parameters pointed to by Ref
 
-            procedure Replace (T : in out Expr.Tree; Value : String);
-            pragma Inline (Replace);
+            procedure Replace (T : in out Expr.Tree; Value : String)
+              with Inline;
             --  Replace the node by the given value
 
             -------------

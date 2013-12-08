@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 with Ada.Calendar;
 with Ada.Characters.Handling;
 with Ada.Exceptions;
@@ -318,8 +320,7 @@ package body Templates_Parser is
       function Image (P : Parameter_Data) return String;
       --  Returns parameter string representation
 
-      procedure Release (P : in out Parameter_Data);
-      pragma Inline (Release);
+      procedure Release (P : in out Parameter_Data) with Inline;
       --  Release all memory allocated P
 
       type Filter_Context (P_Size : Natural) is record
@@ -680,8 +681,7 @@ package body Templates_Parser is
          end case;
       end record;
 
-      function Is_Include_Variable (T : Tag_Var) return Boolean;
-      pragma Inline (Is_Include_Variable);
+      function Is_Include_Variable (T : Tag_Var) return Boolean with Inline;
       --  Returns True if T is an include variable (Name is $<n>)
 
       function To_Data_Parameters
@@ -806,8 +806,7 @@ package body Templates_Parser is
          end case;
       end record;
 
-      function Is_True (Str : String) return Boolean;
-      pragma Inline (Is_True);
+      function Is_True (Str : String) return Boolean with Inline;
       --  Return True if Str is one of "TRUE" or "T", the test is not
       --  case sensitive.
 
@@ -1061,8 +1060,7 @@ package body Templates_Parser is
    function Quote (Str : String) return String;
    --  Returns Str quoted if it contains spaces, otherwise just returns Str
 
-   function Is_Number (S : String) return Boolean;
-   pragma Inline (Is_Number);
+   function Is_Number (S : String) return Boolean with Inline;
    --  Returns True if S is a decimal number
 
    procedure Unchecked_Free is
@@ -3946,19 +3944,16 @@ package body Templates_Parser is
          --  true S is a separator. We keep track of this as we do not want to
          --  have two separators side by side.
 
-         procedure Flush;
-         pragma Inline (Flush);
+         procedure Flush with Inline;
          --  Flush buffer to Results
 
-         function Get_Mark return Natural;
-         pragma Inline (Get_Mark);
+         function Get_Mark return Natural with Inline;
          --  Get a mark on the current text buffer
 
          function Get_Marked_Text (Mark : Natural) return String;
          --  Returns the text from the mark to the end of the buffer
 
-         procedure Rollback (Activate : Boolean; Mark : Natural);
-         pragma Inline (Rollback);
+         procedure Rollback (Activate : Boolean; Mark : Natural) with Inline;
          --  Commit or rollback added texts for terse output. If no text added
          --  from the vector tag we rollback to the previous mark otherwise the
          --  current result stays. The mark is cleared.
@@ -3981,12 +3976,10 @@ package body Templates_Parser is
          --  Returns the Cursor_Tag Var_Name inlined for all dimensions
          --  starting from Path.
 
-         procedure Push_Sep (State : Parse_State);
-         pragma Inline (Push_Sep);
+         procedure Push_Sep (State : Parse_State) with Inline;
          --  Append a separator into the current buffer
 
-         procedure Pop_Sep (State : Parse_State);
-         pragma Inline (Pop_Sep);
+         procedure Pop_Sep (State : Parse_State) with Inline;
          --  Remove the separator if it is the last input into the buffer
 
          L_State : aliased constant Parse_State := State;

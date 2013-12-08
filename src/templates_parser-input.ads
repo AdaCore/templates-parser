@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2002-2012, AdaCore                     --
+--                     Copyright (C) 2002-2013, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2012;
+
 with Ada.IO_Exceptions;
 
 package Templates_Parser.Input is
@@ -39,21 +41,18 @@ package Templates_Parser.Input is
    procedure Open
      (File : in out File_Type;
       Name : String;
-      Form : String    := "");
-   pragma Inline (Open);
+      Form : String    := "")
+     with Inline;
    --  Like Text_IO.Open and Mode = In_File
 
-   procedure Close (File : in out File_Type);
-   pragma Inline (Close);
+   procedure Close (File : in out File_Type) with Inline;
    --  Like Text_IO.Close. Raises text_IO.Status_Error is file is not open
 
-   function End_Of_File (File : File_Type) return Boolean;
-   pragma Inline (End_Of_File);
+   function End_Of_File (File : File_Type) return Boolean with Inline;
    --  Like Text_IO.End_Of_File. Raises Text_IO.Status_Error is file is not
    --  open.
 
-   function LF_Terminated (File : File_Type) return Boolean;
-   pragma Inline (LF_Terminated);
+   function LF_Terminated (File : File_Type) return Boolean with Inline;
    --  Returns True if last line returned by Get_Line was terminated with a LF
    --  or CR+LF on DOS based systems.
 

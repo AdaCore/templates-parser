@@ -23,10 +23,9 @@ project Docs is
 
    for Languages use ("Ada", "Project file");
 
-   for Object_Dir use "../" & TP_Shared.Build_Dir & "/dobj";
-   for Exec_Dir use ".";
-
-   for Main use ("build.adb");
+   for Source_Dirs use ("src");
+   for Object_Dir use "build/obj";
+   for Exec_Dir use "build/bin";
 
    package Compiler is
       for Default_Switches ("Ada") use ("-gnat05");

@@ -13,9 +13,10 @@ Hello here is a list of devices:
 
 <td>
 @@IF@@ @_AVAILABLE_@
-<a href="/order?DEVICE=@_DEVICES_@">Order
+<a href="/order?DEVICE=@_DEVICES_@">Order</a>
 @@ELSE@@
 Sorry, not available
 @@END_IF@@
 
 @@END_TABLE@@
+</table>

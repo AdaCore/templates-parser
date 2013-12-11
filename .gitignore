@@ -14,4 +14,3 @@ docs/user.tmplt.texi
 makefile.setup
 regtests/*.pyc
 regtests/out
-tp_xmlada.gpr

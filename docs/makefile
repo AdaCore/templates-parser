@@ -71,7 +71,7 @@ clean:
 
 build-sample:
 	mkdir -p build/obj build/bin build/samples
-	gnat make -m -Pdocs $(EXEFILES)
+	gnat make -p -m -Pdocs $(EXEFILES)
 	cp src/*.tmplt build/bin
 
 setup: build-sample $(RESFILES)

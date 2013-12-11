@@ -16,7 +16,6 @@
 --  to http://www.gnu.org/licenses for a complete copy of the license.      --
 ------------------------------------------------------------------------------
 
-with "tp_xmlada";
 with "tp_shared";
 
 project Templates_Parser is

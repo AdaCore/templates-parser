@@ -17,6 +17,7 @@
 ------------------------------------------------------------------------------
 
 with "tp_shared";
+with "tp_xmlada";
 
 project Templates_Parser is
 

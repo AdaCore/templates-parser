@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 1999-2013, AdaCore                    --
+--                      Copyright (C) 1999-2014, AdaCore                    --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -46,5 +46,11 @@ library project Templates_Parser is
    package Builder renames TP_Shared.Builder;
 
    package Ide renames TP_Shared.Ide;
+
+   package Install is
+      for Artifacts ("share/doc/templates_parser") use ("docs/build/html");
+      for Artifacts ("share/doc/templates_parser/pdf")
+        use ("docs/build/latex/*.pdf");
+   end Install;
 
 end Templates_Parser;

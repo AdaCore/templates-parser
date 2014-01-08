@@ -57,17 +57,10 @@ GPRCLEAN	= gprclean
 
 #  Install directories
 
-I_DOC	= $(TPREFIX)/share/doc/templates_parser
-
-CP	= cp -p
-MKDIR	= mkdir -p
-
 ifeq (${OS}, Windows_NT)
 EXEEXT	= .exe
-LN	= cp -p
 else
 EXEEXT	=
-LN	= ln -s
 endif
 
 #  Compute the default library kind, and possibly the other that are to
@@ -130,8 +123,8 @@ endif
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
-doc:
-	$(MAKE) -C docs $(ALL_OPTIONS) doc
+build-doc:
+	$(MAKE) -C docs html latexpdf
 	echo Templates_Parser Documentation built with success.
 
 #######################################################################
@@ -157,9 +150,6 @@ endif
 #######################################################################
 #  install
 
-install-dirs:
-	$(MKDIR) -p $(I_DOC)
-
 install-clean:
 ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 	-$(GPRINSTALL) $(GPROPTS) --uninstall \
@@ -167,9 +157,8 @@ ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 	-$(GPRINSTALL) $(GPROPTS) --uninstall \
 		--prefix=$(TPREFIX) -Ptools/tools
 endif
-	$(RM) -fr $(I_DOC)
 
-install: install-dirs
+install:
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) -Ptemplates_parser
@@ -181,9 +170,6 @@ endif
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) --mode=usage \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
-	-$(CP) docs/templates_parser*html $(I_DOC)
-	-$(CP) docs/templates_parser*pdf $(I_DOC)
-	-$(CP) docs/templates_parser*info* $(I_DOC)
 
 #######################################################################
 #  clean
@@ -199,4 +185,4 @@ ifneq ($(OTHER_LIBRARY_TYPE),)
 endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)
-	$(RM) -fr .build makefile.setup
+	rm -fr .build makefile.setup

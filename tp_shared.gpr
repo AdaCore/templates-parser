@@ -63,11 +63,12 @@ abstract project TP_Shared is
    --------------
 
    Common_Options :=
-     ("-gnat12", "-gnatwcfijkmruv", "-gnaty3abcefhiIklmnoprstx", "-Wall");
+     ("-gnat12", "-gnatwcfijkmruv", "-gnaty3abcefhiIklmnoprstx");
    --  Common options used for the Debug and Release modes
 
    Debug_Options :=
-     ("-g", "-gnata", "-gnatVa", "-gnatQ", "-gnato", "-gnatwe", "-gnatyO");
+     ("-g", "-gnata", "-gnatVa", "-gnatQ", "-gnato", "-gnatwe",
+      "-gnatyO", "-Wall");
 
    Release_Options :=
      ("-O2", "-gnatn");

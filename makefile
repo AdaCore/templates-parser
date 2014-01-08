@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2013, AdaCore                     #
+#                     Copyright (C) 2003-2014, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -161,10 +161,12 @@ install-dirs:
 	$(MKDIR) -p $(I_DOC)
 
 install-clean:
-	-$(GPRINSTALL) $(GPROPTS) -q --uninstall \
+ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
+	-$(GPRINSTALL) $(GPROPTS) --uninstall \
 		--prefix=$(TPREFIX) -Ptemplates_parser
-	-$(GPRINSTALL) $(GPROPTS) -q --uninstall \
+	-$(GPRINSTALL) $(GPROPTS) --uninstall \
 		--prefix=$(TPREFIX) -Ptools/tools
+endif
 	$(RM) -fr $(I_DOC)
 
 install: install-dirs

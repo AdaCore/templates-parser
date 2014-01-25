@@ -153,12 +153,10 @@ endif
 install-clean:
 ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 	-$(GPRINSTALL) $(GPROPTS) --uninstall \
-		--prefix=$(TPREFIX) -Ptemplates_parser
-	-$(GPRINSTALL) $(GPROPTS) --uninstall \
-		--prefix=$(TPREFIX) -Ptools/tools
+		--prefix=$(TPREFIX) templates_parser
 endif
 
-install:
+install: install-clean
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) -Ptemplates_parser
@@ -169,7 +167,8 @@ ifneq ($(OTHER_LIBRARY_TYPE),)
 endif
 	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) --mode=usage \
-		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
+		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
+		--install-name=templates_parser -Ptools/tools
 
 #######################################################################
 #  clean

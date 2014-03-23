@@ -29,14 +29,14 @@ while now.second > 56:
     time.sleep(5)
     now = datetime.datetime.now()
 
+run('testme', ["testme.tmplt"], output_file="dt.out")
+run('print_tree', ["testme.tmplt"])
+
 l1 = WeekDays[now.weekday()] + " " + Months[now.month - 1]
 l2 = now.strftime ("%Y/%m/%d")
 l3 = now.hour
 l4 = now.minute
 l5 = now.second
-
-run('testme', ["testme.tmplt"], output_file="dt.out")
-run('print_tree', ["testme.tmplt"])
 
 #  Now check dt.out result
 

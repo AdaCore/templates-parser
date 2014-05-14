@@ -185,3 +185,4 @@ endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)
 	rm -fr .build makefile.setup
+	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr

@@ -67,6 +67,7 @@ help:
 
 clean:
 	-rm -rf $(BUILDDIR)
+	rm -f *.pyc
 
 %.adb.res: src/%.adb
 	( cd build/bin; \

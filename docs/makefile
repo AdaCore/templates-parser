@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2013, AdaCore                     #
+#                     Copyright (C) 2003-2014, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -18,6 +18,9 @@
 
 # Makefile for Sphinx documentation
 #
+
+GNATMAKE = gnat make
+GNATCLEAN = gnat clean
 
 ADBFILES  = demo.adb user1.adb user2.adb table.adb table_section.adb \
 	    table_if.adb matrix.adb table_inline.adb if_inline.adb macro.adb
@@ -71,11 +74,11 @@ clean:
 
 build-sample:
 	mkdir -p build/obj build/bin build/samples
-	gnat make -p -m -Pdocs $(EXEFILES)
+	$(GNATMAKE) -p -m -Pdocs $(EXEFILES)
 	cp src/*.tmplt build/bin
 
 setup: build-sample $(RESFILES)
-	gnat clean -q -Pdocs
+	$(GNATCLEAN) -q -Pdocs
 
 html: setup
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

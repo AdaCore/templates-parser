@@ -8,9 +8,9 @@ def check(name, current, expected):
     else:
         print "NOK " + name + ": '" + expected + "' != '" + current + "'"
 
-def check_n(name, current, expected):
+def check_n(name, current, expected, shift=1):
     v = int (current)
-    if v == expected or v == expected - 1 or v == expected + 1:
+    if v == expected or (v > expected - shift and v < expected + shift):
         print "OK " + name
     else:
         print "NOK " + name + ": '" + str(expected) + "' != '" + current + "'"
@@ -47,6 +47,6 @@ check ("L1", lines[0][:-1], l1)
 check ("L2", lines[1][:-1], l2)
 check_n ("L3", lines[2][:-1], l3)
 check_n ("L4", lines[3][:-1], l4)
-check_n ("L5", lines[4][:-1], l5)
+check_n ("L5", lines[4][:-1], l5, 5)
 
 file.close()

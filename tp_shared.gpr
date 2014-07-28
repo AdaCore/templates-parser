@@ -79,7 +79,11 @@ abstract project TP_Shared is
             for Default_Switches ("Ada") use Common_Options & Release_Options;
          when "Debug" =>
             for Default_Switches ("Ada") use Common_Options & Debug_Options;
-      end case;
+            end case;
+
+      for Switches ("templates_parser.adb")
+        use Common_Options & Debug_Options & ("-gnatVn");
+      --  Disable validity check on those units to work-around N728-028
    end Compiler;
 
    ------------

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2013, AdaCore                     --
+--                     Copyright (C) 1999-2014, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -5569,9 +5569,9 @@ package body Templates_Parser is
                            then
                               B_State (B) := (1, Block.Sections);
                            else
-                              B_State (B)
-                                := (B_State (B).Section_Number + 1,
-                                    B_State (B).Section.N_Section);
+                              B_State (B) :=
+                                (B_State (B).Section_Number + 1,
+                                 B_State (B).Section.N_Section);
                            end if;
 
                            Analyze

@@ -388,13 +388,13 @@ package Templates_Parser is
       Lazy_Tag     : Dynamic.Lazy_Tag_Access;
    end record;
 
-   type Callback is access function
+   type Callback is not null access function
      (Value      : String;
       Parameters : String;
       Context    : Filter_Context) return String;
    --  User's filter callback
 
-   type Callback_No_Param is access function
+   type Callback_No_Param is not null access function
      (Value   : String;
       Context : Filter_Context) return String;
    --  User's filter callback

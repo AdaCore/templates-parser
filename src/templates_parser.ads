@@ -268,8 +268,6 @@ package Templates_Parser is
           Post   => Size ("+"'Result) = 1;
    --  Create translate set from one association
 
-   pragma Style_Checks (Off);
-
    procedure Remove (Set : in out Translate_Set; Name : String) with
      Pre  => Name'Length > 0,
      Post => not Exists (Set, Name);

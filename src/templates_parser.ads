@@ -276,8 +276,7 @@ package Templates_Parser is
 
    function Get (Set : Translate_Set; Name : String) return Association with
      Pre  => Name'Length > 0,
-     Post => (not Exists (Set, Name) and then Get'Result = Null_Association)
-             or else Exists (Set, Name);
+     Post => (if not Exists (Set, Name) then Get'Result = Null_Association);
    --  Returns the association named Name in the Set. Returns Null_Association
    --  is no such association if found in Set.
 

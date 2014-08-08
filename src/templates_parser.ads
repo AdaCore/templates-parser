@@ -57,11 +57,13 @@ package Templates_Parser is
 
    procedure Set_Tag_Separators
      (Start_With : String := Default_Begin_Tag;
-      Stop_With  : String := Default_End_Tag);
+      Stop_With  : String := Default_End_Tag) with
+     Pre => Start_With'Length > 0 and then Stop_With'Length > 0;
    --  Set the tag separators for the whole session. This should be changed as
    --  the very first API call and should not be changed after.
 
-   function Tag_From_Name (Name : String) return String;
+   function Tag_From_Name (Name : String) return String with
+     Post => Tag_From_Name'Result'Length >= Name'Length + 2;
    --  Returns the tag given the Name, default is @_NAME_@
 
    -----------------
@@ -457,7 +459,8 @@ package Templates_Parser is
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
       Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
-      return String;
+      return String
+   with Pre => Filename'Length > 0;
    --  Parse the Template_File replacing variables' occurrences by the
    --  corresponding values. If Cached is set to True, Filename tree will be
    --  recorded into a cache for quick retrieval. If Keep_Unknown_Tags is set
@@ -473,7 +476,8 @@ package Templates_Parser is
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
       Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
-      return Unbounded_String;
+      return Unbounded_String
+   with Pre => Filename'Length > 0;
    --  Idem but returns an Unbounded_String
 
    function Parse
@@ -483,7 +487,8 @@ package Templates_Parser is
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
       Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
-      return String;
+      return String
+   with Pre => Filename'Length > 0;
    --  Idem with a Translation_Set
 
    function Parse
@@ -493,7 +498,8 @@ package Templates_Parser is
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
       Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
-      return Unbounded_String;
+      return Unbounded_String
+   with Pre => Filename'Length > 0;
    --  Idem with a Translation_Set
 
    function Translate

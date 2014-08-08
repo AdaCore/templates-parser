@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2013, AdaCore                     --
+--                     Copyright (C) 2004-2014, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -35,7 +35,9 @@ package Templates_Parser.Utils is
 
    use Ada;
 
-   function Image (N : Integer) return String with Inline;
+   function Image (N : Integer) return String with
+     Inline => True,
+     Post   => Image'Result'Length > 0;
    --  Returns N image without leading blank
 
    function Image (T : Tag) return String;
@@ -59,7 +61,8 @@ package Templates_Parser.Utils is
    function Executable_Extension return String;
    --  Return the executable exetension for the running host
 
-   function Web_Escape (S : String) return String;
+   function Web_Escape (S : String) return String with
+     Post => Web_Escape'Result'Length >= S'Length;
    --  Encode all characters that cannot be used as-is into an HTML page
 
    function Is_Number (S : String) return Boolean;

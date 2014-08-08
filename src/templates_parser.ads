@@ -626,9 +626,8 @@ private
    --  Translate_Set --
    --------------------
 
-   package Association_Map is
-     new Containers.Indefinite_Hashed_Maps
-       (String, Association, Strings.Hash, "=", "=");
+   package Association_Map is new Containers.Indefinite_Hashed_Maps
+     (String, Association, Strings.Hash, "=", "=");
 
    type Map_Access is access Association_Map.Map;
 

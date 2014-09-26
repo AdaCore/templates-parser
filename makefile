@@ -107,17 +107,22 @@ GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
 		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
 		-XVERSION=$(VERSION)
 
+GPR_DEFAULT = -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XXMLADA_BUILD=$(DEFAULT_LIBRARY_TYPE)
+GPR_OTHER   = -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+		-XXMLADA_BUILD=$(DEFAULT_LIBRARY_TYPE)
+
 #######################################################################
 #  build
 
 build: tp_xmlada.gpr
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
 ifneq ($(OTHER_LIBRARY_TYPE),)
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
+	$(GPRBUILD) -p $(GPROPTS) $(GPR_OTHER) \
 		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
 endif
-	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 
 run_regtests test: build
@@ -157,15 +162,15 @@ ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 endif
 
 install: install-clean
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--prefix=$(TPREFIX) -Ptemplates_parser
 ifneq ($(OTHER_LIBRARY_TYPE),)
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_OTHER) \
 		--prefix=$(TPREFIX) --build-name=$(OTHER_LIBRARY_TYPE) \
 		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
 endif
-	$(GPRINSTALL) $(GPROPTS) -p -f -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_DEFAULT) \
 		--prefix=$(TPREFIX) --mode=usage \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--install-name=templates_parser -Ptools/tools
@@ -174,13 +179,10 @@ endif
 #  clean
 
 clean:
-	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) $(GPROPTS) \
-		-Ptemplates_parser
-	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) $(GPROPTS) \
-		-Ptools/tools
+	-$(GPRCLEAN) $(GPR_DEFAULT) $(GPROPTS) -Ptemplates_parser
+	-$(GPRCLEAN) $(GPR_DEFAULT) $(GPROPTS) -Ptools/tools
 ifneq ($(OTHER_LIBRARY_TYPE),)
-	-$(GPRCLEAN) -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) $(GPROPTS) \
-		-Ptemplates_parser
+	-$(GPRCLEAN) $(GPR_OTHER) $(GPROPTS) -Ptemplates_parser
 endif
 	-$(MAKE) -C docs clean $(ALL_OPTIONS)
 	-$(MAKE) -C regtests clean $(ALL_OPTIONS)

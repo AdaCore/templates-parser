@@ -18,7 +18,7 @@
 
 .SILENT:
 
-VERSION	= 11.9.0w
+VERSION	= 11.9.1
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking

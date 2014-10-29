@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2012, AdaCore                     --
+--                     Copyright (C) 2004-2014, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -184,7 +184,7 @@ package body Templates_Parser.Utils is
                end if;
 
             else
-               --  Command does not exists, try checkin it on the PATH
+               --  Command does not exist, try checkin it on the PATH
                declare
                   Full_Pathname : constant String :=
                                     Locate_On_Path

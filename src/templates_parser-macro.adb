@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2013, AdaCore                    --
+--                      Copyright (C) 2010-2014, AdaCore                    --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -178,7 +178,7 @@ package body Macro is
          --  Rewrite condition.
          --  In @@IF@@ @_$N_@ = val
          --  Replace $N by Parameters(N) or by the corresponding value in the
-         --  variable mapping or does nothing if Parameters(N) does not exists
+         --  variable mapping or does nothing if Parameters(N) does not exist
          --  or no variable mapping found.
 
          procedure Rewrite (Included : in out Included_File_Info);

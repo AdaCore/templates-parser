@@ -5148,7 +5148,7 @@ package body Templates_Parser is
                           or else N.Ref > State.I_Params'Last
                           or else State.I_Params (N.Ref) = null
                         then
-                           --  This include parameter does not exists, use
+                           --  This include parameter does not exist, use
                            --  default value.
                            return Data.Translate
                              (Var, To_String (N.Value), C'Access);

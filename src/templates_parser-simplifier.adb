@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2012, AdaCore                    --
+--                      Copyright (C) 2010-2014, AdaCore                    --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -188,7 +188,7 @@ package body Simplifier is
                   elsif (Expr.Is_True (V) and then N.N_True = null)
                     or else (not Expr.Is_True (V) and then N.N_False = null)
                   then
-                     --  The corresponding branch does not exists, skip IF
+                     --  The corresponding branch does not exist, skip IF
                      Expr.Release (N.Cond);
                      Release (N.N_True);
                      Release (N.N_False);

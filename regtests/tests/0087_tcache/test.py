@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('tcache')
+gprbuild('tcache')
 run('tcache')

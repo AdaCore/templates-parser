@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('regtst4')
+gprbuild('regtst4')
 run('regtst4')

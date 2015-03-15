@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('dynamic')
+gprbuild('dynamic')
 run('dynamic')

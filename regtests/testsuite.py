@@ -23,29 +23,30 @@ import sys
 TARGET = os.environ.get("TARGET")
 PRJ_BUILD = os.environ.get("PRJ_BUILD")
 
-if TARGET == None:
-    TARGET = Run (['gcc', '-dumpmachine']).out.strip('\n')
+if TARGET is None:
+    TARGET = Run(['gcc', '-dumpmachine']).out.strip('\n')
 else:
     TARGET = TARGET.lower()
 
-if PRJ_BUILD == None:
+if PRJ_BUILD is None:
     PRJ_BUILD = "debug"
 else:
     PRJ_BUILD = PRJ_BUILD.lower()
+
 
 def makedir(dir):
     return os.getcwd() + "/../.build/" + dir + "/" \
         + TARGET + "/" + PRJ_BUILD + "/static/"
 
 os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + makedir("bin") \
-        + os.pathsep + makedir("rbin")
+    + os.pathsep + makedir("rbin")
 
 from gnatpython.ex import Run
 
 
-def gnatmake(prj):
-    """Compile a project with gnatmake"""
-    cmd = ["gnatmake", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
+def gprbuild(prj):
+    """Compile a project with gprbuild"""
+    cmd = ["gprbuild", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
     process = Run(cmd)
     if process.status:
         print process.out
@@ -81,10 +82,10 @@ def main():
     def test_build_cmd(test, _):
         """Run the given test"""
         cmd = [sys.executable, 'run-test',
-                    '-d', ",".join(discs),
-                    '-o', result_dir,
-                    '-t', options.tmp,
-                    test]
+               '-d', ",".join(discs),
+               '-o', result_dir,
+               '-t', options.tmp,
+               test]
         if options.verbose:
             cmd.append('-v')
         if options.host:

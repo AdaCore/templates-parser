@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('nullset')
+gprbuild('nullset')
 run('nullset')

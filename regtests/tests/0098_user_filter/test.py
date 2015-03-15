@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('user_filter')
+gprbuild('user_filter')
 run('user_filter')

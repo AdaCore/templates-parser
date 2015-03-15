@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('testcat')
+gprbuild('testcat')
 run('testcat')

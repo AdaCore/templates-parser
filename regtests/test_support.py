@@ -14,12 +14,14 @@ os.chdir(TESTDIR)
 
 from gnatpython.ex import Run
 
-def gnatmake(prj):
-    """Compile a project with gnatmake"""
-    cmd = ["gnatmake", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
+
+def gprbuild(prj):
+    """Compile a project with gprbuild"""
+    cmd = ["gprbuild", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
     process = Run(cmd)
     if process.status:
         print process.out
+
 
 def run(bin, options=None, output_file=None):
     """Run a test"""

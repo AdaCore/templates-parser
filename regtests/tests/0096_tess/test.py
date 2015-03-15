@@ -1,4 +1,4 @@
 from test_support import *
 
-gnatmake('tess')
+gprbuild('tess')
 run('tess')

@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2014, AdaCore                     #
+#                     Copyright (C) 2003-2015, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -31,9 +31,12 @@ DEFAULT_LIBRARY_TYPE	= static
 ENABLE_STATIC = true
 ENABLE_SHARED =$(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
-TP_XMLADA    = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
-			-Pconfig/setup/test_xmlada 2>/dev/null \
-		&& echo "Installed")
+
+ifeq ($(shell gnat ls -Pxmlada 2>&1 | grep 'project file .* not found'),)
+TP_XMLADA    = Installed
+else
+TP_XMLADA    = Disabled
+endif
 
 -include makefile.setup
 

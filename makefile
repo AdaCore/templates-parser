@@ -18,7 +18,7 @@
 
 .SILENT:
 
-VERSION	= 11.10.0w
+VERSION	= gpl-2015
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking

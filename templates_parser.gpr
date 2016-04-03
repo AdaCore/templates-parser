@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 1999-2014, AdaCore                    --
+--                      Copyright (C) 1999-2016, AdaCore                    --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -37,9 +37,31 @@ library project Templates_Parser is
          null;
    end case;
 
-   package Naming renames TP_Shared.Naming;
+   package Naming is
 
-   package Compiler renames TP_Shared.Compiler;
+      for Specification ("Templates_Parser.Configuration")
+        use "templates_parser-configuration__standalone.ads";
+      for Implementation ("Templates_Parser.Input")
+        use "templates_parser-input__standalone.adb";
+
+      case TP_Shared.Tasking is
+         when "No_Tasking" =>
+            for Implementation ("Templates_Parser_Tasking")
+              use "templates_parser_tasking__no_tasking.adb";
+         when "Standard_Tasking" =>
+            for Implementation ("Templates_Parser_Tasking")
+              use "templates_parser_tasking__standard_tasking.adb";
+      end case;
+
+   end Naming;
+
+   package Compiler is
+      for Default_Switches ("Ada")
+        use TP_Shared.Compiler'Default_Switches ("Ada");
+      for Switches ("templates_parser.adb")
+        use Compiler'Default_Switches ("Ada") & ("-gnatVn");
+      --  Disable validity check on those units to work-around N728-028
+   end Compiler;
 
    package Binder renames TP_Shared.Binder;
 

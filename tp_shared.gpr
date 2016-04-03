@@ -36,28 +36,6 @@ abstract project TP_Shared is
 
    Build_Dir := ".build";
 
-   ------------
-   -- Naming --
-   ------------
-
-   package Naming is
-
-      for Specification ("Templates_Parser.Configuration")
-        use "templates_parser-configuration__standalone.ads";
-      for Implementation ("Templates_Parser.Input")
-        use "templates_parser-input__standalone.adb";
-
-      case Tasking is
-         when "No_Tasking" =>
-            for Implementation ("Templates_Parser_Tasking")
-              use "templates_parser_tasking__no_tasking.adb";
-         when "Standard_Tasking" =>
-            for Implementation ("Templates_Parser_Tasking")
-              use "templates_parser_tasking__standard_tasking.adb";
-      end case;
-
-   end Naming;
-
    --------------
    -- Compiler --
    --------------
@@ -78,11 +56,7 @@ abstract project TP_Shared is
             for Default_Switches ("Ada") use Common_Options & Release_Options;
          when "Debug" =>
             for Default_Switches ("Ada") use Common_Options & Debug_Options;
-            end case;
-
-      for Switches ("templates_parser.adb")
-        use Compiler'Default_Switches ("Ada") & ("-gnatVn");
-      --  Disable validity check on those units to work-around N728-028
+      end case;
    end Compiler;
 
    ------------

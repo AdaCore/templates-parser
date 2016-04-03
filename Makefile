@@ -132,8 +132,9 @@ endif
 run_regtests test: build
 	$(MAKE) -C regtests $(ALL_OPTIONS) test
 
+DOC_FORMATS := html latexpdf
 build-doc: tp_xmlada.gpr
-	$(MAKE) -C docs html latexpdf
+	$(MAKE) -C docs $(DOC_FORMATS)
 	echo Templates_Parser Documentation built with success.
 
 #######################################################################

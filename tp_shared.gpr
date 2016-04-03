@@ -36,6 +36,9 @@ abstract project TP_Shared is
 
    Build_Dir := ".build";
 
+   Adaflags := External_As_List ("ADAFLAGS", " ");
+   Ldflags := External_As_List ("LDFLAGS", " ");
+
    --------------
    -- Compiler --
    --------------
@@ -57,6 +60,10 @@ abstract project TP_Shared is
          when "Debug" =>
             for Default_Switches ("Ada") use Common_Options & Debug_Options;
       end case;
+
+      for Default_Switches ("Ada")
+        use Compiler'Default_Switches ("Ada") & Adaflags;
+      --  Put user flags at they end so that they take precedence.
    end Compiler;
 
    ------------
@@ -74,6 +81,14 @@ abstract project TP_Shared is
    package Builder is
       for Default_Switches ("Ada") use ("-m", "-j" & Processors);
    end Builder;
+
+   ------------
+   -- Linker --
+   ------------
+
+   package Linker is
+      for Default_Switches ("Ada") use Ldflags;
+   end Linker;
 
    ---------
    -- Ide --

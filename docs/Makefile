@@ -82,7 +82,8 @@ $(RESDIR):
 .PHONY: build-sample
 build-sample:
 	$(GPRBUILD) -p -m -Pdocs $(EXEFILES) \
-	  --subdirs=$(SDIR)/static -XVERSION=$(VERSION)
+	  --subdirs=$(SDIR)/static \
+	  $(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))")
 
 # Executable and result will be removed with BUILDDIR.
 

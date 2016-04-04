@@ -34,6 +34,8 @@ abstract project TP_Shared is
 
    Processors := External ("PROCESSORS", "0");
 
+   Version := External ("VERSION");
+
    Build_Dir := ".build";
 
    Adaflags := External_As_List ("ADAFLAGS", " ");

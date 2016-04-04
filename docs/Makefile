@@ -21,11 +21,13 @@
 
 -include ../makefile.setup
 
-ADBFILES  = demo.adb user1.adb user2.adb table.adb table_section.adb \
-	    table_if.adb matrix.adb table_inline.adb if_inline.adb macro.adb
-
-EXEFILES  = $(ADBFILES:.adb=)
-RESFILES  = $(ADBFILES:=.res)
+TMPLDIR  := src
+ADBDIR   := src
+EXEDIR   := build/bin/$(SDIR)/static
+RESDIR   := build/samples
+ADBFILES := $(wildcard $(ADBDIR)/*.adb)
+EXEFILES := $(patsubst $(ADBDIR)/%.adb,%,$(ADBFILES))
+RESFILES := $(foreach e,$(EXEFILES),$(RESDIR)/$(e).adb.res)
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -68,20 +70,23 @@ clean:
 	-rm -rf $(BUILDDIR)
 	rm -f *.pyc
 
-%.adb.res: src/%.adb
-	( cd build/bin; \
-	./$(SDIR)/static/$* > ../samples/$@ )
+# All documentations require the generated examples.
+html dirhtml singlehtml pickle json htmlhelp qthelp latex latexpdf text man texinfo info: $(RESFILES)
 
+$(RESFILES): $(RESDIR)/%.adb.res: build-sample | $(RESDIR)
+	( cd $(TMPLDIR) && ../$(EXEDIR)/$* ) > $@
+
+$(RESDIR):
+	mkdir $@
+
+.PHONY: build-sample
 build-sample:
-	mkdir -p build/obj build/bin build/samples
 	$(GPRBUILD) -p -m -Pdocs $(EXEFILES) \
 	  --subdirs=$(SDIR)/static -XVERSION=$(VERSION)
-	cp src/*.tmplt build/bin
 
-setup: build-sample $(RESFILES)
-	$(GPRCLEAN) -q -Pdocs --subdirs=$(SDIR)/static -XVERSION=$(VERSION)
+# Executable and result will be removed with BUILDDIR.
 
-html: setup
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

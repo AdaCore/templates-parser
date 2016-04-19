@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2015, AdaCore                     #
+#                     Copyright (C) 2003-2016, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -26,6 +26,7 @@ SDIR		= $(TARGET)/$(MODE)
 build:
 	$(GPRBUILD) -q -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
+		-XVERSION=$(VERSION) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
 test:  build
@@ -34,4 +35,5 @@ test:  build
 clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
+		-XVERSION=$(VERSION) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests

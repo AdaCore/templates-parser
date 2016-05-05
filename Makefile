@@ -155,8 +155,12 @@ else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 endif
 
-setup makefile.setup:
-	echo " $(foreach v,$(ALL_OPTIONS),$(v) := $($(v))\n)" > $@
+force:
+
+makefile.setup: setup
+
+setup: force
+	echo " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
 
 #######################################################################
 #  install

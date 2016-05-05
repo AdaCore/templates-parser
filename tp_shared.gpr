@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2008-2013, AdaCore                    --
+--                      Copyright (C) 2008-2016, AdaCore                    --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -34,29 +34,12 @@ abstract project TP_Shared is
 
    Processors := External ("PROCESSORS", "0");
 
+   Version := External ("VERSION");
+
    Build_Dir := ".build";
 
-   ------------
-   -- Naming --
-   ------------
-
-   package Naming is
-
-      for Specification ("Templates_Parser.Configuration")
-        use "templates_parser-configuration__standalone.ads";
-      for Implementation ("Templates_Parser.Input")
-        use "templates_parser-input__standalone.adb";
-
-      case Tasking is
-         when "No_Tasking" =>
-            for Implementation ("Templates_Parser_Tasking")
-              use "templates_parser_tasking__no_tasking.adb";
-         when "Standard_Tasking" =>
-            for Implementation ("Templates_Parser_Tasking")
-              use "templates_parser_tasking__standard_tasking.adb";
-      end case;
-
-   end Naming;
+   Adaflags := External_As_List ("ADAFLAGS", " ");
+   Ldflags := External_As_List ("LDFLAGS", " ");
 
    --------------
    -- Compiler --
@@ -78,11 +61,11 @@ abstract project TP_Shared is
             for Default_Switches ("Ada") use Common_Options & Release_Options;
          when "Debug" =>
             for Default_Switches ("Ada") use Common_Options & Debug_Options;
-            end case;
+      end case;
 
-      for Switches ("templates_parser.adb")
-        use Common_Options & Debug_Options & ("-gnatVn");
-      --  Disable validity check on those units to work-around N728-028
+      for Default_Switches ("Ada")
+        use Compiler'Default_Switches ("Ada") & Adaflags;
+      --  Put user flags at they end so that they take precedence.
    end Compiler;
 
    ------------
@@ -100,6 +83,14 @@ abstract project TP_Shared is
    package Builder is
       for Default_Switches ("Ada") use ("-m", "-j" & Processors);
    end Builder;
+
+   ------------
+   -- Linker --
+   ------------
+
+   package Linker is
+      for Default_Switches ("Ada") use Ldflags;
+   end Linker;
 
    ---------
    -- Ide --

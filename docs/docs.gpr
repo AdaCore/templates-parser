@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2005-2013, AdaCore                     --
+--                     Copyright (C) 2005-2016, AdaCore                     --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -28,7 +28,15 @@ project Docs is
    for Exec_Dir use "build/bin";
 
    package Compiler is
-      for Default_Switches ("Ada") use ("-gnat05");
+      for Default_Switches ("Ada") use ("-gnat05") & TP_Shared.Adaflags;
    end Compiler;
+
+   package Binder renames TP_Shared.Binder;
+
+   package Builder renames TP_Shared.Builder;
+
+   package Linker renames TP_Shared.Linker;
+
+   package Ide renames TP_Shared.Ide;
 
 end Docs;

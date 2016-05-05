@@ -98,18 +98,25 @@ ifeq ($(TP_XMLADA),)
 TP_XMLADA=Disabled
 endif
 
-ALL_OPTIONS = INCLUDES="$(INCLUDES)" PRJ_BUILD="$(PRJ_BUILD)" SDIR="$(SDIR)" \
-		TP_XMLADA="$(TP_XMLADA)" GNAT="$(GNAT)" \
-		PRJ_BUILD="$(PRJ_BUILD)" TARGET="$(TARGET)" \
-		DEFAULT_LIBRARY_TYPE="$(DEFAULT_LIBRARY_TYPE)" \
-		ENABLE_SHARED="$(ENABLE_SHARED)" \
-		ENABLE_STATIC="$(ENABLE_STATIC)" \
-		GPRBUILD="$(GPRBUILD)" GPRCLEAN="$(GPRCLEAN)" \
-		VERSION="$(VERSION)"
+ALL_OPTIONS := \
+ DEBUG \
+ DEFAULT_LIBRARY_TYPE \
+ ENABLE_SHARED \
+ ENABLE_STATIC \
+ GNAT \
+ GPRBUILD \
+ GPRCLEAN \
+ PRJ_BUILD \
+ PROCESSORS \
+ SDIR \
+ TARGET \
+ TP_XMLADA \
+ VERSION \
+ prefix \
 
-GPROPTS += -XPRJ_BUILD=$(PRJ_BUILD) -XTP_XMLADA=$(TP_XMLADA) \
-		-XPROCESSORS=$(PROCESSORS) -XTARGET=$(TARGET) \
-		-XVERSION=$(VERSION)
+GPROPTS += $(foreach v, \
+ PRJ_BUILD TP_XMLADA PROCESSORS TARGET VERSION \
+ ,"-X$(v)=$($(v))")
 
 GPR_DEFAULT = -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		-XXMLADA_BUILD=$(DEFAULT_LIBRARY_TYPE)
@@ -119,7 +126,7 @@ GPR_OTHER   = -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
 #######################################################################
 #  build
 
-build: tp_xmlada.gpr
+build: tp_xmlada.gpr makefile.setup
 	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
 ifneq ($(OTHER_LIBRARY_TYPE),)
@@ -129,32 +136,30 @@ endif
 	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 
-run_regtests test: build
-	$(MAKE) -C regtests $(ALL_OPTIONS) test
+run_regtests test: build makefile.setup
+	$(MAKE) -C regtests test
 
-build-doc:
-	$(MAKE) -C docs html latexpdf
+DOC_FORMATS := html latexpdf
+build-doc: tp_xmlada.gpr makefile.setup
+	$(MAKE) -C docs $(DOC_FORMATS)
 	echo Templates_Parser Documentation built with success.
 
 #######################################################################
 #  setup
 
-tp_xmlada.gpr: setup
-
-setup:
+tp_xmlada.gpr:
 ifeq ($(TP_XMLADA), Installed)
 	cp config/tp_xmlada_installed.gpr tp_xmlada.gpr
 else
 	cp config/tp_xmlada_dummy.gpr tp_xmlada.gpr
 endif
-	echo "prefix=$(prefix)" > makefile.setup
-	echo "DEFAULT_LIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE)" >> makefile.setup
-	echo "ENABLE_STATIC=$(ENABLE_STATIC)" >> makefile.setup
-	echo "ENABLE_SHARED=$(ENABLE_SHARED)" >> makefile.setup
-	echo "DEBUG=$(DEBUG)" >> makefile.setup
-	echo "PROCESSORS=$(PROCESSORS)" >> makefile.setup
-	echo "TP_XMLADA=$(TP_XMLADA)" >> makefile.setup
-	echo "TARGET=$(TARGET)" >> makefile.setup
+
+force:
+
+makefile.setup: setup
+
+setup: force
+	echo " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
 
 #######################################################################
 #  install
@@ -188,7 +193,7 @@ clean:
 ifneq ($(OTHER_LIBRARY_TYPE),)
 	-$(GPRCLEAN) $(GPR_OTHER) $(GPROPTS) -Ptemplates_parser
 endif
-	-$(MAKE) -C docs clean $(ALL_OPTIONS)
-	-$(MAKE) -C regtests clean $(ALL_OPTIONS)
+	-$(MAKE) -C docs clean
+	-$(MAKE) -C regtests clean
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr

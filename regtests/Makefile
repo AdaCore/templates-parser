@@ -20,13 +20,9 @@
 
 -include ../makefile.setup
 
-MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
-SDIR		= $(TARGET)/$(MODE)
-
 build:
 	$(GPRBUILD) -q -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
-		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
-		-XVERSION=$(VERSION) \
+		$(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
 test:  build
@@ -34,6 +30,5 @@ test:  build
 
 clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
-		-XTARGET=$(TARGET) -XPRJ_BUILD=$(PRJ_BUILD) \
-		-XVERSION=$(VERSION) \
+		$(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests

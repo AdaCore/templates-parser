@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2015, AdaCore                     #
+#                     Copyright (C) 2003-2016, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -19,14 +19,15 @@
 # Makefile for Sphinx documentation
 #
 
-GNATMAKE = gnat make
-GNATCLEAN = gnat clean
+-include ../makefile.setup
 
-ADBFILES  = demo.adb user1.adb user2.adb table.adb table_section.adb \
-	    table_if.adb matrix.adb table_inline.adb if_inline.adb macro.adb
-
-EXEFILES  = $(ADBFILES:.adb=)
-RESFILES  = $(ADBFILES:=.res)
+TMPLDIR  := src
+ADBDIR   := src
+EXEDIR   := build/bin/$(SDIR)/static
+RESDIR   := build/samples
+ADBFILES := $(wildcard $(ADBDIR)/*.adb)
+EXEFILES := $(patsubst $(ADBDIR)/%.adb,%,$(ADBFILES))
+RESFILES := $(foreach e,$(EXEFILES),$(RESDIR)/$(e).adb.res)
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
@@ -69,19 +70,24 @@ clean:
 	-rm -rf $(BUILDDIR)
 	rm -f *.pyc
 
-%.adb.res: src/%.adb
-	( cd build/bin; \
-	./`basename $@ .adb.res` > ../samples/`basename $<.res` )
+# All documentations require the generated examples.
+html dirhtml singlehtml pickle json htmlhelp qthelp latex latexpdf text man texinfo info: $(RESFILES)
 
+$(RESFILES): $(RESDIR)/%.adb.res: build-sample | $(RESDIR)
+	( cd $(TMPLDIR) && ../$(EXEDIR)/$* ) > $@
+
+$(RESDIR):
+	mkdir $@
+
+.PHONY: build-sample
 build-sample:
-	mkdir -p build/obj build/bin build/samples
-	$(GNATMAKE) -p -m -Pdocs $(EXEFILES)
-	cp src/*.tmplt build/bin
+	$(GPRBUILD) -p -m -Pdocs $(EXEFILES) \
+	  --subdirs=$(SDIR)/static \
+	  $(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))")
 
-setup: build-sample $(RESFILES)
-	$(GNATCLEAN) -q -Pdocs
+# Executable and result will be removed with BUILDDIR.
 
-html: setup
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

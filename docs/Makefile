@@ -19,6 +19,12 @@
 # Makefile for Sphinx documentation
 #
 
+# default value if this Makefile is called directly on not from above
+# Makefile.
+
+GPRBUILD  := gprbuild
+PRJ_BUILD := Release
+
 -include ../makefile.setup
 
 TMPLDIR  := src

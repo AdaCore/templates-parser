@@ -26,7 +26,7 @@ build:
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
 test:  build
-	PATH=.:${PATH} ./testsuite.py --jobs=4
+	PRJ_BUILD="$(PRJ_BUILD)" PATH=.:${PATH} ./testsuite.py --jobs=4
 
 clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \

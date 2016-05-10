@@ -158,7 +158,7 @@ force:
 
 makefile.setup: setup
 
-setup: force
+setup: tp_xmlada.gpr force
 	echo " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
 
 #######################################################################

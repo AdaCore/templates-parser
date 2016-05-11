@@ -112,7 +112,7 @@ ALL_OPTIONS := \
  TARGET \
  TP_XMLADA \
  VERSION \
- prefix \
+ prefix
 
 GPROPTS += $(foreach v, \
  PRJ_BUILD TP_XMLADA PROCESSORS TARGET VERSION \
@@ -159,7 +159,7 @@ force:
 makefile.setup: setup
 
 setup: tp_xmlada.gpr force
-	echo " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
+	printf " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
 
 #######################################################################
 #  install

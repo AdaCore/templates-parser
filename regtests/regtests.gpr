@@ -36,12 +36,6 @@ project Regtests is
       for Default_Switches ("Ada") use ("-gnat05", "-g") & TP_Shared.Adaflags;
    end Compiler;
 
-   ------------
-   -- Binder --
-   ------------
-
-   package Binder renames TP_Shared.Binder;
-
    -------------
    -- Builder --
    -------------

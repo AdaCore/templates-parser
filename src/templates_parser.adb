@@ -5817,6 +5817,8 @@ package body Templates_Parser is
             end loop;
 
             Data.Unchecked_Free (Included.Params);
+
+            Data.Release (Included.Filename);
          end if;
       end Release;
 

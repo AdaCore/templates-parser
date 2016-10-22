@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2014, AdaCore                     --
+--                     Copyright (C) 1999-2016, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -5815,6 +5815,8 @@ package body Templates_Parser is
                Data.Release (Included.Params (K));
             end loop;
             Data.Unchecked_Free (Included.Params);
+
+            Data.Release (Included.Filename);
          end if;
       end Release;
 

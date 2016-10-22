@@ -34,7 +34,7 @@ abstract project TP_Shared is
 
    Processors := external ("PROCESSORS", "0");
 
-   Version := External ("VERSION");
+   Version := external ("VERSION", "dev");
 
    Build_Dir := ".build";
 

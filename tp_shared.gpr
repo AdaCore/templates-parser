@@ -32,14 +32,14 @@ abstract project TP_Shared is
    type Library_Kind is ("relocatable", "static");
    Library_Type : Library_Kind := external ("LIBRARY_TYPE", "static");
 
-   Processors := External ("PROCESSORS", "0");
+   Processors := external ("PROCESSORS", "0");
 
    Version := External ("VERSION");
 
    Build_Dir := ".build";
 
-   Adaflags := External_As_List ("ADAFLAGS", " ");
-   Ldflags := External_As_List ("LDFLAGS", " ");
+   Adaflags := external_as_list ("ADAFLAGS", " ");
+   Ldflags := external_as_list ("LDFLAGS", " ");
 
    --------------
    -- Compiler --

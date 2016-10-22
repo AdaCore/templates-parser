@@ -73,61 +73,61 @@ package Templates_Parser is
    type Tag is private;
    --  A tag is using a by reference semantic
 
-   function "+" (Value : String)           return Tag with
-     Post => Size ("+"'Result) = 1;
-   function "+" (Value : Character)        return Tag with
-     Post => Size ("+"'Result) = 1;
-   function "+" (Value : Boolean)          return Tag with
-     Post => Size ("+"'Result) = 1;
-   function "+" (Value : Unbounded_String) return Tag with
-     Post => Size ("+"'Result) = 1;
-   function "+" (Value : Integer)          return Tag with
-     Post => Size ("+"'Result) = 1;
-   function "+" (Value : Tag)              return Tag with
-     Post => Size ("+"'Result) = 1;
+   function "+" (Value : String)           return Tag
+     with Post => Size ("+"'Result) = 1;
+   function "+" (Value : Character)        return Tag
+     with Post => Size ("+"'Result) = 1;
+   function "+" (Value : Boolean)          return Tag
+     with Post => Size ("+"'Result) = 1;
+   function "+" (Value : Unbounded_String) return Tag
+     with Post => Size ("+"'Result) = 1;
+   function "+" (Value : Integer)          return Tag
+     with Post => Size ("+"'Result) = 1;
+   function "+" (Value : Tag)              return Tag
+     with Post => Size ("+"'Result) = 1;
    --  Tag constructors
 
-   function "&" (T : Tag; Value : String)           return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (T : Tag; Value : Character)        return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (T : Tag; Value : Boolean)          return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (T : Tag; Value : Unbounded_String) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (T : Tag; Value : Integer)          return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (T : Tag; Value : Tag)              return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : String)           return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : Character)        return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : Boolean)          return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : Unbounded_String) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : Integer)          return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (T : Tag; Value : Tag)              return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
    --  Add Value at the end of the tag, note that "&" will modify its
    --  first parameter. It is intended to be used as [T := T & "val"],
    --  doing [T1 := T2 & "val"] will add val to T2 and set T1 as an
    --  alias. This is designed this way for efficiency.
 
-   function "&" (Value : String;           T : Tag) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (Value : Character;        T : Tag) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (Value : Boolean;          T : Tag) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (Value : Unbounded_String; T : Tag) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
-   function "&" (Value : Integer;          T : Tag) return Tag with
-     Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (Value : String;           T : Tag) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (Value : Character;        T : Tag) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (Value : Boolean;          T : Tag) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (Value : Unbounded_String; T : Tag) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
+   function "&" (Value : Integer;          T : Tag) return Tag
+     with Post => Size ("&"'Result) = Size (T)'Old + 1;
    --  Add Value at the front of the tag, see note above
 
-   procedure Append (T : in out Tag; Value : String) with
-     Post => Size (T) = Size (T)'Old + 1;
-   procedure Append (T : in out Tag; Value : Character) with
-     Post => Size (T) = Size (T)'Old + 1;
-   procedure Append (T : in out Tag; Value : Boolean) with
-     Post => Size (T) = Size (T)'Old + 1;
-   procedure Append (T : in out Tag; Value : Unbounded_String) with
-     Post => Size (T) = Size (T)'Old + 1;
-   procedure Append (T : in out Tag; Value : Integer) with
-     Post => Size (T) = Size (T)'Old + 1;
-   procedure Append (T : in out Tag; Value : Tag) with
-     Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : String)
+     with Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : Character)
+     with Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : Boolean)
+     with Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : Unbounded_String)
+     with Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : Integer)
+     with Post => Size (T) = Size (T)'Old + 1;
+   procedure Append (T : in out Tag; Value : Tag)
+     with Post => Size (T) = Size (T)'Old + 1;
    --  Add Value at the end of tag
 
    procedure Set_Separator (T : in out Tag; Separator : String);
@@ -143,13 +143,13 @@ package Templates_Parser is
    function Size (T : Tag) return Natural;
    --  Returns the number of value into T
 
-   function Item (T : Tag; N : Positive) return String with
-     Pre => N <= Size (T);
+   function Item (T : Tag; N : Positive) return String
+     with Pre => N <= Size (T);
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 
-   function Composite (T : Tag; N : Positive) return Tag with
-     Pre => N <= Size (T);
+   function Composite (T : Tag; N : Positive) return Tag
+     with Pre => N <= Size (T);
    --  Returns the Nth Tag's item. Raises Constraint_Error if there is
    --  no such Item in T (i.e. T length < N).
 
@@ -239,13 +239,13 @@ package Templates_Parser is
 
    Null_Set : constant Translate_Set;
 
-   procedure Insert (Set : in out Translate_Set; Item : Association) with
-     Post => Size (Set) >= Size (Set)'Old;
+   procedure Insert (Set : in out Translate_Set; Item : Association)
+     with Post => Size (Set) >= Size (Set)'Old;
    --  Add Item into the translate set. If an association for this variable
    --  already exists it just replaces it by the new item.
 
-   procedure Insert (Set : in out Translate_Set; Items : Translate_Set) with
-     Post => Size (Set) >= Size (Set)'Old;
+   procedure Insert (Set : in out Translate_Set; Items : Translate_Set)
+     with Post => Size (Set) >= Size (Set)'Old;
    --  Add Items into the translate set. If an association for variables in
    --  Items already exists it just replaces it by the new one.
 
@@ -270,23 +270,24 @@ package Templates_Parser is
           Post   => Size ("+"'Result) = 1;
    --  Create translate set from one association
 
-   procedure Remove (Set : in out Translate_Set; Name : String) with
-     Pre  => Name'Length > 0,
-     Post => not Exists (Set, Name);
+   procedure Remove (Set : in out Translate_Set; Name : String)
+     with Pre  => Name'Length > 0,
+          Post => not Exists (Set, Name);
    --  Removes association named Name from the Set. Does nothing if there is
    --  not such association in the set.
 
-   function Get (Set : Translate_Set; Name : String) return Association with
-     Pre  => Name'Length > 0,
-     Post => (if not Exists (Set, Name) then Get'Result = Null_Association);
+   function Get (Set : Translate_Set; Name : String) return Association
+     with Pre  => Name'Length > 0,
+          Post => (if not Exists (Set, Name)
+                   then Get'Result = Null_Association);
    --  Returns the association named Name in the Set. Returns Null_Association
    --  is no such association if found in Set.
 
    function Size (Set : Translate_Set) return Natural;
    --  Returns size of the translate set
 
-   function Exists (Set : Translate_Set; Variable : String) return Boolean with
-     Pre  => Variable'Length > 0;
+   function Exists (Set : Translate_Set; Variable : String) return Boolean
+     with Pre  => Variable'Length > 0;
    --  Returns True if an association for Variable exists into the Set
 
    generic
@@ -295,8 +296,8 @@ package Templates_Parser is
    --  Iterates through all associations in the set, call Action for each one.
    --  Set Quit to True to stop the iteration.
 
-   function To_Set (Table : Translate_Table) return Translate_Set with
-     Post => Size (To_Set'Result) = Table'Length;
+   function To_Set (Table : Translate_Table) return Translate_Set
+     with Post => Size (To_Set'Result) = Table'Length;
    --  Convert a Translate_Table into a Translate_Set
 
    -------------
@@ -605,7 +606,7 @@ private
    Null_Association : constant Association :=
                         (Std, Null_Unbounded_String, Null_Unbounded_String);
 
-   No_Translation : constant Translate_Table := (2 .. 1 => Null_Association);
+   No_Translation   : constant Translate_Table := (2 .. 1 => Null_Association);
 
    -----------
    -- Debug --

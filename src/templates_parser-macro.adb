@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2014, AdaCore                    --
+--                      Copyright (C) 2010-2016, AdaCore                    --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -118,7 +118,7 @@ package body Macro is
    -- Register --
    --------------
 
-   procedure Register (Name : String; T : Tree) is
+   procedure Register (Name : String; T : not null Tree) is
       Old : Tree := Get (Name);
    begin
       if Old /= null then

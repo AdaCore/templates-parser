@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2014, AdaCore                     --
+--                     Copyright (C) 1999-2016, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -314,8 +314,7 @@ package body Templates_Parser is
          end case;
       end record;
 
-      No_Parameter : constant Parameter_Data :=
-                       Parameter_Data'(Slice, 0, -1);
+      No_Parameter : constant Parameter_Data := Parameter_Data'(Slice, 0, -1);
 
       function Image (P : Parameter_Data) return String;
       --  Returns parameter string representation
@@ -748,9 +747,8 @@ package body Templates_Parser is
       function Parse (Line : String) return Tree;
       --  Returns a defintion data
 
-      package Def_Map is new
-        Containers.Indefinite_Hashed_Maps
-          (String, Node, Ada.Strings.Hash, "=", "=");
+      package Def_Map is new Containers.Indefinite_Hashed_Maps
+        (String, Node, Ada.Strings.Hash, "=", "=");
       subtype Map is Def_Map.Map;
 
       procedure Print_Tree (D : Tree);
@@ -791,7 +789,7 @@ package body Templates_Parser is
       type Node (Kind : NKind) is record
          case Kind is
             when Value =>
-               V   : Unbounded_String;
+               V : Unbounded_String;
 
             when Var =>
                Var : Data.Tag_Var;
@@ -801,8 +799,8 @@ package body Templates_Parser is
                Left, Right : Tree;
 
             when U_Op =>
-               U_O         : U_Ops;
-               Next        : Tree;
+               U_O  : U_Ops;
+               Next : Tree;
          end case;
       end record;
 
@@ -875,12 +873,11 @@ package body Templates_Parser is
 
    Null_Static_Tree : constant Static_Tree := (null, null);
 
-   package Tree_Map is
-      new Containers.Indefinite_Hashed_Maps
+   package Tree_Map is new Containers.Indefinite_Hashed_Maps
      (String, Tree, Strings.Hash, "=", "=");
 
    type Included_File_Info is record
-      File       : Static_Tree;
+      File     : Static_Tree;
       Filename : Data.Tree;
       Params   : Data.Parameters;
    end record;
@@ -999,7 +996,7 @@ package body Templates_Parser is
 
    package Macro is
 
-      procedure Register (Name : String; T : Tree);
+      procedure Register (Name : String; T : not null Tree);
       --  Register a new macro definition, if previous definition exists,
       --  replace with the new definition.
 
@@ -5806,6 +5803,10 @@ package body Templates_Parser is
       procedure Release (Included : in out Included_File_Info);
       --  Release for Included
 
+      -------------
+      -- Release --
+      -------------
+
       procedure Release (Included : in out Included_File_Info) is
       begin
          if Include then
@@ -5814,6 +5815,7 @@ package body Templates_Parser is
             for K in Included.Params'Range loop
                Data.Release (Included.Params (K));
             end loop;
+
             Data.Unchecked_Free (Included.Params);
          end if;
       end Release;

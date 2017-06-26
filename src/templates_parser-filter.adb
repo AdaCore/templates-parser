@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2013, AdaCore                     --
+--                     Copyright (C) 2003-2017, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -523,7 +523,6 @@ package body Filter is
       P : Parameter_Data := No_Parameter) return String
    is
       pragma Unreferenced (C);
-      use type Strings.Maps.Character_Set;
 
       Result : String (S'Range);
       R      : Natural := 0;

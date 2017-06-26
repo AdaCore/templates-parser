@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2016, AdaCore                    --
+--                     Copyright (C) 2010-2017, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -228,7 +228,6 @@ package body Macro is
             procedure Replace
               (T, C, Prev : in out Data.Tree; Ref : Positive)
             is
-               use type Data.NKind;
                use type Data.Tree;
                New_Node : constant Data.Tree := Data.Clone (Parameters (Ref));
             begin
@@ -362,7 +361,6 @@ package body Macro is
 
          procedure Rewrite (T : in out Expr.Tree) is
             use type Data.Tree;
-            use type Expr.Tree;
 
             procedure Replace (T : in out Expr.Tree; Ref : Positive)
               with Inline;

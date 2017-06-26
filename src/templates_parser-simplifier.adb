@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2014, AdaCore                    --
+--                      Copyright (C) 2010-2017, AdaCore                    --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -58,9 +58,9 @@ package body Simplifier is
       -------------
 
       procedure Rewrite (T : in out Data.Tree) is
-         use type Data.Tree;
          use type Data.NKind;
-         use type Nkind;
+         use type Data.Tree;
+
          D, Prev : Data.Tree;
          Moved   : Boolean := False;
          Old     : Data.Tree;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2013, AdaCore                     --
+--                     Copyright (C) 2004-2017, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -388,7 +388,6 @@ package body Templates_Parser.XML is
       use DOM.Core.Nodes;
       use DOM.Readers;
       use Input_Sources;
-      use Sax.Readers;
 
       Reader : Tree_Reader;
       Input  : File.File_Input;
@@ -416,15 +415,9 @@ package body Templates_Parser.XML is
    -- Parse_Document --
    --------------------
 
-   function Parse_Document
-     (Doc : DOM.Core.Node)
-      return Translate_Set is
-
+   function Parse_Document (Doc : DOM.Core.Node) return Translate_Set is
       use DOM.Core;
       use DOM.Core.Nodes;
-      use DOM.Readers;
-      use Input_Sources;
-      use Sax.Readers;
 
       procedure Error (Node : DOM.Core.Node; Message : String) with No_Return;
       --  Raises Constraint_Error with the Message as exception message
@@ -549,6 +542,7 @@ package body Templates_Parser.XML is
 
             function B_Tag (Key : String; N : Positive) return Tag is
                use type Str_Map.Cursor;
+
                Max_Key : constant String := Utils.Image (N) & "_MAX";
                Cursor  : Str_Map.Cursor;
                Max     : Natural;
@@ -984,7 +978,7 @@ package body Templates_Parser.XML is
 
       procedure Parse_Tag
         (N                 : DOM.Core.Node;
-         Name, Description :    out Unbounded_String)
+         Name, Description : out Unbounded_String)
       is
          C : DOM.Core.Node := First_Child (N);
       begin
@@ -1097,11 +1091,7 @@ package body Templates_Parser.XML is
    end Value;
 
    function Value (Translations : Unbounded_String) return Translate_Set is
-      use DOM.Core.Nodes;
-      use DOM.Readers;
-
       S : String_Access := new String (1 .. Length (Translations));
-
    begin
       --  Copy XML content to local S string
       for I in 1 .. Length (Translations) loop

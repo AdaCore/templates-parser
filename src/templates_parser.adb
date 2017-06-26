@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2016, AdaCore                     --
+--                     Copyright (C) 1999-2017, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -2026,7 +2026,6 @@ package body Templates_Parser is
             -----------
 
             procedure Parse (Parameter : String) is
-               use type Data.Tree;
                Sep : constant Natural := Strings.Fixed.Index (Parameter, "=>");
                Ind : Natural;
             begin
@@ -2390,8 +2389,6 @@ package body Templates_Parser is
       Cached       : Boolean := False;
       Include_File : Boolean := False) return Static_Tree
    is
-      use type Definitions.NKind;
-
       File   : Input.File_Type;     --  file beeing parsed
 
       Buffer : String (1 .. 2_048); --  current line content
@@ -3892,7 +3889,6 @@ package body Templates_Parser is
         (T     : Tree;
          State : Parse_State)
       is
-         use type Association_Map.Cursor;
          use type Data.Tree;
 
          function Analyze (E : Expr.Tree) return String;
@@ -5798,7 +5794,6 @@ package body Templates_Parser is
    -------------
 
    procedure Release (T : in out Tree; Include : Boolean := True) is
-      use type Data.Tree;
 
       procedure Release (Included : in out Included_File_Info);
       --  Release for Included

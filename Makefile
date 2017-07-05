@@ -33,9 +33,9 @@ ENABLE_SHARED = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 
 ifeq ($(shell gnat ls -Pxmlada 2>&1 | grep 'project file .* not found'),)
-TP_XMLADA    = Installed
+  TP_XMLADA := Installed
 else
-TP_XMLADA    = Disabled
+  TP_XMLADA := Disabled
 endif
 
 -include makefile.setup
@@ -60,28 +60,25 @@ GPRCLEAN	= gprclean
 #  be built.
 
 ifeq ($(DEFAULT_LIBRARY_TYPE),static)
-ifneq ($(ENABLE_STATIC),true)
-$(error static not enabled, cannot be the default)
+  ifneq ($(ENABLE_STATIC),true)
+    $(error static not enabled, cannot be the default)
+  endif
+  ifeq ($(ENABLE_SHARED),true)
+    OTHER_LIBRARY_TYPE := relocatable
+  endif
 else
-ifeq ($(ENABLE_SHARED),true)
-OTHER_LIBRARY_TYPE	= relocatable
-endif
-endif
-
-else
-ifneq ($(ENABLE_SHARED),true)
-$(error shared not enabled, cannot be the default)
-else
-ifeq ($(ENABLE_STATIC),true)
-OTHER_LIBRARY_TYPE	= static
-endif
-endif
+  ifneq ($(ENABLE_SHARED),true)
+    $(error shared not enabled, cannot be the default)
+  endif
+  ifeq ($(ENABLE_STATIC),true)
+    OTHER_LIBRARY_TYPE := static
+  endif
 endif
 
 ifeq ($(DEBUG), true)
-PRJ_BUILD=Debug
+  PRJ_BUILD := Debug
 else
-PRJ_BUILD=Release
+  PRJ_BUILD := Release
 endif
 
 ifeq ($(TP_XMLADA),)

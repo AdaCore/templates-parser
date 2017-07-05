@@ -26,7 +26,10 @@ build:
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
 test:  build
-	PRJ_BUILD="$(PRJ_BUILD)" PATH=.:${PATH} ./testsuite.py --jobs=4
+	ADA_PROJECT_PATH="$(abspath $(CURDIR)/..)" \
+	PATH=.:${PATH} \
+	$(foreach v,PRJ_BUILD TARGET TP_XMLADA,$(v)="$($(v))") \
+	./testsuite.py --jobs=4
 
 clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \

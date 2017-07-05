@@ -41,11 +41,9 @@ endif
 -include makefile.setup
 
 ifeq ($(HOST), $(TARGET))
-IS_CROSS	= false
 GPROPTS		=
 TPREFIX=$(DESTDIR)$(prefix)
 else
-IS_CROSS	= true
 GPROPTS		= --target=$(TARGET)
 TPREFIX=$(DESTDIR)$(prefix)/$(TARGET)
 endif

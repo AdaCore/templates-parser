@@ -58,14 +58,6 @@ GPRBUILD	= gprbuild
 GPRINSTALL	= gprinstall
 GPRCLEAN	= gprclean
 
-#  Install directories
-
-ifeq (${OS}, Windows_NT)
-EXEEXT	= .exe
-else
-EXEEXT	=
-endif
-
 #  Compute the default library kind, and possibly the other that are to
 #  be built.
 

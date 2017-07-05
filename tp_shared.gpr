@@ -89,7 +89,8 @@ abstract project TP_Shared is
    ------------
 
    package Linker is
-      for Default_Switches ("Ada") use Ldflags;
+      --  Put options like --as-needed before options like -l.
+      for Leading_Switches ("Ada") use Ldflags;
    end Linker;
 
    ---------

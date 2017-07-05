@@ -82,10 +82,6 @@ else
   PRJ_BUILD := Release
 endif
 
-ifeq ($(TP_XMLADA),)
-TP_XMLADA=Disabled
-endif
-
 ALL_OPTIONS := \
  DEBUG \
  DEFAULT_LIBRARY_TYPE \

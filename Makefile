@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2016, AdaCore                     #
+#                     Copyright (C) 2003-2017, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -193,7 +193,8 @@ clean:
 ifneq ($(OTHER_LIBRARY_TYPE),)
 	-$(GPRCLEAN) $(GPR_OTHER) $(GPROPTS) -Ptemplates_parser
 endif
-	-$(MAKE) -C docs clean
-	-$(MAKE) -C regtests clean
+	$(MAKE) -C docs clean
+	$(MAKE) -C regtests clean
+	rm -f auto.cgpr config/setup/auto.cgpr
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr

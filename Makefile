@@ -23,13 +23,15 @@ VERSION	= 20.0
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
 PROCESSORS   = 0
-HOST	     = $(shell gcc -dumpmachine)
-TARGET	     = $(shell gcc -dumpmachine)
-prefix	     = $(dir $(shell which gnatls))..
+HOST         := $(shell gcc -dumpmachine)
+TARGET       := $(shell gcc -dumpmachine)
+prefix       := $(dir $(shell which gnatls))..
 DEFAULT_LIBRARY_TYPE	= static
 
+GNAT         := gnat
+
 ENABLE_STATIC = true
-ENABLE_SHARED = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
+ENABLE_SHARED := $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 
 ifeq ($(shell gnat ls -Pxmlada 2>&1 | grep 'project file .* not found'),)
@@ -51,7 +53,6 @@ endif
 MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
 SDIR		= $(TARGET)/$(MODE)
 
-GNAT		= gnat
 GPRBUILD	= gprbuild
 GPRINSTALL	= gprinstall
 GPRCLEAN	= gprclean

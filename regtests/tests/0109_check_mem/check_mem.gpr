@@ -17,7 +17,6 @@
 ------------------------------------------------------------------------------
 
 with "templates_parser";
-with "xmlada";
 
 project check_mem is
 

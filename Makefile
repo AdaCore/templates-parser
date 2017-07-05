@@ -34,7 +34,7 @@ ENABLE_STATIC = true
 ENABLE_SHARED := $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 
-ifeq ($(shell gnat ls -Pxmlada 2>&1 | grep 'project file .* not found'),)
+ifeq ($(shell gnat ls -Pxmlada_dom 2>&1 | grep 'project file .* not found'),)
   TP_XMLADA := Installed
 else
   TP_XMLADA := Disabled

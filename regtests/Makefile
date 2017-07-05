@@ -32,3 +32,5 @@ clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		$(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
+	rm -fr out
+	rm -f *.pyc

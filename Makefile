@@ -193,7 +193,8 @@ clean:
 ifneq ($(OTHER_LIBRARY_TYPE),)
 	-$(GPRCLEAN) $(GPR_OTHER) $(GPROPTS) -Ptemplates_parser
 endif
-	-$(MAKE) -C docs clean
-	-$(MAKE) -C regtests clean
+	$(MAKE) -C docs clean
+	$(MAKE) -C regtests clean
+	rm -f auto.cgpr config/setup/auto.cgpr
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr

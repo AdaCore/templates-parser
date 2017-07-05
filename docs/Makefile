@@ -73,7 +73,7 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	-rm -rf $(BUILDDIR)
+	rm -fr $(BUILDDIR)
 	rm -f *.pyc
 
 # All documentations require the generated examples.

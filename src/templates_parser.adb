@@ -6497,4 +6497,11 @@ package body Templates_Parser is
       return To_String (Results);
    end Translate;
 
+   -------------
+   -- Version --
+   -------------
+
+   function Version return String is separate;
+   --  so that it can be generated at build time.
+
 end Templates_Parser;

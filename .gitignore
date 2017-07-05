@@ -17,3 +17,4 @@ regtests/out
 config/setup/foo.ads.stderr
 config/setup/foo.ads.stdout
 tp_xmlada.gpr
+src/templates_parser-version.adb

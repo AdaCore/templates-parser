@@ -184,3 +184,4 @@ endif
 	rm -f auto.cgpr config/setup/auto.cgpr
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr
+	rm -f config/setup/foo.ads.std*

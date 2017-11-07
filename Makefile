@@ -170,18 +170,20 @@ ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 		--prefix=$(TPREFIX) templates_parser
 endif
 
+GPRINST_OPTS=-p -f --prefix=$(TPREFIX) \
+	--build-var=TEMPLATES_PARSER_BUILD,LIBRARY_TYPE
+
 install: install-clean
-	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_DEFAULT) \
+	$(GPRINSTALL) $(GPROPTS) $(GPR_DEFAULT) $(GPRINST_OPTS) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
-		--prefix=$(TPREFIX) -Ptemplates_parser
+		--build-name=$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
 ifneq ($(OTHER_LIBRARY_TYPE),)
-	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_OTHER) \
-		--prefix=$(TPREFIX) --build-name=$(OTHER_LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) $(GPR_OTHER) $(GPRINST_OPTS) \
+		--build-name=$(OTHER_LIBRARY_TYPE) \
 		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
 endif
-	$(GPRINSTALL) $(GPROPTS) -p -f $(GPR_DEFAULT) \
-		--prefix=$(TPREFIX) --mode=usage \
-		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
+	$(GPRINSTALL) $(GPROPTS) $(GPR_DEFAULT) $(GPRINST_OPTS) \
+		--mode=usage --subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--install-name=templates_parser -Ptools/tools
 
 #######################################################################

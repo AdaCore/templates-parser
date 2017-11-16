@@ -171,7 +171,7 @@ ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 endif
 
 GPRINST_OPTS=-p -f --prefix=$(TPREFIX) \
-	--build-var=TEMPLATES_PARSER_BUILD,LIBRARY_TYPE
+	--build-var=LIBRARY_TYPE --build-var=TEMPLATES_PARSER_BUILD
 
 install: install-clean
 	$(GPRINSTALL) $(GPROPTS) $(GPR_DEFAULT) $(GPRINST_OPTS) \

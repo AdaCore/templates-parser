@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2017, AdaCore                     --
+--                     Copyright (C) 2003-2018, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -31,6 +31,7 @@ pragma Ada_2012;
 
 pragma Wide_Character_Encoding (Brackets);
 
+with Ada.Characters.Latin_1;
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Fixed;
 with Ada.Strings.Hash;
@@ -92,6 +93,7 @@ package body Filter is
    Reverse_Token       : aliased constant String := "REVERSE";
    Size_Token          : aliased constant String := "SIZE";
    Slice_Token         : aliased constant String := "SLICE";
+   Strip_Token         : aliased constant String := "STRIP";
    Sub_Token           : aliased constant String := "SUB";
    Trim_Token          : aliased constant String := "TRIM";
    Upper_Token         : aliased constant String := "UPPER";
@@ -227,6 +229,9 @@ package body Filter is
 
          Slice          =>
            (Slice_Token'Access,          Slice'Access),
+
+         Strip          =>
+           (Strip_Token'Access,          Strip'Access),
 
          Sub            =>
            (Sub_Token'Access,            Minus'Access),
@@ -1719,6 +1724,28 @@ package body Filter is
          return S (First .. Last);
       end if;
    end Slice;
+
+   -----------
+   -- Strip --
+   -----------
+
+   function Strip
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+      package L1 renames Ada.Characters.Latin_1;
+
+      Clean_Set : constant Maps.Character_Set :=
+                    Maps.To_Set
+                      (" " & L1.HT & L1.VT & L1.NUL & L1.LF & L1.CR
+                       & L1.BS & L1.EOT & L1.FF);
+   begin
+      Check_Null_Parameter (P);
+
+      return Ada.Strings.Fixed.Trim (S, Clean_Set, Clean_Set);
+   end Strip;
 
    ----------
    -- Trim --

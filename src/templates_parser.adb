@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2017, AdaCore                     --
+--                     Copyright (C) 1999-2018, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -243,6 +243,9 @@ package body Templates_Parser is
 
          Slice,
          --  Returns a slice of the string
+
+         Strip,
+         --  Trim leading and trailing spaces and characters HT, LF, CR, NUL
 
          Sub,
          --  Substract the given parameter to the string
@@ -538,6 +541,11 @@ package body Templates_Parser is
          P : Parameter_Data := No_Parameter) return String;
 
       function Slice
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
+      function Strip
         (S : String;
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;

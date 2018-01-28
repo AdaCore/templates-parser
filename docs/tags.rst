@@ -573,6 +573,12 @@ parser.
   that 0 matches the last character of the string, -1 matches the character
   just before,...
 
+**STRIP**
+  .. index:: Filter, STRIP
+
+  Removes leading and trailing spaces and special characters HT, VT, CR,
+  LF, NUL, EOT, BS, FF.
+
 **TRIM**
   .. index:: Filter, TRIM
 

@@ -1,0 +1,4 @@
+@@TABLE@@
+   procedure @_STRIP:Provided_Interfaces_@ is
+   --  This is an example: @_STRIP:Provided_Interfaces_@ which does nothing
+@@END_TABLE@@

@@ -1,0 +1,7 @@
+@@INLINE@@
+@@IF@@ @_EXIST:Parameters_@
+@_CAPITALIZE:Name_@ (@_Parameters_@)
+@@ELSE@@
+@_CAPITALIZE:Name_@
+@@END_IF@@
+@@END_INLINE@@

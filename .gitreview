@@ -1,5 +1,0 @@
-[gerrit]
-host=git.adacore.com
-project=templates-parser
-	defaultbranch = 19.1
-defaultremote=origin

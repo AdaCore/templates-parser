@@ -1,0 +1,14 @@
+A            : Natural          := 0;
+Is_That_True : constant boolean := False;
+Value        := 12.3;
+No_Init      : Natural;
+Age          : Positive         := 12;
+
+[INFO] align_on.tmplt
+[C_INFO]  1 FALSE
+[TABLE'ALIGN_ON(":",":=")]
+  [BLOCK]
+    [COMMON]
+      [TEXT] @_DECL_@
+  [END_BLOCK]
+[END_TABLE]

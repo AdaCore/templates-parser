@@ -33,6 +33,8 @@ separate (Templates_Parser)
 
 procedure Print_Tree (T : Tree; Level : Natural := 0) is
 
+   use type Containers.Count_Type;
+
    procedure Print_Indent (L : Natural);
    --  Output proper number of spaces for identation
 
@@ -158,6 +160,26 @@ begin
 
          if T.Terse then
             Text_IO.Put ("'TERSE");
+         end if;
+
+         if T.Align_On.Length > 0 then
+            declare
+               First : Boolean := True;
+            begin
+               Text_IO.Put ("'ALIGN_ON(");
+
+               for S of T.Align_On loop
+                  if not First then
+                     Text_IO.Put (',');
+                  else
+                     First := False;
+                  end if;
+
+                  Text_IO.Put ('"' & S & '"');
+               end loop;
+
+               Text_IO.Put (')');
+            end;
          end if;
 
          Text_IO.Put_Line ("]");

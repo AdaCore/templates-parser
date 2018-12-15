@@ -2791,7 +2791,7 @@ package body Templates_Parser is
             Offset := 2;
          end if;
 
-         return Last /= 0
+         return Last >= First + Stmt'Length - 1
            and then Buffer (First .. First + Stmt'Length - 1 - Offset) =
                       Stmt (Stmt'First .. Stmt'Last - Offset)
            and then (not Extended

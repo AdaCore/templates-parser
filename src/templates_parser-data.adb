@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2013, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -125,6 +125,9 @@ package body Data is
                else
                   return (Up_Level, 1);
                end if;
+
+            elsif A_Name = "indent" then
+               return (Indent, 0);
 
             else
                raise Template_Error
@@ -736,6 +739,7 @@ package body Data is
          when Line       => Append (R, "'Line");
          when Min_Column => Append (R, "'Min_Column");
          when Max_Column => Append (R, "'Max_Column");
+         when Indent     => Append (R, "'Indent");
          when Up_Level   =>
             Append (R, "'Up_Level");
             if T.Attribute.Value /= 1 then
@@ -785,6 +789,7 @@ package body Data is
             if Start = 0 then
                --  No more tag
                return new Node'(Text,
+                                Col   => Line'First,
                                 Next  => null,
                                 Value => To_Unbounded_String (Line));
 
@@ -815,6 +820,7 @@ package body Data is
                      --  The first token in Line is a variable
                      return new Node'
                        (Var,
+                        Col  => Start,
                         Next => Build (Line (Stop + 1 .. Line'Last)),
                         Var  => Build (Line (Start .. Stop)));
 
@@ -822,6 +828,7 @@ package body Data is
                      --  We have some text before the tag
                      return new Node'
                        (Text,
+                        Col   => Line'First,
                         Next  => Build (Line (Start .. Line'Last)),
                         Value => To_Unbounded_String
                                    (Line (Line'First .. Start - 1)));

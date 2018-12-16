@@ -1,0 +1,14 @@
+procedure @_TEST_VAR_@ is
+begin
+   @_STMTS'Indent_@
+end @_TEST_VAR_@;
+
+   procedure @_TEST_VAR_@ is
+   begin
+      @_STMTS'Indent_@
+   end @_TEST_VAR_@;
+
+procedure @_TEST_VAR_@ is
+begin
+   @_STMTS_@
+end @_TEST_VAR_@;

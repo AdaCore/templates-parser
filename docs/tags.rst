@@ -729,7 +729,7 @@ and a template would look like::
 Attributes
 ==========
 
-In addition to filters, you can also apply attributes to composite tags.
+In addition to filters, you can also apply attributes to tags.
 Attributes are placed after the tag name and preceded with a simple quote.
 *@_SOME_VAR['ATTRIBUTE_NAME]_@*. It is possible to use filters
 and attributes together. In that case the attribute is first evaluated and
@@ -771,6 +771,12 @@ Current supported attributes are:
 
   Returns the size of largest composite tag in M composite tag. This attribute
   can be applied only to a composite tag having two nested level - a matrix.
+
+**M'Indent**
+  .. index:: Attribute, 'Indent
+
+  This attribute will indent (on the starting tag column) the tag
+  value on new-line.
 
 For example:
 

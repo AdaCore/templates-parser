@@ -114,7 +114,7 @@ ALL_OPTIONS := \
  VERSION \
  prefix
 
-GPROPTS += $(foreach v, \
+override GPROPTS += $(foreach v, \
  PRJ_BUILD TP_XMLADA PROCESSORS TARGET VERSION \
  ,"-X$(v)=$($(v))")
 

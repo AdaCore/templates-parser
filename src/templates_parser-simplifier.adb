@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                      Copyright (C) 2010-2017, AdaCore                    --
+--                      Copyright (C) 2010-2019, AdaCore                    --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -118,6 +118,7 @@ package body Simplifier is
                               Old := T;
                               T := new Data.Node'
                                 (Kind  => Data.Text,
+                                 Col   => D.Var.Def.Text.Col,
                                  Next  => D.Var.Def.Text.Next,
                                  Value => To_Unbounded_String
                                    (Data.Translate

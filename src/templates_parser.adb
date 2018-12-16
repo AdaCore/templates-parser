@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2018, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -651,7 +651,8 @@ package body Templates_Parser is
 
       type NKind is (Text, Var);
 
-      type Attribute is (Nil, Length, Line, Min_Column, Max_Column, Up_Level);
+      type Attribute is
+        (Nil, Length, Line, Min_Column, Max_Column, Up_Level, Indent);
 
       type Internal_Tag
         is (No, Now, Year, Month, Month_Name, Day, Day_Name, Hour, Minute,
@@ -680,6 +681,7 @@ package body Templates_Parser is
 
       type Node (Kind : NKind) is record
          Next : Tree;
+         Col  : Positive; -- first character position in the line
          case Kind is
             when Text =>
                Value : Unbounded_String;
@@ -4022,6 +4024,9 @@ package body Templates_Parser is
 
                      else
                         declare
+                           use Strings.Fixed;
+                           use type Data.Attribute;
+
                            Is_Composite : aliased Boolean;
                            Value        : constant String :=
                                             Translate (T.Var, State,
@@ -4035,7 +4040,45 @@ package body Templates_Parser is
                            --  expansion.
 
                            if Value /= "" then
-                              Add (Value);
+                              if T.Col = 1
+                                   or else
+                                  T.Var.Attribute.Attr /= Data.Indent
+                                   or else
+                                  Index (Value, String'(1 => ASCII.LF)) = 0
+                              then
+                                 Add (Value);
+
+                              else
+                                 --  We have some LF into the string and the
+                                 --  tag is not placed at the start of the
+                                 --  line, we need to indent the content.
+
+                                 declare
+                                    Spaces : constant Positive := T.Col - 1;
+                                    V      : Unbounded_String :=
+                                               To_Unbounded_String (Value);
+                                    P      : Natural := 1;
+                                 begin
+                                    Indent_Content : loop
+                                       P := Index
+                                         (V, String'(1 => ASCII.LF), P);
+
+                                       exit Indent_Content when P = 0;
+
+                                       P := P + 1;
+
+                                       Insert
+                                         (V,
+                                          Before   => P,
+                                          New_Item => String'(Spaces * ' '));
+
+                                       P := P + Spaces;
+                                    end loop Indent_Content;
+
+                                    Add (To_String (V));
+                                 end;
+                              end if;
+
                               Output := Is_Composite;
                            end if;
                         end;
@@ -5240,9 +5283,8 @@ package body Templates_Parser is
 
                else
                   case Tk.Kind is
-
                      when Std =>
-                        if Var.Attribute.Attr = Data.Nil then
+                        if Var.Attribute.Attr in Data.Nil | Data.Indent then
                            return Data.Translate
                              (Var, To_String (Tk.Value), C'Access);
                         else

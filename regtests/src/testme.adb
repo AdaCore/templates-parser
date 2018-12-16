@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2005-2012, AdaCore                     --
+--                     Copyright (C) 2005-2019, AdaCore                     --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -127,6 +127,9 @@ procedure Testme is
                    "toto titi tata tata titi toto tata titi toto titi titi"),
          TP.Assoc ("REPL", "[_\1_]"),
          TP.Assoc ("WITHLF", "First line" & ASCII.LF & "Second line"),
+         TP.Assoc ("STMTS", "A := A + 1;" & ASCII.LF
+                   & "A := B + 5;" & ASCII.LF
+                   & "A := A / 2;"),
          TP.Assoc ("WITHBR", "First line<br>Second line"),
          TP.Assoc ("VT", "vector_tag"),
          TP.Assoc ("DATE1", "1967-09-09"),

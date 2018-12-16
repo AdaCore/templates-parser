@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2010-2017, AdaCore                     --
+--                     Copyright (C) 2010-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -251,6 +251,7 @@ package body Macro is
                New_Node : constant Data.Tree :=
                             new Data.Node'
                               (Data.Text,
+                               Col   => Value'First,
                                Next  => C.Next,
                                Value => To_Unbounded_String (Value));
             begin

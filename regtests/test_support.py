@@ -17,7 +17,7 @@ from gnatpython.ex import Run
 
 def gprbuild(prj):
     """Compile a project with gprbuild"""
-    cmd = ["gprbuild", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
+    cmd = ["gprbuild", "-p", "-P" + prj, "-bargs", "-E"]
     process = Run(cmd)
     if process.status:
         print process.out

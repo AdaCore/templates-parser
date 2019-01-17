@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2017, AdaCore                     #
+#                     Copyright (C) 2003-2019, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -80,7 +80,7 @@ clean:
 html dirhtml singlehtml pickle json htmlhelp qthelp latex latexpdf text man texinfo info: $(RESFILES)
 
 $(RESFILES): $(RESDIR)/%.adb.res: build-sample | $(RESDIR)
-	( cd $(TMPLDIR) && ../$(EXEDIR)/$* ) > $@
+	( cd $(TMPLDIR) > /dev/null && ../$(EXEDIR)/$* ) > $@
 
 $(RESDIR):
 	mkdir $@

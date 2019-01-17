@@ -15,15 +15,15 @@ code with three
 end of the text.
    1
 ---
-code with 
+code with
    green
 end of the text.
    2
 
 [INFO] blocks6.tmplt
 [C_INFO]  1 FALSE
-[TEXT] 
-[TABLE] TERMINATE_SECTIONS
+[TEXT]
+[TABLE'TERMINATE_SECTIONS]
   [BLOCK]
     [COMMON]
       [TEXT] ---

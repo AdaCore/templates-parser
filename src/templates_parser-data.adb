@@ -765,33 +765,34 @@ package body Data is
    -- Parse --
    -----------
 
-   function Parse (Line : String) return Tree is
+   function Parse (Content : String; Line : Natural) return Tree is
 
       Begin_Tag : constant String := To_String (Templates_Parser.Begin_Tag);
       End_Tag   : constant String := To_String (Templates_Parser.End_Tag);
 
-      function Build (Line : String) return Tree;
+      function Build (Content : String) return Tree;
       --  Recursive function to build the tree
 
       -----------
       -- Build --
       -----------
 
-      function Build (Line : String) return Tree is
+      function Build (Content : String) return Tree is
          Start, Stop, S : Natural;
       begin
-         if Line = "" then
+         if Content = "" then
             return null;
 
          else
-            Start := Strings.Fixed.Index (Line, Begin_Tag);
+            Start := Strings.Fixed.Index (Content, Begin_Tag);
 
             if Start = 0 then
                --  No more tag
                return new Node'(Text,
-                                Col   => Line'First,
+                                Line  => Line,
+                                Col   => Content'First,
                                 Next  => null,
-                                Value => To_Unbounded_String (Line));
+                                Value => To_Unbounded_String (Content));
 
             else
                --  Get matching ending separator, a macro can have variables
@@ -801,8 +802,8 @@ package body Data is
                S := Start + Begin_Tag'Length;
 
                Search_Matching_Tag : loop
-                  Stop := Strings.Fixed.Index (Line, End_Tag, From => S);
-                  S := Strings.Fixed.Index (Line, Begin_Tag, From => S);
+                  Stop := Strings.Fixed.Index (Content, End_Tag, From => S);
+                  S := Strings.Fixed.Index (Content, Begin_Tag, From => S);
 
                   exit Search_Matching_Tag when S = 0 or else S > Stop;
 
@@ -816,22 +817,24 @@ package body Data is
                else
                   Stop := Stop + End_Tag'Length - 1;
 
-                  if Start = Line'First then
+                  if Start = Content'First then
                      --  The first token in Line is a variable
                      return new Node'
                        (Var,
+                        Line => Line,
                         Col  => Start,
-                        Next => Build (Line (Stop + 1 .. Line'Last)),
-                        Var  => Build (Line (Start .. Stop)));
+                        Next => Build (Content (Stop + 1 .. Content'Last)),
+                        Var  => Build (Content (Start .. Stop)));
 
                   else
                      --  We have some text before the tag
                      return new Node'
                        (Text,
-                        Col   => Line'First,
-                        Next  => Build (Line (Start .. Line'Last)),
+                        Line  => Line,
+                        Col   => Content'First,
+                        Next  => Build (Content (Start .. Content'Last)),
                         Value => To_Unbounded_String
-                                   (Line (Line'First .. Start - 1)));
+                                   (Content (Content'First .. Start - 1)));
                   end if;
                end if;
             end if;
@@ -839,7 +842,7 @@ package body Data is
       end Build;
 
    begin
-      return Build (Line);
+      return Build (Content);
    end Parse;
 
    ----------------
@@ -948,7 +951,7 @@ package body Data is
       P : constant Data.Parameters := new Parameter_Set (Parameters'Range);
    begin
       for K in P'Range loop
-         P (K) := Data.Parse (To_String (Parameters (K)));
+         P (K) := Data.Parse (To_String (Parameters (K)), 0);
       end loop;
       return P;
    end To_Data_Parameters;

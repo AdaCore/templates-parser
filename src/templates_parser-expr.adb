@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2013, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -412,7 +412,7 @@ package body Expr is
    -- Parse --
    -----------
 
-   function Parse (Expression : String) return Tree is
+   function Parse (Expression : String; Line : Natural) return Tree is
 
       Start_Index : Natural := Expression'First;
       Index       : Natural := Expression'First;
@@ -480,7 +480,7 @@ package body Expr is
          loop
             O := Current_Token.Bin_Op;
             Next_Token;
-            N := new Node'(Op, O, N, Relation);
+            N := new Node'(Op, Line, O, N, Relation);
          end loop;
 
          return N;
@@ -669,13 +669,16 @@ package body Expr is
                   Stop  := Current_Token.Stop;
                   N := new Node'
                     (Value,
+                     Line,
                      V => To_Unbounded_String (Expression (Start .. Stop)));
 
                when Var =>
                   Start := Current_Token.Start;
                   Stop  := Current_Token.Stop;
                   N := new Node'
-                    (Var, Var => Data.Build (Expression (Start .. Stop)));
+                    (Var,
+                     Line,
+                     Var => Data.Build (Expression (Start .. Stop)));
 
                when others =>
                   return null;
@@ -687,7 +690,7 @@ package body Expr is
             then
                --  We have a &, let's catenate the result
                Next_Token;
-               return new Node'(Op, O_Cat, N, Var_Val);
+               return new Node'(Op, Line, O_Cat, N, Var_Val);
             else
                return N;
             end if;
@@ -744,7 +747,7 @@ package body Expr is
          loop
             O := Current_Token.Bin_Op;
             Next_Token;
-            N := new Node'(Op, O, N, Term);
+            N := new Node'(Op, Line, O, N, Term);
          end loop;
 
          return N;
@@ -760,7 +763,7 @@ package body Expr is
          if Current_Token.Kind = Unary_Op then
             O := Current_Token.Un_Op;
             Next_Token;
-            return new Node'(U_Op, U_O => O, Next => Primary);
+            return new Node'(U_Op, Line, U_O => O, Next => Primary);
          else
             return Primary;
          end if;

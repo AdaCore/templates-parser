@@ -118,6 +118,7 @@ package body Simplifier is
                               Old := T;
                               T := new Data.Node'
                                 (Kind  => Data.Text,
+                                 Line  => D.Var.Def.Text.Line,
                                  Col   => D.Var.Def.Text.Col,
                                  Next  => D.Var.Def.Text.Next,
                                  Value => To_Unbounded_String

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2018, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -453,13 +453,19 @@ package Templates_Parser is
    -- Parsing and Translating --
    -----------------------------
 
+   type Reason_Kind is (Unused, Undefined);
+
    function Parse
      (Filename          : String;
       Translations      : Translate_Table       := No_Translation;
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return String
    with Pre => Filename'Length > 0;
    --  Parse the Template_File replacing variables' occurrences by the
@@ -476,7 +482,11 @@ package Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return Unbounded_String
    with Pre => Filename'Length > 0;
    --  Idem but returns an Unbounded_String
@@ -487,7 +497,11 @@ package Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return String
    with Pre => Filename'Length > 0;
    --  Idem with a Translation_Set
@@ -498,7 +512,11 @@ package Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return Unbounded_String
    with Pre => Filename'Length > 0;
    --  Idem with a Translation_Set

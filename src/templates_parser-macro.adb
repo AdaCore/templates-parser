@@ -251,6 +251,7 @@ package body Macro is
                New_Node : constant Data.Tree :=
                             new Data.Node'
                               (Data.Text,
+                               Line  => C.Line,
                                Col   => Value'First,
                                Next  => C.Next,
                                Value => To_Unbounded_String (Value));
@@ -380,10 +381,11 @@ package body Macro is
                N_Value : constant String :=
                            Data.Translate
                              (T.Var, Value, Ctx'Access);
+               Line    : constant Natural := T.Line;
             begin
                Expr.Release (T, Single => True);
                T := new Expr.Node'
-                 (Expr.Value, V => To_Unbounded_String (N_Value));
+                 (Expr.Value, Line, V => To_Unbounded_String (N_Value));
             end Replace;
 
             procedure Replace (T : in out Expr.Tree; Ref : Positive) is

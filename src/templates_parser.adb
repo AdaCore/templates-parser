@@ -31,6 +31,7 @@ pragma Ada_2012;
 
 with Ada.Calendar;
 with Ada.Characters.Handling;
+with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Containers.Indefinite_Vectors;
 with Ada.Exceptions;
 with Ada.IO_Exceptions;
@@ -683,6 +684,7 @@ package body Templates_Parser is
 
       type Node (Kind : NKind) is record
          Next : Tree;
+         Line : Natural;
          Col  : Positive; -- first character position in the line
          case Kind is
             when Text =>
@@ -718,7 +720,7 @@ package body Templates_Parser is
       procedure Unchecked_Free is
         new Ada.Unchecked_Deallocation (Parameter_Set, Parameters);
 
-      function Parse (Line : String) return Tree;
+      function Parse (Content : String; Line : Natural) return Tree;
       --  Parse text line and returns the corresponding tree representation
 
       procedure Print_Tree (D : Tree);
@@ -799,6 +801,8 @@ package body Templates_Parser is
       --  operator.
 
       type Node (Kind : NKind) is record
+         Line : Natural;
+
          case Kind is
             when Value =>
                V : Unbounded_String;
@@ -820,7 +824,7 @@ package body Templates_Parser is
       --  Return True if Str is one of "TRUE" or "T", the test is not
       --  case sensitive.
 
-      function Parse (Expression : String) return Tree;
+      function Parse (Expression : String; Line : Natural) return Tree;
       --  Parse Expression and returns the corresponding tree representation
 
       procedure Print_Tree (E : Tree);
@@ -2981,7 +2985,7 @@ package body Templates_Parser is
             File : constant String := To_String (Get_First_Parameter);
          begin
             Error := False;
-            Included.Filename := Data.Parse (File);
+            Included.Filename := Data.Parse (File, Line);
 
             if Included.Filename.Kind = Data.Text
               and then Included.Filename.Next = null
@@ -3131,7 +3135,7 @@ package body Templates_Parser is
             Rewrite (T, Last => True, In_Table => False);
          end Rewrite_Inlined_Block;
 
-         T : Tree;
+         T     : Tree;
          Error : Boolean;
 
       begin
@@ -3153,7 +3157,7 @@ package body Templates_Parser is
          then
             T := new Node (Text);
             T.Line := Line;
-            T.Text := Data.Parse (Buffer (1 .. Utils.BOM_Utf8'Length));
+            T.Text := Data.Parse (Buffer (1 .. Utils.BOM_Utf8'Length), Line);
 
             --  Removes BOM from buffer
 
@@ -3371,7 +3375,7 @@ package body Templates_Parser is
 
             T.Line := Line;
 
-            T.Cond   := Expr.Parse (Get_All_Parameters);
+            T.Cond   := Expr.Parse (Get_All_Parameters, Line);
             T.N_True := Parse (Parse_If, In_If => True);
 
             if Is_Stmt (End_If_Token) then
@@ -3393,6 +3397,9 @@ package body Templates_Parser is
 
          elsif Is_Stmt (Extends_Token) then
             T := new Node (Extends_Stmt);
+
+            T.Line := Line;
+
             Parse_Included_File (T.E_Included, Error);
 
             if Error then
@@ -3413,6 +3420,8 @@ package body Templates_Parser is
 
          elsif Is_Stmt (Block_Token, Extended => True) then
             T := new Node (Block_Stmt);
+
+            T.Line := Line;
             T.B_Name := To_Unbounded_String (Get_Tag_Parameter (1));
             T.N_Block := Parse (Parse_Block, In_If => In_If);
             T.Next := Parse (Mode, In_If);
@@ -3422,7 +3431,6 @@ package body Templates_Parser is
             T := new Node (Table_Stmt);
 
             T.Line := Line;
-
             T.Terminate_Sections := False;
             T.Reverse_Index      := False;
             T.Terse              := False;
@@ -3511,6 +3519,7 @@ package body Templates_Parser is
 
          elsif Is_Stmt (Include_Token) then
             T := new Node (Include_Stmt);
+
             T.Line := Line;
 
             Parse_Included_File (T.I_Included, Error);
@@ -3751,9 +3760,10 @@ package body Templates_Parser is
                      --  not add this LF if we reach the end of file except for
                      --  included files.
 
-                     T.Text := Data.Parse (Buffer (1 .. Last) & ASCII.LF);
+                     T.Text :=
+                       Data.Parse (Buffer (1 .. Last) & ASCII.LF, Line);
                   else
-                     T.Text := Data.Parse (Buffer (1 .. Last));
+                     T.Text := Data.Parse (Buffer (1 .. Last), Line);
                   end if;
 
                   if Get_Next_Line then
@@ -3894,12 +3904,16 @@ package body Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return String is
    begin
       return To_String
         (Parse (Filename, Translations, Cached,
-                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag));
+                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag, Report));
    end Parse;
 
    function Parse
@@ -3908,12 +3922,16 @@ package body Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return Unbounded_String is
    begin
       return Parse
         (Filename, To_Set (Translations), Cached,
-         Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag);
+         Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag, Report);
    end Parse;
 
    function Parse
@@ -3922,12 +3940,16 @@ package body Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return String is
    begin
       return To_String
         (Parse (Filename, Translations, Cached,
-                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag));
+                Keep_Unknown_Tags, Lazy_Tag, Cursor_Tag, Report));
    end Parse;
 
    function Parse
@@ -3936,9 +3958,15 @@ package body Templates_Parser is
       Cached            : Boolean               := False;
       Keep_Unknown_Tags : Boolean               := False;
       Lazy_Tag          : Dyn.Lazy_Tag_Access   := Dyn.Null_Lazy_Tag;
-      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag)
+      Cursor_Tag        : Dyn.Cursor_Tag_Access := Dyn.Null_Cursor_Tag;
+      Report            : access procedure (Tag_Name : String;
+                                            Filename : String := "";
+                                            Line     : Natural := 0;
+                                            Reason   : Reason_Kind) := null)
       return Unbounded_String
    is
+      package Name_Set is new Containers.Indefinite_Ordered_Sets (String);
+
       Max_Nested_Levels : constant := 10;
       --  The maximum number of table nested levels
 
@@ -3960,6 +3988,7 @@ package body Templates_Parser is
          Table_Level   : Natural;
          Inline_Sep    : Unbounded_String;
          Filename      : Unbounded_String;
+         Line          : Natural;
          Blocks_Count  : Natural;
          I_Params      : Data.Parameters;
          F_Params      : Parameter_Set (1 .. P_Size);
@@ -3970,7 +3999,7 @@ package body Templates_Parser is
 
       Empty_State : constant Parse_State :=
                       (0, (1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
-                       Null_Unbounded_String, Null_Unbounded_String, 0,
+                       Null_Unbounded_String, Null_Unbounded_String, 0, 0,
                        null, No_Parameter, Empty_Block_State, False, null);
 
       Results : Unbounded_String := Null_Unbounded_String;
@@ -3994,6 +4023,8 @@ package body Templates_Parser is
       --  nesting level of @@EXTENDS@@ block we are analyzing. 0 outside
       --  such a block.
 
+      Unused_Variables : Name_Set.Set;
+
       procedure Flush with Inline;
       --  Flush buffer to Results
 
@@ -4002,11 +4033,6 @@ package body Templates_Parser is
          State : Parse_State);
       --  Parse T and build results file. State is needed for Vector_Tag and
       --  Matrix_Tag expansion.
-
-      function Get_Association (Var : Data.Tag_Var) return Association;
-      --  Returns association for Name or Null_Association if not found. This
-      --  routine also handles lazy tags by calling the appropriate callback
-      --  routine. Lazy tag values are then recorded into Lazy_Set.
 
       -------------
       -- Analyze --
@@ -4017,6 +4043,11 @@ package body Templates_Parser is
          State : Parse_State)
       is
          use type Data.Tree;
+
+         function NS
+           (State : Parse_State; Line : Natural) return Parse_State
+           with Inline;
+         --  Returns a new Parse_State with just the line updated
 
          function Analyze (E : Expr.Tree) return String;
          --  Analyse the expression tree and returns the result as a boolean
@@ -4052,7 +4083,8 @@ package body Templates_Parser is
          --  Filters and Atribute recorded for this variable.
 
          function I_Translate
-           (Var : Data.Tag_Var; State : Parse_State) return String;
+           (Var   : Data.Tag_Var;
+            State : Parse_State) return String;
          --  As above but for an include variable
 
          procedure Add (S : String; Sep : Boolean := False);
@@ -4065,6 +4097,13 @@ package body Templates_Parser is
 
          function Get_Marked_Text (Mark : Natural) return String;
          --  Returns the text from the mark to the end of the buffer
+
+         function Get_Association
+           (Var  : Data.Tag_Var;
+            Line : Natural) return Association;
+         --  Returns association for Name or Null_Association if not found.
+         --  This routine also handles lazy tags by calling the appropriate
+         --  callback routine. Lazy tag values are then recorded into Lazy_Set.
 
          procedure Rollback (Activate : Boolean; Mark : Natural) with Inline;
          --  Commit or rollback added texts for terse output. If no text added
@@ -4250,8 +4289,9 @@ package body Templates_Parser is
 
                            Is_Composite : aliased Boolean;
                            Value        : constant String :=
-                                            Translate (T.Var, State,
-                                                       Is_Composite'Access);
+                                            Translate
+                                              (T.Var, NS (State, T.Line),
+                                               Is_Composite'Access);
                         begin
                            --  Only adds to the buffer if variable value is not
                            --  empty. This is needed as we want to track empty
@@ -4477,7 +4517,8 @@ package body Templates_Parser is
                if R.Kind = Expr.Var then
                   declare
                      LL : constant String := Analyze (L);
-                     Tk : constant Association := Get_Association (R.Var);
+                     Tk : constant Association :=
+                            Get_Association (R.Var, R.Line);
                   begin
                      case Tk.Kind is
                         when Std =>
@@ -4626,7 +4667,8 @@ package body Templates_Parser is
                   if Data.Is_Include_Variable (E.Var) then
                      return I_Translate (E.Var, State);
                   else
-                     return Translate (E.Var, State, Is_Composite'Access);
+                     return Translate
+                       (E.Var, NS (State, E.Line), Is_Composite'Access);
                   end if;
 
                when Expr.Op =>
@@ -4681,7 +4723,8 @@ package body Templates_Parser is
                        Reverse_Index => State.Reverse_Index,
                        Table_Level   => State.Table_Level,
                        Inline_Sep    => State.Inline_Sep,
-                       Filename      => State.Filename,
+                       Filename      => Included.File.Info.Filename,
+                       Line          => State.Line,
                        Blocks_Count  => State.Blocks_Count,
                        I_Params      => Included.Params,
                        F_Params      => Flatten_Parameters
@@ -4711,7 +4754,8 @@ package body Templates_Parser is
                      when Data.Var  =>
                         F (K) := To_Unbounded_String
                           (Translate
-                             (I (K).Var, State, Is_Composite'Access));
+                             (I (K).Var, NS (State, I (K).Line),
+                              Is_Composite'Access));
                   end case;
                end if;
             end loop;
@@ -4729,6 +4773,54 @@ package body Templates_Parser is
                return Flatten_Parameters (I.all);
             end if;
          end Flatten_Parameters;
+
+         ---------------------
+         -- Get_Association --
+         ---------------------
+
+         function Get_Association
+           (Var  : Data.Tag_Var;
+            Line : Natural) return Association
+         is
+            use type Data.Internal_Tag;
+            use type Dynamic.Lazy_Tag_Access;
+            Name :  constant String := To_String (Var.Name);
+            Pos  : Association_Map.Cursor;
+         begin
+            Pos := Translations.Set.Find (Name);
+
+            if Association_Map.Has_Element (Pos) then
+               Unused_Variables.Exclude (Name);
+               return Association_Map.Element (Pos);
+
+            elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
+              and then not Filter.Is_No_Dynamic (Var.Filters)
+              and then Var.Internal = Data.No
+            then
+               --  Look into the Lazy_Set for the cached value
+
+               Pos := Lazy_Set.Set.Find (Name);
+
+               if Association_Map.Has_Element (Pos) then
+                  return Association_Map.Element (Pos);
+
+               else
+                  --  Check for Lazy tag
+
+                  Dynamic.Value (Lazy_Tag, Name, Lazy_Set);
+
+                  return Get (Lazy_Set, Name);
+               end if;
+
+            else
+               if Report /= null then
+                  Report
+                    (Name, To_String (State.Filename), Line, Undefined);
+               end if;
+
+               return Null_Association;
+            end if;
+         end Get_Association;
 
          --------------
          -- Get_Mark --
@@ -4884,10 +4976,10 @@ package body Templates_Parser is
                begin
                   declare
                      use type Dynamic.Cursor_Tag_Access;
-                     Tk : constant Association := Get_Association (T);
+                     Tk : constant Association :=
+                            Get_Association (T, State.Line);
                   begin
                      if Tk = Null_Association then
-
                         if Cursor_Tag /= Dynamic.Null_Cursor_Tag then
                            --  Check the Cursor_Tag
                            declare
@@ -5253,6 +5345,31 @@ package body Templates_Parser is
             return Result;
          end Inline_Cursor_Tag;
 
+         --------
+         -- NS --
+         --------
+
+         function NS
+           (State : Parse_State; Line : Natural) return Parse_State
+         is
+         begin
+            return (Parse_State'(State.P_Size,
+                    State.Cursor,
+                    State.Max_Lines,
+                    State.Max_Expand,
+                    State.Reverse_Index,
+                    State.Table_Level,
+                    State.Inline_Sep,
+                    State.Filename,
+                    Line,
+                    State.Blocks_Count,
+                    State.I_Params,
+                    State.F_Params,
+                    State.Block,
+                    State.Terse_Table,
+                    State.Parent));
+         end NS;
+
          -------------
          -- Pop_Sep --
          -------------
@@ -5419,7 +5536,7 @@ package body Templates_Parser is
                use type Data.Attribute;
                use type Dynamic.Cursor_Tag_Access;
                use type Dynamic.Path;
-               Tk : constant Association := Get_Association (Var);
+               Tk : constant Association := Get_Association (Var, State.Line);
             begin
                if Tk = Null_Association then
 
@@ -5751,6 +5868,7 @@ package body Templates_Parser is
                                         State.Table_Level + 1,
                                         State.Inline_Sep,
                                         State.Filename,
+                                        T.Line,
                                         T.Blocks_Count,
                                         State.I_Params,
                                         State.F_Params,
@@ -5864,6 +5982,7 @@ package body Templates_Parser is
                                            State.Table_Level,
                                            State.Inline_Sep,
                                            State.Filename,
+                                           Block.Line,
                                            State.Blocks_Count,
                                            State.I_Params,
                                            State.F_Params,
@@ -5885,6 +6004,7 @@ package body Templates_Parser is
                                            State.Table_Level,
                                            State.Inline_Sep,
                                            State.Filename,
+                                           Block.Line,
                                            State.Blocks_Count,
                                            State.I_Params,
                                            State.F_Params,
@@ -5919,6 +6039,7 @@ package body Templates_Parser is
                                State.Table_Level,
                                State.Inline_Sep,
                                State.Filename,
+                               T.Line,
                                State.Blocks_Count,
                                State.I_Params,
                                State.F_Params,
@@ -5941,6 +6062,7 @@ package body Templates_Parser is
                                      Table_Level   => State.Table_Level,
                                      Inline_Sep    => T.Sep,
                                      Filename      => State.Filename,
+                                     Line          => T.Line,
                                      Blocks_Count  => State.Blocks_Count,
                                      I_Params      => State.I_Params,
                                      F_Params      => State.F_Params,
@@ -5962,45 +6084,6 @@ package body Templates_Parser is
          Last := 0;
       end Flush;
 
-      ---------------------
-      -- Get_Association --
-      ---------------------
-
-      function Get_Association (Var : Data.Tag_Var) return Association is
-         use type Data.Internal_Tag;
-         use type Dynamic.Lazy_Tag_Access;
-         Name : constant String := To_String (Var.Name);
-         Pos  : Association_Map.Cursor;
-      begin
-         Pos := Translations.Set.Find (Name);
-
-         if Association_Map.Has_Element (Pos) then
-            return Association_Map.Element (Pos);
-
-         elsif Lazy_Tag /= Dynamic.Null_Lazy_Tag
-           and then not Filter.Is_No_Dynamic (Var.Filters)
-           and then Var.Internal = Data.No
-         then
-            --  Look into the Lazy_Set for the cached value
-
-            Pos := Lazy_Set.Set.Find (Name);
-
-            if Association_Map.Has_Element (Pos) then
-               return Association_Map.Element (Pos);
-
-            else
-               --  Check for Lazy tag
-
-               Dynamic.Value (Lazy_Tag, Name, Lazy_Set);
-
-               return Get (Lazy_Set, Name);
-            end if;
-
-         else
-            return Null_Association;
-         end if;
-      end Get_Association;
-
       T : Static_Tree;
 
    begin
@@ -6009,7 +6092,19 @@ package body Templates_Parser is
       Now := Ada.Calendar.Clock;
       --  Used for the time related variable
 
-      Analyze (T.C_Info, Empty_State);
+      --  Fill the Unused_Variables set with all variables
+
+      for A in Translations.Set.Iterate loop
+         Unused_Variables.Include (Association_Map.Key (A));
+      end loop;
+
+      declare
+         State : Parse_State := Empty_State;
+      begin
+         State.Filename := To_Unbounded_String (Filename);
+         State.Line := T.Info.Line;
+         Analyze (T.C_Info, State);
+      end;
 
       if Cached then
          Cached_Files.Release (T);
@@ -6020,6 +6115,14 @@ package body Templates_Parser is
       --  Flush buffer and return result
 
       Flush;
+
+      --  Now report all unused variables
+
+      if Report /= null then
+         for V of Unused_Variables loop
+            Report (V, Reason => Unused);
+         end loop;
+      end if;
 
       return Results;
    end Parse;
@@ -6295,7 +6398,7 @@ package body Templates_Parser is
      (Template     : String;
       Translations : Translate_Set) return String
    is
-      T : Data.Tree := Data.Parse (Template);
+      T : Data.Tree := Data.Parse (Template, 1);
       P : Data.Tree := T;
 
       Results : Unbounded_String;

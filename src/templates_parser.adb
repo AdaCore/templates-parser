@@ -3630,8 +3630,8 @@ package body Templates_Parser is
                   T.Line := Line;
 
                   if Input.LF_Terminated (File)
-                    and then (not Input.End_Of_File (File)
-                                or else Include_File)
+                        and then
+                     (not Input.End_Of_File (File) or else Include_File)
                   then
                      --  Add a LF if the read line is terminated by a LF. Do
                      --  not add this LF if we reach the end of file except for

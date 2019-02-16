@@ -18,8 +18,9 @@
 
 --  Procedure to test the template_parser
 
-with Ada.Text_IO;
 with Ada.Command_Line;
+with Ada.Text_IO;
+
 with Templates_Parser;
 with Test_Callback;
 
@@ -29,8 +30,8 @@ procedure Testme is
 
    package TP renames Templates_Parser;
 
-   use type TP.Vector_Tag;
    use type TP.Matrix_Tag;
+   use type TP.Vector_Tag;
 
    L_Tag : aliased Test_Callback.Lazy_Tag;
    C_Tag : aliased Test_Callback.Cursor_Tag;

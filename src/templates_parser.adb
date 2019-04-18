@@ -31,6 +31,7 @@ pragma Ada_2012;
 
 with Ada.Calendar;
 with Ada.Characters.Handling;
+with Ada.Containers.Indefinite_Vectors;
 with Ada.Exceptions;
 with Ada.IO_Exceptions;
 with Ada.Strings.Fixed;
@@ -88,6 +89,7 @@ package body Templates_Parser is
    A_Terminate_Sections_Token : constant String := "TERMINATE_SECTIONS";
    A_Reverse_Token            : constant String := "REVERSE";
    A_Terse_Token              : constant String := "TERSE";
+   A_Aligh_On                 : constant String := "ALIGN_ON";
 
    ------------
    -- Filter --
@@ -892,6 +894,8 @@ package body Templates_Parser is
       Params   : Data.Parameters;
    end record;
 
+   package String_Set is new Containers.Indefinite_Vectors (Positive, String);
+
    type Node (Kind : Nkind) is record
       Next : Tree;
       Line : Natural;
@@ -921,7 +925,7 @@ package body Templates_Parser is
             N_False   : Tree;
 
          when Extends_Stmt =>
-            N_Extends : Tree;  --  The BLOCK children
+            N_Extends  : Tree;  --  The BLOCK children
             E_Included : Included_File_Info;  --  Extended file
 
          when Block_Stmt =>
@@ -932,6 +936,7 @@ package body Templates_Parser is
             Terminate_Sections : Boolean;
             Reverse_Index      : Boolean;
             Terse              : Boolean;
+            Align_On           : String_Set.Vector;
             Blocks             : Tree;
             Blocks_Count       : Natural;     -- Number if blocks
 
@@ -2430,11 +2435,25 @@ package body Templates_Parser is
         (At_Least_One : Boolean := True) return String;
       --  Get all parameters on the current line
 
-      function Count_Tag_Attributes return Natural;
+      function Get_Tag_Attributes_Count return Natural;
       --  Returns the number of tag attributes present
 
       function Get_Tag_Attribute (N : Positive) return String;
       --  Returns the Nth tag attribute
+
+      function Get_Tag_Attribute_Parameter_Count
+        (Attribute_Number : Positive) return Natural;
+      --  Returns the number of tag attribute parameters for the given
+      --  attribute number.
+
+      function Get_Tag_Attribute_Parameter
+        (Attribute_Number, N : Positive) return String;
+      --  Returns the Nth attribute's parameter for the given attribute number
+
+      function Get_Tag_Attribute_Parameter_Internal
+        (Attribute_Number, N : Positive; Count : out Natural) return String;
+      --  Returns both the number of attribute parameter's and the Nth
+      --  parameter.
 
       function Get_Tag_Parameter (N : Positive) return String;
       --  Returns the Nth tag parameter found between parenthesis
@@ -2472,17 +2491,6 @@ package body Templates_Parser is
          In_If   : Boolean;
          No_Read : Boolean := False) return Tree;
       --  Get a line in File and returns the Tree
-
-      --------------------------
-      -- Count_Tag_Attributes --
-      --------------------------
-
-      function Count_Tag_Attributes return Natural is
-         K : constant Natural :=
-               Strings.Fixed.Index (Buffer (First + 2 .. Last), "@@");
-      begin
-         return Strings.Fixed.Count (Buffer (First + 2 .. K), "'");
-      end Count_Tag_Attributes;
 
       ---------
       -- EOF --
@@ -2648,7 +2656,11 @@ package body Templates_Parser is
 
          --  Check for the end of this attribute
 
-         E := Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
+         E := Strings.Fixed.Index (Buffer (S + 1 .. L), "(");
+
+         if E = 0 then
+            E := Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
+         end if;
 
          if E = 0 then
             E := L;
@@ -2656,6 +2668,94 @@ package body Templates_Parser is
 
          return Buffer (S + 1 .. E - 1);
       end Get_Tag_Attribute;
+
+      ---------------------------------
+      -- Get_Tag_Attribute_Parameter --
+      ---------------------------------
+
+      function Get_Tag_Attribute_Parameter
+        (Attribute_Number, N : Positive) return String
+      is
+         Count : Natural := 0;
+      begin
+         return Get_Tag_Attribute_Parameter_Internal
+           (Attribute_Number, N, Count);
+      end Get_Tag_Attribute_Parameter;
+
+      ---------------------------------------
+      -- Get_Tag_Attribute_Parameter_Count --
+      ---------------------------------------
+
+      function Get_Tag_Attribute_Parameter_Count
+        (Attribute_Number : Positive) return Natural
+      is
+         Count : Natural := 0;
+         A     : constant String :=
+                   Get_Tag_Attribute_Parameter_Internal
+                     (Attribute_Number, 1, Count) with Unreferenced;
+      begin
+         return Count;
+      end Get_Tag_Attribute_Parameter_Count;
+
+      ------------------------------------------
+      -- Get_Tag_Attribute_Parameter_Internal --
+      ------------------------------------------
+
+      function Get_Tag_Attribute_Parameter_Internal
+        (Attribute_Number, N : Positive; Count : out Natural) return String
+      is
+         Attribute : constant String := Get_Tag_Attribute (Attribute_Number);
+         Start     : constant Positive :=
+                       Strings.Fixed.Index (Buffer (First .. Last), Attribute)
+                       + Attribute'Length + 1;
+         In_Param  : Boolean := False;
+         S, E      : Positive; -- parameter is between S and E
+      begin
+         Count := 0;
+
+         Check_Parameters : for K in Start .. Last loop
+            if Buffer (K) = '"' then
+               if In_Param then
+                  In_Param := False;
+
+                  --  End of param being looked for
+
+                  if Count = N then
+                     E := K - 1;
+                  end if;
+
+               else
+                  In_Param := True;
+                  Count := Count + 1;
+
+                  --  New parameter is the one looked for, record start
+
+                  if Count = N then
+                     S := K + 1;
+                  end if;
+               end if;
+
+            elsif not In_Param and then Buffer (K) = ')' then
+               exit Check_Parameters;
+
+            elsif not In_Param and then Buffer (K) not in ' ' | ',' then
+               Fatal_Error ("expecting coma between parameters");
+            end if;
+         end loop Check_Parameters;
+
+         return Buffer (S .. E);
+      end Get_Tag_Attribute_Parameter_Internal;
+
+      -------------------------------
+      -- Get_Tag_Attributes_Count --
+      -------------------------------
+
+      function Get_Tag_Attributes_Count return Natural is
+         K : constant Natural :=
+               Strings.Fixed.Index (Buffer (First + 2 .. Last), "@@");
+      begin
+         return Strings.Fixed.Count (Buffer (First + 2 .. K), "'");
+      end Get_Tag_Attributes_Count;
 
       -----------------------
       -- Get_Tag_Parameter --
@@ -3337,7 +3437,7 @@ package body Templates_Parser is
 
             --  Check attributes
 
-            for K in 1 .. Count_Tag_Attributes loop
+            for K in 1 .. Get_Tag_Attributes_Count loop
                declare
                   Att : constant String := Get_Tag_Attribute (K);
                begin
@@ -3349,6 +3449,12 @@ package body Templates_Parser is
 
                   elsif Att = A_Terse_Token then
                      T.Terse := True;
+
+                  elsif Att = A_Aligh_On then
+                     for P in 1 .. Get_Tag_Attribute_Parameter_Count (K) loop
+                        T.Align_On.Append (Get_Tag_Attribute_Parameter (K, P));
+                     end loop;
+
                   else
                      Fatal_Error ("Unknown table attributes " & Att);
                   end if;
@@ -3880,6 +3986,9 @@ package body Templates_Parser is
       --  nesting level of @@EXTENDS@@ block we are analyzing. 0 outside
       --  such a block.
 
+      procedure Flush with Inline;
+      --  Flush buffer to Results
+
       procedure Analyze
         (T     : Tree;
          State : Parse_State);
@@ -3943,9 +4052,6 @@ package body Templates_Parser is
          --  true S is a separator. We keep track of this as we do not want to
          --  have two separators side by side.
 
-         procedure Flush with Inline;
-         --  Flush buffer to Results
-
          function Get_Mark return Natural with Inline;
          --  Get a mark on the current text buffer
 
@@ -3981,6 +4087,11 @@ package body Templates_Parser is
          procedure Pop_Sep (State : Parse_State) with Inline;
          --  Remove the separator if it is the last input into the buffer
 
+         function Align_On
+           (Seps : String_Set.Vector;
+            Text : String) return String;
+         --  Align text given the State.Align_On separators
+
          L_State : aliased constant Parse_State := State;
 
          ---------
@@ -4004,6 +4115,110 @@ package body Templates_Parser is
             Last_Was_Sep := Sep;
          end Add;
 
+         --------------
+         -- Align_On --
+         --------------
+
+         function Align_On
+           (Seps  : String_Set.Vector;
+            Text  : String) return String
+         is
+            Cols   : array (Positive range 1 .. Positive (Seps.Length))
+                       of Natural := (others => 0);
+            LS     : Positive := 1;    -- line start
+            LE     : Natural  := 0;    -- line end
+            Result : Unbounded_String; -- Text aligned
+         begin
+            --  Look for columns in Text and set the separators column in Cols
+
+            Check_Cols : while LS < Text'Length loop
+               --  Check for line start .. end
+               LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
+
+               if LE = 0 then
+                  LE := Text'Length;
+               end if;
+
+               --  Check for separators
+
+               Update_Cols : declare
+                  I   : Positive := Cols'First;
+                  P   : Positive := LS;
+                  Loc : Natural;
+               begin
+                  for S of Seps loop
+                     Loc := Strings.Fixed.Index (Text (LS .. LE), S, P);
+
+                     if Loc > 0 then
+                        P := Loc;
+                        Cols (I) := Natural'Max (Cols (I), P - LS);
+                        P := P + S'Length;
+                     end if;
+
+                     I := I + 1;
+                  end loop;
+               end Update_Cols;
+
+               LS := LE + 1;
+            end loop Check_Cols;
+
+            --  Add necessary spaces to align elements in columns
+
+            LS := 1;
+
+            Set_Cols : while LS < Text'Length loop
+               --  Check for line start .. end
+               LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
+
+               if LE = 0 then
+                  LE := Text'Length;
+               end if;
+
+               --  Check for separators
+
+               declare
+                  use Strings.Fixed;
+                  Line   : Unbounded_String :=
+                             To_Unbounded_String (Text (LS .. LE));
+                  I      : Positive := Cols'First;
+                  P      : Positive := LS;
+                  Loc    : Natural;
+                  Spaces : Natural := 0;
+                  Offset : Natural := 0;
+               begin
+                  for S of Seps loop
+                     Loc := Index (Text (LS .. LE), S, P);
+
+                     if Loc > 0
+                       and then Cols (I) - Loc + LS - Offset > 0
+                     then
+                        P := Loc;
+
+                        Spaces := Cols (I) - P + LS - Offset;
+
+                        if Spaces > 0 then
+                           Insert
+                             (Source   => Line,
+                              Before   => Offset + P - LS + 1,
+                              New_Item => String'(Spaces * ' '));
+                           Offset := Offset + Spaces;
+                        end if;
+
+                        P := P + S'Length;
+                     end if;
+
+                     I := I + 1;
+                  end loop;
+
+                  Append (Result, Line);
+               end;
+
+               LS := LE + 1;
+            end loop Set_Cols;
+
+            return To_String (Result);
+         end Align_On;
+
          -------------
          -- Analyze --
          -------------
@@ -4012,9 +4227,7 @@ package body Templates_Parser is
             T : Data.Tree := D;
          begin
             while T /= null loop
-
                case T.Kind is
-
                   when Data.Text =>
                      Add (To_String (T.Value));
 
@@ -4508,16 +4721,6 @@ package body Templates_Parser is
                return Flatten_Parameters (I.all);
             end if;
          end Flatten_Parameters;
-
-         -----------
-         -- Flush --
-         -----------
-
-         procedure Flush is
-         begin
-            Append (Results, Buffer (1 .. Last));
-            Last := 0;
-         end Flush;
 
          --------------
          -- Get_Mark --
@@ -5446,7 +5649,6 @@ package body Templates_Parser is
          end if;
 
          case T.Kind is
-
             when Info | C_Info =>
                Analyze (T.Next, State);
 
@@ -5521,6 +5723,9 @@ package body Templates_Parser is
 
             when Table_Stmt =>
                declare
+                  Start_Pos             : constant Positive :=
+                                            1 + Length (Results);
+                  End_Pos               : Natural := 0;
                   Max_Lines, Max_Expand : Natural;
                begin
                   Get_Max (T, Max_Lines, Max_Expand);
@@ -5539,6 +5744,24 @@ package body Templates_Parser is
                                         Empty_Block_State,
                                         T.Terse,
                                         L_State'Unchecked_Access));
+
+                  --  Align_On attribute present
+
+                  if not T.Align_On.Is_Empty then
+                     Flush;
+                     End_Pos := Length (Results);
+
+                     --  we have some content for the table. Let's align it as
+                     --  needed.
+
+                     if Start_Pos /= End_Pos then
+                        Replace_Slice
+                          (Results, Start_Pos, End_Pos,
+                           Align_On
+                             (T.Align_On,
+                              Slice (Results, Start_Pos, End_Pos)));
+                     end if;
+                  end if;
                end;
 
                Push_Sep (State);
@@ -5565,7 +5788,7 @@ package body Templates_Parser is
                if In_Extends = 0 then
                   declare
                      B : constant Tree_Map.Cursor :=
-                       Named_Blocks.Find (To_String (T.B_Name));
+                           Named_Blocks.Find (To_String (T.B_Name));
                   begin
                      if Tree_Map.Has_Element (B) then
                         Analyze (Tree_Map.Element (B), State);
@@ -5574,10 +5797,12 @@ package body Templates_Parser is
                         Analyze (T.N_Block, State);
                      end if;
                   end;
+
                else
                   --  add the block's expansion to the variables
                   Named_Blocks.Include (To_String (T.B_Name), T.N_Block);
                end if;
+
                Analyze (T.Next, State);
 
             when Section_Block =>
@@ -5667,6 +5892,7 @@ package body Templates_Parser is
                         end if;
                      end;
                   end loop;
+
                   Pop_Sep (State);
                end;
 
@@ -5712,6 +5938,16 @@ package body Templates_Parser is
                Analyze (T.Next, State);
          end case;
       end Analyze;
+
+      -----------
+      -- Flush --
+      -----------
+
+      procedure Flush is
+      begin
+         Append (Results, Buffer (1 .. Last));
+         Last := 0;
+      end Flush;
 
       ---------------------
       -- Get_Association --
@@ -5770,7 +6006,7 @@ package body Templates_Parser is
 
       --  Flush buffer and return result
 
-      Append (Results, Buffer (1 .. Last));
+      Flush;
 
       return Results;
    end Parse;

@@ -1,0 +1,7 @@
+procedure Call is
+@@TABLE'ALIGN_ON(":",":=")@@
+   @_DECLS_@
+@@END_TABLE@@
+begin
+   null;
+end Call;

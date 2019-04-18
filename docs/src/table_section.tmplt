@@ -13,7 +13,7 @@
 </table>
 
 <table>
-@@TABLE@@ @@TERMINATE_SECTIONS@@
+@@TABLE'TERMINATE_SECTIONS@@
    <tr>
    <td bgcolor=#00000F width=10>
    <td width=150>@_DEVICES_@

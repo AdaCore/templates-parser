@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2017, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -32,6 +32,8 @@ with Ada.Text_IO;
 separate (Templates_Parser)
 
 procedure Print_Tree (T : Tree; Level : Natural := 0) is
+
+   use type Containers.Count_Type;
 
    procedure Print_Indent (L : Natural);
    --  Output proper number of spaces for identation
@@ -146,21 +148,42 @@ begin
          Print_Tree (T.Next, Level);
 
       when Table_Stmt =>
-         Text_IO.Put ("[TABLE]");
+         Text_IO.Put ("[TABLE");
 
          if T.Terminate_Sections then
-            Text_IO.Put (" TERMINATE_SECTIONS");
+            Text_IO.Put ("'TERMINATE_SECTIONS");
          end if;
 
          if T.Reverse_Index then
-            Text_IO.Put (" REVERSE");
+            Text_IO.Put ("'REVERSE");
          end if;
 
          if T.Terse then
-            Text_IO.Put (" TERSE");
+            Text_IO.Put ("'TERSE");
          end if;
 
-         Text_IO.New_Line;
+         if T.Align_On.Length > 0 then
+            declare
+               First : Boolean := True;
+            begin
+               Text_IO.Put ("'ALIGN_ON(");
+
+               for S of T.Align_On loop
+                  if not First then
+                     Text_IO.Put (',');
+                  else
+                     First := False;
+                  end if;
+
+                  Text_IO.Put ('"' & S & '"');
+               end loop;
+
+               Text_IO.Put (')');
+            end;
+         end if;
+
+         Text_IO.Put_Line ("]");
+
          Print_Tree (T.Blocks, Level + 1);
          Print_Indent (Level);
          Text_IO.Put_Line ("[END_TABLE]");

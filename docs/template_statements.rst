@@ -228,7 +228,7 @@ Syntax:
 
 ::
 
- @@TABLE['REVERSE]['TERMINATE_SECTIONS]['TERSE]@@
+ @@TABLE['REVERSE]['TERMINATE_SECTIONS]['TERSE]['ALIGN_ON("sep")]@@
  ...
  [@@BEGIN@@]
  ...
@@ -294,6 +294,14 @@ A table with sections can have attributes:
   especially important to avoid empty ending lines for table containing
   vector of different size.
 
+**ALIGN_ON**
+  The content of table will be aligned on the given separators.
+  Multiple separators may be specified as coma separated strings, for
+  example ALIGN_ON(":",":="). Each line will have the corresponding
+  separator aligned in the specified order. That is, on the example
+  above we first align on ":" and then ":=", if another ":" is found
+  on the line it is not taken into account.
+
 For the following template:
 
 .. literalinclude:: src/table_section.tmplt
@@ -319,6 +327,21 @@ The template file above can be written this way:
 
 .. literalinclude:: src/table_block.tmplt
    :language: xml
+
+Another example to for the **ALIGN_ON** table attribute:
+
+.. literalinclude:: src/table_align.tmplt
+   :language: text
+
+And the following program:
+
+.. literalinclude:: src/table_align.adb
+   :language: ada
+
+The following output will be generated:
+
+.. literalinclude:: build/samples/table_align.adb.res
+   :language: ada
 
 Into a table construct there are some additional variable tags available:
 

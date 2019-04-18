@@ -101,6 +101,11 @@ procedure Testme is
          TP.Assoc ("VAR5", "T R uE"),
          TP.Assoc ("VAR6", "A"),
          TP.Assoc ("VAR7", +"ZZ" & "A3.4" & "A4.2" & "again!" & "A2.2" & "!"),
+         TP.Assoc ("DECL", +"A : Natural := 0;"
+                           & "Is_That_True : constant boolean := False;"
+                           & "Value := 12.3;"
+                           & "No_Init : Natural;"
+                           & "Age : Positive := 12;"),
          TP.Assoc ("CLASS", C),
          TP.Assoc ("MEMBER", MF),
          TP.Assoc ("COND1", False),

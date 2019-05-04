@@ -4125,18 +4125,18 @@ package body Templates_Parser is
          is
             Cols   : array (Positive range 1 .. Positive (Seps.Length))
                        of Natural := (others => 0);
-            LS     : Positive := 1;    -- line start
-            LE     : Natural  := 0;    -- line end
-            Result : Unbounded_String; -- Text aligned
+            LS     : Positive := Text'First;  -- line start
+            LE     : Natural  := 0;           -- line end
+            Result : Unbounded_String;        -- Text aligned
          begin
             --  Look for columns in Text and set the separators column in Cols
 
-            Check_Cols : while LS < Text'Length loop
+            Check_Cols : while LS < Text'Last loop
                --  Check for line start .. end
                LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
 
                if LE = 0 then
-                  LE := Text'Length;
+                  LE := Text'Last;
                end if;
 
                --  Check for separators
@@ -4164,14 +4164,14 @@ package body Templates_Parser is
 
             --  Add necessary spaces to align elements in columns
 
-            LS := 1;
+            LS := Text'First;
 
-            Set_Cols : while LS < Text'Length loop
+            Set_Cols : while LS < Text'Last loop
                --  Check for line start .. end
                LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
 
                if LE = 0 then
-                  LE := Text'Length;
+                  LE := Text'Last;
                end if;
 
                --  Check for separators

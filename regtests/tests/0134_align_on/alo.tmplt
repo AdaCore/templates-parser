@@ -1,0 +1,12 @@
+
+Test 1
+
+@@TABLE'ALIGN_ON(":")@@
+   @_CAPITALIZE:Partition_Names_@ : process @_CAPITALIZE:Partition_Names_@.final;
+@@END_TABLE@@
+
+Test 2
+
+@@TABLE'ALIGN_ON(":")@@
+   @_CAPITALIZE:Partition_Names_@ : process @_CAPITALIZE:Partition_Names_@.final;
+@@END_TABLE@@

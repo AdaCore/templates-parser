@@ -1,0 +1,9 @@
+Test 1
+
+   Part1 : process Part1.final;
+   Part2 : process Part2.final;
+
+Test 2
+
+   Part1 : process Part1.final;
+   Part2 : process Part2.final;

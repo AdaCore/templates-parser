@@ -7,3 +7,8 @@ Test 2
 
    Part1 : process Part1.final;
    Part2 : process Part2.final;
+
+Test 3
+
+   Part2 : process Part2.final;
+   Part1 : process Part1.final;

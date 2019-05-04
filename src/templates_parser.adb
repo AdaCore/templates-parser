@@ -2645,10 +2645,10 @@ package body Templates_Parser is
       -----------------------
 
       function Get_Tag_Attribute (N : Positive) return String is
-         S : Positive := First + 2;
-         L : constant Natural :=
-               Strings.Fixed.Index (Buffer (S .. Last), "@@");
-         E : Natural;
+         S      : Positive := First + 2;
+         L      : constant Natural :=
+                    Strings.Fixed.Index (Buffer (S .. Last), "@@");
+         E      : Natural;
       begin
          for I in 1 .. N loop
             S := Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
@@ -2656,11 +2656,19 @@ package body Templates_Parser is
 
          --  Check for the end of this attribute
 
-         E := Strings.Fixed.Index (Buffer (S + 1 .. L), "(");
+         declare
+            E1 : constant Natural :=
+                   Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
+            E2 : constant Natural :=
+                   Strings.Fixed.Index (Buffer (S + 1 .. L), "(");
+         begin
+            if E1 > 0 and then E1 < E2 then
+               E := E1;
 
-         if E = 0 then
-            E := Strings.Fixed.Index (Buffer (S + 1 .. L), "'");
-         end if;
+            else
+               E := E2;
+            end if;
+         end;
 
          if E = 0 then
             E := L;

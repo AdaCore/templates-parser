@@ -1,7 +1,9 @@
+Some Text : To Check Aligment
+
 Test 1
 
-   Part1 : process Part1.final;
-   Part2 : process Part2.final;
+   Part1    :    process Part1.final;
+   Part2    :    process Part2.final;
 
 Test 2
 

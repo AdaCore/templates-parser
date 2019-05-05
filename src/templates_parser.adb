@@ -5731,12 +5731,17 @@ package body Templates_Parser is
 
             when Table_Stmt =>
                declare
-                  Start_Pos             : constant Positive :=
+                  Start_Pos             : Positive :=
                                             1 + Length (Results);
                   End_Pos               : Natural := 0;
                   Max_Lines, Max_Expand : Natural;
                begin
                   Get_Max (T, Max_Lines, Max_Expand);
+
+                  if not T.Align_On.Is_Empty then
+                     Flush;
+                     Start_Pos := 1 + Length (Results);
+                  end if;
 
                   Analyze (T.Blocks,
                            Parse_State'(State.F_Params'Length,

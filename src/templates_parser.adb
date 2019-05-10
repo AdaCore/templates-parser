@@ -2662,7 +2662,7 @@ package body Templates_Parser is
             E2 : constant Natural :=
                    Strings.Fixed.Index (Buffer (S + 1 .. L), "(");
          begin
-            if E1 > 0 and then E1 < E2 then
+            if E1 > 0 and then (E1 < E2 or else E2 = 0) then
                E := E1;
 
             else

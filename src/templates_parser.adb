@@ -2529,18 +2529,27 @@ package body Templates_Parser is
       function Get_All_Parameters
         (At_Least_One : Boolean := True) return String
       is
-         Start : Natural;
+         Start  : Natural;
+         Offset : Natural := 0;
       begin
          --  Skip first word (tag statement, or include file name)
 
-         Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
+         if First < Last and then Buffer (First .. First + 1) = "@@" then
+            Start := Strings.Fixed.Index (Buffer (First + 2 .. Last), "@@");
+            Offset := 2;
+         else
+            Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
+         end if;
 
-         if Start = 0 then
+         if Start = 0 or else Start + Offset >= Last then
             if At_Least_One then
                Fatal_Error ("missing parameter");
             else
                Start := Last + 1;
             end if;
+
+         else
+            Start := Start + Offset;
          end if;
 
          if Buffer (Last) = ASCII.CR then
@@ -2550,7 +2559,8 @@ package body Templates_Parser is
             Last := Last - 1;
          end if;
 
-         return Strings.Fixed.Trim (Buffer (Start .. Last), Strings.Both);
+         return Strings.Fixed.Trim
+           (Buffer (Start .. Last), Left  => Blank, Right => Blank);
       end Get_All_Parameters;
 
       -------------------------
@@ -2559,11 +2569,19 @@ package body Templates_Parser is
 
       function Get_First_Parameter return Unbounded_String is
          Start, Stop : Natural;
+         Offset      : Natural := 0;
       begin
-         Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
+         if First < Last and then Buffer (First .. First + 1) = "@@" then
+            Start := Strings.Fixed.Index (Buffer (First + 2 .. Last), "@@");
+            Offset := 2;
+         else
+            Start := Strings.Fixed.Index (Buffer (First .. Last), Blank);
+         end if;
 
-         if Start = 0 then
+         if Start = 0 or else Start + Offset >= Last then
             return Null_Unbounded_String;
+         else
+            Start := Start + Offset;
          end if;
 
          Start := Strings.Fixed.Index (Buffer (Start .. Last), Blank, Outside);

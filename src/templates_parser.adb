@@ -2527,7 +2527,8 @@ package body Templates_Parser is
       ------------------------
 
       function Get_All_Parameters
-        (At_Least_One : Boolean := True) return String is
+        (At_Least_One : Boolean := True) return String
+      is
          Start : Natural;
       begin
          --  Skip first word (tag statement, or include file name)
@@ -2573,7 +2574,7 @@ package body Templates_Parser is
             return Null_Unbounded_String;
          end if;
 
-         Stop  := Strings.Fixed.Index (Buffer (Start .. Last), Blank);
+         Stop := Strings.Fixed.Index (Buffer (Start .. Last), Blank);
 
          if Stop = 0 then
             Stop := Last;

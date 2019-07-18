@@ -1,0 +1,13 @@
+
+1:----------------------------
+void sync_sync_fct
+      (void *a     , size_t a_len,
+       void *result, size_t result_len);
+2:----------------------------
+void sync_sync_fct
+      (void *a     , size_t a_len,
+       void *result, size_t result_len);
+3:----------------------------
+       void *a     , size_t a_len
+       void *result, size_t result_len
+

@@ -29,9 +29,9 @@ aa|_one_|_two_|_three_|xx|zz
 abc
 [INFO] testme64.tmplt
 [C_INFO]  1 FALSE
-[TEXT] 
+[TEXT]
 [TEXT] --  Inline and IF
-[TEXT] 
+[TEXT]
 [TEXT] word1
 [IF] @_COND1_@
   [TEXT]    word2.1
@@ -39,17 +39,17 @@ abc
   [TEXT]    word2.2
 [END_IF]
 [TEXT] word3
-[TEXT] 
+[TEXT]
 [INLINE] ( )
-  [TEXT] word1 
+  [TEXT] word1
   [IF] @_COND1_@
-    [TEXT] word2.1 
+    [TEXT] word2.1
   [ELSE]
-    [TEXT] word2.2 
+    [TEXT] word2.2
   [END_IF]
   [TEXT] word3
 [END_INLINE]
-[TEXT] 
+[TEXT]
 [TEXT] word1
 [IF] @_COND2_@
   [TEXT]    word2.1
@@ -57,28 +57,28 @@ abc
   [TEXT]    word2.2
 [END_IF]
 [TEXT] word3
-[TEXT] 
+[TEXT]
 [INLINE] ( , )
-  [TEXT] word1 , 
+  [TEXT] word1
   [IF] @_COND2_@
-    [TEXT] word2.1 , 
+    [TEXT] word2.1
   [ELSE]
-    [TEXT] word2.2 , 
+    [TEXT] word2.2
   [END_IF]
   [TEXT] word3
 [END_INLINE]
-[TEXT] 
+[TEXT]
 [TEXT] xyz
-[TEXT] 
+[TEXT]
 [TEXT] --  Inline and TABLE
-[TEXT] 
+[TEXT]
 [TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] @_VAR3_@
   [END_BLOCK]
 [END_TABLE]
-[TEXT] 
+[TEXT]
 [INLINE] (:)
   [TABLE]
     [BLOCK]
@@ -87,7 +87,7 @@ abc
     [END_BLOCK]
   [END_TABLE]
 [END_INLINE]
-[TEXT] 
+[TEXT]
 [INLINE] ((:))
   [TABLE]
     [BLOCK]
@@ -97,17 +97,17 @@ abc
   [END_TABLE]
   [TEXT] xx
 [END_INLINE]
-[TEXT] 
+[TEXT]
 [INLINE] (|)
-  [TEXT] aa|
+  [TEXT] aa
   [TABLE]
     [BLOCK]
       [COMMON]
         [TEXT] _@_VAR3_@_
     [END_BLOCK]
   [END_TABLE]
-  [TEXT] xx|
+  [TEXT] xx
   [TEXT] zz
 [END_INLINE]
-[TEXT] 
+[TEXT]
 [TEXT] abc

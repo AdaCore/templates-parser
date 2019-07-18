@@ -1,0 +1,20 @@
+
+1:----------------------------
+void sync_@_LOWER:Parent_Function_@_@_LOWER:Name_@
+@@INLINE(      \()(,\n       )(\);)@@
+@@TABLE'ALIGN_ON(",")@@
+       void *@_LOWER:Param_Names_@, size_t @_LOWER:Param_Names_@_len
+@@END_TABLE@@
+@@END_INLINE@@
+
+2:----------------------------
+void sync_sync_fct
+@@INLINE(      \()(,\n       )(\);)@@
+       void *a     , size_t a_len
+       void *result, size_t result_len
+@@END_INLINE@@
+
+3:----------------------------
+@@TABLE'ALIGN_ON(",")@@
+       void *@_LOWER:Param_Names_@, size_t @_LOWER:Param_Names_@_len
+@@END_TABLE@@

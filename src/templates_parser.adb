@@ -2952,10 +2952,10 @@ package body Templates_Parser is
          function Count_Blocks (T : Tree) return Natural with Inline;
          --  Returns the number of sections in T (Table_Stmt)
 
-         procedure Rewrite_Inlined_Block (T : Tree; Sep : String);
-         --  Recursive procedure that rewrite all text nodes in an inlined
-         --  block. In such a block the spaces before and after text are
-         --  meaningless and LF are replaced by the given separator.
+         procedure Rewrite_Inlined_Block (T : Tree);
+         --  Simplify the inline block by triming spaces. This is only the
+         --  first step, the simplification will save some CPU cycle for each
+         --  template rendering and makes the final inlining a bit more simple.
 
          procedure Parse_Included_File
            (Included : in out Included_File_Info;
@@ -3067,16 +3067,16 @@ package body Templates_Parser is
          -- Rewrite_Inlined_Block --
          ---------------------------
 
-         procedure Rewrite_Inlined_Block (T : Tree; Sep : String) is
+         procedure Rewrite_Inlined_Block (T : Tree) is
 
-            procedure Rewrite (T : Tree; Last, In_Table : Boolean);
+            procedure Rewrite (T : Tree);
             --  Last is set to True if we are checking the last node
 
             -------------
             -- Rewrite --
             -------------
 
-            procedure Rewrite (T : Tree; Last, In_Table : Boolean) is
+            procedure Rewrite (T : Tree) is
                N : Tree := T;
                D : Data.Tree;
             begin
@@ -3091,56 +3091,19 @@ package body Templates_Parser is
                            Trim (D.Value, Side => Left);
                         end if;
 
-                        while D /= null loop
-                           case D.Kind is
-                              when Data.Text =>
-                                 declare
-                                    Len : constant Natural := Length (D.Value);
-                                    --  Len can be 0 here because of the
-                                    --  trimming above.
-                                 begin
-                                    if Len /= 0
-                                      and then
-                                        Element (D.Value, Len) = ASCII.LF
-                                      and then
-                                        (not Last
-                                         or else N.Next /= null
-                                         or else D.Next /= null
-                                         or else In_Table)
-                                    then
-                                       Delete (D.Value, Len, Len);
-
-                                       if not In_Table then
-                                          --  Inside a table we do no want to
-                                          --  add the separator, this must be
-                                          --  done during the rendering as we
-                                          --  need to have the actual vector
-                                          --  values.
-                                          Append (D.Value, Sep);
-                                       end if;
-                                    end if;
-                                 end;
-
-                              when Data.Var  =>
-                                 null;
-                           end case;
-
-                           D := D.Next;
-                        end loop;
-
                      when If_Stmt =>
-                        Rewrite (N.N_True, N.Next = null, In_Table);
-                        Rewrite (N.N_False, N.Next = null, In_Table);
+                        Rewrite (N.N_True);
+                        Rewrite (N.N_False);
 
                      when Table_Stmt =>
-                        Rewrite (N.Blocks, N.Next = null, In_Table => True);
+                        Rewrite (N.Blocks);
 
                      when Section_Block =>
-                        Rewrite (N.Common, Last, In_Table);
-                        Rewrite (N.Sections, Last, In_Table);
+                        Rewrite (N.Common);
+                        Rewrite (N.Sections);
 
                      when Section_Stmt =>
-                        Rewrite (N.N_Section, Last, In_Table);
+                        Rewrite (N.N_Section);
 
                      when others =>
                         null;
@@ -3151,7 +3114,7 @@ package body Templates_Parser is
             end Rewrite;
 
          begin
-            Rewrite (T, Last => True, In_Table => False);
+            Rewrite (T);
          end Rewrite_Inlined_Block;
 
          T     : Tree;
@@ -3746,10 +3709,7 @@ package body Templates_Parser is
 
             T.I_Block := Parse (Parse_Inline, In_If);
 
-            --  Now we have parsed the full tree to inline. Rewrite this tree
-            --  to replace all text node by a stripped version.
-
-            Rewrite_Inlined_Block (T.I_Block, To_String (T.Sep));
+            Rewrite_Inlined_Block (T.I_Block);
 
             T.Next := Parse (Mode, In_If);
 
@@ -4027,9 +3987,6 @@ package body Templates_Parser is
       Last    : Natural := 0;
       --  Cache to avoid too many reallocation using Append on Results above
 
-      Last_Was_Sep : Boolean := False;
-      --  Used to avoid two consecutive separators
-
       Now      : Calendar.Time;
       D_Map    : Definitions.Map;
       Lazy_Set : Translate_Set;
@@ -4106,7 +4063,7 @@ package body Templates_Parser is
             State : Parse_State) return String;
          --  As above but for an include variable
 
-         procedure Add (S : String; Sep : Boolean := False);
+         procedure Add (S : String);
          --  Add S into Results (using Buffer cache if possible). If Sep is
          --  true S is a separator. We keep track of this as we do not want to
          --  have two separators side by side.
@@ -4147,16 +4104,15 @@ package body Templates_Parser is
          --  Returns the Cursor_Tag Var_Name inlined for all dimensions
          --  starting from Path.
 
-         procedure Push_Sep (State : Parse_State) with Inline;
-         --  Append a separator into the current buffer
-
-         procedure Pop_Sep (State : Parse_State) with Inline;
-         --  Remove the separator if it is the last input into the buffer
-
          function Align_On
            (Seps : String_Set.Vector;
             Text : String) return String;
          --  Align text given the State.Align_On separators
+
+         function Rewrite_Inlined_Block
+           (T : Tree; Block : String) return String;
+         --  Do inline the block, add the Before and After strings and Sep
+         --  after each line.
 
          L_State : aliased constant Parse_State := State;
 
@@ -4164,7 +4120,7 @@ package body Templates_Parser is
          -- Add --
          ---------
 
-         procedure Add (S : String; Sep : Boolean := False) is
+         procedure Add (S : String) is
          begin
             if Last + S'Length > Buffer'Last then
                --  Not enough cache space, flush buffer
@@ -4177,8 +4133,6 @@ package body Templates_Parser is
                Buffer (Last + 1 .. Last + S'Length) := S;
                Last := Last + S'Length;
             end if;
-
-            Last_Was_Sep := Sep;
          end Add;
 
          --------------
@@ -5388,28 +5342,71 @@ package body Templates_Parser is
                     State.Parent));
          end NS;
 
-         -------------
-         -- Pop_Sep --
-         -------------
+         ---------------------------
+         -- Rewrite_Inlined_Block --
+         ---------------------------
 
-         procedure Pop_Sep (State : Parse_State) is
+         function Rewrite_Inlined_Block
+           (T : Tree; Block : String) return String
+         is
+            Sep    : constant String := To_String (T.Sep);
+            Start  : Positive := Block'First;
+            Pos    : Natural;
+            Offset : Natural;
+            Next   : Natural;
+            Result : Unbounded_String := T.Before;
          begin
-            if Last_Was_Sep then
-               Last := Last - Length (State.Inline_Sep);
-               Last_Was_Sep := False;
-            end if;
-         end Pop_Sep;
+            Next := Strings.Fixed.Index
+              (Block (Start .. Block'Last), String'(1 => ASCII.LF));
 
-         --------------
-         -- Push_Sep --
-         --------------
+            --  No end-of-line separator, let's handle the whole line
 
-         procedure Push_Sep (State : Parse_State) is
-         begin
-            if State.Inline_Sep /= Null_Unbounded_String then
-               Add (To_String (State.Inline_Sep), Sep => True);
+            if Next = 0 then
+               Next := Block'Last;
             end if;
-         end Push_Sep;
+
+            --  Add all lines (separator is LF) add Sep after each one
+
+            loop
+               Pos := Next;
+               exit when Pos = 0;
+
+               if Pos = Block'First or else Block (Pos) /= ASCII.LF then
+                  --  A single character or line without LF
+                  Offset := 0;
+               elsif Pos > Block'First and then Block (Pos - 1) = ASCII.CR then
+                  --  We have a CR + LF
+                  Offset := 2;
+               else
+                  --  Just a single LF, standard separator
+                  Offset := 1;
+               end if;
+
+               --  Add line content
+
+               Append (Result, Block (Start .. Pos - Offset));
+
+               Start := Pos + 1;
+
+               Next := Strings.Fixed.Index
+                 (Block (Start .. Block'Last), String'(1 => ASCII.LF));
+
+               --  Add Sep or handle the last line
+
+               if Next = 0 then
+                  --  Last line in the INLINE, add the After string and the
+                  --  final CR/LF.
+
+                  Append (Result, T.After);
+                  Append (Result, Block (Pos - Offset + 1 .. Pos));
+
+               else
+                  Append (Result, Sep);
+               end if;
+            end loop;
+
+            return To_String (Result);
+         end Rewrite_Inlined_Block;
 
          --------------
          -- Rollback --
@@ -5866,9 +5863,8 @@ package body Templates_Parser is
 
             when Table_Stmt =>
                declare
-                  Start_Pos             : Positive :=
-                                            1 + Length (Results);
-                  End_Pos               : Natural := 0;
+                  Start_Pos             : Positive;
+                  End_Pos               : Natural;
                   Max_Lines, Max_Expand : Natural;
                begin
                   Get_Max (T, Max_Lines, Max_Expand);
@@ -5913,11 +5909,7 @@ package body Templates_Parser is
                   end if;
                end;
 
-               Push_Sep (State);
-
                Analyze (T.Next, State);
-
-               Pop_Sep (State);
 
             when Extends_Stmt =>
                --  Expand all the blocks, and create temporary variables from
@@ -6008,11 +6000,6 @@ package body Templates_Parser is
                                            State.Terse_Table,
                                            L_State'Unchecked_Access));
 
-                           if Block.Common /= null then
-                              Pop_Sep (State);
-                              Push_Sep (State);
-                           end if;
-
                            Analyze
                              (Block.Sections,
                               Parse_State'(State.F_Params'Length,
@@ -6030,10 +6017,6 @@ package body Templates_Parser is
                                            State.Terse_Table,
                                            L_State'Unchecked_Access));
 
-                           Pop_Sep (State);
-
-                           Push_Sep (State);
-
                            Block := Block.Next;
                            B := B + 1;
                         end loop;
@@ -6043,8 +6026,6 @@ package body Templates_Parser is
                         end if;
                      end;
                   end loop;
-
-                  Pop_Sep (State);
                end;
 
             when Section_Stmt =>
@@ -6070,24 +6051,39 @@ package body Templates_Parser is
                Analyze (T.Next, State);
 
             when Inline_Stmt =>
-               Add (To_String (T.Before));
-               Analyze (T.I_Block,
-                        Parse_State'(State.F_Params'Length,
-                                     Cursor        => State.Cursor,
-                                     Max_Lines     => State.Max_Lines,
-                                     Max_Expand    => State.Max_Expand,
-                                     Reverse_Index => State.Reverse_Index,
-                                     Table_Level   => State.Table_Level,
-                                     Inline_Sep    => T.Sep,
-                                     Filename      => State.Filename,
-                                     Line          => T.Line,
-                                     Blocks_Count  => State.Blocks_Count,
-                                     I_Params      => State.I_Params,
-                                     F_Params      => State.F_Params,
-                                     Block         => State.Block,
-                                     Terse_Table   => State.Terse_Table,
-                                     Parent      => L_State'Unchecked_Access));
-               Add (To_String (T.After));
+               declare
+                  Start_Pos  : Positive;
+                  End_Pos    : Natural;
+               begin
+                  Flush;
+                  Start_Pos := Length (Results) + 1;
+
+                  Analyze (T.I_Block,
+                           Parse_State'(State.F_Params'Length,
+                             Cursor        => State.Cursor,
+                             Max_Lines     => State.Max_Lines,
+                             Max_Expand    => State.Max_Expand,
+                             Reverse_Index => State.Reverse_Index,
+                             Table_Level   => State.Table_Level,
+                             Inline_Sep    => T.Sep,
+                             Filename      => State.Filename,
+                             Line          => T.Line,
+                             Blocks_Count  => State.Blocks_Count,
+                             I_Params      => State.I_Params,
+                             F_Params      => State.F_Params,
+                             Block         => State.Block,
+                             Terse_Table   => State.Terse_Table,
+                             Parent        => L_State'Unchecked_Access));
+
+                  Flush;
+                  End_Pos := Length (Results);
+
+                  Replace_Slice
+                    (Results, Start_Pos, End_Pos,
+                     Rewrite_Inlined_Block
+                       (T, Slice (Results, Start_Pos, End_Pos)));
+               end;
+
                Analyze (T.Next, State);
          end case;
       end Analyze;

@@ -5369,8 +5369,7 @@ package body Templates_Parser is
          --------
 
          function NS
-           (State : Parse_State; Line : Natural) return Parse_State
-         is
+           (State : Parse_State; Line : Natural) return Parse_State is
          begin
             return (Parse_State'(State.P_Size,
                     State.Cursor,
@@ -5876,7 +5875,7 @@ package body Templates_Parser is
 
                   if not T.Align_On.Is_Empty then
                      Flush;
-                     Start_Pos := 1 + Length (Results);
+                     Start_Pos := Length (Results) + 1;
                   end if;
 
                   Analyze (T.Blocks,

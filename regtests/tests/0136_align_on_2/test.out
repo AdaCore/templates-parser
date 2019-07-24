@@ -11,3 +11,6 @@ void sync_sync_fct
        void *a     , size_t a_len
        void *result, size_t result_len
 
+4:----------------------------
+
+5:----------------------------

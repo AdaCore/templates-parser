@@ -5899,7 +5899,7 @@ package body Templates_Parser is
                      --  we have some content for the table. Let's align it as
                      --  needed.
 
-                     if Start_Pos /= End_Pos then
+                     if Start_Pos < End_Pos then
                         Replace_Slice
                           (Results, Start_Pos, End_Pos,
                            Align_On
@@ -6078,10 +6078,12 @@ package body Templates_Parser is
                   Flush;
                   End_Pos := Length (Results);
 
-                  Replace_Slice
-                    (Results, Start_Pos, End_Pos,
-                     Rewrite_Inlined_Block
-                       (T, Slice (Results, Start_Pos, End_Pos)));
+                  if Start_Pos < End_Pos then
+                     Replace_Slice
+                       (Results, Start_Pos, End_Pos,
+                        Rewrite_Inlined_Block
+                          (T, Slice (Results, Start_Pos, End_Pos)));
+                  end if;
                end;
 
                Analyze (T.Next, State);

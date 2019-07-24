@@ -18,3 +18,11 @@ void sync_sync_fct
 @@TABLE'ALIGN_ON(",")@@
        void *@_LOWER:Param_Names_@, size_t @_LOWER:Param_Names_@_len
 @@END_TABLE@@
+
+4:----------------------------
+@@INLINE(      \()(,\n       )(\);)@@
+@@END_INLINE@@
+
+5:----------------------------
+@@INLINE@@
+@@END_INLINE@@

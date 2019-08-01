@@ -2,7 +2,7 @@
 with Ada.Text_IO;
 with Templates_Parser;
 
-procedure Table_Section is
+procedure Table_Align is
 
    use type Templates_Parser.Vector_Tag;
 
@@ -16,4 +16,4 @@ procedure Table_Section is
 begin
    Ada.Text_IO.Put_Line
      (Templates_Parser.Parse ("table_align.tmplt", Translations));
-end Table_Section;
+end Table_Align;

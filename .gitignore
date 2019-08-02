@@ -14,3 +14,6 @@ docs/user.tmplt.texi
 makefile.setup
 regtests/*.pyc
 regtests/out
+config/setup/foo.ads.stderr
+config/setup/foo.ads.stdout
+tp_xmlada.gpr

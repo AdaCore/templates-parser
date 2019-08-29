@@ -23,29 +23,29 @@ VERSION	= 20.0
 DEBUG        = false
 TP_TASKING   = Standard_Tasking
 PROCESSORS   = 0
-HOST	     = $(shell gcc -dumpmachine)
-TARGET	     = $(shell gcc -dumpmachine)
-prefix	     = $(dir $(shell which gnatls))..
+HOST         := $(shell gcc -dumpmachine)
+TARGET       := $(shell gcc -dumpmachine)
+prefix       := $(dir $(shell which gnatls))..
 DEFAULT_LIBRARY_TYPE	= static
 
+GNAT         := gnat
+
 ENABLE_STATIC = true
-ENABLE_SHARED = $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
+ENABLE_SHARED := $(shell $(GNAT) make -c -q -p -XTARGET=$(TARGET) \
 			-Pconfig/setup/test_shared 2>/dev/null && echo "true")
 
 ifeq ($(shell gnat ls -Pxmlada 2>&1 | grep 'project file .* not found'),)
-TP_XMLADA    = Installed
+  TP_XMLADA := Installed
 else
-TP_XMLADA    = Disabled
+  TP_XMLADA := Disabled
 endif
 
 -include makefile.setup
 
 ifeq ($(HOST), $(TARGET))
-IS_CROSS	= false
 GPROPTS		=
 TPREFIX=$(DESTDIR)$(prefix)
 else
-IS_CROSS	= true
 GPROPTS		= --target=$(TARGET)
 TPREFIX=$(DESTDIR)$(prefix)/$(TARGET)
 endif
@@ -53,49 +53,33 @@ endif
 MODE		= $(if $(filter-out true,$(DEBUG)),release,debug)
 SDIR		= $(TARGET)/$(MODE)
 
-GNAT		= gnat
 GPRBUILD	= gprbuild
 GPRINSTALL	= gprinstall
 GPRCLEAN	= gprclean
-
-#  Install directories
-
-ifeq (${OS}, Windows_NT)
-EXEEXT	= .exe
-else
-EXEEXT	=
-endif
 
 #  Compute the default library kind, and possibly the other that are to
 #  be built.
 
 ifeq ($(DEFAULT_LIBRARY_TYPE),static)
-ifneq ($(ENABLE_STATIC),true)
-$(error static not enabled, cannot be the default)
+  ifneq ($(ENABLE_STATIC),true)
+    $(error static not enabled, cannot be the default)
+  endif
+  ifeq ($(ENABLE_SHARED),true)
+    OTHER_LIBRARY_TYPE := relocatable
+  endif
 else
-ifeq ($(ENABLE_SHARED),true)
-OTHER_LIBRARY_TYPE	= relocatable
-endif
-endif
-
-else
-ifneq ($(ENABLE_SHARED),true)
-$(error shared not enabled, cannot be the default)
-else
-ifeq ($(ENABLE_STATIC),true)
-OTHER_LIBRARY_TYPE	= static
-endif
-endif
+  ifneq ($(ENABLE_SHARED),true)
+    $(error shared not enabled, cannot be the default)
+  endif
+  ifeq ($(ENABLE_STATIC),true)
+    OTHER_LIBRARY_TYPE := static
+  endif
 endif
 
 ifeq ($(DEBUG), true)
-PRJ_BUILD=Debug
+  PRJ_BUILD := Debug
 else
-PRJ_BUILD=Release
-endif
-
-ifeq ($(TP_XMLADA),)
-TP_XMLADA=Disabled
+  PRJ_BUILD := Release
 endif
 
 ALL_OPTIONS := \
@@ -200,3 +184,4 @@ endif
 	rm -f auto.cgpr config/setup/auto.cgpr
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr
+	rm -f config/setup/foo.ads.std*

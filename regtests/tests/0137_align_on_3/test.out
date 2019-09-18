@@ -1,0 +1,21 @@
+1:----------------------------
+       a  : int;       b : float
+       r1 : boolean; r2  : character
+
+2:----------------------------
+       azerty : int; u              : float
+       r      : boolean; this_is_it : character
+
+3:----------------------------
+       A            : Natural          := 0;
+       Is_That_True : constant boolean := False;
+       Value        := 12.3;
+       No_Init      : Natural;
+       Age          : Positive         := 12;
+
+4:----------------------------
+       A            : Natural          := 0;
+       Is_That_True : constant boolean := False;
+       Value        := 12.3;
+       No_Init      : Natural;
+       Age          : Positive         := 12;

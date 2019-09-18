@@ -26,7 +26,6 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
-
 pragma Ada_2012;
 
 with Ada.Calendar;
@@ -4165,13 +4164,43 @@ package body Templates_Parser is
                   I   : Positive := Cols'First;
                   P   : Positive := LS;
                   Loc : Natural;
+                  NP  : Natural;
+                  Ofs : Natural := 0;
                begin
                   for S of Seps loop
                      Loc := Strings.Fixed.Index (Text (LS .. LE), S, P);
 
                      if Loc > 0 then
                         P := Loc;
-                        Cols (I) := Natural'Max (Cols (I), P - LS);
+
+                        NP := P - LS + 1 + Ofs; -- new pos
+
+                        --  We have a previous position recorded
+
+                        if Cols (I) /= 0 then
+                           if NP > Cols (I) then
+                              --  The new position is above the current
+                              --  one. This is going to be the new value
+                              --  and so we need to shift all columns of
+                              --  the corresponding offset.
+
+                              for K in I + 1 .. Cols'Last loop
+                                 Cols (K) := Cols (K) + (NP - Cols (I));
+                              end loop;
+
+                           elsif NP < Cols (I) then
+                              --  Increase offset of the current line as we
+                              --  need to add spaces before the separator for
+                              --  it to be aligned with the current column.
+
+                              Ofs := Ofs + (Cols (I) - NP);
+                           end if;
+                        end if;
+
+                        --  And finally update this columns
+
+                        Cols (I) := Natural'Max (Cols (I), NP);
+
                         P := P + S'Length;
                      end if;
 
@@ -4214,7 +4243,7 @@ package body Templates_Parser is
                      then
                         P := Loc;
 
-                        Spaces := Cols (I) - P + LS - Offset;
+                        Spaces := Cols (I) - P + LS - Offset - 1;
 
                         if Spaces > 0 then
                            Insert

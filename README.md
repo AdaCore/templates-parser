@@ -7,7 +7,7 @@ as dynamic HTML documents.
 
 To learn more about them, you can either read our Sphinx documentation [in this
 repository](docs/) or read it from [AdaCore's live
-docs](http://docs.adacore.com/live/wave/aws/html/template_parser/index.html).
+docs](https://docs.adacore.com/live/wave/aws/html/template_parser/index.html).
 
 Build
 -----

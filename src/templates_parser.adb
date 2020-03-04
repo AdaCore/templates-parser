@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2019, AdaCore                     --
+--                     Copyright (C) 1999-2020, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -1519,6 +1519,13 @@ package body Templates_Parser is
          --  leading directory separator.
          return Include_Filename
            (Include_Filename'First + 1 .. Include_Filename'Last);
+
+      elsif Include_Filename'Length > 2
+        and then Include_Filename (Include_Filename'First) = '.'
+        and then Maps.Is_In
+          (Include_Filename (Include_Filename'First + 1), Dir_Seps)
+      then
+         return Include_Filename;
 
       else
          declare

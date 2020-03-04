@@ -1,0 +1,14 @@
+
+1: /content/header.tmplt - FALSE
+This is header
+
+2: header.tmplt - FALSE
+This is header
+
+3: ../content/header.tmplt - FALSE
+This is header
+
+4: ./content/header.tmplt - TRUE
+This is header
+
+DONE

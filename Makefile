@@ -151,7 +151,7 @@ build: $(version_path)
 
 $(version_path):
 	echo "--  Generated, by ../Makefile"      > $(version_path)
-	echo "separate(Templates_Parser)"        >> $(version_path)
+	echo "separate (Templates_Parser)"       >> $(version_path)
 	echo "function Version return String is" >> $(version_path)
 	echo "begin"                             >> $(version_path)
 	echo "   return \"$(VERSION)\";"         >> $(version_path)

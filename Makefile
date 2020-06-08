@@ -142,20 +142,8 @@ force:
 
 makefile.setup: setup
 
-version_path := src/templates_parser-version.adb
-
-setup: tp_xmlada.gpr $(version_path) force
+setup: tp_xmlada.gpr force
 	printf " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
-
-build: $(version_path)
-
-$(version_path):
-	echo "--  Generated, by ../Makefile"      > $(version_path)
-	echo "separate (Templates_Parser)"       >> $(version_path)
-	echo "function Version return String is" >> $(version_path)
-	echo "begin"                             >> $(version_path)
-	echo "   return \"$(VERSION)\";"         >> $(version_path)
-	echo "end Version;"                      >> $(version_path)
 
 #######################################################################
 #  install
@@ -194,7 +182,6 @@ endif
 	$(MAKE) -C docs clean
 	$(MAKE) -C regtests clean
 	rm -f auto.cgpr config/setup/auto.cgpr
-	rm -f src/templates_parser-version.adb
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr
 	rm -f config/setup/foo.ads.std*

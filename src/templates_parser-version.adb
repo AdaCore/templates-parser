@@ -1,7 +1,8 @@
-with GNAT.Bind_Environment; use GNAT.Bind_Environment;
+with GNAT.Bind_Environment;
 
 separate (Templates_Parser)
 function Version return String is
+   use GNAT;
 begin
-   return Get ("version");
+   return Bind_Environment.Get ("version");
 end Version;

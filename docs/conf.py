@@ -290,10 +290,10 @@ epub_copyright = u'2013, Pascal Obry'
 
 # get tp version
 
-content = open("../src/templates_parser-version.adb").readlines()
+content = open("../Makefile").readlines()
 
 for l in content:
-    m = re.search('.*return "(.*)"', l)
+    m = re.search('^VERSION[^=]=[\t ]*(.*)', l)
     if m != None:
         TEMPLATES_PARSER_VERSION = m.group(1)
 

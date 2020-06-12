@@ -73,7 +73,7 @@ abstract project TP_Shared is
    ------------
 
    package Binder is
-      for Default_Switches ("Ada") use ("-E");
+      for Default_Switches ("Ada") use ("-E", "-Vversion=" & Version);
    end Binder;
 
    -------------

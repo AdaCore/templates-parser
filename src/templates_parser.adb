@@ -2831,8 +2831,6 @@ package body Templates_Parser is
             Look_For_Char : while K < I_Last loop
                if Buffer (K) = '\' and then Escape = 0 then
                   Escape := 2;
-               elsif Escape /= 0 then
-                  Escape := Escape - 1;
                end if;
 
                if Escape = 0 then
@@ -2842,6 +2840,9 @@ package body Templates_Parser is
                      Level := Level - 1;
                   end if;
                   exit Look_For_Char when Buffer (K) = Char and then Level = 0;
+
+               else
+                  Escape := Escape - 1;
                end if;
 
                K := K + 1;
@@ -2899,8 +2900,6 @@ package body Templates_Parser is
             for K in First .. I_Last loop
                if Buffer (K) = '\' and then Escape = 0 then
                   Escape := 2;
-               elsif Escape /= 0 then
-                  Escape := Escape - 1;
                end if;
 
                if Escape = 0 then
@@ -2912,6 +2911,9 @@ package body Templates_Parser is
                   elsif Buffer (K) = ')' then
                      Level := Level - 1;
                   end if;
+
+               else
+                  Escape := Escape - 1;
                end if;
             end loop;
 

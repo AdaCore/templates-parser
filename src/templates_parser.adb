@@ -26,6 +26,7 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
+
 pragma Ada_2012;
 
 with Ada.Calendar;
@@ -38,6 +39,7 @@ with Ada.Strings.Fixed;
 with Ada.Strings.Maps.Constants;
 with Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
+
 with GNAT.Calendar.Time_IO;
 with GNAT.Regpat;
 
@@ -6509,6 +6511,6 @@ package body Templates_Parser is
    -------------
 
    function Version return String is separate;
-   --  so that it can be generated at build time.
+   --  so that it can be generated at build time
 
 end Templates_Parser;

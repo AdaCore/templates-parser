@@ -41,6 +41,26 @@ abstract project TP_Shared is
    Adaflags := external_as_list ("ADAFLAGS", " ");
    Ldflags := external_as_list ("LDFLAGS", " ");
 
+   type OS_Type is ("Linux", "Windows", "macOS", "auto");
+   Target_OS : OS_Type := external ("Target_OS", "auto");
+
+   Target_Triplet := Project'Target;
+   case Target_OS is
+      when "auto" =>
+         case Target_Triplet is
+           when "x86_64-linux" =>
+              Target_OS := "Linux";
+           when "i686-pc-mingw32" =>
+              Target_OS := "Windows";
+           when "x86_64-darwin" =>
+              Target_OS := "macOS";
+           when others =>
+              null;
+           end case;
+      when others =>
+         null;
+   end case;
+
    --------------
    -- Compiler --
    --------------

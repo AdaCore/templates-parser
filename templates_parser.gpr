@@ -65,9 +65,6 @@ library project Templates_Parser is
    package Compiler is
       for Default_Switches ("Ada")
         use TP_Shared.Compiler'Default_Switches ("Ada");
-      for Switches ("templates_parser.adb")
-        use Compiler'Default_Switches ("Ada") & ("-gnatVn");
-      --  Disable validity check on those units to work-around N728-028
    end Compiler;
 
    package Binder renames TP_Shared.Binder;

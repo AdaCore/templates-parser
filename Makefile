@@ -150,7 +150,7 @@ setup: tp_xmlada.gpr force
 
 install-clean:
 ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
-	-$(GPRINSTALL) $(GPROPTS) --uninstall \
+	-$(GPRINSTALL) $(GPROPTS) -f --uninstall \
 		--prefix=$(TPREFIX) templates_parser
 endif
 

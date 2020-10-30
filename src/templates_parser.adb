@@ -5988,7 +5988,8 @@ package body Templates_Parser is
 
             when Section_Block =>
                declare
-                  B_State : array (1 .. State.Blocks_Count) of Block_State;
+                  B_State : array (1 .. State.Blocks_Count) of Block_State :=
+                              (others => Empty_Block_State);
                   B       : Positive;
                   Mark    : Natural := 0;
                begin

@@ -32,7 +32,8 @@ library project Templates_Parser is
 
    case TP_Shared.Library_Type is
       when "relocatable" =>
-         for Library_Options use TP_Shared.Ldflags;
+         --  Put options like --as-needed before options like -l.
+         for Leading_Library_Options use TP_Shared.Ldflags;
       when others =>
          null;
    end case;

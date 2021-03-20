@@ -17,7 +17,6 @@
 ------------------------------------------------------------------------------
 
 with "templates_parser";
-with "xmlada";
 
 project translations_demo is
 

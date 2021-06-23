@@ -18,7 +18,7 @@
 
 .SILENT:
 
-VERSION	= 20.0
+VERSION	= 22.0
 
 DEBUG        = false
 TP_TASKING   = Standard_Tasking

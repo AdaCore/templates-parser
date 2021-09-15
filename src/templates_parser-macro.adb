@@ -29,6 +29,7 @@
 
 pragma Ada_2012;
 
+with Ada.Assertions;
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Strings.Hash_Case_Insensitive;
 with Ada.Text_IO;
@@ -277,76 +278,68 @@ package body Macro is
             Prev := null;
 
             while D /= null loop
-               case D.Kind is
-                  when Data.Text =>
-                     null;
+               Ada.Assertions.Assert
+                 (Check   => D.Kind in Data.Text | Data.Var,
+                  Message => "Value outside expected value set");
+               if D.Kind in Data.Var then
+                  if D.Var.Is_Macro then
+                     Rewrite_Tree (D.Var.Def, Parameters);
 
-                  when Data.Var =>
-                     --  Rewrite also the macro call if any
+                  else
+                     if D.Var.N > 0 then
+                        --  This is a reference to a parameter
 
-                     if D.Var.Is_Macro then
-                        Rewrite_Tree (D.Var.Def, Parameters);
+                        if D.Var.N <= Parameters'Length and then Parameters (D.Var.N) /= null then
+                           --  This is a reference to replace
+                           Replace (T, D, Prev, D.Var.N);
 
-                     else
-                        if D.Var.N > 0 then
-                           --  This is a reference to a parameter
+                        else
+                           --  This variable does not have reference, remove
+                           --  it.
+                           Delete_Node (T, D, Prev);
 
-                           if D.Var.N <= Parameters'Length
-                             and then Parameters (D.Var.N) /= null
-                           then
-                              --  This is a reference to replace
-                              Replace (T, D, Prev, D.Var.N);
-
-                           else
-                              --  This variable does not have reference, remove
-                              --  it.
-                              Delete_Node (T, D, Prev);
-
-                              D := D.Next;
-                           end if;
-
-                           Moved := True;
-
-                        elsif Vars.Contains (To_String (D.Var.Name)) then
-                           --  This is a variable that exists into the map.
-                           --  It means that this variable is actually the
-                           --  name of a SET which actually has been passed
-                           --  a reference to another variable.
-
-                           declare
-                              E : constant Definitions.Tree :=
-                                    Vars.Element (To_String (D.Var.Name));
-                           begin
-                              case E.N.Kind is
-                                 when Definitions.Const =>
-                                    Replace
-                                      (T, D, Prev, To_String (E.N.Value));
-
-                                 when Definitions.Ref =>
-                                    if E.N.Ref <= Parameters'Length
-                                      and then Parameters (E.N.Ref) /= null
-                                    then
-                                       Replace (T, D, Prev, E.N.Ref);
-                                    else
-                                       Replace (T, D, Prev, "");
-                                    end if;
-
-                                 when Definitions.Ref_Default =>
-                                    if E.N.Ref <= Parameters'Length
-                                      and then Parameters (E.N.Ref) /= null
-                                    then
-                                       Replace (T, D, Prev, E.N.Ref);
-                                    else
-                                       Replace
-                                         (T, D, Prev, To_String (E.N.Value));
-                                    end if;
-                              end case;
-                           end;
-
-                           Moved := True;
+                           D := D.Next;
                         end if;
+
+                        Moved := True;
+
+                     elsif Vars.Contains (To_String (D.Var.Name)) then
+                        --  This is a variable that exists into the map.
+                        --  It means that this variable is actually the
+                        --  name of a SET which actually has been passed
+                        --  a reference to another variable.
+
+                        declare
+                           E : constant Definitions.Tree := Vars.Element (To_String (D.Var.Name));
+                        begin
+                           case E.N.Kind is
+                              when Definitions.Const =>
+                                 Replace (T, D, Prev, To_String (E.N.Value));
+
+                              when Definitions.Ref =>
+                                 if E.N.Ref <= Parameters'Length
+                                   and then Parameters (E.N.Ref) /= null
+                                 then
+                                    Replace (T, D, Prev, E.N.Ref);
+                                 else
+                                    Replace (T, D, Prev, "");
+                                 end if;
+
+                              when Definitions.Ref_Default =>
+                                 if E.N.Ref <= Parameters'Length
+                                   and then Parameters (E.N.Ref) /= null
+                                 then
+                                    Replace (T, D, Prev, E.N.Ref);
+                                 else
+                                    Replace (T, D, Prev, To_String (E.N.Value));
+                                 end if;
+                           end case;
+                        end;
+
+                        Moved := True;
                      end if;
-               end case;
+                  end if;
+               end if;
 
                if Moved then
                   Moved := False;
@@ -392,22 +385,17 @@ package body Macro is
                Ctx     : aliased Filter.Filter_Context (0);
                Tag_Var : Data.Tag_Var;
             begin
-               case Parameters (Ref).Kind is
-                  when Data.Text =>
-                     --  We need to evaluate the value against the filters
-
-                     Replace
-                       (T,
-                        Data.Translate
-                          (T.Var,
-                           To_String (Parameters (Ref).Value),
-                           Ctx'Access));
-
-                  when Data.Var =>
-                     Tag_Var := Data.Clone (Parameters (Ref).Var);
-                     Data.Release (T.Var);
-                     T.Var := Tag_Var;
-               end case;
+               Ada.Assertions.Assert
+                 (Check   => Parameters (Ref).Kind in Data.Text | Data.Var,
+                  Message => "Value outside expected value set");
+               if Parameters (Ref).Kind in Data.Text then
+                  Replace
+                    (T, Data.Translate (T.Var, To_String (Parameters (Ref).Value), Ctx'Access));
+               else
+                  Tag_Var := Data.Clone (Parameters (Ref).Var);
+                  Data.Release (T.Var);
+                  T.Var := Tag_Var;
+               end if;
             end Replace;
 
          begin

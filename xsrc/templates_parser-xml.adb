@@ -27,6 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Assertions;
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
 
@@ -347,10 +348,14 @@ package body Templates_Parser.XML is
          --  Do not process labels encoded for another variable
 
          if not Is_Labels and then not Is_Description then
-            case Item.Kind is
-               when Std       => Process_Std;
-               when Composite => Process_Composite;
-            end case;
+            Ada.Assertions.Assert
+              (Check   => Item.Kind in Std | Composite,
+               Message => "Value outside expected value set");
+            if Item.Kind in Std then
+               Process_Std;
+            else
+               Process_Composite;
+            end if;
          end if;
       end Process;
 

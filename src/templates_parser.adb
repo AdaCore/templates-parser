@@ -29,6 +29,7 @@
 
 pragma Ada_2012;
 
+with Ada.Assertions;
 with Ada.Calendar;
 with Ada.Characters.Handling;
 with Ada.Containers.Indefinite_Ordered_Sets;
@@ -4287,77 +4288,69 @@ package body Templates_Parser is
             T : Data.Tree := D;
          begin
             while T /= null loop
-               case T.Kind is
-                  when Data.Text =>
-                     Add (To_String (T.Value));
+               Ada.Assertions.Assert
+                 (Check   => T.Kind in Data.Text | Data.Var,
+                  Message => "Value outside expected value set");
+               if T.Kind in Data.Text then
+                  Add (To_String (T.Value));
+               else
+                  if Data.Is_Include_Variable (T.Var) then
+                     Add (I_Translate (T.Var, State));
 
-                  when Data.Var =>
-                     if Data.Is_Include_Variable (T.Var) then
-                        Add (I_Translate (T.Var, State));
+                  else
+                     declare
+                        use Strings.Fixed;
+                        use type Data.Attribute;
 
-                     else
-                        declare
-                           use Strings.Fixed;
-                           use type Data.Attribute;
+                        Is_Composite : aliased Boolean;
+                        Value        : constant String :=
+                          Translate (T.Var, NS (State, T.Line), Is_Composite'Access);
+                     begin
+                        --  Only adds to the buffer if variable value is not
+                        --  empty. This is needed as we want to track empty
+                        --  values to be able to rollback if necessary on
+                        --  the terse mode. Note that we handle only
+                        --  composite tags which are part of the table
+                        --  expansion.
 
-                           Is_Composite : aliased Boolean;
-                           Value        : constant String :=
-                                            Translate
-                                              (T.Var, NS (State, T.Line),
-                                               Is_Composite'Access);
-                        begin
-                           --  Only adds to the buffer if variable value is not
-                           --  empty. This is needed as we want to track empty
-                           --  values to be able to rollback if necessary on
-                           --  the terse mode. Note that we handle only
-                           --  composite tags which are part of the table
-                           --  expansion.
+                        if Value /= "" then
+                           if T.Col = 1 or else T.Var.Attribute.Attr /= Data.Indent
+                             or else Index (Value, String'(1 => ASCII.LF)) = 0
+                           then
+                              Add (Value);
 
-                           if Value /= "" then
-                              if T.Col = 1
-                                   or else
-                                  T.Var.Attribute.Attr /= Data.Indent
-                                   or else
-                                  Index (Value, String'(1 => ASCII.LF)) = 0
-                              then
-                                 Add (Value);
+                           else
+                              --  We have some LF into the string and the
+                              --  tag is not placed at the start of the
+                              --  line, we need to indent the content.
 
-                              else
-                                 --  We have some LF into the string and the
-                                 --  tag is not placed at the start of the
-                                 --  line, we need to indent the content.
+                              declare
+                                 Spaces : constant Positive := T.Col - 1;
+                                 V      : Unbounded_String  := To_Unbounded_String (Value);
+                                 P      : Natural           := 1;
+                              begin
+                                 Indent_Content :
+                                 loop
+                                    P := Index (V, String'(1 => ASCII.LF), P);
 
-                                 declare
-                                    Spaces : constant Positive := T.Col - 1;
-                                    V      : Unbounded_String :=
-                                               To_Unbounded_String (Value);
-                                    P      : Natural := 1;
-                                 begin
-                                    Indent_Content : loop
-                                       P := Index
-                                         (V, String'(1 => ASCII.LF), P);
+                                    exit Indent_Content when P = 0;
 
-                                       exit Indent_Content when P = 0;
+                                    P := P + 1;
 
-                                       P := P + 1;
+                                    Insert (V, Before => P, New_Item => String'(Spaces * ' '));
 
-                                       Insert
-                                         (V,
-                                          Before   => P,
-                                          New_Item => String'(Spaces * ' '));
+                                    P := P + Spaces;
+                                 end loop Indent_Content;
 
-                                       P := P + Spaces;
-                                    end loop Indent_Content;
-
-                                    Add (To_String (V));
-                                 end;
-                              end if;
-
-                              Output := Is_Composite;
+                                 Add (To_String (V));
+                              end;
                            end if;
-                        end;
-                     end if;
-               end case;
+
+                           Output := Is_Composite;
+                        end if;
+                     end;
+                  end if;
+               end if;
 
                T := T.Next;
             end loop;
@@ -4533,27 +4526,28 @@ package body Templates_Parser is
                      Tk : constant Association :=
                             Get_Association (R.Var, R.Line);
                   begin
-                     case Tk.Kind is
-                        when Std =>
-                           if LL = To_String (Tk.Value) then
-                              return "TRUE";
-                           else
-                              return "FALSE";
-                           end if;
+                     Ada.Assertions.Assert
+                       (Check   => Tk.Kind in Std | Composite,
+                        Message => "Value outside expected value set");
+                     if Tk.Kind in Std then
+                        if LL = To_String (Tk.Value) then
+                           return "TRUE";
+                        else
+                           return "FALSE";
+                        end if;
+                     else
+                        if Tk.Comp_Value.Data.Values = null then
+                           --  Build map of values for fast test
+                           Tk.Comp_Value.Data.Values := new Tag_Values.Set;
+                           Build_Set (Tk.Comp_Value.Data.all);
+                        end if;
 
-                        when Composite =>
-                           if Tk.Comp_Value.Data.Values = null then
-                              --  Build map of values for fast test
-                              Tk.Comp_Value.Data.Values := new Tag_Values.Set;
-                              Build_Set (Tk.Comp_Value.Data.all);
-                           end if;
-
-                           if Tk.Comp_Value.Data.Values.Contains (LL) then
-                              return "TRUE";
-                           else
-                              return "FALSE";
-                           end if;
-                     end case;
+                        if Tk.Comp_Value.Data.Values.Contains (LL) then
+                           return "TRUE";
+                        else
+                           return "FALSE";
+                        end if;
+                     end if;
                   end;
 
                else
@@ -4761,15 +4755,16 @@ package body Templates_Parser is
                if I (K) = null then
                   F (K) := Null_Unbounded_String;
                else
-                  case I (K).Kind is
-                     when Data.Text =>
-                        F (K) := I (K).Value;
-                     when Data.Var  =>
-                        F (K) := To_Unbounded_String
-                          (Translate
-                             (I (K).Var, NS (State, I (K).Line),
-                              Is_Composite'Access));
-                  end case;
+                  Ada.Assertions.Assert
+                    (Check   => I (K).Kind in Data.Text | Data.Var,
+                     Message => "Value outside expected value set");
+                  if I (K).Kind in Data.Text then
+                     F (K) := I (K).Value;
+                  else
+                     F (K) :=
+                       To_Unbounded_String
+                         (Translate (I (K).Var, NS (State, I (K).Line), Is_Composite'Access));
+                  end if;
                end if;
             end loop;
             return F;
@@ -5365,7 +5360,7 @@ package body Templates_Parser is
          function NS
            (State : Parse_State; Line : Natural) return Parse_State is
          begin
-            return (Parse_State'(State.P_Size,
+            return Parse_State'(State.P_Size,
                     State.Cursor,
                     State.Max_Lines,
                     State.Max_Expand,
@@ -5379,7 +5374,7 @@ package body Templates_Parser is
                     State.F_Params,
                     State.Block,
                     State.Terse_Table,
-                    State.Parent));
+                    State.Parent);
          end NS;
 
          ---------------------------
@@ -5665,80 +5660,73 @@ package body Templates_Parser is
                   end if;
 
                else
-                  case Tk.Kind is
-                     when Std =>
-                        if Var.Attribute.Attr in Data.Nil | Data.Indent then
-                           return Data.Translate
-                             (Var, To_String (Tk.Value), C'Access);
-                        else
+                  Ada.Assertions.Assert
+                    (Check   => Tk.Kind in Std | Composite,
+                     Message => "Value outside expected value set");
+                  if Tk.Kind in Std then
+                     if Var.Attribute.Attr in Data.Nil | Data.Indent then
+                        return Data.Translate (Var, To_String (Tk.Value), C'Access);
+                     else
+                        raise Template_Error
+                          with "Attribute not valid on a discrete tag (" & Data.Image (Var) & ')';
+                     end if;
+                  else
+                     Is_Composite.all := True;
+                     if Tk.Comp_Value.Data.Nested_Level = 1 then
+                        --  This is a vector
+
+                        if Var.Attribute.Attr = Data.Length then
+                           return
+                             Data.Translate
+                               (Var, Utils.Image (Tk.Comp_Value.Data.Count), C'Access);
+
+                        elsif Var.Attribute.Attr = Data.Up_Level then
+                           Up_Value := Var.Attribute.Value;
+
+                        elsif Var.Attribute.Attr /= Data.Nil then
                            raise Template_Error
-                             with "Attribute not valid on a discrete tag ("
-                               & Data.Image (Var) & ')';
+                             with "This attribute is not valid for a " & "vector tag ("
+                             & Data.Image (Var) & ')';
                         end if;
 
-                     when Composite =>
-                        Is_Composite.all := True;
-                        if Tk.Comp_Value.Data.Nested_Level = 1 then
-                           --  This is a vector
+                     elsif Tk.Comp_Value.Data.Nested_Level = 2 then
+                        if Var.Attribute.Attr = Data.Line then
+                           --  'Line on a matrix
+                           return
+                             Data.Translate
+                               (Var, Utils.Image (Tk.Comp_Value.Data.Count), C'Access);
 
-                           if Var.Attribute.Attr = Data.Length then
-                              return Data.Translate
-                                (Var,
-                                 Utils.Image
-                                   (Tk.Comp_Value.Data.Count), C'Access);
+                        elsif Var.Attribute.Attr = Data.Min_Column then
+                           --  'Min_Column on a matrix
+                           return
+                             Data.Translate (Var, Utils.Image (Tk.Comp_Value.Data.Min), C'Access);
 
-                           elsif Var.Attribute.Attr = Data.Up_Level then
-                              Up_Value := Var.Attribute.Value;
+                        elsif Var.Attribute.Attr = Data.Max_Column then
+                           --  'Max_Column on a matrix
+                           return
+                             Data.Translate (Var, Utils.Image (Tk.Comp_Value.Data.Max), C'Access);
 
-                           elsif Var.Attribute.Attr /= Data.Nil then
-                              raise Template_Error
-                                with "This attribute is not valid for a "
-                                  & "vector tag (" & Data.Image (Var) & ')';
-                           end if;
-
-                        elsif Tk.Comp_Value.Data.Nested_Level = 2 then
-                           if Var.Attribute.Attr = Data.Line then
-                              --  'Line on a matrix
-                              return Data.Translate
-                                (Var,
-                                 Utils.Image (Tk.Comp_Value.Data.Count),
-                                 C'Access);
-
-                           elsif Var.Attribute.Attr = Data.Min_Column then
-                              --  'Min_Column on a matrix
-                              return Data.Translate
-                                (Var,
-                                 Utils.Image (Tk.Comp_Value.Data.Min),
-                                 C'Access);
-
-                           elsif Var.Attribute.Attr = Data.Max_Column then
-                              --  'Max_Column on a matrix
-                              return Data.Translate
-                                (Var,
-                                 Utils.Image (Tk.Comp_Value.Data.Max),
-                                 C'Access);
-
-                           elsif Var.Attribute.Attr /= Data.Nil then
-                              raise Template_Error
-                                with "This attribute is not valid for a "
-                                  & "matrix tag (" & Data.Image (Var) & ')';
-                           end if;
+                        elsif Var.Attribute.Attr /= Data.Nil then
+                           raise Template_Error
+                             with "This attribute is not valid for a " & "matrix tag ("
+                             & Data.Image (Var) & ')';
                         end if;
+                     end if;
 
-                        declare
-                           Result : Unbounded_String;
-                           Found  : Boolean;
-                        begin
-                           Field
-                             (Tk.Comp_Value,
-                              State.Cursor (1 .. State.Table_Level),
-                              Up_Value,
-                              Result, Found);
+                     declare
+                        Result : Unbounded_String;
+                        Found  : Boolean;
+                     begin
+                        Field
+                          (Tk.Comp_Value,
+                           State.Cursor (1 .. State.Table_Level),
+                           Up_Value,
+                           Result,
+                           Found);
 
-                           return Data.Translate
-                             (Var, To_String (Result), C'Access);
-                        end;
-                  end case;
+                        return Data.Translate (Var, To_String (Result), C'Access);
+                     end;
+                  end if;
                end if;
             end;
 
@@ -6478,13 +6466,11 @@ package body Templates_Parser is
             declare
                Item : constant Association := Association_Map.Element (Pos);
             begin
-               case Item.Kind is
-                  when Std =>
-                     return Data.Translate
-                       (Var, To_String (Item.Value), C'Access);
-                  when others =>
-                     return "";
-               end case;
+               if Item.Kind in Std then
+                  return Data.Translate (Var, To_String (Item.Value), C'Access);
+               else
+                  return "";
+               end if;
             end;
          end if;
 
@@ -6495,10 +6481,14 @@ package body Templates_Parser is
 
    begin
       while P /= null loop
-         case P.Kind is
-            when Data.Text => Append (Results, P.Value);
-            when Data.Var  => Append (Results, Translate (P.Var));
-         end case;
+         Ada.Assertions.Assert
+           (Check   => P.Kind in Data.Text | Data.Var,
+            Message => "Value outside expected value set");
+         if P.Kind in Data.Text then
+            Append (Results, P.Value);
+         else
+            Append (Results, Translate (P.Var));
+         end if;
 
          P := P.Next;
       end loop;

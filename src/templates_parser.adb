@@ -2079,7 +2079,6 @@ package body Templates_Parser is
                                         Strings.Both);
                      First, Last : Natural;
                      Next_Last   : Natural;
-                     pragma Unreferenced (Next_Last);
                   begin
                      if Is_Number (Ind_Str) then
                         Ind := Natural'Value (Ind_Str);

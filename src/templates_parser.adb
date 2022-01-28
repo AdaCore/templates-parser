@@ -3642,6 +3642,8 @@ package body Templates_Parser is
          elsif Is_Stmt (Inline_Token, Extended => True) then
             T := new Node (Inline_Stmt);
 
+            T.Line := Line;
+
             declare
                function Inline_Parameter
                  (Index : Positive) return Unbounded_String;

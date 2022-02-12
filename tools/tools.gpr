@@ -26,7 +26,7 @@ project Tools is
    for Object_Dir use "../" & TP_Shared.Build_Dir & "/tobj";
    for Exec_Dir use "../" & TP_Shared.Build_Dir & "/bin";
 
-   for Main use ("templates2ada", "templatespp");
+   for Main use ("templates2ada.adb", "templatespp.adb");
 
    package Builder renames TP_Shared.Builder;
 

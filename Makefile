@@ -60,20 +60,24 @@ GPRCLEAN	= gprclean
 #  Compute the default library kind, and possibly the other that are to
 #  be built.
 
+ifeq ($(DEFAULT_LIBRARY_TYPE),shared)
+  ifneq ($(ENABLE_SHARED),true)
+    $(error shared not enabled, cannot be the default)
+  endif
+endif
+
 ifeq ($(DEFAULT_LIBRARY_TYPE),static)
   ifneq ($(ENABLE_STATIC),true)
     $(error static not enabled, cannot be the default)
   endif
-  ifeq ($(ENABLE_SHARED),true)
-    OTHER_LIBRARY_TYPE := relocatable
-  endif
-else
-  ifneq ($(ENABLE_SHARED),true)
-    $(error shared not enabled, cannot be the default)
-  endif
-  ifeq ($(ENABLE_STATIC),true)
-    OTHER_LIBRARY_TYPE := static
-  endif
+endif
+
+ifeq ($(ENABLE_STATIC), true)
+   STATIC_LIBRARY=static
+endif
+
+ifeq ($(ENABLE_SHARED), true)
+   LIBRARY_TYPES=$(STATIC_LIBRARY) relocatable static-pic
 endif
 
 ifeq ($(DEBUG), true)
@@ -104,19 +108,18 @@ override GPROPTS += $(foreach v, \
 
 GPR_DEFAULT = -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
 		-XXMLADA_BUILD=$(DEFAULT_LIBRARY_TYPE)
-GPR_OTHER   = -XLIBRARY_TYPE=$(OTHER_LIBRARY_TYPE) \
-		-XXMLADA_BUILD=$(OTHER_LIBRARY_TYPE)
 
-#######################################################################
-#  build
+#########
+# build #
+#########
 
-build: tp_xmlada.gpr makefile.setup
-	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
-		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
-ifneq ($(OTHER_LIBRARY_TYPE),)
-	$(GPRBUILD) -p $(GPROPTS) $(GPR_OTHER) \
-		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
-endif
+build: $(LIBRARY_TYPES:%=build-%) build-tools
+
+build-%: tp_xmlada.gpr makefile.setup
+	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$* -XXMLADA_BUILD=$* \
+		--subdirs=$(SDIR)/$* -Ptemplates_parser
+
+build-tools:
 	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 
@@ -128,8 +131,9 @@ build-doc: tp_xmlada.gpr makefile.setup
 	$(MAKE) -C docs $(DOC_FORMATS)
 	echo Templates_Parser Documentation built with success.
 
-#######################################################################
-#  setup
+#########
+# setup #
+#########
 
 tp_xmlada.gpr:
 ifeq ($(TP_XMLADA), Installed)
@@ -145,10 +149,11 @@ makefile.setup: setup
 setup: tp_xmlada.gpr force
 	printf " $(foreach v,$(ALL_OPTIONS),$(v) = $($(v))\n)" > makefile.setup
 
-#######################################################################
-#  install
+###########
+# install #
+###########
 
-install-clean:
+uninstall:
 ifneq (,$(wildcard $(TPREFIX)/share/gpr/manifests/templates_parser))
 	-$(GPRINSTALL) $(GPROPTS) -f --uninstall \
 		--prefix=$(TPREFIX) templates_parser
@@ -157,31 +162,28 @@ endif
 GPRINST_OPTS=-p -f --prefix=$(TPREFIX) \
 	--build-var=LIBRARY_TYPE --build-var=TEMPLATES_PARSER_BUILD
 
-install: install-clean
-	$(GPRINSTALL) $(GPROPTS) $(GPR_DEFAULT) $(GPRINST_OPTS) \
-		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
-		--build-name=$(DEFAULT_LIBRARY_TYPE) -Ptemplates_parser
-ifneq ($(OTHER_LIBRARY_TYPE),)
-	$(GPRINSTALL) $(GPROPTS) $(GPR_OTHER) $(GPRINST_OPTS) \
-		--build-name=$(OTHER_LIBRARY_TYPE) \
-		--subdirs=$(SDIR)/$(OTHER_LIBRARY_TYPE) -Ptemplates_parser
-endif
+install: uninstall $(LIBRARY_TYPES:%=install-%)
 	$(GPRINSTALL) $(GPROPTS) $(GPR_DEFAULT) $(GPRINST_OPTS) \
 		--mode=usage --subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) \
 		--install-name=templates_parser -Ptools/tools
 
-#######################################################################
-#  clean
+install-%:
+	$(GPRINSTALL) $(GPROPTS) -XLIBRARY_TYPE=$* -XXMLADA_BUILD=$*\
+		$(GPRINST_OPTS) --subdirs=$(SDIR)/$* --build-name=$* -Ptemplates_parser
 
-clean:
-	-$(GPRCLEAN) $(GPR_DEFAULT) $(GPROPTS) -Ptemplates_parser
+#########
+# clean #
+#########
+
+clean: $(LIBRARY_TYPES:%=clean-%)
 	-$(GPRCLEAN) $(GPR_DEFAULT) $(GPROPTS) -Ptools/tools
-ifneq ($(OTHER_LIBRARY_TYPE),)
-	-$(GPRCLEAN) $(GPR_OTHER) $(GPROPTS) -Ptemplates_parser
-endif
 	$(MAKE) -C docs clean
 	$(MAKE) -C regtests clean
 	rm -f auto.cgpr config/setup/auto.cgpr
 	rm -fr .build makefile.setup
 	rm -f config/setup/foo.ali config/setup/foo.o tp_xmlada.gpr
 	rm -f config/setup/foo.ads.std*
+
+clean-%:
+	-$(GPRCLEAN) -XLIBRARY_TYPE=$* -XXMLADA_BUILD=$* $(GPROPTS) \
+		-Ptemplates_parser

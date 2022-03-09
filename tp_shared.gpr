@@ -29,7 +29,7 @@ abstract project TP_Shared is
    type XMLAda_Type is ("Installed", "Disabled");
    XMLAda : XMLAda_Type := external ("TP_XMLADA", "Disabled");
 
-   type Library_Kind is ("relocatable", "static");
+   type Library_Kind is ("relocatable", "static", "static-pic");
    Library_Type : Library_Kind := external ("LIBRARY_TYPE", "static");
 
    Processors := external ("PROCESSORS", "0");

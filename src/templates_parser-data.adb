@@ -29,6 +29,7 @@
 
 pragma Ada_2012;
 
+with Ada.Assertions;
 with Ada.Text_IO;
 
 separate (Templates_Parser)
@@ -278,7 +279,7 @@ package body Data is
 
                   if Str (K) = '\'
                     and then K < Str'Last
-                    and then not (Str (K + 1) in '0' .. '9')
+                    and then Str (K + 1) not in '0' .. '9'
                   then
                      --  An escaped character, skip the backslash
                      K := K + 1;
@@ -717,10 +718,14 @@ package body Data is
                   Append (R, Natural'Image (K) & " => ");
                end if;
 
-               case T.Parameters (K).Kind is
-                  when Text => Append (R, T.Parameters (K).Value);
-                  when Var  => Append (R, Image (T.Parameters (K).Var));
-               end case;
+               Ada.Assertions.Assert
+                 (Check   => T.Parameters (K).Kind in Text | Var,
+                  Message => "Value outside expected value set");
+               if T.Parameters (K).Kind in Text then
+                  Append (R, T.Parameters (K).Value);
+               else
+                  Append (R, Image (T.Parameters (K).Var));
+               end if;
 
                if K /= T.Parameters'Last then
                   Append (R, ",");
@@ -854,37 +859,34 @@ package body Data is
       NL : Boolean := False;
    begin
       while N /= null loop
-         case N.Kind is
-            when Text =>
-               declare
-                  Value : constant String := To_String (N.Value);
-                  VL    : constant Natural := Value'Length;
-                  BL    : constant Natural := Utils.BOM_Utf8'Length;
-               begin
-                  if VL >= BL
-                    and then
-                      Value
-                        (Value'First .. Value'First + BL - 1) = Utils.BOM_Utf8
-                  then
-                     Text_IO.Put ("U+<FEFF>");
-                  else
-                     Text_IO.Put (Value);
-                  end if;
-                  if Value'Length > 0 then
-                     NL := Value (Value'Last) = ASCII.LF;
-                  else
-                     NL := False;
-                  end if;
-               end;
-
-            when Var =>
-               if N.Var.Is_Macro and then Expand_Macro then
-                  Print_Tree (N.Var.Def);
+         Ada.Assertions.Assert
+           (Check => N.Kind in Text | Var, Message => "Value outside expected value set");
+         if N.Kind in Text then
+            declare
+               Value : constant String  := To_String (N.Value);
+               VL    : constant Natural := Value'Length;
+               BL    : constant Natural := Utils.BOM_Utf8'Length;
+            begin
+               if VL >= BL and then Value (Value'First .. Value'First + BL - 1) = Utils.BOM_Utf8
+               then
+                  Text_IO.Put ("U+<FEFF>");
                else
-                  Text_IO.Put (Image (N.Var));
+                  Text_IO.Put (Value);
+               end if;
+               if Value'Length > 0 then
+                  NL := Value (Value'Last) = ASCII.LF;
+               else
                   NL := False;
                end if;
-         end case;
+            end;
+         else
+            if N.Var.Is_Macro and then Expand_Macro then
+               Print_Tree (N.Var.Def);
+            else
+               Text_IO.Put (Image (N.Var));
+               NL := False;
+            end if;
+         end if;
          N := N.Next;
       end loop;
 
@@ -929,10 +931,11 @@ package body Data is
          P := T;
          T := T.Next;
 
-         case P.Kind is
-            when Var  => Release (P.Var);
-            when Text => null;
-         end case;
+         Ada.Assertions.Assert
+           (Check => P.Kind in Var | Text, Message => "Value outside expected value set");
+         if P.Kind in Var then
+            Release (P.Var);
+         end if;
 
          Unchecked_Free (P);
          exit when Single;

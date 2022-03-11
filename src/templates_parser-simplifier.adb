@@ -27,6 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Assertions;
 separate (Templates_Parser)
 
 package body Simplifier is
@@ -68,85 +69,79 @@ package body Simplifier is
          D := T;
 
          while D /= null loop
-            case D.Kind is
-               when Data.Text =>
-                  if Prev = null
-                    and then T.Kind = Data.Text
-                    and then D /= T
+            Ada.Assertions.Assert
+              (Check   => D.Kind in Data.Text | Data.Var,
+               Message => "Value outside expected value set");
+            if D.Kind in Data.Text then
+               if Prev = null and then T.Kind = Data.Text and then D /= T then
+                  Append (T.Value, D.Value);
+
+                  Old    := T.Next;
+                  T.Next := D.Next;
+                  D      := D.Next;
+                  Moved  := True;
+
+                  Data.Release (Old, Single => True);
+
+               elsif Prev /= null and then Prev.Kind = Data.Text then
+                  Append (Prev.Value, D.Value);
+
+                  Old       := Prev.Next;
+                  Prev.Next := D.Next;
+                  D         := D.Next;
+                  Moved     := True;
+
+                  Data.Release (Old, Single => True);
+               end if;
+            else
+               if D.Var.Is_Macro then
+                  Run (D.Var.Def);
+
+                  --  Check if we have a single resulting TEXT node
+
+                  if D.Var.Def /= null and then D.Var.Def.Kind = Text
+                    and then D.Var.Def.Text.Kind = Data.Text and then D.Var.Def.Text.Next = null
+                    and then D.Var.Def.Next = null
                   then
-                     Append (T.Value, D.Value);
+                     declare
+                        C : aliased Filter.Filter_Context (P_Size => 0);
+                     begin
+                        if Prev = null then
+                           --  First node is a variable (line starting with
+                           --  a tag variable), replace it by the
+                           --  corresponding text node.
+                           Old := T;
+                           T   :=
+                             new Data.Node'
+                               (Kind  => Data.Text,
+                                Line  => D.Var.Def.Text.Line,
+                                Col   => D.Var.Def.Text.Col,
+                                Next  => D.Var.Def.Text.Next,
+                                Value =>
+                                  To_Unbounded_String
+                                    (Data.Translate
+                                       (D.Var, To_String (D.Var.Def.Text.Value), C'Access)));
 
-                     Old := T.Next;
-                     T.Next := D.Next;
-                     D := D.Next;
-                     Moved := True;
+                           D     := D.Next;
+                           Moved := True;
 
-                     Data.Release (Old, Single => True);
+                           Data.Release (Old, Single => True);
 
-                  elsif Prev /= null and then Prev.Kind = Data.Text then
-                     Append (Prev.Value, D.Value);
+                        elsif Prev.Kind = Data.Text then
+                           --  First node was a text, merge the values
+                           Append (Prev.Value, D.Var.Def.Text.Value);
 
-                     Old := Prev.Next;
-                     Prev.Next := D.Next;
-                     D := D.Next;
-                     Moved := True;
+                           Old       := Prev.Next;
+                           Prev.Next := D.Next;
+                           D         := D.Next;
+                           Moved     := True;
 
-                     Data.Release (Old, Single => True);
+                           Data.Release (Old, Single => True);
+                        end if;
+                     end;
                   end if;
-
-               when Data.Var =>
-                  --  Rewrite also the macro if any
-
-                  if D.Var.Is_Macro then
-                     Run (D.Var.Def);
-
-                     --  Check if we have a single resulting TEXT node
-
-                     if D.Var.Def /= null
-                       and then D.Var.Def.Kind = Text
-                       and then D.Var.Def.Text.Kind = Data.Text
-                       and then D.Var.Def.Text.Next = null
-                       and then D.Var.Def.Next = null
-                     then
-                        declare
-                           C : aliased Filter.Filter_Context (P_Size => 0);
-                        begin
-                           if Prev = null then
-                              --  First node is a variable (line starting with
-                              --  a tag variable), replace it by the
-                              --  corresponding text node.
-                              Old := T;
-                              T := new Data.Node'
-                                (Kind  => Data.Text,
-                                 Line  => D.Var.Def.Text.Line,
-                                 Col   => D.Var.Def.Text.Col,
-                                 Next  => D.Var.Def.Text.Next,
-                                 Value => To_Unbounded_String
-                                   (Data.Translate
-                                      (D.Var,
-                                       To_String (D.Var.Def.Text.Value),
-                                       C'Access)));
-
-                              D := D.Next;
-                              Moved := True;
-
-                              Data.Release (Old, Single => True);
-
-                           elsif Prev.Kind = Data.Text then
-                              --  First node was a text, merge the values
-                              Append (Prev.Value, D.Var.Def.Text.Value);
-
-                              Old := Prev.Next;
-                              Prev.Next := D.Next;
-                              D := D.Next;
-                              Moved := True;
-
-                              Data.Release (Old, Single => True);
-                           end if;
-                        end;
-                     end if;
-                  end if;
-            end case;
+               end if;
+            end if;
 
             if not Moved then
                Prev := D;

@@ -27,6 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+with Ada.Assertions;
 separate (Templates_Parser)
 
 package body Cached_Files is
@@ -339,12 +340,13 @@ package body Cached_Files is
          return;
       end if;
 
-      case Mode is
-         when Used =>
-            T.Info.Next.Used := T.Info.Next.Used + 1;
-         when Released =>
-            T.Info.Next.Used := T.Info.Next.Used - 1;
-      end case;
+      Ada.Assertions.Assert
+        (Check => Mode in Used | Released, Message => "Value outside expected value set");
+      if Mode in Used then
+         T.Info.Next.Used := T.Info.Next.Used + 1;
+      else
+         T.Info.Next.Used := T.Info.Next.Used - 1;
+      end if;
 
       --  And mark all included files
 

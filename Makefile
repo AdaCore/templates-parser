@@ -119,7 +119,7 @@ build-%: tp_xmlada.gpr makefile.setup
 	$(GPRBUILD) -p $(GPROPTS) -XLIBRARY_TYPE=$* -XXMLADA_BUILD=$* \
 		--subdirs=$(SDIR)/$* -Ptemplates_parser
 
-build-tools:
+build-tools: build-$(DEFAULT_LIBRARY_TYPE)
 	$(GPRBUILD) -p $(GPROPTS) $(GPR_DEFAULT) \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Ptools/tools
 

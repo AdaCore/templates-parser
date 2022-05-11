@@ -38,27 +38,28 @@ def filter(infile):
 
     while l < len(lines):
         v = lines[l][:-1]
-        data = data + v.translate(None, ' ')
+        data = data + "".join([l or " " for l in v])
         set_start(v)
         l = l + 1
 
         while not is_end(v) and l < len(lines):
             v = lines[l][:-1]
             l = l + 1
-            data = data + v.translate(None, ' ')
+            data = data + "".join([l or " " for l in v])
 
         txt.append(data)
         data = ""
 
     return txt.sort()
 
-gprbuild('translations_demo')
-run('translations_demo')
+
+gprbuild("translations_demo")
+run("translations_demo")
 
 res1 = filter("ts.xml")
 res2 = filter("tsr.xml")
 
 if res1 == res2:
-    print "OK"
+    print("OK")
 else:
-    print "NOK"
+    print("NOK")

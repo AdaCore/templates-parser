@@ -1,7 +1,9 @@
 
 1.
            return Fa1 (Self) = T_Rt1.Ra1 (T_Rt1.Table (Foreign)) and Fa2 (Self) = T_Rt2.Ra2 (T_Rt2.Table (Foreign)) and Fa3 (Self) = T_Rt3.Ra3 (T_Rt3.Table (Foreign));
+
 2.
-   return Fa1 (Self) = T_Rt1.Ra1 (T_Rt1.Table (Foreign))
-     and Fa2 (Self) = T_Rt2.Ra2 (T_Rt2.Table (Foreign))
+   return Fa1 (Self) = T_Rt1.Ra1 (T_Rt1.Table (Foreign))
+     and Fa2 (Self) = T_Rt2.Ra2 (T_Rt2.Table (Foreign))
      and Fa3 (Self) = T_Rt3.Ra3 (T_Rt3.Table (Foreign));
+

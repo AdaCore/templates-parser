@@ -6,7 +6,7 @@
       3> three
       1> (one)
       2> (two)
-      3>
+      3> 
 
 1 ---------------------------
 
@@ -42,9 +42,9 @@
 
 [INFO] testme80.tmplt
 [C_INFO]  1 FALSE
-[TEXT]
+[TEXT] 
 [TEXT] 0 ---------------------------
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -56,9 +56,9 @@
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] 1 ---------------------------
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -72,9 +72,9 @@
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] 2 ---------------------------
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -86,9 +86,9 @@
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] 3 ---------------------------
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -100,9 +100,9 @@
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] 4 ---------------------------
-[TEXT]
+[TEXT] 
 [TABLE'REVERSE]
   [BLOCK]
     [COMMON]

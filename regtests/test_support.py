@@ -2,17 +2,15 @@
 This module contains support functions for all test.py
 """
 
+from e3.os.process import Run
 import os
 import sys
 
 #  Change directory
-
-TEST = sys.modules['__main__']
+TEST = sys.modules["__main__"]
 TESTDIR = os.path.dirname(TEST.__file__)
 TEST_NAME = os.path.basename(TESTDIR)
 os.chdir(TESTDIR)
-
-from gnatpython.ex import Run
 
 
 def gprbuild(prj):
@@ -20,7 +18,7 @@ def gprbuild(prj):
     cmd = ["gprbuild", "-p", "-P" + prj, "-bargs", "-E"]
     process = Run(cmd)
     if process.status:
-        print process.out
+        print(process.out)
 
 
 def run(bin, options=None, output_file=None):

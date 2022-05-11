@@ -1,150 +1,118 @@
 #!/usr/bin/env python
 """./testsuite.py [options] [test name]
 
-Run the templates_parser testsuite
+Run the template-parser testsuite.
 """
 
-from gnatpython.env import Env
-from gnatpython.ex import Run
-from gnatpython.fileutils import mkdir, rm
-from gnatpython.main import Main
-from gnatpython.mainloop import (MainLoop, add_mainloop_options,
-                                 generate_collect_result)
-from gnatpython.testdriver import add_run_test_options
-from gnatpython.reports import ReportDiff
-
 from glob import glob
-
 import os
 import sys
+import time
 
-#  Compute PATH to global test drivers (testme, print_tree)
+from e3.env import Env
+from e3.os.process import Run
+from e3.fs import mkdir, rm
 
-TARGET = os.environ.get("TARGET")
-PRJ_BUILD = os.environ.get("PRJ_BUILD")
-
-if TARGET is None:
-    TARGET = Run(['gcc', '-dumpmachine']).out.strip('\n')
-else:
-    TARGET = TARGET.lower()
-
-if PRJ_BUILD is None:
-    PRJ_BUILD = "debug"
-else:
-    PRJ_BUILD = PRJ_BUILD.lower()
+import e3.testsuite
+from e3.testsuite import Testsuite
+from e3.testsuite.driver.diff import DiffTestDriver
+from e3.testsuite.result import Log, TestResult, TestStatus
+from e3.testsuite.testcase_finder import ParsedTest, TestFinder
 
 
-def makedir(dir):
-    return os.getcwd() + "/../.build/" + dir + "/" \
-        + TARGET + "/" + PRJ_BUILD + "/static/"
+class BasicTestDriver(DiffTestDriver):
+    """Simple test driver that runs a python script inside the TP tests."""
 
-os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + makedir("bin") \
-    + os.pathsep + makedir("rbin")
+    def run(self):
+        """Run the template parser test.
 
-from gnatpython.ex import Run
-
-
-def gprbuild(prj):
-    """Compile a project with gprbuild"""
-    cmd = ["gprbuild", "-p", "-gnat05", "-P" + prj, "-bargs", "-E"]
-    process = Run(cmd)
-    if process.status:
-        print process.out
+        Executes the test.py command inside the tests and compares the results.
+        """
+        cmd = ["python", "test.py"]
+        start_time = time.time()
+        self.shell(cmd, catch_error=False)
+        self.result.time = time.time() - start_time
 
 
-def main():
-    """Run the testsuite"""
-    options = __parse_options()
-    assert os.path.exists(makedir("bin")), \
-        "cannot find %s directory" % makedir("bin")
-    assert os.path.exists(makedir("rbin")), \
-        "cannot find %s directory" % makedir("rbin")
-    env = Env()
-    env.add_search_path("PYTHONPATH", os.getcwd())
+class TPTestFinder(TestFinder):
+    """Templates Parser test finder utility."""
 
-    test_list = [t for t in filter_list('tests/*', options.run_test)
-                 if os.path.isdir(t)]
+    def probe(self, testsuite, dirpath, dirnames, filenames):
+        if "test.py" in filenames:
+            driver_cls = BasicTestDriver
+        else:
+            driver_cls = None
 
-    # Various files needed or created by the testsuite
-    result_dir = options.output_dir
-    results_file = result_dir + '/results'
-
-    if os.path.exists(result_dir):
-        rm(result_dir, True)
-
-    mkdir(result_dir)
-
-    discs = env.discriminants
-
-    if options.discs:
-        discs += options.discs
-
-    def test_build_cmd(test, _):
-        """Run the given test"""
-        cmd = [sys.executable, 'run-test',
-               '-d', ",".join(discs),
-               '-o', result_dir,
-               '-t', options.tmp,
-               test]
-        if options.verbose:
-            cmd.append('-v')
-        if options.host:
-            cmd.append('--host=' + options.host)
-        if options.target:
-            cmd.append('--target=' + options.target)
-        if not options.enable_cleanup:
-            cmd.append('--disable-cleanup')
-        return Run(cmd, bg=True)
-
-    collect_result = generate_collect_result(
-        result_dir, results_file, options.view_diffs)
-
-    MainLoop(test_list, test_build_cmd, collect_result, options.mainloop_jobs)
-
-    # Write report
-    with open(result_dir + '/discs', 'w') as discs_f:
-        discs_f.write(" ".join(discs))
-    ReportDiff(result_dir, options.old_result_dir).txt_image(
-        result_dir + '/report')
+        if driver_cls:
+            return ParsedTest(
+                test_name=testsuite.test_name(dirpath),
+                driver_cls=driver_cls,
+                test_env={"testsuite_root_dir": testsuite.root_dir},
+                test_dir=dirpath,
+            )
 
 
-def filter_list(pattern, run_test=""):
-    """Compute the list of test matching pattern
+class TPTestsuite(Testsuite):
+    """Testsuite for Template Parser."""
 
-    If run_test is not null, run only tests containing run_test
-    """
-    test_list = glob(pattern)
-    if not run_test:
-        return test_list
-    else:
-        return [test for test in test_list if run_test in test]
+    def __init__(self):
+        super().__init__()
+        target = os.environ.get("TARGET")
+        prj_build = os.environ.get("PRJ_BUILD")
 
+        if target is None:
+            target = Run(["gcc", "-dumpmachine"]).out.strip("\n")
+        else:
+            target = target.lower()
 
-def __parse_options():
-    """Parse command lines options"""
-    m = Main(add_targets_options=True)
-    add_mainloop_options(m)
-    add_run_test_options(m)
-    m.add_option("--diffs", dest="view_diffs", action="store_true",
-                 default=False, help="Print .diff content")
-    m.add_option("--old-result-dir", type="string", default=None,
-                 help="Old result dir")
-    m.parse_args()
+        if prj_build is None:
+            prj_build = "debug"
+        else:
+            prj_build = prj_build.lower()
 
-    if m.args:
-        m.options.run_test = m.args[0]
-        # User want to run only one test
-        print "Running only test '%s'" % m.options.run_test
-    else:
-        m.options.run_test = ""
+        def makedir(dir):
+            return (
+                os.getcwd()
+                + "/../.build/"
+                + dir
+                + "/"
+                + target
+                + "/"
+                + prj_build
+                + "/static/"
+            )
 
-    if m.options.discs:
-        m.options.discs = m.options.discs.split(',')
+        env = Env()
+        env.add_search_path("PYTHONPATH", os.getcwd())
+        env.add_search_path(
+            "PATH",
+            os.environ.get("PATH")
+            + os.pathsep
+            + makedir("bin")
+            + os.pathsep
+            + makedir("rbin"),
+        )
 
-    return m.options
+    @property
+    def test_finders(self):
+        return [TPTestFinder()]
+
+    def add_options(self, parser):
+        parser.add_argument(
+            "--diffs",
+            dest="view_diffs",
+            action="store_true",
+            default=False,
+            help="Print .diff content",
+        )
+        parser.add_argument(
+            "--old-result-dir",
+            dest="old_result_dir",
+            type=str,
+            default=None,
+            help="Old result dir",
+        )
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except AssertionError, e:
-        print 'ERROR: %s' % e
+    sys.exit(TPTestsuite().testsuite_main())

@@ -30,16 +30,24 @@ class BasicTestDriver(DiffTestDriver):
         """
         cmd = ["python", "test.py"]
         start_time = time.time()
-        self.shell(cmd, catch_error=False)
+        run = self.shell(cmd, catch_error=False)
         self.result.time = time.time() - start_time
 
 
 class TPTestFinder(TestFinder):
     """Templates Parser test finder utility."""
 
+    latin1_tests = ["0064_testme"]
+    xfail_tests = ["Z999_xfail"]
+
     def probe(self, testsuite, dirpath, dirnames, filenames):
+        test_env = {"testsuite_root_dir": testsuite.root_dir}
         if "test.py" in filenames:
             driver_cls = BasicTestDriver
+            if os.path.basename(dirpath) in self.latin1_tests:
+                test_env["encoding"] = "latin-1"
+            if os.path.basename(dirpath) in self.xfail_tests:
+                test_env["control"] = [["XFAIL", "True", "Should always fail."]]
         else:
             driver_cls = None
 
@@ -47,7 +55,7 @@ class TPTestFinder(TestFinder):
             return ParsedTest(
                 test_name=testsuite.test_name(dirpath),
                 driver_cls=driver_cls,
-                test_env={"testsuite_root_dir": testsuite.root_dir},
+                test_env=test_env,
                 test_dir=dirpath,
             )
 

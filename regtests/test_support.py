@@ -8,7 +8,7 @@ import sys
 
 #  Change directory
 TEST = sys.modules["__main__"]
-TESTDIR = os.path.dirname(TEST.__file__)
+TESTDIR = os.path.dirname(os.path.realpath(TEST.__file__))
 TEST_NAME = os.path.basename(TESTDIR)
 os.chdir(TESTDIR)
 

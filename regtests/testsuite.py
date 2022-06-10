@@ -17,7 +17,7 @@ import e3.testsuite
 from e3.testsuite import Testsuite
 from e3.testsuite.driver.diff import DiffTestDriver
 from e3.testsuite.result import Log, TestResult, TestStatus
-from e3.testsuite.testcase_finder import ParsedTest, TestFinder
+from e3.testsuite.testcase_finder import ParsedTest, YAMLTestFinder, TestFinder
 
 
 class BasicTestDriver(DiffTestDriver):
@@ -34,34 +34,11 @@ class BasicTestDriver(DiffTestDriver):
         self.result.time = time.time() - start_time
 
 
-class TPTestFinder(TestFinder):
-    """Templates Parser test finder utility."""
-
-    latin1_tests = ["0064_testme"]
-    xfail_tests = ["Z999_xfail"]
-
-    def probe(self, testsuite, dirpath, dirnames, filenames):
-        test_env = {"testsuite_root_dir": testsuite.root_dir}
-        if "test.py" in filenames:
-            driver_cls = BasicTestDriver
-            if os.path.basename(dirpath) in self.latin1_tests:
-                test_env["encoding"] = "latin-1"
-            if os.path.basename(dirpath) in self.xfail_tests:
-                test_env["control"] = [["XFAIL", "True", "Should always fail."]]
-        else:
-            driver_cls = None
-
-        if driver_cls:
-            return ParsedTest(
-                test_name=testsuite.test_name(dirpath),
-                driver_cls=driver_cls,
-                test_env=test_env,
-                test_dir=dirpath,
-            )
-
-
 class TPTestsuite(Testsuite):
     """Testsuite for Template Parser."""
+
+    test_driver_map = {"basic": BasicTestDriver}
+    default_driver = "basic"
 
     def __init__(self):
         super().__init__()
@@ -103,7 +80,7 @@ class TPTestsuite(Testsuite):
 
     @property
     def test_finders(self):
-        return [TPTestFinder()]
+        return [YAMLTestFinder()]
 
     def add_options(self, parser):
         parser.add_argument(

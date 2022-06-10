@@ -6,14 +6,14 @@ Test slice
 12 = 12
 23 = 23
 23 = 23
-=
+= 
 6 = 6
 = 
 = 
 2345 = 2345
 456 = 456
 45 = 45
-=
+= 
 
 [INFO] testme30.tmplt
 [C_INFO]  1 FALSE

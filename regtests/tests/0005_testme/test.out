@@ -259,25 +259,25 @@ Idem with @@TERMINATE_SECTIONS@@
 S1) A1.1
 S2) A1.2
 S1) A1.3
-S2)
+S2) 
 S1) A2.1
 S2) A2.2
 S1) A2.3
-S2)
+S2) 
 S1) A3.1
 S2) A3.2
 S1) A3.3
-S2)
+S2) 
 S1) A4.1
 S2) A4.2
 S1) A4.3
-S2)
+S2) 
 
 [INFO] testme6.tmplt
 [C_INFO]  1 FALSE
-[TEXT]
+[TEXT] 
 [TEXT] This is a test for the matrix feature:
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -293,17 +293,17 @@ S2)
       [TEXT] [@_MAT_@]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] ======================================================================
-[TEXT]
+[TEXT] 
 [TEXT] A table with labels (vector):
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
-      [TEXT]
+      [TEXT] 
       [TEXT] Label: @_LABELS_@
-      [TEXT]
+      [TEXT] 
       [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
       [TABLE]
         [BLOCK]
@@ -314,21 +314,21 @@ S2)
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] ======================================================================
-[TEXT]
+[TEXT] 
 [TEXT] A matrix inside a table with labels (vectors):
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
-      [TEXT]
+      [TEXT] 
       [TEXT] Label: @_LABELS_@
-      [TEXT]
+      [TEXT] 
       [TABLE]
         [BLOCK]
           [COMMON]
-            [TEXT]
+            [TEXT] 
             [TEXT] Table1: @_UP_TABLE_LINE_@ @_TABLE_LINE_@ @_NUMBER_LINE_@ @_TABLE_LEVEL_@
             [TABLE]
               [BLOCK]
@@ -341,17 +341,17 @@ S2)
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] ======================================================================
-[TEXT]
+[TEXT] 
 [TEXT] A matrix outside a table:
-[TEXT]
+[TEXT] 
 [TEXT] @_MAT_@
-[TEXT]
+[TEXT] 
 [TEXT] ======================================================================
-[TEXT]
+[TEXT] 
 [TEXT] A matrix with section:
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -365,9 +365,9 @@ S2)
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] Idem with @@TERMINATE_SECTIONS@@
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]

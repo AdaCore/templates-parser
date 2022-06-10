@@ -1,9 +1,10 @@
 ﻿ONE is properly set
+
 [INFO] with_bom.tmplt
 [C_INFO]  1 FALSE
 [TEXT] U+<FEFF>
 [IF] (@_ONE_@ = 1)
-[TEXT] ONE is properly set
+  [TEXT] ONE is properly set
 [ELSE]
-[TEXT] ONE is not OK
+  [TEXT] ONE is not OK
 [END_IF]

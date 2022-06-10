@@ -125,35 +125,35 @@ Should be 0 : 0
 Should be 0 : 0
 [INFO] testme.tmplt
 [C_INFO]  1 FALSE
-[TEXT]
+[TEXT] 
 [TEXT] This is a test template for Templates_Parser
-[TEXT]
+[TEXT] 
 [TEXT] A single value : @_VAR1_@
-[TEXT]
+[TEXT] 
 [TEXT] Should be 0 : @_NUMBER_LINE_@
 [TEXT] Should be 0 : @_TABLE_LEVEL_@
-[TEXT]
+[TEXT] 
 [TEXT] A table :
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
       [TEXT] @_VAR2_@
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [IF] @_COND1_@
   [TEXT]   ERROR: test is not correct
 [ELSE]
   [TEXT]   OK: test passed
 [END_IF]
-[TEXT]
+[TEXT] 
 [IF] @_COND2_@
   [TEXT]   OK: test passed
 [ELSE]
   [TEXT]   ERROR: test is not correct
 [END_IF]
-[TEXT]
+[TEXT] 
 [IF] @_COND2_@
   [TABLE]
     [BLOCK]
@@ -166,7 +166,7 @@ Should be 0 : 0
     [END_BLOCK]
   [END_TABLE]
 [END_IF]
-[TEXT]
+[TEXT] 
 [TABLE'TERMINATE_SECTIONS]
   [BLOCK]
     [SECTION]
@@ -177,7 +177,7 @@ Should be 0 : 0
       [TEXT]   Well a another one [@_VAR2_@]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TABLE]
   [BLOCK]
     [COMMON]
@@ -198,9 +198,9 @@ Should be 0 : 0
       [END_TABLE]
   [END_BLOCK]
 [END_TABLE]
-[TEXT]
+[TEXT] 
 [TEXT] Cond1: @_COND1_@ - @_YES_NO:COND1_@ - @_OUI_NON:COND1_@
 [TEXT] Cond2: @_COND2_@ - @_YES_NO:COND2_@ - @_OUI_NON:COND2_@
-[TEXT]
+[TEXT] 
 [TEXT] Should be 0 : @_NUMBER_LINE_@
 [TEXT] Should be 0 : @_TABLE_LEVEL_@

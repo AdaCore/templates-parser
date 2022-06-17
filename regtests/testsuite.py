@@ -40,6 +40,11 @@ class TPTestsuite(Testsuite):
     test_driver_map = {"basic": BasicTestDriver}
     default_driver = "basic"
 
+    def test_name(self, test_dir):
+        # Return the last directory name as the test name.
+        test_directory_name = test_dir.split("/")[-1]
+        return test_directory_name
+
     def __init__(self):
         super().__init__()
         target = os.environ.get("TARGET")

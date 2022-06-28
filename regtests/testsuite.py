@@ -12,6 +12,7 @@ import time
 from e3.env import Env
 from e3.os.process import Run
 from e3.fs import mkdir, rm
+from e3.sys import interpreter
 
 import e3.testsuite
 from e3.testsuite import Testsuite
@@ -28,9 +29,9 @@ class BasicTestDriver(DiffTestDriver):
 
         Executes the test.py command inside the tests and compares the results.
         """
-        cmd = ["python", "test.py"]
+        cmd = [interpreter(), "test.py"]
         start_time = time.time()
-        run = Run(cmd, catch_error=False)
+        run = self.shell(cmd, catch_error=False, timeout=None)
         self.result.time = time.time() - start_time
 
 
@@ -40,10 +41,7 @@ class TPTestsuite(Testsuite):
     test_driver_map = {"basic": BasicTestDriver}
     default_driver = "basic"
 
-    def test_name(self, test_dir):
-        # Return the last directory name as the test name.
-        test_directory_name = test_dir.split("/")[-1]
-        return test_directory_name
+    tests_subdir = "tests"
 
     def __init__(self):
         super().__init__()

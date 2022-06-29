@@ -31,7 +31,12 @@ class BasicTestDriver(DiffTestDriver):
         """
         cmd = [interpreter(), "test.py"]
         start_time = time.time()
-        run = self.shell(cmd, catch_error=False, timeout=None)
+        run = self.shell(
+            cmd,
+            cwd=self.test_env["working_dir"],
+            catch_error=False,
+            timeout=None,
+        )
         self.result.time = time.time() - start_time
 
 

@@ -6,12 +6,6 @@ from e3.os.process import Run
 import os
 import sys
 
-#  Change directory
-TEST = sys.modules["__main__"]
-TESTDIR = os.path.dirname(os.path.realpath(TEST.__file__))
-TEST_NAME = os.path.basename(TESTDIR)
-os.chdir(TESTDIR)
-
 
 def gprbuild(prj):
     """Compile a project with gprbuild"""

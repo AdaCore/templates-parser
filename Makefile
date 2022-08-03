@@ -75,11 +75,11 @@ ifeq ($(DEFAULT_LIBRARY_TYPE),static)
 endif
 
 ifeq ($(ENABLE_STATIC), true)
-   STATIC_LIBRARY=static
+   LIBRARY_TYPES += static
 endif
 
 ifeq ($(ENABLE_SHARED), true)
-   LIBRARY_TYPES=$(STATIC_LIBRARY) relocatable static-pic
+   LIBRARY_TYPES += relocatable static-pic
 endif
 
 ifeq ($(DEBUG), true)

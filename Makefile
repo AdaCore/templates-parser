@@ -42,8 +42,6 @@ else
   TP_XMLADA := Disabled
 endif
 
--include makefile.setup
-
 ifeq ($(HOST), $(TARGET))
 GPROPTS		=
 TPREFIX=$(DESTDIR)$(prefix)
@@ -109,6 +107,8 @@ endif
 endif
 endif
 endif
+
+-include makefile.setup
 
 ALL_OPTIONS := \
  DEBUG \

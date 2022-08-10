@@ -83,7 +83,7 @@ $(RESFILES): $(RESDIR)/%.adb.res: build-sample | $(RESDIR)
 	( cd $(TMPLDIR) > /dev/null && ../$(EXEDIR)/$* ) > $@
 
 $(RESDIR):
-	mkdir $@
+	mkdir -p $@
 
 .PHONY: build-sample
 build-sample:

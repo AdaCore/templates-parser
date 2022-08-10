@@ -474,13 +474,19 @@ package body Filter is
    is
       pragma Unreferenced (C);
       use type Strings.Maps.Character_Set;
+      package L1 renames Ada.Characters.Latin_1;
 
       Result : String (S'Range);
+
+      Non_ASCII : constant String
+        := (L1.Space, L1.LC_E_Acute, L1.LC_E_Grave, L1.LC_E_Circumflex,
+            L1.LC_I_Circumflex, L1.LC_I_Diaeresis, L1.LC_A_Grave,
+            L1.LC_O_Circumflex, L1.LC_C_Cedilla);
 
       Clean_Set : constant Strings.Maps.Character_Set :=
                     Strings.Maps.Constants.Letter_Set
                       or Strings.Maps.Constants.Decimal_Digit_Set
-                      or Strings.Maps.To_Set (" йикопафз");
+                      or Strings.Maps.To_Set (Non_ASCII);
 
    begin
       Check_Null_Parameter (P);

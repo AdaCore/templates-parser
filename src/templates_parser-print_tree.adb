@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2019, AdaCore                     --
+--                     Copyright (C) 1999-2022, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -89,7 +89,7 @@ begin
       when Info =>
          Text_IO.Put_Line ("[INFO] " & To_String (T.Filename));
          declare
-            I : Tree := T.I_File;
+            I        : Tree := T.I_File;
             Included : Included_File_Info;
          begin
             while I /= null loop

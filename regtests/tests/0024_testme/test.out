@@ -41,7 +41,7 @@ abc
 [END_IF]
 [TEXT] word3
 [TEXT] 
-[INLINE] ( )
+[INLINE] () ( ) ()
   [TEXT] word1
   [IF] @_COND1_@
     [TEXT] word2.1
@@ -59,7 +59,7 @@ abc
 [END_IF]
 [TEXT] word3
 [TEXT] 
-[INLINE] ( , )
+[INLINE] () ( , ) ()
   [TEXT] word1
   [IF] @_COND2_@
     [TEXT] word2.1
@@ -80,7 +80,7 @@ abc
   [END_BLOCK]
 [END_TABLE]
 [TEXT] 
-[INLINE] (:)
+[INLINE] () (:) ()
   [TABLE]
     [BLOCK]
       [COMMON]
@@ -89,7 +89,7 @@ abc
   [END_TABLE]
 [END_INLINE]
 [TEXT] 
-[INLINE] ((:))
+[INLINE] () (\(:\)) ()
   [TABLE]
     [BLOCK]
       [COMMON]
@@ -99,7 +99,7 @@ abc
   [TEXT] xx
 [END_INLINE]
 [TEXT] 
-[INLINE] (|)
+[INLINE] () (|) ()
   [TEXT] aa
   [TABLE]
     [BLOCK]

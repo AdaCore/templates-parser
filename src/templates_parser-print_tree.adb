@@ -41,6 +41,9 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
    procedure Print (Included : Included_File_Info);
    --  Print info for included file
 
+   function Sep_Image (Str : Unbounded_String) return String;
+   --  Returns inline sep parameter possibly with escaped characters
+
    -----------
    -- Print --
    -----------
@@ -77,6 +80,26 @@ procedure Print_Tree (T : Tree; Level : Natural := 0) is
    begin
       Text_IO.Put ((L * 2) * ' ');
    end Print_Indent;
+
+   ---------------
+   -- Sep_Image --
+   ---------------
+
+   function Sep_Image (Str : Unbounded_String) return String is
+      R : Unbounded_String;
+   begin
+      for E of To_String (Str) loop
+         case E is
+            when ASCII.CR => null;
+            when ASCII.LF => Append (R, "\n");
+            when '('      => Append (R, "\(");
+            when ')'      => Append (R, "\)");
+            when others   => Append (R, E);
+         end case;
+      end loop;
+
+      return To_String (R);
+   end Sep_Image;
 
 begin
    if T = null then
@@ -227,8 +250,13 @@ begin
          Print_Tree (T.Next, Level);
 
       when Inline_Stmt =>
-         Text_IO.Put_Line ("[INLINE] (" & To_String (T.Sep) & ')');
+         Text_IO.Put_Line
+           ("[INLINE]"
+            & " (" & Sep_Image (T.Before) & ')'
+            & " (" & Sep_Image (T.Sep) & ')'
+            & " (" & Sep_Image (T.After) & ')');
          Print_Tree (T.I_Block, Level + 1);
+         Print_Indent (Level);
          Text_IO.Put_Line ("[END_INLINE]");
          Print_Tree (T.Next, Level);
    end case;

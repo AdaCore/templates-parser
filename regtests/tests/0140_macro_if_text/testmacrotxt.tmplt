@@ -1,0 +1,10 @@
+@@MACRO(M_OUT_PARAMS)@@
+@@IF@@ not @_IS_EMPTY:VAR1_@
+THIS
+@@IF@@ @_TEST_VAR_@ = Test
+AND THAT
+@@END_IF@@
+@@END_IF@@
+@@END_MACRO@@
+
+1> @_M_OUT_PARAMS()_@

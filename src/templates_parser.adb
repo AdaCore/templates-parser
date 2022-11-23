@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2020, AdaCore                     --
+--                     Copyright (C) 1999-2022, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -3538,7 +3538,7 @@ package body Templates_Parser is
                procedure Move_To_Last (T : in out Tree);
                --  Move to last node
 
-               procedure Rewrite (T : in out Tree);
+               procedure Rewrite (T : Tree);
                --  Rewrite this node, this is used to remove all CR/LF for
                --  the last lines which could be output for this tree.
 
@@ -3557,17 +3557,18 @@ package body Templates_Parser is
                -- Rewrite --
                -------------
 
-               procedure Rewrite (T : in out Tree) is
+               procedure Rewrite (T : Tree) is
+                  L : Tree := T;
                   D : Data.Tree;
                begin
-                  if T /= null then
-                     Move_To_Last (T);
+                  if L /= null then
+                     Move_To_Last (L);
 
-                     case T.Kind is
+                     case L.Kind is
                         when Text =>
                            --  A text node
 
-                           D := T.Text;
+                           D := L.Text;
 
                            --  Move to the end of this line
 
@@ -3583,8 +3584,8 @@ package body Templates_Parser is
                            end if;
 
                         when If_Stmt =>
-                           Rewrite (T.N_True);
-                           Rewrite (T.N_False);
+                           Rewrite (L.N_True);
+                           Rewrite (L.N_False);
 
                         when others =>
                            null;
@@ -3592,11 +3593,10 @@ package body Templates_Parser is
                   end if;
                end Rewrite;
 
-               N : Tree := T;
             begin
                --  We want to trim CR/LF from the last text node
 
-               Rewrite (N);
+               Rewrite (T);
 
                Macro.Register (Name, T);
             end;

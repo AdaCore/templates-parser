@@ -88,6 +88,28 @@ else
   PRJ_BUILD := Release
 endif
 
+ifeq ($(strip $(findstring linux, $(TARGET))),linux)
+   PRJ_TARGET=Linux
+else
+ifeq ($(strip $(findstring mingw32, $(TARGET))),mingw32)
+   PRJ_TARGET=Windows
+else
+ifeq ($(strip $(findstring cygwin, $(TARGET))),cygwin)
+   PRJ_TARGET=Windows
+else
+ifeq ($(strip $(findstring darwin, $(TARGET))),darwin)
+   PRJ_TARGET=macOS
+else
+ifeq ($(strip $(findstring freebsd, $(TARGET))),freebsd)
+   PRJ_TARGET=FreeBSD
+else
+   PRJ_TARGET=UNIX
+endif
+endif
+endif
+endif
+endif
+
 ALL_OPTIONS := \
  DEBUG \
  DEFAULT_LIBRARY_TYPE \
@@ -97,6 +119,7 @@ ALL_OPTIONS := \
  GPRBUILD \
  GPRCLEAN \
  PRJ_BUILD \
+ PRJ_TARGET \
  PROCESSORS \
  SDIR \
  TARGET \
@@ -105,7 +128,7 @@ ALL_OPTIONS := \
  prefix
 
 override GPROPTS += $(foreach v, \
- PRJ_BUILD TP_XMLADA PROCESSORS TARGET VERSION \
+ PRJ_BUILD PRJ_TARGET TP_XMLADA PROCESSORS TARGET VERSION \
  ,"-X$(v)=$($(v))")
 
 GPR_DEFAULT = -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \

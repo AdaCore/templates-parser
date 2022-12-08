@@ -23,6 +23,9 @@ abstract project TP_Shared is
    type Build_Type is ("Debug", "Release");
    Build : Build_Type := external ("PRJ_BUILD", "Debug");
 
+   type Target_type is ("Windows", "macOS", "Linux", "FreeBSD", "UNIX");
+   Target_OS : Target_Type := external ("PRJ_TARGET");
+
    type Tasking_Type is ("No_Tasking", "Standard_Tasking");
    Tasking : Tasking_Type := external ("TP_TASKING", "Standard_Tasking");
 

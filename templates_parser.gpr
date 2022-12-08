@@ -21,6 +21,16 @@ with "tp_xmlada";
 
 library project Templates_Parser is
 
+   So_Ext := "";
+   case TP_Shared.Target_OS is
+      when "Windows" =>
+         So_Ext := ".dll";
+      when "macOS" =>
+         So_Ext := ".dylib";
+      when others =>
+         So_Ext := ".so";
+   end case;
+   
    for Source_Dirs use ("src");
 
    for Object_Dir use TP_Shared.Build_Dir & "/obj";
@@ -28,8 +38,8 @@ library project Templates_Parser is
 
    for Library_Name use "templates_parser";
    for Library_Kind use TP_Shared.Library_Type;
-   for Library_Version use "libtemplates_parser-" & TP_Shared.Version & ".so";
-
+   for Library_Version use "libtemplates_parser-" & TP_Shared.Version & So_Ext;
+   
    case TP_Shared.Library_Type is
       when "relocatable" =>
          --  Put options like --as-needed before options like -l.

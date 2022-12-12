@@ -291,6 +291,12 @@ parser.
   Add a parameter into an URL. This routine adds the '?' and '&'
   character if needed. *VALUE* can be a tag variable name.
 
+**ALTERNATE(VALUE)**
+  .. index:: Filter, ALTERNATE
+
+  Returns VALUE if the current value is not the empty string otherwise the
+  current value is returned (that is, the empty string is returned).
+
 **BR_2_EOL(EOL)**
   .. index:: Filter, BR_2_EOL
 
@@ -325,6 +331,12 @@ parser.
   .. index:: Filter, CONTRACT
 
   Converts any suite of spaces by a single space character.
+
+**DEFAULT(VALUE)**
+  .. index:: Filter, DEFAULT
+
+  Returns VALUE if the current value is the empty string otherwise the
+  current value is returned.
 
 **DEL_PARAM(NAME)**
   .. index:: Filter, DEL_PARAM

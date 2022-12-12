@@ -130,6 +130,9 @@ package body Templates_Parser is
          --  Add an HTTP parameter to the string, add the '&' parameter
          --  separator if needed.
 
+         Alternate,
+         --  Returns parameter if value is not null
+
          BR_2_EOL,
          --  Replaces all <BR> HTML tags by a given end-of-line sequence
 
@@ -147,6 +150,9 @@ package body Templates_Parser is
 
          Contract,
          --  Replaces a suite of spaces by a single space character
+
+         Default,
+         --  Returns parameter if value is empty
 
          Del_Param,
          --  Delete an HTTP parameter from the string, removes the '&'
@@ -394,6 +400,11 @@ package body Templates_Parser is
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;
 
+      function Alternate
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
       function BR_2_EOL
         (S : String;
          C : not null access Filter_Context;
@@ -420,6 +431,11 @@ package body Templates_Parser is
          P : Parameter_Data := No_Parameter) return String;
 
       function Contract
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
+      function Default
         (S : String;
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;

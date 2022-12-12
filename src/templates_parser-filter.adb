@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2018, AdaCore                     --
+--                     Copyright (C) 2003-2022, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -103,6 +103,8 @@ package body Filter is
    Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
    Wrap_Token          : aliased constant String := "WRAP";
    Yes_No_Token        : aliased constant String := "YES_NO";
+   Default_Token       : aliased constant String := "DEFAULT";
+   Alternate_Token     : aliased constant String := "ALTERNATE";
 
    --  Filters Table
 
@@ -128,6 +130,9 @@ package body Filter is
          Add_Param      =>
            (Add_Param_Token'Access,      Add_Param'Access),
 
+         Alternate      =>
+           (Alternate_Token'Access,      Alternate'Access),
+
          BR_2_EOL       =>
            (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
 
@@ -145,6 +150,9 @@ package body Filter is
 
          Contract       =>
            (Contract_Token'Access,       Contract'Access),
+
+         Default        =>
+           (Default_Token'Access,        Default'Access),
 
          Del_Param      =>
            (Del_Param_Token'Access,      Del_Param'Access),
@@ -342,6 +350,28 @@ package body Filter is
          return S & '&' & Param;
       end if;
    end Add_Param;
+
+   ---------------
+   -- Alternate --
+   ---------------
+
+   function Alternate
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+   begin
+      if P = No_Parameter then
+         raise Template_Error with "missing parameter for ALTERNATE filter";
+      end if;
+
+      if S = "" then
+         return "";
+      else
+         return To_String (P.S);
+      end if;
+   end Alternate;
 
    --------------
    -- BR_2_EOL --
@@ -569,6 +599,28 @@ package body Filter is
          return Result (Result'First .. R);
       end if;
    end Contract;
+
+   -------------
+   -- Default --
+   -------------
+
+   function Default
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+   begin
+      if P = No_Parameter then
+         raise Template_Error with "missing parameter for DEFAULT filter";
+      end if;
+
+      if S = "" then
+         return To_String (P.S);
+      else
+         return S;
+      end if;
+   end Default;
 
    ---------------
    -- Del_Param --

@@ -1,7 +1,7 @@
 ############################################################################
 #                              Ada Web Server                              #
 #                                                                          #
-#                     Copyright (C) 2003-2017, AdaCore                     #
+#                     Copyright (C) 2003-2022, AdaCore                     #
 #                                                                          #
 #  This is free software;  you can redistribute it  and/or modify it       #
 #  under terms of the  GNU General Public License as published  by the     #
@@ -24,18 +24,18 @@ endif
 
 build:
 	$(GPRBUILD) -q -p -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
-		$(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
+		$(foreach v,PRJ_TARGET PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 
-test:  build
+test: build
 	ADA_PROJECT_PATH="$(abspath $(CURDIR)/..)" \
 	PATH=.:${PATH} \
-	$(foreach v,PRJ_BUILD TARGET TP_XMLADA,$(v)="$($(v))") \
+	$(foreach v,PRJ_TARGET PRJ_BUILD TARGET TP_XMLADA,$(v)="$($(v))") \
 	./testsuite.py --jobs=4
 
 clean:
 	-$(GPRCLEAN) -XLIBRARY_TYPE=$(DEFAULT_LIBRARY_TYPE) \
-		$(foreach v,PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
+		$(foreach v,PRJ_TARGET PRJ_BUILD TARGET VERSION,"-X$(v)=$($(v))") \
 		--subdirs=$(SDIR)/$(DEFAULT_LIBRARY_TYPE) -Pregtests
 	rm -fr out
 	rm -f *.pyc

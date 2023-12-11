@@ -5044,8 +5044,8 @@ package body Templates_Parser is
                                    (Cursor_Tag, Name, Path => (1 => 1));
 
                                  if D = 1 and then L1 = 1 then
-                                    --  Not a composite tag
-                                    return 0;
+                                    --  Not a composite tag, but a standard tag
+                                    return 1;
 
                                  elsif K = 1 then
                                     return L1;

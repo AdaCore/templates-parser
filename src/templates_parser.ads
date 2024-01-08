@@ -265,6 +265,14 @@ package Templates_Parser is
    --  doing [T1 := T2 & Assoc] will add Assoc into T2 and set T1 as an
    --  alias. This is designed this way for efficiency.
 
+   function "&" (Left, Right : Translate_Set) return Translate_Set;
+   --  Merge Right Translate_Set into Left and return Left with all
+   --  association in Right added. Note that "&" will modify its
+   --  first parameter Left. It is intended to be used as [T := T & T2],
+   --  doing [T1 := T2 & T3] will add all associations from T3 into T2
+   --  and set T1 as an alias of T2. This is designed this way for
+   --  efficiency.
+
    function "+" (Item : Association) return Translate_Set
      with Inline => True,
           Post   => Size ("+"'Result) = 1;

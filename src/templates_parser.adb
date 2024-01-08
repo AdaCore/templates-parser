@@ -1307,6 +1307,16 @@ package body Templates_Parser is
       return T;
    end "&";
 
+   function "&" (Left, Right : Translate_Set) return Translate_Set is
+      T : Translate_Set := Left;
+   begin
+      for A of Right.Set.all loop
+         Insert (T, A);
+      end loop;
+
+      return T;
+   end "&";
+
    ---------
    -- "+" --
    ---------

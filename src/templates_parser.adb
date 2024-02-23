@@ -1151,15 +1151,13 @@ package body Templates_Parser is
       else
          T.Data.Last.Next := Item;
          T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => T.Data.Nested_Level,
-            Separator    => T.Data.Separator,
-            Head         => T.Data.Head,
-            Last         => Item,
-            Tag_Nodes    => null,
-            Values       => null);
+           (@ with delta
+              Count     => @.Count + 1,
+              Min       => Natural'Min (@.Min, 1),
+              Max       => Natural'Max (@.Max, 1),
+              Last      => Item,
+              Tag_Nodes => null,
+              Values    => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, Data => T.Data);
       end if;
@@ -1191,15 +1189,13 @@ package body Templates_Parser is
 
       else
          T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
-            Nested_Level => T.Data.Nested_Level,
-            Separator    => T.Data.Separator,
-            Head         => Item,
-            Last         => T.Data.Last,
-            Tag_Nodes    => null,
-            Values       => null);
+           (@ with delta
+              Count     => @.Count + 1,
+              Min       => Natural'Min (@.Min, 1),
+              Max       => Natural'Max (@.Max, 1),
+              Head      => Item,
+              Tag_Nodes => null,
+              Values    => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
       end if;
@@ -1232,17 +1228,16 @@ package body Templates_Parser is
          T.Data.Last.Next := Item;
 
          T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, T_Size),
-            Max          => Natural'Max (T.Data.Max, T_Size),
-            Nested_Level =>
-              Positive'Max
-                (T.Data.Nested_Level, Value.Data.Nested_Level + 1),
-            Separator    => T.Data.Separator,
-            Head         => T.Data.Head,
-            Last         => Item,
-            Tag_Nodes    => null,
-            Values       => null);
+           (@ with delta
+              Count        => @.Count + 1,
+              Min          => Natural'Min (@.Min, T_Size),
+              Max          => Natural'Max (@.Max, T_Size),
+              Nested_Level =>
+                Positive'Max
+                  (T.Data.Nested_Level, Value.Data.Nested_Level + 1),
+              Last         => Item,
+              Tag_Nodes    => null,
+              Values       => null);
 
          return (Ada.Finalization.Controlled with T.Ref_Count, T.Data);
       end if;
@@ -1425,11 +1420,14 @@ package body Templates_Parser is
       end if;
 
       Unchecked_Free (T.Data.Tag_Nodes);
-      T.Data.Tag_Nodes := null;
-      T.Data.Count     := T.Data.Count + 1;
-      T.Data.Min       := Natural'Min (T.Data.Min, T_Size);
-      T.Data.Max       := Natural'Max (T.Data.Max, T_Size);
-      T.Data.Last      := Item;
+
+      T.Data.all :=
+        (@ with delta
+           Count     => @.Count + 1,
+           Tag_Nodes => null,
+           Min       => Natural'Min (@.Min, T_Size),
+           Max       => Natural'Max (@.Max, T_Size),
+           Last      => Item);
    end Append;
 
    procedure Append (T : in out Tag; Value : Unbounded_String) is
@@ -1446,11 +1444,14 @@ package body Templates_Parser is
       end if;
 
       Unchecked_Free (T.Data.Tag_Nodes);
-      T.Data.Tag_Nodes := null;
-      T.Data.Count     := T.Data.Count + 1;
-      T.Data.Min       := Natural'Min (T.Data.Min, 1);
-      T.Data.Max       := Natural'Max (T.Data.Max, 1);
-      T.Data.Last      := Item;
+
+      T.Data.all :=
+        (@ with delta
+           Count     => @.Count + 1,
+           Tag_Nodes => null,
+           Min       => Natural'Min (@.Min, 1),
+           Max       => Natural'Max (@.Max, 1),
+           Last      => Item);
    end Append;
 
    procedure Append (T : in out Tag; Value : String) is
@@ -5403,21 +5404,7 @@ package body Templates_Parser is
          function NS
            (State : Parse_State; Line : Natural) return Parse_State is
          begin
-            return (Parse_State'(State.P_Size,
-                    State.Cursor,
-                    State.Max_Lines,
-                    State.Max_Expand,
-                    State.Reverse_Index,
-                    State.Table_Level,
-                    State.Inline_Sep,
-                    State.Filename,
-                    Line,
-                    State.Blocks_Count,
-                    State.I_Params,
-                    State.F_Params,
-                    State.Block,
-                    State.Terse_Table,
-                    State.Parent));
+            return (Parse_State'(State with delta Line => Line));
          end NS;
 
          ---------------------------
@@ -5952,20 +5939,16 @@ package body Templates_Parser is
                   end if;
 
                   Analyze (T.Blocks,
-                           Parse_State'(State.F_Params'Length,
-                                        State.Cursor,
-                                        Max_Lines, Max_Expand,
-                                        T.Reverse_Index,
-                                        State.Table_Level + 1,
-                                        State.Inline_Sep,
-                                        State.Filename,
-                                        T.Line,
-                                        T.Blocks_Count,
-                                        State.I_Params,
-                                        State.F_Params,
-                                        Empty_Block_State,
-                                        T.Terse,
-                                        L_State'Unchecked_Access));
+                           Parse_State'(State with delta
+                               Max_Lines     => Max_Lines,
+                               Max_Expand    => Max_Expand,
+                               Reverse_Index => T.Reverse_Index,
+                               Table_Level   => State.Table_Level + 1,
+                               Line          => T.Line,
+                               Blocks_Count  => T.Blocks_Count,
+                               Block         => Empty_Block_State,
+                               Terse_Table   => T.Terse,
+                               Parent        => L_State'Unchecked_Access));
 
                   --  Align_On attribute present
 
@@ -6063,37 +6046,21 @@ package body Templates_Parser is
 
                            Analyze
                              (Block.Common,
-                              Parse_State'(State.F_Params'Length,
-                                           New_Cursor,
-                                           State.Max_Lines, State.Max_Expand,
-                                           State.Reverse_Index,
-                                           State.Table_Level,
-                                           State.Inline_Sep,
-                                           State.Filename,
-                                           Block.Line,
-                                           State.Blocks_Count,
-                                           State.I_Params,
-                                           State.F_Params,
-                                           Empty_Block_State,
-                                           State.Terse_Table,
-                                           L_State'Unchecked_Access));
+                              Parse_State'
+                                (State with delta
+                                   Cursor => New_Cursor,
+                                   Line   => Block.Line,
+                                   Block  => Empty_Block_State,
+                                   Parent => L_State'Unchecked_Access));
 
                            Analyze
                              (Block.Sections,
-                              Parse_State'(State.F_Params'Length,
-                                           New_Cursor,
-                                           State.Max_Lines, State.Max_Expand,
-                                           State.Reverse_Index,
-                                           State.Table_Level,
-                                           State.Inline_Sep,
-                                           State.Filename,
-                                           Block.Line,
-                                           State.Blocks_Count,
-                                           State.I_Params,
-                                           State.F_Params,
-                                           B_State (B),
-                                           State.Terse_Table,
-                                           L_State'Unchecked_Access));
+                              Parse_State'
+                                (State with delta
+                                   Cursor => New_Cursor,
+                                   Line   => Block.Line,
+                                   Block  => B_State (B),
+                                   Parent => L_State'Unchecked_Access));
 
                            Block := @.Next;
                            B := @ + 1;
@@ -6109,20 +6076,9 @@ package body Templates_Parser is
             when Section_Stmt =>
                Analyze
                  (State.Block.Section.Next,
-                  Parse_State'(State.F_Params'Length,
-                               State.Cursor,
-                               State.Max_Lines, State.Max_Expand,
-                               State.Reverse_Index,
-                               State.Table_Level,
-                               State.Inline_Sep,
-                               State.Filename,
-                               T.Line,
-                               State.Blocks_Count,
-                               State.I_Params,
-                               State.F_Params,
-                               State.Block,
-                               State.Terse_Table,
-                               L_State'Unchecked_Access));
+                  Parse_State'(State with delta
+                                 Line   => T.Line,
+                                 Parent => L_State'Unchecked_Access));
 
             when Include_Stmt =>
                Analyze (T.I_Included);
@@ -6137,21 +6093,10 @@ package body Templates_Parser is
                   Start_Pos := Length (Results) + 1;
 
                   Analyze (T.I_Block,
-                           Parse_State'(State.F_Params'Length,
-                             Cursor        => State.Cursor,
-                             Max_Lines     => State.Max_Lines,
-                             Max_Expand    => State.Max_Expand,
-                             Reverse_Index => State.Reverse_Index,
-                             Table_Level   => State.Table_Level,
-                             Inline_Sep    => T.Sep,
-                             Filename      => State.Filename,
-                             Line          => T.Line,
-                             Blocks_Count  => State.Blocks_Count,
-                             I_Params      => State.I_Params,
-                             F_Params      => State.F_Params,
-                             Block         => State.Block,
-                             Terse_Table   => State.Terse_Table,
-                             Parent        => L_State'Unchecked_Access));
+                           Parse_State'(State with delta
+                             Inline_Sep => T.Sep,
+                             Line       => T.Line,
+                             Parent     => L_State'Unchecked_Access));
 
                   Flush;
                   End_Pos := Length (Results);

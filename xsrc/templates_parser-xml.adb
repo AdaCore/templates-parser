@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2017, AdaCore                     --
+--                     Copyright (C) 2004-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -207,7 +207,7 @@ package body Templates_Parser.XML is
 
          procedure Process_Composite is
 
-            Null_Indice : constant Indices := (2 .. 1 => 0);
+            Null_Indice : constant Indices := [2 .. 1 => 0];
 
             procedure Output_Tag (T : Tag; Pos : Indices := Null_Indice);
             --  Output recursively tag T, Pos is the current indices for the
@@ -281,9 +281,9 @@ package body Templates_Parser.XML is
             begin
                while N /= null loop
                   if N.Kind = Value then
-                     Output_Value (Pos & Indices'(1 => P), To_Utf8 (N.V));
+                     Output_Value (Pos & Indices'[P], To_Utf8 (N.V));
                   else
-                     Output_Tag (N.VS.all, Pos & Indices'(1 => P));
+                     Output_Tag (N.VS.all, Pos & Indices'[P]);
                   end if;
 
                   P := P + 1;

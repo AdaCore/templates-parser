@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2022, AdaCore                     --
+--                     Copyright (C) 1999-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,8 +26,6 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
-
-pragma Ada_2012;
 
 with Ada.Calendar;
 with Ada.Characters.Handling;
@@ -1220,7 +1218,7 @@ package body Templates_Parser is
             Min          => Natural'Min (T.Data.Min, T_Size),
             Max          => Natural'Max (T.Data.Max, T_Size),
             Nested_Level => Value.Data.Nested_Level + 1,
-            Separator    => To_Unbounded_String ((1 => ASCII.LF)),
+            Separator    => To_Unbounded_String ([ASCII.LF]),
             Head         => Item,
             Last         => Item,
             Tag_Nodes    => null,
@@ -1250,7 +1248,7 @@ package body Templates_Parser is
 
    function "&" (T : Tag; Value : Character) return Tag is
    begin
-      return T & String'(1 => Value);
+      return T & String'[Value];
    end "&";
 
    function "&" (T : Tag; Value : Boolean) return Tag is
@@ -1270,7 +1268,7 @@ package body Templates_Parser is
 
    function "&" (Value : Character; T : Tag) return Tag is
    begin
-      return String'(1 => Value) & T;
+      return String'[Value] & T;
    end "&";
 
    function "&" (Value : Boolean; T : Tag) return Tag is
@@ -1343,7 +1341,7 @@ package body Templates_Parser is
 
    function "+" (Value : Character) return Tag is
    begin
-      return +String'(1 => Value);
+      return +String'[Value];
    end "+";
 
    function "+" (Value : Boolean) return Tag is
@@ -1366,7 +1364,7 @@ package body Templates_Parser is
    begin
       Result := Result & Value;
       --  This is an embedded tag, set separator to LF
-      Set_Separator (Result, (1 => ASCII.LF));
+      Set_Separator (Result, [ASCII.LF]);
       return Result;
    end "+";
 
@@ -1415,7 +1413,7 @@ package body Templates_Parser is
    begin
       if T.Data.Head = null then
          T.Data.Nested_Level := Value.Data.Nested_Level + 1;
-         T.Data.Separator    := To_Unbounded_String ((1 => ASCII.LF));
+         T.Data.Separator    := To_Unbounded_String ([ASCII.LF]);
          T.Data.Head         := Item;
       else
          T.Data.Last.Next := Item;
@@ -1460,7 +1458,7 @@ package body Templates_Parser is
 
    procedure Append (T : in out Tag; Value : Character) is
    begin
-      Append (T, To_Unbounded_String (String'(1 => Value)));
+      Append (T, To_Unbounded_String (String'[Value]));
    end Append;
 
    procedure Append (T : in out Tag; Value : Boolean) is
@@ -2423,7 +2421,7 @@ package body Templates_Parser is
       Result : Unbounded_String;
       Found  : Boolean;
    begin
-      Field (T, (1 => N), 0, Result, Found);
+      Field (T, [N], 0, Result, Found);
 
       if not Found then
          raise Constraint_Error;
@@ -3090,7 +3088,7 @@ package body Templates_Parser is
 
             declare
                P_Set : constant Parameter_Set :=
-                         (0 => To_Unbounded_String (File))
+                         [To_Unbounded_String (File)]
                          & Get_Parameters
                            (Get_All_Parameters (At_Least_One => False));
             begin
@@ -3698,7 +3696,7 @@ package body Templates_Parser is
                            when 'n' =>
                               if Utils.Is_Windows then
                                  K := K + 2;
-                                 R (K - 1 .. K) := (ASCII.CR, ASCII.LF);
+                                 R (K - 1 .. K) := [ASCII.CR, ASCII.LF];
                               else
                                  K := K + 1;
                                  R (K) := ASCII.LF;
@@ -4014,7 +4012,7 @@ package body Templates_Parser is
       end record;
 
       Empty_State : constant Parse_State :=
-                      (0, (1 .. Max_Nested_Levels => 0), 0, 0, False, 0,
+                      (0, [1 .. Max_Nested_Levels => 0], 0, 0, False, 0,
                        Null_Unbounded_String, Null_Unbounded_String, 0, 0,
                        null, No_Parameter, Empty_Block_State, False, null);
 
@@ -4181,7 +4179,7 @@ package body Templates_Parser is
             Text  : String) return String
          is
             Cols   : array (Positive range 1 .. Positive (Seps.Length))
-                       of Natural := (others => 0);
+                       of Natural := [others => 0];
             LS     : Positive := Text'First;  -- line start
             LE     : Natural  := 0;           -- line end
             Result : Unbounded_String;        -- Text aligned
@@ -4190,7 +4188,7 @@ package body Templates_Parser is
 
             Check_Cols : while LS < Text'Last loop
                --  Check for line start .. end
-               LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
+               LE := Strings.Fixed.Index (Text, String'[ASCII.LF], LS);
 
                if LE = 0 then
                   LE := Text'Last;
@@ -4255,7 +4253,7 @@ package body Templates_Parser is
 
             Set_Cols : while LS < Text'Last loop
                --  Check for line start .. end
-               LE := Strings.Fixed.Index (Text, String'(1 => ASCII.LF), LS);
+               LE := Strings.Fixed.Index (Text, String'[ASCII.LF], LS);
 
                if LE = 0 then
                   LE := Text'Last;
@@ -4345,7 +4343,7 @@ package body Templates_Parser is
                                    or else
                                   T.Var.Attribute.Attr /= Data.Indent
                                    or else
-                                  Index (Value, String'(1 => ASCII.LF)) = 0
+                                  Index (Value, String'[ASCII.LF]) = 0
                               then
                                  Add (Value);
 
@@ -4362,7 +4360,7 @@ package body Templates_Parser is
                                  begin
                                     Indent_Content : loop
                                        P := Index
-                                         (V, String'(1 => ASCII.LF), P);
+                                         (V, String'[ASCII.LF], P);
 
                                        exit Indent_Content when P = 0;
 
@@ -4681,7 +4679,7 @@ package body Templates_Parser is
             end F_Xor;
 
             Op_Table     : constant array (Expr.Ops) of Ops_Fct :=
-                             (Expr.O_And   => F_And'Access,
+                             [Expr.O_And   => F_And'Access,
                               Expr.O_Or    => F_Or'Access,
                               Expr.O_Xor   => F_Xor'Access,
                               Expr.O_Sup   => F_Sup'Access,
@@ -4691,10 +4689,10 @@ package body Templates_Parser is
                               Expr.O_Equal => F_Equ'Access,
                               Expr.O_Diff  => F_Diff'Access,
                               Expr.O_In    => F_In'Access,
-                              Expr.O_Cat   => F_Cat'Access);
+                              Expr.O_Cat   => F_Cat'Access];
 
             U_Op_Table   : constant array (Expr.U_Ops) of U_Ops_Fct :=
-                             (Expr.O_Not => F_Not'Access);
+                             [Expr.O_Not => F_Not'Access];
 
             Is_Composite : aliased Boolean;
 
@@ -5051,7 +5049,7 @@ package body Templates_Parser is
                                  end if;
 
                                  L1 := Dynamic.Length
-                                   (Cursor_Tag, Name, Path => (1 => 1));
+                                   (Cursor_Tag, Name, Path => [1]);
 
                                  if D = 1 and then L1 = 1 then
                                     --  Not a composite tag, but a standard tag
@@ -5061,7 +5059,7 @@ package body Templates_Parser is
                                     return L1;
 
                                  else
-                                    return Max (Name, K - 1, (1 => 1));
+                                    return Max (Name, K - 1, [1]);
                                  end if;
                               end if;
                            end;
@@ -5424,7 +5422,7 @@ package body Templates_Parser is
             Result : Unbounded_String := T.Before;
          begin
             Next := Strings.Fixed.Index
-              (Block (Start .. Block'Last), String'(1 => ASCII.LF));
+              (Block (Start .. Block'Last), String'[ASCII.LF]);
 
             --  No end-of-line separator, let's handle the whole line
 
@@ -5456,7 +5454,7 @@ package body Templates_Parser is
                Start := Pos + 1;
 
                Next := Strings.Fixed.Index
-                 (Block (Start .. Block'Last), String'(1 => ASCII.LF));
+                 (Block (Start .. Block'Last), String'[ASCII.LF]);
 
                --  Add Sep or handle the last line
 
@@ -5652,7 +5650,6 @@ package body Templates_Parser is
                            end loop;
 
                            if Valid_Cursor then
-
                               L := Dynamic.Length
                                 (Cursor_Tag, Name,
                                  1 & State.Cursor
@@ -5662,7 +5659,7 @@ package body Templates_Parser is
                                  --  A standard tag (single value)
                                  return Data.Translate
                                    (Var,
-                                    Dynamic.Value (Cursor_Tag, Name, (1 => 1)),
+                                    Dynamic.Value (Cursor_Tag, Name, [1]),
                                     C'Access);
 
                               else
@@ -6016,7 +6013,7 @@ package body Templates_Parser is
             when Section_Block =>
                declare
                   B_State : array (1 .. State.Blocks_Count) of Block_State :=
-                              (others => Empty_Block_State);
+                              [others => Empty_Block_State];
                   B       : Positive;
                   Mark    : Natural := 0;
                begin

@@ -49,7 +49,7 @@ abstract project TP_Shared is
    --------------
 
    Common_Options :=
-     ("-gnat12", "-gnatwcfijkmruv", "-gnaty3abcdefhiIklmnoOprstx");
+     ("-gnat2022", "-gnatwcfijkmruv", "-gnaty3abcdefhiIklmnoOprstx");
    --  Common options used for the Debug and Release modes
 
    Debug_Options :=

@@ -127,7 +127,7 @@ package body Templates_Parser.Utils is
 
          loop
             Last := Strings.Fixed.Index
-              (PATH, String'(1 => Path_Separator), From => First);
+              (PATH, String'[Path_Separator], From => First);
 
             if Last = 0 then
                Idx := PATH'Last;

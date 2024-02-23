@@ -189,12 +189,13 @@ package body Data is
                if Pos > Str'First and then Str (Pos - 1) /= '\' then
                   --  This is not a quoted character
                   if Str (Pos) = ')' then
-                     Count := Count - 1;
+                     Count := @ - 1;
                   elsif Str (Pos) = '(' then
-                     Count := Count + 1;
+                     Count := @ + 1;
                   end if;
                end if;
-               Pos := Pos - 1;
+
+               Pos := @ - 1;
             end loop;
 
             if Pos = Str'First then
@@ -272,14 +273,14 @@ package body Data is
                loop
                   exit when K > Str'Last;
 
-                  I := I + 1;
+                  I := @ + 1;
 
                   if Str (K) = '\'
                     and then K < Str'Last
                     and then not (Str (K + 1) in '0' .. '9')
                   then
                      --  An escaped character, skip the backslash
-                     K := K + 1;
+                     K := @ + 1;
 
                      --  Handle some special escaped characters \n \r \t
 
@@ -294,7 +295,7 @@ package body Data is
                      S (I) := Str (K);
                   end if;
 
-                  K := K + 1;
+                  K := @ + 1;
                end loop;
 
                return S (S'First .. I);
@@ -443,9 +444,9 @@ package body Data is
                raise Template_Error with "NO_DYNAMIC must be the first filter";
             end if;
 
-            K := K + 1;
+            K := @ + 1;
 
-            Stop := Stop - 1;
+            Stop := @ - 1;
          end loop;
 
          return new Filter.Set'(FS (FS'First .. K - 1));
@@ -645,11 +646,11 @@ package body Data is
 
          for K in R.Parameters'Range loop
             if R.Parameters (K) /= null then
-               R.Parameters (K) := Data.Clone (R.Parameters (K));
+               R.Parameters (K) := Data.Clone (@);
             end if;
          end loop;
 
-         R.Def := Clone (R.Def);
+         R.Def := Clone (@);
       end if;
 
       return R;
@@ -664,15 +665,16 @@ package body Data is
 
          loop
             if N.Kind = Data.Var then
-               N.Var := Data.Clone (N.Var);
+               N.Var := Data.Clone (@);
             end if;
 
             exit when N.Next = null;
 
-            N.Next := new Node'(N.Next.all);
+            N.Next := new Node'(@.all);
             N := N.Next;
          end loop;
       end if;
+
       return Root;
    end Clone;
 
@@ -925,7 +927,7 @@ package body Data is
    begin
       while T /= null loop
          P := T;
-         T := T.Next;
+         T := @.Next;
 
          case P.Kind is
             when Var  => Release (P.Var);

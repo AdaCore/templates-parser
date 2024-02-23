@@ -1128,15 +1128,15 @@ package body Templates_Parser is
                  (Templates_Parser.Value, null,
                   V => To_Unbounded_String (Value));
    begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
+      T.Ref_Count.all := @ + 1;
 
       Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, 1),
-            Max          => Natural'Max (T.Data.Max, 1),
+           (Count        => @.Count + 1,
+            Min          => Natural'Min (@.Min, 1),
+            Max          => Natural'Max (@.Max, 1),
             Nested_Level => 1,
             Separator    => To_Unbounded_String (Default_Separator),
             Head         => Item,
@@ -1169,13 +1169,13 @@ package body Templates_Parser is
                  (Templates_Parser.Value, T.Data.Head,
                   V => To_Unbounded_String (Value));
    begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
+      T.Ref_Count.all := @ + 1;
 
       Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
-           (T.Data.Count + 1,
+           (Count        => @.Count + 1,
             Min          => Natural'Min (T.Data.Min, 1),
             Max          => Natural'Max (T.Data.Max, 1),
             Nested_Level => 1,
@@ -1208,15 +1208,15 @@ package body Templates_Parser is
                  new Tag_Node'(Value_Set, null, new Tag'(Value));
       T_Size : constant Natural := Size (Value);
    begin
-      T.Ref_Count.all := T.Ref_Count.all + 1;
+      T.Ref_Count.all := @ + 1;
 
       Unchecked_Free (T.Data.Tag_Nodes);
 
       if T.Data.Head = null then
          T.Data.all :=
-           (T.Data.Count + 1,
-            Min          => Natural'Min (T.Data.Min, T_Size),
-            Max          => Natural'Max (T.Data.Max, T_Size),
+           (Count        => @.Count + 1,
+            Min          => Natural'Min (@.Min, T_Size),
+            Max          => Natural'Max (@.Max, T_Size),
             Nested_Level => Value.Data.Nested_Level + 1,
             Separator    => To_Unbounded_String ([ASCII.LF]),
             Head         => Item,
@@ -1389,7 +1389,7 @@ package body Templates_Parser is
          Initialize (Set);
 
       else
-         Set.Ref_Count.all := Set.Ref_Count.all + 1;
+         Set.Ref_Count.all := @ + 1;
       end if;
 
       Templates_Parser_Tasking.Unlock;
@@ -1398,7 +1398,7 @@ package body Templates_Parser is
    overriding procedure Adjust (T : in out Tag) is
    begin
       Templates_Parser_Tasking.Lock;
-      T.Ref_Count.all := T.Ref_Count.all + 1;
+      T.Ref_Count.all := @ + 1;
       Templates_Parser_Tasking.Unlock;
    end Adjust;
 
@@ -1606,11 +1606,11 @@ package body Templates_Parser is
 
       procedure Clone (Included : in out Included_File_Info) is
       begin
-         Included.Filename := Data.Clone (Included.Filename);
-         Included.Params :=
-           new Data.Parameter_Set'(Included.Params.all);
+         Included.Filename := Data.Clone (@);
+         Included.Params := new Data.Parameter_Set'(@.all);
+
          for K in Included.Params'Range loop
-            Included.Params (K) := Data.Clone (Included.Params (K));
+            Included.Params (K) := Data.Clone (@);
          end loop;
       end Clone;
 
@@ -1621,38 +1621,38 @@ package body Templates_Parser is
 
          case N.Kind is
             when Text =>
-               N.Text := Data.Clone (N.Text);
+               N.Text := Data.Clone (@);
 
             when Info =>
-               N.I_File := Clone (N.I_File);
+               N.I_File := Clone (@);
 
             when If_Stmt =>
-               N.Cond := Expr.Clone (N.Cond);
-               N.N_True := Clone (N.N_True);
-               N.N_False := Clone (N.N_False);
+               N.Cond := Expr.Clone (@);
+               N.N_True := Clone (@);
+               N.N_False := Clone (@);
 
             when Table_Stmt =>
-               N.Blocks := Clone (N.Blocks);
+               N.Blocks := Clone (@);
 
             when Extends_Stmt =>
-               N.N_Extends := Clone (N.N_Extends);
+               N.N_Extends := Clone (@);
                Clone (N.E_Included);
 
             when Block_Stmt =>
-               N.N_Block := Clone (N.N_Block);
+               N.N_Block := Clone (@);
 
             when Section_Block =>
-               N.Common := Clone (N.Common);
-               N.Sections := Clone (N.Sections);
+               N.Common := Clone (@);
+               N.Sections := Clone (@);
 
             when Section_Stmt =>
-               N.N_Section := Clone (N.N_Section);
+               N.N_Section := Clone (@);
 
             when Inline_Stmt =>
-               N.I_Block := Clone (N.I_Block);
+               N.I_Block := Clone (@);
 
             when Set_Stmt =>
-               N.Def := Definitions.Clone (N.Def);
+               N.Def := Definitions.Clone (@);
 
             when Include_Stmt =>
                Clone (N.I_Included);
@@ -1661,7 +1661,7 @@ package body Templates_Parser is
                null;
          end case;
 
-         N.Next := Clone (N.Next);
+         N.Next := Clone (@);
       end if;
 
       return N;
@@ -1734,7 +1734,7 @@ package body Templates_Parser is
          begin
             for K in T.Data.Tag_Nodes'Range loop
                T.Data.Tag_Nodes (K) := P;
-               P := P.Next;
+               P := @.Next;
             end loop;
          end;
       end if;
@@ -1897,7 +1897,7 @@ package body Templates_Parser is
 
       if Ref_Count /= null then
          Templates_Parser_Tasking.Lock;
-         Ref_Count.all := Ref_Count.all - 1;
+         Ref_Count.all := @ - 1;
 
          if Ref_Count.all = 0 then
             Unchecked_Free (Ref_Count);
@@ -1917,7 +1917,7 @@ package body Templates_Parser is
       if Ref_Count /= null then
          Templates_Parser_Tasking.Lock;
 
-         Ref_Count.all := Ref_Count.all - 1;
+         Ref_Count.all := @ - 1;
 
          if Ref_Count.all = 0 then
             Templates_Parser_Tasking.Unlock;
@@ -2175,7 +2175,7 @@ package body Templates_Parser is
               and then (Parameters (First) = ' '
                         or else Parameters (First) = ASCII.HT)
             loop
-               First := First + 1;
+               First := @ + 1;
             end loop;
 
             --  Look for end of parameter
@@ -2197,7 +2197,7 @@ package body Templates_Parser is
 
                --  Skip quotes
 
-               First := First + 1;
+               First := @ + 1;
                Last := Next_Last - 1;
 
             else
@@ -2207,7 +2207,7 @@ package body Templates_Parser is
                  and then Parameters (Next_Last) /= ' '
                  and then Parameters (Next_Last) /= ASCII.HT
                loop
-                  Next_Last := Next_Last + 1;
+                  Next_Last := @ + 1;
                end loop;
 
                if Next_Last /= Parameters'Last then
@@ -2228,7 +2228,7 @@ package body Templates_Parser is
               and then (Parameters (First) = ' '
                         or else Parameters (First) = ASCII.HT)
             loop
-               First := First + 1;
+               First := @ + 1;
             end loop;
 
             --  Check if parameters are specified with a name
@@ -2242,7 +2242,7 @@ package body Templates_Parser is
             Get_Next_Parameter (Parameters, First, Last, Next_Last);
 
             Result (Index) := To_Unbounded_String (Parameters (First .. Last));
-            Index := Index + 1;
+            Index := @ + 1;
 
             Last := Next_Last;
             First := Last + 1;
@@ -2309,7 +2309,7 @@ package body Templates_Parser is
                   while EP > Parameters'First
                     and then Parameters (EP) = ' '
                   loop
-                     EP := EP - 1;
+                     EP := @ - 1;
                   end loop;
 
                   SP := EP;
@@ -2321,7 +2321,7 @@ package body Templates_Parser is
                       (Parameters (SP - 1),
                        Strings.Maps.Constants.Decimal_Digit_Set)
                   loop
-                     SP := SP - 1;
+                     SP := @ - 1;
                   end loop;
 
                   if Parameters (EP) in '0' .. '9' then
@@ -2329,7 +2329,7 @@ package body Templates_Parser is
                        (Count, Natural'Value (Parameters (SP .. EP)));
                   end if;
 
-                  Sep := Sep + 1;
+                  Sep := @ + 1;
                end loop;
             end;
 
@@ -2346,10 +2346,10 @@ package body Templates_Parser is
                while Index < Parameters'Last
                  and then Parameters (Index + 1) = ' '
                loop
-                  Index := Index + 1;
+                  Index := @ + 1;
                end loop;
 
-               Count := Count + 1;
+               Count := @ + 1;
             end loop;
          end if;
       end if;
@@ -2580,14 +2580,14 @@ package body Templates_Parser is
             end if;
 
          else
-            Start := Start + Offset;
+            Start := @ + Offset;
          end if;
 
          if Buffer (Last) = ASCII.CR then
             --  Last character is a DOS CR (certainly because the template
             --  file is in DOS format), ignore it as this is not part of the
             --  parameter.
-            Last := Last - 1;
+            Last := @ - 1;
          end if;
 
          return Strings.Fixed.Trim
@@ -2612,7 +2612,7 @@ package body Templates_Parser is
          if Start = 0 or else Start + Offset >= Last then
             return Null_Unbounded_String;
          else
-            Start := Start + Offset;
+            Start := @ + Offset;
          end if;
 
          Start := Strings.Fixed.Index (Buffer (Start .. Last), Blank, Outside);
@@ -2628,7 +2628,7 @@ package body Templates_Parser is
          if Stop = 0 then
             Stop := Last;
          else
-            Stop := Stop - 1;
+            Stop := @ - 1;
          end if;
 
          return To_Unbounded_String (Buffer (Start .. Stop));
@@ -2650,7 +2650,7 @@ package body Templates_Parser is
 
          else
             loop
-               Line := Line + 1;
+               Line := @ + 1;
 
                Input.Get_Line (File, Buffer, Last);
 
@@ -2788,7 +2788,7 @@ package body Templates_Parser is
 
                else
                   In_Param := True;
-                  Count := Count + 1;
+                  Count := @ + 1;
 
                   --  New parameter is the one looked for, record start
 
@@ -2858,17 +2858,18 @@ package body Templates_Parser is
 
                if Escape = 0 then
                   if Buffer (K) = '(' then
-                     Level := Level + 1;
+                     Level := @ + 1;
                   elsif Buffer (K) = ')' then
-                     Level := Level - 1;
+                     Level := @ - 1;
                   end if;
+
                   exit Look_For_Char when Buffer (K) = Char and then Level = 0;
 
                else
                   Escape := Escape - 1;
                end if;
 
-               K := K + 1;
+               K := @ + 1;
             end loop Look_For_Char;
 
             return K;
@@ -2928,15 +2929,15 @@ package body Templates_Parser is
                if Escape = 0 then
                   if Buffer (K) = '(' then
                      if Level = 0 then
-                        Count := Count + 1;
+                        Count := @ + 1;
                      end if;
                      Level := Level + 1;
                   elsif Buffer (K) = ')' then
-                     Level := Level - 1;
+                     Level := @ - 1;
                   end if;
 
                else
-                  Escape := Escape - 1;
+                  Escape := @ - 1;
                end if;
             end loop;
 
@@ -3005,9 +3006,10 @@ package body Templates_Parser is
             S : Tree    := T;
          begin
             while S /= null loop
-               C := C + 1;
+               C := @ + 1;
                S := S.Next;
             end loop;
+
             return C;
          end Count_Blocks;
 
@@ -3020,9 +3022,10 @@ package body Templates_Parser is
             S : Tree    := T;
          begin
             while S /= null loop
-               C := C + 1;
+               C := @ + 1;
                S := S.N_Section;
             end loop;
+
             return C;
          end Count_Sections;
 
@@ -3083,7 +3086,7 @@ package body Templates_Parser is
             First := First + 11;
 
             while First < Last and then Buffer (First) = ' ' loop
-               First := First + 1;
+               First := @ + 1;
             end loop;
 
             declare
@@ -3178,7 +3181,7 @@ package body Templates_Parser is
 
             Buffer (1 .. Last - Utils.BOM_Utf8'Length) :=
               Buffer (1 + Utils.BOM_Utf8'Length .. Last);
-            Last := Last - Utils.BOM_Utf8'Length;
+            Last := @ - Utils.BOM_Utf8'Length;
 
             --  Continued parsing the remaining of the line
 
@@ -3689,37 +3692,38 @@ package body Templates_Parser is
                      if P (N) = '\' and then N < P'Last then
                         case P (N + 1) is
                            when '\' =>
-                              K := K + 1;
+                              K := @ + 1;
                               R (K) := '\';
-                              N := N + 1;
+                              N := @ + 1;
 
                            when 'n' =>
                               if Utils.Is_Windows then
-                                 K := K + 2;
+                                 K := @ + 2;
                                  R (K - 1 .. K) := [ASCII.CR, ASCII.LF];
                               else
-                                 K := K + 1;
+                                 K := @ + 1;
                                  R (K) := ASCII.LF;
                               end if;
-                              N := N + 1;
+
+                              N := @ + 1;
 
                            when 'r' =>
-                              K := K + 1;
+                              K := @ + 1;
                               R (K) := ASCII.LF;
-                              N := N + 1;
+                              N := @ + 1;
 
                            when others =>
-                              K := K + 1;
-                              R (K) := P (N + 1);
-                              N := N + 1;
+                              K := @ + 1;
+                              N := @ + 1;
+                              R (K) := P (N);
                         end case;
 
                      else
-                        K := K + 1;
+                        K := @ + 1;
                         R (K) := P (N);
                      end if;
 
-                     N := N + 1;
+                     N := @ + 1;
                   end loop;
 
                   return To_Unbounded_String (R (R'First .. K));
@@ -4166,7 +4170,7 @@ package body Templates_Parser is
                Append (Results, S);
             else
                Buffer (Last + 1 .. Last + S'Length) := S;
-               Last := Last + S'Length;
+               Last := @ + S'Length;
             end if;
          end Add;
 
@@ -4229,7 +4233,7 @@ package body Templates_Parser is
                               --  need to add spaces before the separator for
                               --  it to be aligned with the current column.
 
-                              Ofs := Ofs + (Cols (I) - NP);
+                              Ofs := @ + (Cols (I) - NP);
                            end if;
                         end if;
 
@@ -4237,10 +4241,10 @@ package body Templates_Parser is
 
                         Cols (I) := Natural'Max (Cols (I), NP);
 
-                        P := P + S'Length;
+                        P := @ + S'Length;
                      end if;
 
-                     I := I + 1;
+                     I := @ + 1;
                   end loop;
                end Update_Cols;
 
@@ -4289,10 +4293,10 @@ package body Templates_Parser is
                            Offset := Offset + Spaces;
                         end if;
 
-                        P := P + S'Length;
+                        P := @ + S'Length;
                      end if;
 
-                     I := I + 1;
+                     I := @ + 1;
                   end loop;
 
                   Append (Result, Line);
@@ -4364,14 +4368,14 @@ package body Templates_Parser is
 
                                        exit Indent_Content when P = 0;
 
-                                       P := P + 1;
+                                       P := @ + 1;
 
                                        Insert
                                          (V,
                                           Before   => P,
                                           New_Item => String'(Spaces * ' '));
 
-                                       P := P + Spaces;
+                                       P := @ + Spaces;
                                     end loop Indent_Content;
 
                                     Add (To_String (V));
@@ -5045,7 +5049,7 @@ package body Templates_Parser is
                                     --  that the index needs to be updated so
                                     --  that the outer table tag statement will
                                     --  be the first var index.
-                                    K := K - (D - Var_Level);
+                                    K := @ - (D - Var_Level);
                                  end if;
 
                                  L1 := Dynamic.Length
@@ -5251,7 +5255,7 @@ package body Templates_Parser is
                   N_Section : constant Natural := T.Blocks.Sections_Count;
                begin
                   if Result mod N_Section /= 0 then
-                     Result := Result + N_Section - (Result mod N_Section);
+                     Result := @ + N_Section - (@ mod N_Section);
                   end if;
                end;
             end if;
@@ -5489,7 +5493,7 @@ package body Templates_Parser is
                   if To_Delete > 0 then
                      if Last >= To_Delete then
                         --  Enough data into the buffer, remove from it
-                        Last := Last - To_Delete;
+                        Last := @ - To_Delete;
 
                      else
                         --  Remove remaining data from results
@@ -5865,7 +5869,7 @@ package body Templates_Parser is
 
                      while N /= null and then N.Kind = Text loop
                         Analyze (N.Text);
-                        N := N.Next;
+                        N := @.Next;
                      end loop;
 
                   exception
@@ -5901,7 +5905,7 @@ package body Templates_Parser is
                            end if;
                         end Handle_Set;
 
-                        N := N.Next;
+                        N := @.Next;
                      end loop;
                   end;
 
@@ -6044,8 +6048,8 @@ package body Templates_Parser is
                               B_State (B) := (1, Block.Sections);
                            else
                               B_State (B) :=
-                                (B_State (B).Section_Number + 1,
-                                 B_State (B).Section.N_Section);
+                                (@.Section_Number + 1,
+                                 @.Section.N_Section);
                            end if;
 
                            Analyze
@@ -6082,8 +6086,8 @@ package body Templates_Parser is
                                            State.Terse_Table,
                                            L_State'Unchecked_Access));
 
-                           Block := Block.Next;
-                           B := B + 1;
+                           Block := @.Next;
+                           B := @ + 1;
                         end loop;
 
                         if State.Terse_Table then
@@ -6313,7 +6317,7 @@ package body Templates_Parser is
             begin
                while I /= null loop
                   O := I;
-                  I := I.Next;
+                  I := @.Next;
                   Unchecked_Free (O);
                end loop;
             end;
@@ -6333,7 +6337,7 @@ package body Templates_Parser is
                while N /= null and then N.Kind = Text loop
                   Data.Release (N.Text);
                   Tmp := N;
-                  N := N.Next;
+                  N := @.Next;
                   Unchecked_Free (Tmp);
                end loop;
 
@@ -6525,7 +6529,7 @@ package body Templates_Parser is
             when Data.Var  => Append (Results, Translate (P.Var));
          end case;
 
-         P := P.Next;
+         P := @.Next;
       end loop;
 
       Data.Release (T);

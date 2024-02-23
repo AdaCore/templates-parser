@@ -558,12 +558,12 @@ package body Templates_Parser.XML is
                   for K in 1 .. Max loop
                      Cursor := Data.Find (Key & "_" & Utils.Image (K));
                      exit when Cursor = Str_Map.No_Element;
-                     T := T & Str_Map.Element (Cursor);
+                     T := @ & Str_Map.Element (Cursor);
                   end loop;
 
                else
                   for K in 1 .. Max loop
-                     T := T & B_Tag ("_" & Utils.Image (K), N + 1);
+                     T := @ & B_Tag ("_" & Utils.Image (K), N + 1);
                   end loop;
                end if;
 
@@ -649,9 +649,9 @@ package body Templates_Parser.XML is
                      Cursor := Map.Find (K_Img);
 
                      if Str_Map.Has_Element (Cursor) then
-                        T := T & Str_Map.Element (Cursor);
+                        T := @ & Str_Map.Element (Cursor);
                      else
-                        T := T & "";
+                        T := @ & "";
                      end if;
                   end;
                end loop;
@@ -804,7 +804,7 @@ package body Templates_Parser.XML is
                   N_Name : constant String := Local_Name (C);
                begin
                   if N_Name = "Ind" then
-                     Count := Count + 1;
+                     Count := @ + 1;
 
                      declare
                         Atts    : constant DOM.Core.Named_Node_Map

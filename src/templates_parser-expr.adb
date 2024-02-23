@@ -509,28 +509,28 @@ package body Expr is
          --  Check symbolic operators
          elsif Expression (Index) = '(' then
             Current_Token := (Kind => Open_Par);
-            Index := Index + 1;
+            Index := @ + 1;
 
          elsif Expression (Index) = ')' then
             Current_Token := (Kind => Close_Par);
-            Index := Index + 1;
+            Index := @ + 1;
 
          elsif Expression (Index) = '=' then
             Current_Token := (Kind => Binary_Op, Bin_Op => O_Equal);
-            Index := Index + 1;
+            Index := @ + 1;
 
          elsif Expression (Index) = '/'
            and then Index < Expression'Last
            and then Expression (Index + 1) = '='
          then
             Current_Token := (Kind => Binary_Op, Bin_Op => O_Diff);
-            Index := Index + 2;
+            Index := @ + 2;
 
          elsif Expression (Index) = '<' then
             Index := Index + 1;
             if Expression (Index) = '=' then
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Einf);
-               Index := Index + 1;
+               Index := @ + 1;
             else
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Inf);
             end if;
@@ -539,7 +539,7 @@ package body Expr is
             Index := Index + 1;
             if Expression (Index) = '=' then
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Esup);
-               Index := Index + 1;
+               Index := @ + 1;
             else
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Sup);
             end if;
@@ -582,7 +582,7 @@ package body Expr is
                exit when Expression (Index) /= '/'
                  or else Expression (Index + 1) = '=';
 
-               Index := Index + 1;
+               Index := @ + 1;
             end loop;
 
             declare

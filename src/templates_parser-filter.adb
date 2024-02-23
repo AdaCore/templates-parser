@@ -393,16 +393,17 @@ package body Filter is
               or else (J + 4 <= S'Last and then S (J + 3 .. J + 4) = "/>"))
          then
             Result (K .. K + EOL'Length - 1) := EOL;
-            K := K + EOL'Length;
+            K := @ + EOL'Length;
+
             if S (J + 3) = '>' then
-               J := J + 4;
+               J := @ + 4;
             else
-               J := J + 5;
+               J := @ + 5;
             end if;
          else
             Result (K) := S (J);
-            K := K + 1;
-            J := J + 1;
+            K := @ + 1;
+            J := @ + 1;
          end if;
 
          exit when J > S'Last;
@@ -578,14 +579,13 @@ package body Filter is
             if Space = False then
                Space := True;
 
-               R := R + 1;
+               R := @ + 1;
                Result (R) := ' ';
             end if;
-
          else
             Space := False;
 
-            R := R + 1;
+            R := @ + 1;
             Result (R) := S (K);
          end if;
 
@@ -658,7 +658,7 @@ package body Filter is
                Last  := Pos;
 
                while Last < S'Last and then S (Last) /= '&' loop
-                  Last := Last + 1;
+                  Last := @ + 1;
                end loop;
 
                if Last = S'Last then
@@ -860,12 +860,12 @@ package body Filter is
 
          for P in reverse TS'First .. N loop
             Result (K) := TS (P);
-            K := K - 1;
+            K := @ - 1;
             Count := Count + 1;
 
             if Count mod 3 = 0 and then P /= TS'First then
                Result (K) := Separator;
-               K := K - 1;
+               K := @ - 1;
             end if;
          end loop;
 
@@ -997,10 +997,10 @@ package body Filter is
          for J in S'Range loop
             if S (J) = ASCII.LF then
                Result (K .. K + 4) := "<br/>";
-               K := K + 5;
+               K := @ + 5;
             else
                Result (K) := S (J);
-               K := K + 1;
+               K := @ + 1;
             end if;
          end loop;
 
@@ -1352,7 +1352,7 @@ package body Filter is
 
       for K in S'Range loop
          if not (S (K) = ' ') then
-            L := L + 1;
+            L := @ + 1;
             Result (L) := S (K);
          end if;
       end loop;
@@ -1656,12 +1656,12 @@ package body Filter is
                   By => S (Matches (K).First .. Matches (K).Last));
 
                --  Position N just after the inserted replacement text
-               N := N + Matches (K).Last - Matches (K).First + 1;
+               N := @ + Matches (K).Last - Matches (K).First + 1;
             end loop;
          end loop;
 
          --  Prepend the beginning of string before the match
-         Result := Result
+         Result := @
            & To_Unbounded_String (S (Current .. Matches (0).First - 1))
            & Temp;
 
@@ -2023,15 +2023,14 @@ package body Filter is
       Check_Null_Parameter (P);
 
       for I in S'Range loop
-         Last := Last + 1;
+         Last := @ + 1;
 
          if S (I) = ' ' then
             Result (Last .. Last + Nbsp_Token'Length - 1) := Nbsp_Token;
-            Last := Last + Nbsp_Token'Length - 1;
+            Last := @ + Nbsp_Token'Length - 1;
          else
             Result (Last) := S (I);
          end if;
-
       end loop;
 
       return Result (1 .. Last);
@@ -2088,7 +2087,7 @@ package body Filter is
          else
             --  Go to the next character
 
-            Last := Last + 1;
+            Last := @ + 1;
          end if;
       end loop;
 

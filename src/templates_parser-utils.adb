@@ -329,18 +329,18 @@ package body Templates_Parser.Utils is
                         --  and leave this loop
                         exit Nested_Tag;
                      else
-                        N := N - 1;
+                        N := @ - 1;
                      end if;
 
                   elsif T (Last) = '(' then
-                     N := N + 1;
+                     N := @ + 1;
                   end if;
 
                   if Last = T'Last then
                      --  Matching parent not found
                      raise Constraint_Error;
                   else
-                     Last := Last + 1;
+                     Last := @ + 1;
                   end if;
                end loop Nested_Tag;
 
@@ -354,7 +354,7 @@ package body Templates_Parser.Utils is
                     and then T (Last + 1) = '"'
                   then
                      --  Skip this quote
-                     Last := Last + 1;
+                     Last := @ + 1;
 
                   elsif T (Last) = '"'
                     and then (Last = T'Last or else T (Last + 1) /= '"')
@@ -369,7 +369,8 @@ package body Templates_Parser.Utils is
                      --  No matching quote
                      raise Constraint_Error;
                   end if;
-                  Last := Last + 1;
+
+                  Last := @ + 1;
                end loop Quoted_Value;
 
                --  Here we must have either a ',' or ")"
@@ -381,7 +382,7 @@ package body Templates_Parser.Utils is
                end if;
             end if;
 
-            K := K + 1;
+            K := @ + 1;
          end loop;
 
          return Result;

@@ -1590,10 +1590,12 @@ package body Templates_Parser is
    -----------
 
    procedure Clear (T : in out Tag) is
-      NT : Tag;
    begin
-      --  Here we just separate current vector from the new one
-      T := NT;
+      T := Tag'(Ada.Finalization.Controlled with
+                  Ref_Count =>
+                    new Integer'(1),
+                  Data      =>
+                    new Tag_Data'(0, Natural'Last, 0, 1, others => <>));
    end Clear;
 
    -----------
@@ -1601,8 +1603,13 @@ package body Templates_Parser is
    -----------
 
    function Clone (T : Tree) return Tree is
+
       procedure Clone (Included : in out Included_File_Info);
       --  Clone the fields in Included
+
+      -----------
+      -- Clone --
+      -----------
 
       procedure Clone (Included : in out Included_File_Info) is
       begin
@@ -1810,6 +1817,7 @@ package body Templates_Parser is
             Append (Result, Image (N.all));
             N := N.Next;
          end loop;
+
          return Result;
       end Image;
 
@@ -2268,6 +2276,7 @@ package body Templates_Parser is
                exit;
             end if;
          end loop;
+
          return Index;
       end Next;
 
@@ -2369,12 +2378,8 @@ package body Templates_Parser is
 
    overriding procedure Initialize (T : in out Tag) is
    begin
-      T.Ref_Count         := new Integer'(1);
-      T.Data              := new Tag_Data;
-      T.Data.Count        := 0;
-      T.Data.Min          := Natural'Last;
-      T.Data.Max          := 0;
-      T.Data.Nested_Level := 1;
+      T.Ref_Count := new Integer'(1);
+      T.Data      := new Tag_Data'(0, Natural'Last, 0, 1, others => <>);
    end Initialize;
 
    ------------
@@ -4826,7 +4831,8 @@ package body Templates_Parser is
          is
             use type Data.Internal_Tag;
             use type Dynamic.Lazy_Tag_Access;
-            Name :  constant String := To_String (Var.Name);
+
+            Name : constant String := To_String (Var.Name);
             Pos  : Association_Map.Cursor;
          begin
             Pos := Translations.Set.Find (Name);
@@ -4988,6 +4994,7 @@ package body Templates_Parser is
                         end if;
                         P := P.Next;
                      end loop;
+
                      return Result;
                   end Max;
 
@@ -4997,7 +5004,7 @@ package body Templates_Parser is
                   is
                      use type Dynamic.Path;
                      Result : Natural := 0;
-                     L : Natural;
+                     L      : Natural;
                   begin
                      L := Dynamic.Length (Cursor_Tag, Name, Path);
 
@@ -5099,8 +5106,8 @@ package body Templates_Parser is
                            else
                               --  All other cases here
                               declare
-                                 K : constant Positive
-                                   := Tk.Comp_Value.Data.Nested_Level - N + 1;
+                                 K : constant Positive :=
+                                       Tk.Comp_Value.Data.Nested_Level - N + 1;
                                  --  K is the variable indice for which
                                  --  the number of items is looked for.
                               begin
@@ -6121,8 +6128,8 @@ package body Templates_Parser is
 
             when Inline_Stmt =>
                declare
-                  Start_Pos  : Positive;
-                  End_Pos    : Natural;
+                  Start_Pos : Positive;
+                  End_Pos   : Natural;
                begin
                   Flush;
                   Start_Pos := Length (Results) + 1;
@@ -6465,6 +6472,7 @@ package body Templates_Parser is
       for K in Table'Range loop
          Insert (Set, Table (K));
       end loop;
+
       return Set;
    end To_Set;
 

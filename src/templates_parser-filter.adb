@@ -473,11 +473,13 @@ package body Filter is
             Upper := False;
          else
             Result (K) := Characters.Handling.To_Lower (S (K));
+
             if Result (K) = ' ' or else Result (K) = '_' then
                Upper := True;
             end if;
          end if;
       end loop;
+
       return Result;
    end Capitalize;
 
@@ -528,6 +530,7 @@ package body Filter is
             Result (K) := ' ';
          end if;
       end loop;
+
       return Result;
    end Clean_Text;
 
@@ -573,9 +576,7 @@ package body Filter is
       Check_Null_Parameter (P);
 
       for K in S'Range loop
-
          if S (K) = ' ' then
-
             if Space = False then
                Space := True;
 
@@ -641,14 +642,13 @@ package body Filter is
 
       else
          declare
-            Pos : constant Natural := Strings.Fixed.Index (S, Param);
+            Pos         : constant Natural := Strings.Fixed.Index (S, Param);
             First, Last : Natural;
          begin
             if Pos < E
               or else
                 (Pos + Len <= S'Last
-                 and then S (Pos + Len) /= '='
-                 and then S (Pos + Len) /= '&')
+                 and then S (Pos + Len) not in '=' | '&')
             then
                --  The parameter is not present, return original string
                return S;
@@ -896,8 +896,10 @@ package body Filter is
             U := Filter_Map.Element (C);
             Unchecked_Free (U.CBT);
          end if;
+
          Filter_Map.Next (C);
       end loop;
+
       Filter_Map.Clear (User_Filters);
    end Free_Filters;
 
@@ -927,9 +929,12 @@ package body Filter is
 
       else
          case P.Mode is
-            when Str          => return '(' & To_String (P.S) & ')';
-            when Regexp       => return '(' & To_String (P.R_Str) & ')';
-            when Regpat       => return
+            when Str          =>
+               return '(' & To_String (P.S) & ')';
+            when Regexp       =>
+               return '(' & To_String (P.R_Str) & ')';
+            when Regpat       =>
+               return
                  '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
             when Slice        =>
                return '(' & Utils.Image (P.First)
@@ -1145,14 +1150,15 @@ package body Filter is
 
             if Table (K).Name.all < Name then
                F := K;
+
                if F /= Mode'Last then
                   F := Mode'Succ (F);
                end if;
 
                exit when Table (F).Name.all > Name;
-
             else
                L := K;
+
                if L /= Mode'First then
                   L := Mode'Pred (L);
                end if;
@@ -1726,6 +1732,7 @@ package body Filter is
       for K in S'Range loop
          Result (Result'Last - K + Result'First) := S (K);
       end loop;
+
       return Result;
    end Reverse_Data;
 
@@ -2078,8 +2085,8 @@ package body Filter is
             else
                --  There is only one word on the line: cut it
 
-                  Append (Result, S (First .. Last - 1) & ASCII.LF);
-                  First := Last;
+               Append (Result, S (First .. Last - 1) & ASCII.LF);
+               First := Last;
             end if;
 
             Last_Space := Last_Space_Init;

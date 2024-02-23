@@ -709,6 +709,7 @@ package body Templates_Parser.XML is
                      Insert (Result, Parse_Labels (C));
                   end if;
                end;
+
                C := Next_Sibling (C);
             end loop;
 
@@ -787,6 +788,7 @@ package body Templates_Parser.XML is
                         Found := True;
                      end if;
                   end;
+
                   C := Next_Sibling (C);
                end loop;
 
@@ -807,8 +809,8 @@ package body Templates_Parser.XML is
                      Count := @ + 1;
 
                      declare
-                        Atts    : constant DOM.Core.Named_Node_Map
-                          := DOM.Core.Nodes.Attributes (C);
+                        Atts    : constant DOM.Core.Named_Node_Map :=
+                                    DOM.Core.Nodes.Attributes (C);
                         K       : Natural;
                      begin
                         if Length (Atts) = 1
@@ -833,6 +835,7 @@ package body Templates_Parser.XML is
                      Error (C, "Entity Ind or V expected, found " & N_Name);
                   end if;
                end;
+
                C := Next_Sibling (C);
             end loop;
 
@@ -881,6 +884,7 @@ package body Templates_Parser.XML is
                   Parse_Tag (C, Name, Description);
                end if;
             end;
+
             C := Next_Sibling (C);
          end loop;
 
@@ -985,8 +989,8 @@ package body Templates_Parser.XML is
          while C /= null loop
             declare
                N_Name  : constant String := Local_Name (C);
-               N_Value : constant String
-                 := Get_Value (DOM.Core.Nodes.First_Child (C));
+               N_Value : constant String :=
+                           Get_Value (DOM.Core.Nodes.First_Child (C));
             begin
                if N_Name = "Name" then
                   Name := To_Unbounded_String (N_Value);
@@ -1029,6 +1033,7 @@ package body Templates_Parser.XML is
                     (C, "SimpleTag or CompositeTag expected, found" & Name);
                end if;
             end;
+
             C := Next_Sibling (C);
          end loop;
 

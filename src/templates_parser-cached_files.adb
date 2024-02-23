@@ -63,7 +63,7 @@ package body Cached_Files is
    procedure Add
      (Filename : String;
       T        : Tree;
-      Old      :    out Tree)
+      Old      : out Tree)
    is
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
 
@@ -255,6 +255,7 @@ package body Cached_Files is
          pragma Assert (T.Info.Next /= T.C_Info);
          Release (T.C_Info, Include => False);
       end if;
+
       Templates_Parser_Tasking.Unlock;
    exception
       when others =>
@@ -319,6 +320,7 @@ package body Cached_Files is
          if not Result then
             return False;
          end if;
+
          P := P.Next;
       end loop;
 

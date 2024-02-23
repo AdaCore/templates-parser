@@ -56,8 +56,8 @@ package Templates_Parser.Input is
 
    procedure Get_Line
      (File   : File_Type;
-      Buffer :    out String;
-      Last   :    out Natural);
+      Buffer : out String;
+      Last   : out Natural);
    --  Like Text_IO.Get_Line. Raises Text_IO.Status_Error is file is not open
 
 private

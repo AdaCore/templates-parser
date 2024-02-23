@@ -473,6 +473,7 @@ package body Data is
                   --  ??? check for string literal
                   exit when Tag (Stop + 1) = '(' or else Stop = Tag'First;
                end loop;
+
                MP_Start := Stop + 1;
             end if;
 
@@ -870,6 +871,7 @@ package body Data is
                   else
                      Text_IO.Put (Value);
                   end if;
+
                   if Value'Length > 0 then
                      NL := Value (Value'Last) = ASCII.LF;
                   else
@@ -953,6 +955,7 @@ package body Data is
       for K in P'Range loop
          P (K) := Data.Parse (To_String (Parameters (K)), 0);
       end loop;
+
       return P;
    end To_Data_Parameters;
 

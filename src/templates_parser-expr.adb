@@ -546,8 +546,8 @@ package body Expr is
 
          elsif Expression (Index) = '"' then
             --  This is a string, return it
-            Current_Token
-              := (Kind => Value, Start => Index + 1, Stop => Index);
+            Current_Token :=
+              (Kind => Value, Start => Index + 1, Stop => Index);
 
             loop
                if Current_Token.Stop = Expression'Last then
@@ -558,6 +558,7 @@ package body Expr is
                   Current_Token.Stop := Current_Token.Stop + 1;
                end if;
             end loop;
+
             Index := Current_Token.Stop + 2;
 
          else
@@ -632,13 +633,13 @@ package body Expr is
                      Error ("variable end not found");
 
                   else
-                     Current_Token
-                       := (Kind  => Var, Start => I, Stop  => Index - 1);
+                     Current_Token :=
+                       (Kind  => Var, Start => I, Stop  => Index - 1);
                   end if;
 
                else
-                  Current_Token
-                    := (Kind => Value, Start => I, Stop => Index - 1);
+                  Current_Token :=
+                    (Kind => Value, Start => I, Stop => Index - 1);
                end if;
             end;
          end if;
@@ -683,6 +684,7 @@ package body Expr is
             end case;
 
             Next_Token;
+
             if Current_Token.Kind = Binary_Op
               and then Current_Token.Bin_Op = O_Cat
             then
@@ -702,6 +704,7 @@ package body Expr is
             when Open_Par =>
                Next_Token;
                Result := Expr;
+
                if Current_Token.Kind = Close_Par then
                   Next_Token;
                   return Result;

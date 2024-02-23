@@ -221,6 +221,7 @@ package body Templates_Parser.Utils is
          Result : Unbounded_String;
       begin
          Append (Result, """");
+
          for K in Str'Range loop
             if Str (K) = '"' then
                Append (Result, """""");
@@ -228,7 +229,9 @@ package body Templates_Parser.Utils is
                Append (Result, Str (K));
             end if;
          end loop;
+
          Append (Result, """");
+
          return To_String (Result);
       end Quote;
 
@@ -300,6 +303,7 @@ package body Templates_Parser.Utils is
                Append (Result, Str (K));
             end if;
          end loop;
+
          return To_String (Result);
       end Clear_Quote;
 

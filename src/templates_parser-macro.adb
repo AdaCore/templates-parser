@@ -123,6 +123,7 @@ package body Macro is
          Set.Delete (Name);
          Release (Old);
       end if;
+
       Set.Insert (Name, T);
    end Register;
 
@@ -216,6 +217,7 @@ package body Macro is
                   Old := C;
                   Prev.Next := C.Next;
                end if;
+
                Data.Release (Old, Single => True);
             end Delete_Node;
 
@@ -230,6 +232,7 @@ package body Macro is
                New_Node : constant Data.Tree := Data.Clone (Parameters (Ref));
             begin
                New_Node.Next := C.Next;
+
                if Prev = null then
                   Data.Release (T, Single => True);
                   T := New_Node;
@@ -393,7 +396,6 @@ package body Macro is
                case Parameters (Ref).Kind is
                   when Data.Text =>
                      --  We need to evaluate the value against the filters
-
                      Replace
                        (T,
                         Data.Translate

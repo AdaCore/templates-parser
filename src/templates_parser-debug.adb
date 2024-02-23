@@ -65,6 +65,7 @@ package body Templates_Parser.Debug is
             else
                Print (N.VS.all, K + 1);
             end if;
+
             N := N.Next;
          end loop;
 

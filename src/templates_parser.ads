@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2019, AdaCore                     --
+--                     Copyright (C) 1999-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -27,7 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-pragma Ada_2012;
+pragma Ada_2022;
 
 with Ada.Finalization;
 with Ada.Strings.Unbounded;
@@ -632,7 +632,7 @@ private
    Null_Association : constant Association :=
                         (Std, Null_Unbounded_String, Null_Unbounded_String);
 
-   No_Translation   : constant Translate_Table := (2 .. 1 => Null_Association);
+   No_Translation   : constant Translate_Table := [2 .. 1 => Null_Association];
 
    -----------
    -- Debug --
@@ -676,6 +676,6 @@ private
 
    type User_Filter is abstract tagged null record;
 
-   No_Parameter : constant Parameter_Set := (1 .. 0 => <>);
+   No_Parameter : constant Parameter_Set := [1 .. 0 => <>];
 
 end Templates_Parser;

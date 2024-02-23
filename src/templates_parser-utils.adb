@@ -27,6 +27,8 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
+pragma Ada_2022;
+
 with Ada.Command_Line;
 with Ada.Directories;
 with Ada.Strings.Fixed;
@@ -127,7 +129,7 @@ package body Templates_Parser.Utils is
 
          loop
             Last := Strings.Fixed.Index
-              (PATH, String'(1 => Path_Separator), From => First);
+              (PATH, String'[Path_Separator], From => First);
 
             if Last = 0 then
                Idx := PATH'Last;

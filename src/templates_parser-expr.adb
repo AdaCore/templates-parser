@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2019, AdaCore                     --
+--                     Copyright (C) 1999-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -27,7 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-pragma Ada_2012;
+pragma Ada_2022;
 
 with Ada.Text_IO;
 
@@ -312,7 +312,7 @@ package body Expr is
       end F_Xor;
 
       Op_Table   : constant array (Expr.Ops) of Ops_Fct :=
-                     (Expr.O_And   => F_And'Access,
+                     [Expr.O_And   => F_And'Access,
                       Expr.O_Or    => F_Or'Access,
                       Expr.O_Xor   => F_Xor'Access,
                       Expr.O_Sup   => F_Sup'Access,
@@ -322,10 +322,10 @@ package body Expr is
                       Expr.O_Equal => F_Equ'Access,
                       Expr.O_Diff  => F_Diff'Access,
                       Expr.O_In    => F_In'Access,
-                      Expr.O_Cat   => F_Cat'Access);
+                      Expr.O_Cat   => F_Cat'Access];
 
       U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
-                     (Expr.O_Not => F_Not'Access);
+                     [Expr.O_Not => F_Not'Access];
 
    begin
       case E.Kind is

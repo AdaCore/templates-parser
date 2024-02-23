@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2022, AdaCore                     --
+--                     Copyright (C) 2003-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -27,7 +27,7 @@
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
 
-pragma Ada_2012;
+pragma Ada_2022;
 
 pragma Wide_Character_Encoding (Brackets);
 
@@ -108,166 +108,166 @@ package body Filter is
 
    --  Filters Table
 
-   Table : constant array (Mode) of Filter_Record
-     := (Multiply       =>
-           (Multiply_Token'Access,       Multiply'Access),
+   Table : constant array (Mode) of Filter_Record :=
+             [Multiply       =>
+                (Multiply_Token'Access,       Multiply'Access),
 
-         Plus           =>
-           (Plus_Token'Access,           Plus'Access),
+              Plus           =>
+                (Plus_Token'Access,           Plus'Access),
 
-         Minus          =>
-           (Minus_Token'Access,          Minus'Access),
+              Minus          =>
+                (Minus_Token'Access,          Minus'Access),
 
-         Divide         =>
-           (Divide_Token'Access,         Divide'Access),
+              Divide         =>
+                (Divide_Token'Access,         Divide'Access),
 
-         Absolute       =>
-           (Abs_Token'Access,            Absolute'Access),
+              Absolute       =>
+                (Abs_Token'Access,            Absolute'Access),
 
-         Add            =>
-           (Add_Token'Access,            Plus'Access),
+              Add            =>
+                (Add_Token'Access,            Plus'Access),
 
-         Add_Param      =>
-           (Add_Param_Token'Access,      Add_Param'Access),
+              Add_Param      =>
+                (Add_Param_Token'Access,      Add_Param'Access),
 
-         Alternate      =>
-           (Alternate_Token'Access,      Alternate'Access),
+              Alternate      =>
+                (Alternate_Token'Access,      Alternate'Access),
 
-         BR_2_EOL       =>
-           (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
+              BR_2_EOL       =>
+                (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
 
-         BR_2_LF        =>
-           (BR_2_LF_Token'Access,        BR_2_LF'Access),
+              BR_2_LF        =>
+                (BR_2_LF_Token'Access,        BR_2_LF'Access),
 
-         Capitalize     =>
-           (Capitalize_Token'Access,     Capitalize'Access),
+              Capitalize     =>
+                (Capitalize_Token'Access,     Capitalize'Access),
 
-         Clean_Text     =>
-           (Clean_Text_Token'Access,     Clean_Text'Access),
+              Clean_Text     =>
+                (Clean_Text_Token'Access,     Clean_Text'Access),
 
-         Coma_2_Point   =>
-           (Coma_2_Point_Token'Access,   Coma_2_Point'Access),
+              Coma_2_Point   =>
+                (Coma_2_Point_Token'Access,   Coma_2_Point'Access),
 
-         Contract       =>
-           (Contract_Token'Access,       Contract'Access),
+              Contract       =>
+                (Contract_Token'Access,       Contract'Access),
 
-         Default        =>
-           (Default_Token'Access,        Default'Access),
+              Default        =>
+                (Default_Token'Access,        Default'Access),
 
-         Del_Param      =>
-           (Del_Param_Token'Access,      Del_Param'Access),
+              Del_Param      =>
+                (Del_Param_Token'Access,      Del_Param'Access),
 
-         Div            =>
-           (Div_Token'Access,            Divide'Access),
+              Div            =>
+                (Div_Token'Access,            Divide'Access),
 
-         Exist          =>
-           (Exist_Token'Access,          Exist'Access),
+              Exist          =>
+                (Exist_Token'Access,          Exist'Access),
 
-         File_Exists    =>
-           (File_Exists_Token'Access,    File_Exists'Access),
+              File_Exists    =>
+                (File_Exists_Token'Access,    File_Exists'Access),
 
-         Format_Date    =>
-           (Format_Date_Token'Access,    Format_Date'Access),
+              Format_Date    =>
+                (Format_Date_Token'Access,    Format_Date'Access),
 
-         Format_Number  =>
-           (Format_Number_Token'Access,  Format_Number'Access),
+              Format_Number  =>
+                (Format_Number_Token'Access,  Format_Number'Access),
 
-         Is_Empty       =>
-           (Is_Empty_Token'Access,       Is_Empty'Access),
+              Is_Empty       =>
+                (Is_Empty_Token'Access,       Is_Empty'Access),
 
-         LF_2_BR        =>
-           (LF_2_BR_Token'Access,        LF_2_BR'Access),
+              LF_2_BR        =>
+                (LF_2_BR_Token'Access,        LF_2_BR'Access),
 
-         Lower          =>
-           (Lower_Token'Access,          Lower'Access),
+              Lower          =>
+                (Lower_Token'Access,          Lower'Access),
 
-         Match          =>
-           (Match_Token'Access,          Match'Access),
+              Match          =>
+                (Match_Token'Access,          Match'Access),
 
-         Max            =>
-           (Max_Token'Access,            Max'Access),
+              Max            =>
+                (Max_Token'Access,            Max'Access),
 
-         Min            =>
-           (Min_Token'Access,            Min'Access),
+              Min            =>
+                (Min_Token'Access,            Min'Access),
 
-         Modulo         =>
-           (Modulo_Token'Access,         Modulo'Access),
+              Modulo         =>
+                (Modulo_Token'Access,         Modulo'Access),
 
-         Mult           =>
-           (Mult_Token'Access,           Multiply'Access),
+              Mult           =>
+                (Mult_Token'Access,           Multiply'Access),
 
-         Neg            =>
-           (Neg_Token'Access,            Neg'Access),
+              Neg            =>
+                (Neg_Token'Access,            Neg'Access),
 
-         No_Digit       =>
-           (No_Digit_Token'Access,       No_Digit'Access),
+              No_Digit       =>
+                (No_Digit_Token'Access,       No_Digit'Access),
 
-         No_Dynamic     =>
-           (No_Dynamic_Token'Access,     No_Dynamic'Access),
+              No_Dynamic     =>
+                (No_Dynamic_Token'Access,     No_Dynamic'Access),
 
-         No_Letter      =>
-           (No_Letter_Token'Access,      No_Letter'Access),
+              No_Letter      =>
+                (No_Letter_Token'Access,      No_Letter'Access),
 
-         No_Space       =>
-           (No_Space_Token'Access,       No_Space'Access),
+              No_Space       =>
+                (No_Space_Token'Access,       No_Space'Access),
 
-         Oui_Non        =>
-           (Oui_Non_Token'Access,        Oui_Non'Access),
+              Oui_Non        =>
+                (Oui_Non_Token'Access,        Oui_Non'Access),
 
-         Point_2_Coma   =>
-           (Point_2_Coma_Token'Access,   Point_2_Coma'Access),
+              Point_2_Coma   =>
+                (Point_2_Coma_Token'Access,   Point_2_Coma'Access),
 
-         Repeat         =>
-           (Repeat_Token'Access,         Repeat'Access),
+              Repeat         =>
+                (Repeat_Token'Access,         Repeat'Access),
 
-         Replace        =>
-           (Replace_Token'Access,        Replace'Access),
+              Replace        =>
+                (Replace_Token'Access,        Replace'Access),
 
-         Replace_All    =>
-           (Replace_All_Token'Access,    Replace_All'Access),
+              Replace_All    =>
+                (Replace_All_Token'Access,    Replace_All'Access),
 
-         Replace_Param  =>
-           (Replace_Param_Token'Access,  Replace_Param'Access),
+              Replace_Param  =>
+                (Replace_Param_Token'Access,  Replace_Param'Access),
 
-         Invert         =>
-           (Reverse_Token'Access,        Reverse_Data'Access),
+              Invert         =>
+                (Reverse_Token'Access,        Reverse_Data'Access),
 
-         Size           =>
-           (Size_Token'Access,           Size'Access),
+              Size           =>
+                (Size_Token'Access,           Size'Access),
 
-         Slice          =>
-           (Slice_Token'Access,          Slice'Access),
+              Slice          =>
+                (Slice_Token'Access,          Slice'Access),
 
-         Strip          =>
-           (Strip_Token'Access,          Strip'Access),
+              Strip          =>
+                (Strip_Token'Access,          Strip'Access),
 
-         Sub            =>
-           (Sub_Token'Access,            Minus'Access),
+              Sub            =>
+                (Sub_Token'Access,            Minus'Access),
 
-         Trim           =>
-           (Trim_Token'Access,           Trim'Access),
+              Trim           =>
+                (Trim_Token'Access,           Trim'Access),
 
-         Upper          =>
-           (Upper_Token'Access,          Upper'Access),
+              Upper          =>
+                (Upper_Token'Access,          Upper'Access),
 
-         User_Defined   =>
-           (User_Defined_Token'Access,   User_Defined'Access),
+              User_Defined   =>
+                (User_Defined_Token'Access,   User_Defined'Access),
 
-         Web_Encode     =>
-           (Web_Encode_Token'Access,     Web_Encode'Access),
+              Web_Encode     =>
+                (Web_Encode_Token'Access,     Web_Encode'Access),
 
-         Web_Escape     =>
-           (Web_Escape_Token'Access,     Web_Escape'Access),
+              Web_Escape     =>
+                (Web_Escape_Token'Access,     Web_Escape'Access),
 
-         Web_NBSP       =>
-           (Web_NBSP_Token'Access,       Web_NBSP'Access),
+              Web_NBSP       =>
+                (Web_NBSP_Token'Access,       Web_NBSP'Access),
 
-         Wrap           =>
-           (Wrap_Token'Access,           Wrap'Access),
+              Wrap           =>
+                (Wrap_Token'Access,           Wrap'Access),
 
-         Yes_No         =>
-           (Yes_No_Token'Access,         Yes_No'Access)
-         );
+              Yes_No         =>
+                (Yes_No_Token'Access,         Yes_No'Access)
+             ];
 
    function Replace_One_Or_All
      (S   : String;
@@ -450,7 +450,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      return BR_2_EOL (S, String'(1 => ASCII.LF));
+      return BR_2_EOL (S, String'[ASCII.LF]);
    end BR_2_LF;
 
    ----------------
@@ -507,10 +507,10 @@ package body Filter is
       package L1 renames Ada.Characters.Latin_1;
 
       Non_ASCII : constant String :=
-                    (L1.Space, L1.LC_E_Acute, L1.LC_E_Grave,
+                    [L1.Space, L1.LC_E_Acute, L1.LC_E_Grave,
                      L1.LC_E_Circumflex, L1.LC_I_Circumflex,
                      L1.LC_I_Diaeresis, L1.LC_A_Grave,
-                     L1.LC_O_Circumflex, L1.LC_C_Cedilla);
+                     L1.LC_O_Circumflex, L1.LC_C_Cedilla];
 
       Clean_Set : constant Strings.Maps.Character_Set :=
                     Strings.Maps.Constants.Letter_Set

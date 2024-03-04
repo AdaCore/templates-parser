@@ -184,10 +184,10 @@ package body Templates_Parser.XML is
 
             else
                L := N - 1; -- Last character for the tag name
-               N := N + 4; -- First character after _DIM
+               N := @ + 4; -- First character after _DIM
 
                loop
-                  N := N + 1;
+                  N := @ + 1;
                   exit when Var (N) = '_' or else N = Var'Last;
 
                   if Var (N) not in '0' .. '9' then
@@ -286,8 +286,8 @@ package body Templates_Parser.XML is
                      Output_Tag (N.VS.all, Pos & Indices'[P]);
                   end if;
 
-                  P := P + 1;
-                  N := N.Next;
+                  P := @ + 1;
+                  N := @.Next;
                end loop;
             end Output_Tag;
 
@@ -465,7 +465,7 @@ package body Templates_Parser.XML is
          N := DOM.Core.Nodes.First_Child (Parent);
 
          while N /= null and then DOM.Core.Nodes.Node_Name (N) = "#text" loop
-            N := DOM.Core.Nodes.Next_Sibling (N);
+            N := DOM.Core.Nodes.Next_Sibling (@);
          end loop;
 
          return N;
@@ -493,7 +493,7 @@ package body Templates_Parser.XML is
          M : DOM.Core.Node := N;
       begin
          loop
-            M := DOM.Core.Nodes.Next_Sibling (M);
+            M := DOM.Core.Nodes.Next_Sibling (@);
             exit when M = null or else DOM.Core.Nodes.Node_Name (M) /= "#text";
          end loop;
 
@@ -614,7 +614,7 @@ package body Templates_Parser.XML is
                           and then Local_Name (Item (Atts, 0)) = "ind"
                         then
                            K   := Positive'Value (Node_Value (Item (Atts, 0)));
-                           Max := Natural'Max (Max, K);
+                           Max := Natural'Max (@, K);
 
                            Map.Insert
                              (Node_Value (Item (Atts, 0)),
@@ -636,7 +636,8 @@ package body Templates_Parser.XML is
                         Error (C, "Entity Label expected, found " & N_Name);
                      end if;
                   end;
-                  C := Next_Sibling (C);
+
+                  C := Next_Sibling (@);
                end loop;
 
                --  Now we have all labels indexed into the Map (key being the
@@ -710,7 +711,7 @@ package body Templates_Parser.XML is
                   end if;
                end;
 
-               C := Next_Sibling (C);
+               C := Next_Sibling (@);
             end loop;
 
             return Result;
@@ -789,7 +790,7 @@ package body Templates_Parser.XML is
                      end if;
                   end;
 
-                  C := Next_Sibling (C);
+                  C := Next_Sibling (@);
                end loop;
 
                if not Found then
@@ -885,7 +886,7 @@ package body Templates_Parser.XML is
                end if;
             end;
 
-            C := Next_Sibling (C);
+            C := Next_Sibling (@);
          end loop;
 
          if Name = Null_Unbounded_String then
@@ -923,7 +924,8 @@ package body Templates_Parser.XML is
                      "Entity Tag, Dim or Entry expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          --  Now we have all entities in the Data map
@@ -961,7 +963,8 @@ package body Templates_Parser.XML is
                   Error (C, "Entity Tag or V expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          Insert (Result, Assoc (To_String (Name), To_String (Value)));
@@ -1004,7 +1007,8 @@ package body Templates_Parser.XML is
                      "Entity Name or Description expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
       end Parse_Tag;
 
@@ -1034,7 +1038,7 @@ package body Templates_Parser.XML is
                end if;
             end;
 
-            C := Next_Sibling (C);
+            C := Next_Sibling (@);
          end loop;
 
          return T;

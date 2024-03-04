@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2014, AdaCore                     --
+--                     Copyright (C) 2004-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -247,7 +247,8 @@ package body Templates_Parser.Utils is
          else
             Append (Result, Image (N.VS.all));
          end if;
-         N := N.Next;
+
+         N := @.Next;
       end loop;
 
       return "(" & To_String (Result) & ")";

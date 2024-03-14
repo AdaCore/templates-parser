@@ -63,7 +63,7 @@ package body Cached_Files is
    procedure Add
      (Filename : String;
       T        : Tree;
-      Old      : out Tree)
+      Old      :    out Tree)
    is
       L_Filename : constant Unbounded_String := To_Unbounded_String (Filename);
 
@@ -128,7 +128,7 @@ package body Cached_Files is
                --  Tree is used, mark it as obsoleted, it will be removed
                --  when no more used by the Release call.
                Old.Obsolete := True;
-               Old.Used     := @ + 1;
+               Old.Used     := Old.Used + 1;
 
                --  But current tree is not used, it has been posted here
                --  for futur use. But if replaced right away it should be
@@ -152,7 +152,7 @@ package body Cached_Files is
 
       Files (S + 1 .. Index + 1) := Files (S .. Index);
 
-      Index := @ + 1;
+      Index := Index + 1;
 
       Files (S) := T;
 
@@ -255,7 +255,6 @@ package body Cached_Files is
          pragma Assert (T.Info.Next /= T.C_Info);
          Release (T.C_Info, Include => False);
       end if;
-
       Templates_Parser_Tasking.Unlock;
    exception
       when others =>
@@ -320,7 +319,6 @@ package body Cached_Files is
          if not Result then
             return False;
          end if;
-
          P := P.Next;
       end loop;
 

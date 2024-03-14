@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2024, AdaCore                     --
+--                     Copyright (C) 1999-2019, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,6 +26,8 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
+
+pragma Ada_2012;
 
 with Ada.Text_IO;
 
@@ -310,7 +312,7 @@ package body Expr is
       end F_Xor;
 
       Op_Table   : constant array (Expr.Ops) of Ops_Fct :=
-                     [Expr.O_And   => F_And'Access,
+                     (Expr.O_And   => F_And'Access,
                       Expr.O_Or    => F_Or'Access,
                       Expr.O_Xor   => F_Xor'Access,
                       Expr.O_Sup   => F_Sup'Access,
@@ -320,10 +322,10 @@ package body Expr is
                       Expr.O_Equal => F_Equ'Access,
                       Expr.O_Diff  => F_Diff'Access,
                       Expr.O_In    => F_In'Access,
-                      Expr.O_Cat   => F_Cat'Access];
+                      Expr.O_Cat   => F_Cat'Access);
 
       U_Op_Table : constant array (Expr.U_Ops) of U_Ops_Fct :=
-                     [Expr.O_Not => F_Not'Access];
+                     (Expr.O_Not => F_Not'Access);
 
    begin
       case E.Kind is
@@ -509,28 +511,28 @@ package body Expr is
          --  Check symbolic operators
          elsif Expression (Index) = '(' then
             Current_Token := (Kind => Open_Par);
-            Index := @ + 1;
+            Index := Index + 1;
 
          elsif Expression (Index) = ')' then
             Current_Token := (Kind => Close_Par);
-            Index := @ + 1;
+            Index := Index + 1;
 
          elsif Expression (Index) = '=' then
             Current_Token := (Kind => Binary_Op, Bin_Op => O_Equal);
-            Index := @ + 1;
+            Index := Index + 1;
 
          elsif Expression (Index) = '/'
            and then Index < Expression'Last
            and then Expression (Index + 1) = '='
          then
             Current_Token := (Kind => Binary_Op, Bin_Op => O_Diff);
-            Index := @ + 2;
+            Index := Index + 2;
 
          elsif Expression (Index) = '<' then
             Index := Index + 1;
             if Expression (Index) = '=' then
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Einf);
-               Index := @ + 1;
+               Index := Index + 1;
             else
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Inf);
             end if;
@@ -539,15 +541,15 @@ package body Expr is
             Index := Index + 1;
             if Expression (Index) = '=' then
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Esup);
-               Index := @ + 1;
+               Index := Index + 1;
             else
                Current_Token := (Kind => Binary_Op, Bin_Op => O_Sup);
             end if;
 
          elsif Expression (Index) = '"' then
             --  This is a string, return it
-            Current_Token :=
-              (Kind => Value, Start => Index + 1, Stop => Index);
+            Current_Token
+              := (Kind => Value, Start => Index + 1, Stop => Index);
 
             loop
                if Current_Token.Stop = Expression'Last then
@@ -558,7 +560,6 @@ package body Expr is
                   Current_Token.Stop := Current_Token.Stop + 1;
                end if;
             end loop;
-
             Index := Current_Token.Stop + 2;
 
          else
@@ -583,7 +584,7 @@ package body Expr is
                exit when Expression (Index) /= '/'
                  or else Expression (Index + 1) = '=';
 
-               Index := @ + 1;
+               Index := Index + 1;
             end loop;
 
             declare
@@ -633,13 +634,13 @@ package body Expr is
                      Error ("variable end not found");
 
                   else
-                     Current_Token :=
-                       (Kind  => Var, Start => I, Stop  => Index - 1);
+                     Current_Token
+                       := (Kind  => Var, Start => I, Stop  => Index - 1);
                   end if;
 
                else
-                  Current_Token :=
-                    (Kind => Value, Start => I, Stop => Index - 1);
+                  Current_Token
+                    := (Kind => Value, Start => I, Stop => Index - 1);
                end if;
             end;
          end if;
@@ -684,7 +685,6 @@ package body Expr is
             end case;
 
             Next_Token;
-
             if Current_Token.Kind = Binary_Op
               and then Current_Token.Bin_Op = O_Cat
             then
@@ -704,7 +704,6 @@ package body Expr is
             when Open_Par =>
                Next_Token;
                Result := Expr;
-
                if Current_Token.Kind = Close_Par then
                   Next_Token;
                   return Result;

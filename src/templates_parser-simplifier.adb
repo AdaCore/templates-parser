@@ -49,7 +49,6 @@ package body Simplifier is
          while N.Next /= null loop
             N := N.Next;
          end loop;
-
          N.Next := To;
          Link := N;
       end Link_End;

@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2022, AdaCore                     --
+--                     Copyright (C) 2003-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,8 +26,6 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
-
-pragma Ada_2012;
 
 pragma Wide_Character_Encoding (Brackets);
 
@@ -108,166 +106,166 @@ package body Filter is
 
    --  Filters Table
 
-   Table : constant array (Mode) of Filter_Record
-     := (Multiply       =>
-           (Multiply_Token'Access,       Multiply'Access),
+   Table : constant array (Mode) of Filter_Record :=
+             [Multiply       =>
+                (Multiply_Token'Access,       Multiply'Access),
 
-         Plus           =>
-           (Plus_Token'Access,           Plus'Access),
+              Plus           =>
+                (Plus_Token'Access,           Plus'Access),
 
-         Minus          =>
-           (Minus_Token'Access,          Minus'Access),
+              Minus          =>
+                (Minus_Token'Access,          Minus'Access),
 
-         Divide         =>
-           (Divide_Token'Access,         Divide'Access),
+              Divide         =>
+                (Divide_Token'Access,         Divide'Access),
 
-         Absolute       =>
-           (Abs_Token'Access,            Absolute'Access),
+              Absolute       =>
+                (Abs_Token'Access,            Absolute'Access),
 
-         Add            =>
-           (Add_Token'Access,            Plus'Access),
+              Add            =>
+                (Add_Token'Access,            Plus'Access),
 
-         Add_Param      =>
-           (Add_Param_Token'Access,      Add_Param'Access),
+              Add_Param      =>
+                (Add_Param_Token'Access,      Add_Param'Access),
 
-         Alternate      =>
-           (Alternate_Token'Access,      Alternate'Access),
+              Alternate      =>
+                (Alternate_Token'Access,      Alternate'Access),
 
-         BR_2_EOL       =>
-           (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
+              BR_2_EOL       =>
+                (BR_2_EOL_Token'Access,       BR_2_EOL'Access),
 
-         BR_2_LF        =>
-           (BR_2_LF_Token'Access,        BR_2_LF'Access),
+              BR_2_LF        =>
+                (BR_2_LF_Token'Access,        BR_2_LF'Access),
 
-         Capitalize     =>
-           (Capitalize_Token'Access,     Capitalize'Access),
+              Capitalize     =>
+                (Capitalize_Token'Access,     Capitalize'Access),
 
-         Clean_Text     =>
-           (Clean_Text_Token'Access,     Clean_Text'Access),
+              Clean_Text     =>
+                (Clean_Text_Token'Access,     Clean_Text'Access),
 
-         Coma_2_Point   =>
-           (Coma_2_Point_Token'Access,   Coma_2_Point'Access),
+              Coma_2_Point   =>
+                (Coma_2_Point_Token'Access,   Coma_2_Point'Access),
 
-         Contract       =>
-           (Contract_Token'Access,       Contract'Access),
+              Contract       =>
+                (Contract_Token'Access,       Contract'Access),
 
-         Default        =>
-           (Default_Token'Access,        Default'Access),
+              Default        =>
+                (Default_Token'Access,        Default'Access),
 
-         Del_Param      =>
-           (Del_Param_Token'Access,      Del_Param'Access),
+              Del_Param      =>
+                (Del_Param_Token'Access,      Del_Param'Access),
 
-         Div            =>
-           (Div_Token'Access,            Divide'Access),
+              Div            =>
+                (Div_Token'Access,            Divide'Access),
 
-         Exist          =>
-           (Exist_Token'Access,          Exist'Access),
+              Exist          =>
+                (Exist_Token'Access,          Exist'Access),
 
-         File_Exists    =>
-           (File_Exists_Token'Access,    File_Exists'Access),
+              File_Exists    =>
+                (File_Exists_Token'Access,    File_Exists'Access),
 
-         Format_Date    =>
-           (Format_Date_Token'Access,    Format_Date'Access),
+              Format_Date    =>
+                (Format_Date_Token'Access,    Format_Date'Access),
 
-         Format_Number  =>
-           (Format_Number_Token'Access,  Format_Number'Access),
+              Format_Number  =>
+                (Format_Number_Token'Access,  Format_Number'Access),
 
-         Is_Empty       =>
-           (Is_Empty_Token'Access,       Is_Empty'Access),
+              Is_Empty       =>
+                (Is_Empty_Token'Access,       Is_Empty'Access),
 
-         LF_2_BR        =>
-           (LF_2_BR_Token'Access,        LF_2_BR'Access),
+              LF_2_BR        =>
+                (LF_2_BR_Token'Access,        LF_2_BR'Access),
 
-         Lower          =>
-           (Lower_Token'Access,          Lower'Access),
+              Lower          =>
+                (Lower_Token'Access,          Lower'Access),
 
-         Match          =>
-           (Match_Token'Access,          Match'Access),
+              Match          =>
+                (Match_Token'Access,          Match'Access),
 
-         Max            =>
-           (Max_Token'Access,            Max'Access),
+              Max            =>
+                (Max_Token'Access,            Max'Access),
 
-         Min            =>
-           (Min_Token'Access,            Min'Access),
+              Min            =>
+                (Min_Token'Access,            Min'Access),
 
-         Modulo         =>
-           (Modulo_Token'Access,         Modulo'Access),
+              Modulo         =>
+                (Modulo_Token'Access,         Modulo'Access),
 
-         Mult           =>
-           (Mult_Token'Access,           Multiply'Access),
+              Mult           =>
+                (Mult_Token'Access,           Multiply'Access),
 
-         Neg            =>
-           (Neg_Token'Access,            Neg'Access),
+              Neg            =>
+                (Neg_Token'Access,            Neg'Access),
 
-         No_Digit       =>
-           (No_Digit_Token'Access,       No_Digit'Access),
+              No_Digit       =>
+                (No_Digit_Token'Access,       No_Digit'Access),
 
-         No_Dynamic     =>
-           (No_Dynamic_Token'Access,     No_Dynamic'Access),
+              No_Dynamic     =>
+                (No_Dynamic_Token'Access,     No_Dynamic'Access),
 
-         No_Letter      =>
-           (No_Letter_Token'Access,      No_Letter'Access),
+              No_Letter      =>
+                (No_Letter_Token'Access,      No_Letter'Access),
 
-         No_Space       =>
-           (No_Space_Token'Access,       No_Space'Access),
+              No_Space       =>
+                (No_Space_Token'Access,       No_Space'Access),
 
-         Oui_Non        =>
-           (Oui_Non_Token'Access,        Oui_Non'Access),
+              Oui_Non        =>
+                (Oui_Non_Token'Access,        Oui_Non'Access),
 
-         Point_2_Coma   =>
-           (Point_2_Coma_Token'Access,   Point_2_Coma'Access),
+              Point_2_Coma   =>
+                (Point_2_Coma_Token'Access,   Point_2_Coma'Access),
 
-         Repeat         =>
-           (Repeat_Token'Access,         Repeat'Access),
+              Repeat         =>
+                (Repeat_Token'Access,         Repeat'Access),
 
-         Replace        =>
-           (Replace_Token'Access,        Replace'Access),
+              Replace        =>
+                (Replace_Token'Access,        Replace'Access),
 
-         Replace_All    =>
-           (Replace_All_Token'Access,    Replace_All'Access),
+              Replace_All    =>
+                (Replace_All_Token'Access,    Replace_All'Access),
 
-         Replace_Param  =>
-           (Replace_Param_Token'Access,  Replace_Param'Access),
+              Replace_Param  =>
+                (Replace_Param_Token'Access,  Replace_Param'Access),
 
-         Invert         =>
-           (Reverse_Token'Access,        Reverse_Data'Access),
+              Invert         =>
+                (Reverse_Token'Access,        Reverse_Data'Access),
 
-         Size           =>
-           (Size_Token'Access,           Size'Access),
+              Size           =>
+                (Size_Token'Access,           Size'Access),
 
-         Slice          =>
-           (Slice_Token'Access,          Slice'Access),
+              Slice          =>
+                (Slice_Token'Access,          Slice'Access),
 
-         Strip          =>
-           (Strip_Token'Access,          Strip'Access),
+              Strip          =>
+                (Strip_Token'Access,          Strip'Access),
 
-         Sub            =>
-           (Sub_Token'Access,            Minus'Access),
+              Sub            =>
+                (Sub_Token'Access,            Minus'Access),
 
-         Trim           =>
-           (Trim_Token'Access,           Trim'Access),
+              Trim           =>
+                (Trim_Token'Access,           Trim'Access),
 
-         Upper          =>
-           (Upper_Token'Access,          Upper'Access),
+              Upper          =>
+                (Upper_Token'Access,          Upper'Access),
 
-         User_Defined   =>
-           (User_Defined_Token'Access,   User_Defined'Access),
+              User_Defined   =>
+                (User_Defined_Token'Access,   User_Defined'Access),
 
-         Web_Encode     =>
-           (Web_Encode_Token'Access,     Web_Encode'Access),
+              Web_Encode     =>
+                (Web_Encode_Token'Access,     Web_Encode'Access),
 
-         Web_Escape     =>
-           (Web_Escape_Token'Access,     Web_Escape'Access),
+              Web_Escape     =>
+                (Web_Escape_Token'Access,     Web_Escape'Access),
 
-         Web_NBSP       =>
-           (Web_NBSP_Token'Access,       Web_NBSP'Access),
+              Web_NBSP       =>
+                (Web_NBSP_Token'Access,       Web_NBSP'Access),
 
-         Wrap           =>
-           (Wrap_Token'Access,           Wrap'Access),
+              Wrap           =>
+                (Wrap_Token'Access,           Wrap'Access),
 
-         Yes_No         =>
-           (Yes_No_Token'Access,         Yes_No'Access)
-         );
+              Yes_No         =>
+                (Yes_No_Token'Access,         Yes_No'Access)
+             ];
 
    function Replace_One_Or_All
      (S   : String;
@@ -395,16 +393,17 @@ package body Filter is
               or else (J + 4 <= S'Last and then S (J + 3 .. J + 4) = "/>"))
          then
             Result (K .. K + EOL'Length - 1) := EOL;
-            K := K + EOL'Length;
+            K := @ + EOL'Length;
+
             if S (J + 3) = '>' then
-               J := J + 4;
+               J := @ + 4;
             else
-               J := J + 5;
+               J := @ + 5;
             end if;
          else
             Result (K) := S (J);
-            K := K + 1;
-            J := J + 1;
+            K := @ + 1;
+            J := @ + 1;
          end if;
 
          exit when J > S'Last;
@@ -450,7 +449,7 @@ package body Filter is
    begin
       Check_Null_Parameter (P);
 
-      return BR_2_EOL (S, String'(1 => ASCII.LF));
+      return BR_2_EOL (S, String'[ASCII.LF]);
    end BR_2_LF;
 
    ----------------
@@ -474,11 +473,13 @@ package body Filter is
             Upper := False;
          else
             Result (K) := Characters.Handling.To_Lower (S (K));
+
             if Result (K) = ' ' or else Result (K) = '_' then
                Upper := True;
             end if;
          end if;
       end loop;
+
       return Result;
    end Capitalize;
 
@@ -507,10 +508,10 @@ package body Filter is
       package L1 renames Ada.Characters.Latin_1;
 
       Non_ASCII : constant String :=
-                    (L1.Space, L1.LC_E_Acute, L1.LC_E_Grave,
+                    [L1.Space, L1.LC_E_Acute, L1.LC_E_Grave,
                      L1.LC_E_Circumflex, L1.LC_I_Circumflex,
                      L1.LC_I_Diaeresis, L1.LC_A_Grave,
-                     L1.LC_O_Circumflex, L1.LC_C_Cedilla);
+                     L1.LC_O_Circumflex, L1.LC_C_Cedilla];
 
       Clean_Set : constant Strings.Maps.Character_Set :=
                     Strings.Maps.Constants.Letter_Set
@@ -529,6 +530,7 @@ package body Filter is
             Result (K) := ' ';
          end if;
       end loop;
+
       return Result;
    end Clean_Text;
 
@@ -574,20 +576,17 @@ package body Filter is
       Check_Null_Parameter (P);
 
       for K in S'Range loop
-
          if S (K) = ' ' then
-
             if Space = False then
                Space := True;
 
-               R := R + 1;
+               R := @ + 1;
                Result (R) := ' ';
             end if;
-
          else
             Space := False;
 
-            R := R + 1;
+            R := @ + 1;
             Result (R) := S (K);
          end if;
 
@@ -643,14 +642,13 @@ package body Filter is
 
       else
          declare
-            Pos : constant Natural := Strings.Fixed.Index (S, Param);
+            Pos         : constant Natural := Strings.Fixed.Index (S, Param);
             First, Last : Natural;
          begin
             if Pos < E
               or else
                 (Pos + Len <= S'Last
-                 and then S (Pos + Len) /= '='
-                 and then S (Pos + Len) /= '&')
+                 and then S (Pos + Len) not in '=' | '&')
             then
                --  The parameter is not present, return original string
                return S;
@@ -660,7 +658,7 @@ package body Filter is
                Last  := Pos;
 
                while Last < S'Last and then S (Last) /= '&' loop
-                  Last := Last + 1;
+                  Last := @ + 1;
                end loop;
 
                if Last = S'Last then
@@ -862,12 +860,12 @@ package body Filter is
 
          for P in reverse TS'First .. N loop
             Result (K) := TS (P);
-            K := K - 1;
+            K := @ - 1;
             Count := Count + 1;
 
             if Count mod 3 = 0 and then P /= TS'First then
                Result (K) := Separator;
-               K := K - 1;
+               K := @ - 1;
             end if;
          end loop;
 
@@ -898,8 +896,10 @@ package body Filter is
             U := Filter_Map.Element (C);
             Unchecked_Free (U.CBT);
          end if;
+
          Filter_Map.Next (C);
       end loop;
+
       Filter_Map.Clear (User_Filters);
    end Free_Filters;
 
@@ -929,9 +929,12 @@ package body Filter is
 
       else
          case P.Mode is
-            when Str          => return '(' & To_String (P.S) & ')';
-            when Regexp       => return '(' & To_String (P.R_Str) & ')';
-            when Regpat       => return
+            when Str          =>
+               return '(' & To_String (P.S) & ')';
+            when Regexp       =>
+               return '(' & To_String (P.R_Str) & ')';
+            when Regpat       =>
+               return
                  '(' & To_String (P.P_Str) & '/' & To_String (P.Param) & ')';
             when Slice        =>
                return '(' & Utils.Image (P.First)
@@ -999,10 +1002,10 @@ package body Filter is
          for J in S'Range loop
             if S (J) = ASCII.LF then
                Result (K .. K + 4) := "<br/>";
-               K := K + 5;
+               K := @ + 5;
             else
                Result (K) := S (J);
-               K := K + 1;
+               K := @ + 1;
             end if;
          end loop;
 
@@ -1147,14 +1150,15 @@ package body Filter is
 
             if Table (K).Name.all < Name then
                F := K;
+
                if F /= Mode'Last then
                   F := Mode'Succ (F);
                end if;
 
                exit when Table (F).Name.all > Name;
-
             else
                L := K;
+
                if L /= Mode'First then
                   L := Mode'Pred (L);
                end if;
@@ -1354,7 +1358,7 @@ package body Filter is
 
       for K in S'Range loop
          if not (S (K) = ' ') then
-            L := L + 1;
+            L := @ + 1;
             Result (L) := S (K);
          end if;
       end loop;
@@ -1658,12 +1662,12 @@ package body Filter is
                   By => S (Matches (K).First .. Matches (K).Last));
 
                --  Position N just after the inserted replacement text
-               N := N + Matches (K).Last - Matches (K).First + 1;
+               N := @ + Matches (K).Last - Matches (K).First + 1;
             end loop;
          end loop;
 
          --  Prepend the beginning of string before the match
-         Result := Result
+         Result := @
            & To_Unbounded_String (S (Current .. Matches (0).First - 1))
            & Temp;
 
@@ -1728,6 +1732,7 @@ package body Filter is
       for K in S'Range loop
          Result (Result'Last - K + Result'First) := S (K);
       end loop;
+
       return Result;
    end Reverse_Data;
 
@@ -2025,15 +2030,14 @@ package body Filter is
       Check_Null_Parameter (P);
 
       for I in S'Range loop
-         Last := Last + 1;
+         Last := @ + 1;
 
          if S (I) = ' ' then
             Result (Last .. Last + Nbsp_Token'Length - 1) := Nbsp_Token;
-            Last := Last + Nbsp_Token'Length - 1;
+            Last := @ + Nbsp_Token'Length - 1;
          else
             Result (Last) := S (I);
          end if;
-
       end loop;
 
       return Result (1 .. Last);
@@ -2081,8 +2085,8 @@ package body Filter is
             else
                --  There is only one word on the line: cut it
 
-                  Append (Result, S (First .. Last - 1) & ASCII.LF);
-                  First := Last;
+               Append (Result, S (First .. Last - 1) & ASCII.LF);
+               First := Last;
             end if;
 
             Last_Space := Last_Space_Init;
@@ -2090,7 +2094,7 @@ package body Filter is
          else
             --  Go to the next character
 
-            Last := Last + 1;
+            Last := @ + 1;
          end if;
       end loop;
 

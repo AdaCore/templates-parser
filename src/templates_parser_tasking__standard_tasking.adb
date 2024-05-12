@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                       Copyright (C) 2005-2012, AdaCore                   --
+--                     Copyright (C) 2005-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,6 +26,8 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
+
+pragma Ada_2022;
 
 with Ada.Task_Identification;
 
@@ -66,7 +68,7 @@ package body Templates_Parser_Tasking is
       entry Lock when True is
       begin
          if TID = Lock'Caller then
-            Lock_Count := Lock_Count + 1;
+            Lock_Count := @ + 1;
          else
             requeue Lock_Internal;
          end if;
@@ -89,7 +91,7 @@ package body Templates_Parser_Tasking is
       procedure Unlock is
       begin
          if TID = Current_Task then
-            Lock_Count := Lock_Count - 1;
+            Lock_Count := @ - 1;
          else
             raise Tasking_Error;
          end if;

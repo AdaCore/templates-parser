@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2004-2017, AdaCore                     --
+--                     Copyright (C) 2004-2024, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -26,6 +26,8 @@
 --  however invalidate any other reasons why the executable file  might be  --
 --  covered by the  GNU Public License.                                     --
 ------------------------------------------------------------------------------
+
+pragma Ada_2022;
 
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
@@ -184,10 +186,10 @@ package body Templates_Parser.XML is
 
             else
                L := N - 1; -- Last character for the tag name
-               N := N + 4; -- First character after _DIM
+               N := @ + 4; -- First character after _DIM
 
                loop
-                  N := N + 1;
+                  N := @ + 1;
                   exit when Var (N) = '_' or else N = Var'Last;
 
                   if Var (N) not in '0' .. '9' then
@@ -207,7 +209,7 @@ package body Templates_Parser.XML is
 
          procedure Process_Composite is
 
-            Null_Indice : constant Indices := (2 .. 1 => 0);
+            Null_Indice : constant Indices := [2 .. 1 => 0];
 
             procedure Output_Tag (T : Tag; Pos : Indices := Null_Indice);
             --  Output recursively tag T, Pos is the current indices for the
@@ -281,13 +283,13 @@ package body Templates_Parser.XML is
             begin
                while N /= null loop
                   if N.Kind = Value then
-                     Output_Value (Pos & Indices'(1 => P), To_Utf8 (N.V));
+                     Output_Value (Pos & Indices'[P], To_Utf8 (N.V));
                   else
-                     Output_Tag (N.VS.all, Pos & Indices'(1 => P));
+                     Output_Tag (N.VS.all, Pos & Indices'[P]);
                   end if;
 
-                  P := P + 1;
-                  N := N.Next;
+                  P := @ + 1;
+                  N := @.Next;
                end loop;
             end Output_Tag;
 
@@ -465,7 +467,7 @@ package body Templates_Parser.XML is
          N := DOM.Core.Nodes.First_Child (Parent);
 
          while N /= null and then DOM.Core.Nodes.Node_Name (N) = "#text" loop
-            N := DOM.Core.Nodes.Next_Sibling (N);
+            N := DOM.Core.Nodes.Next_Sibling (@);
          end loop;
 
          return N;
@@ -493,7 +495,7 @@ package body Templates_Parser.XML is
          M : DOM.Core.Node := N;
       begin
          loop
-            M := DOM.Core.Nodes.Next_Sibling (M);
+            M := DOM.Core.Nodes.Next_Sibling (@);
             exit when M = null or else DOM.Core.Nodes.Node_Name (M) /= "#text";
          end loop;
 
@@ -558,12 +560,12 @@ package body Templates_Parser.XML is
                   for K in 1 .. Max loop
                      Cursor := Data.Find (Key & "_" & Utils.Image (K));
                      exit when Cursor = Str_Map.No_Element;
-                     T := T & Str_Map.Element (Cursor);
+                     T := @ & Str_Map.Element (Cursor);
                   end loop;
 
                else
                   for K in 1 .. Max loop
-                     T := T & B_Tag ("_" & Utils.Image (K), N + 1);
+                     T := @ & B_Tag ("_" & Utils.Image (K), N + 1);
                   end loop;
                end if;
 
@@ -614,7 +616,7 @@ package body Templates_Parser.XML is
                           and then Local_Name (Item (Atts, 0)) = "ind"
                         then
                            K   := Positive'Value (Node_Value (Item (Atts, 0)));
-                           Max := Natural'Max (Max, K);
+                           Max := Natural'Max (@, K);
 
                            Map.Insert
                              (Node_Value (Item (Atts, 0)),
@@ -636,7 +638,8 @@ package body Templates_Parser.XML is
                         Error (C, "Entity Label expected, found " & N_Name);
                      end if;
                   end;
-                  C := Next_Sibling (C);
+
+                  C := Next_Sibling (@);
                end loop;
 
                --  Now we have all labels indexed into the Map (key being the
@@ -649,9 +652,9 @@ package body Templates_Parser.XML is
                      Cursor := Map.Find (K_Img);
 
                      if Str_Map.Has_Element (Cursor) then
-                        T := T & Str_Map.Element (Cursor);
+                        T := @ & Str_Map.Element (Cursor);
                      else
-                        T := T & "";
+                        T := @ & "";
                      end if;
                   end;
                end loop;
@@ -709,7 +712,8 @@ package body Templates_Parser.XML is
                      Insert (Result, Parse_Labels (C));
                   end if;
                end;
-               C := Next_Sibling (C);
+
+               C := Next_Sibling (@);
             end loop;
 
             return Result;
@@ -787,7 +791,8 @@ package body Templates_Parser.XML is
                         Found := True;
                      end if;
                   end;
-                  C := Next_Sibling (C);
+
+                  C := Next_Sibling (@);
                end loop;
 
                if not Found then
@@ -804,11 +809,11 @@ package body Templates_Parser.XML is
                   N_Name : constant String := Local_Name (C);
                begin
                   if N_Name = "Ind" then
-                     Count := Count + 1;
+                     Count := @ + 1;
 
                      declare
-                        Atts    : constant DOM.Core.Named_Node_Map
-                          := DOM.Core.Nodes.Attributes (C);
+                        Atts    : constant DOM.Core.Named_Node_Map :=
+                                    DOM.Core.Nodes.Attributes (C);
                         K       : Natural;
                      begin
                         if Length (Atts) = 1
@@ -833,6 +838,7 @@ package body Templates_Parser.XML is
                      Error (C, "Entity Ind or V expected, found " & N_Name);
                   end if;
                end;
+
                C := Next_Sibling (C);
             end loop;
 
@@ -881,7 +887,8 @@ package body Templates_Parser.XML is
                   Parse_Tag (C, Name, Description);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          if Name = Null_Unbounded_String then
@@ -919,7 +926,8 @@ package body Templates_Parser.XML is
                      "Entity Tag, Dim or Entry expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          --  Now we have all entities in the Data map
@@ -957,7 +965,8 @@ package body Templates_Parser.XML is
                   Error (C, "Entity Tag or V expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          Insert (Result, Assoc (To_String (Name), To_String (Value)));
@@ -985,8 +994,8 @@ package body Templates_Parser.XML is
          while C /= null loop
             declare
                N_Name  : constant String := Local_Name (C);
-               N_Value : constant String
-                 := Get_Value (DOM.Core.Nodes.First_Child (C));
+               N_Value : constant String :=
+                           Get_Value (DOM.Core.Nodes.First_Child (C));
             begin
                if N_Name = "Name" then
                   Name := To_Unbounded_String (N_Value);
@@ -1000,7 +1009,8 @@ package body Templates_Parser.XML is
                      "Entity Name or Description expected, found " & N_Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
       end Parse_Tag;
 
@@ -1029,7 +1039,8 @@ package body Templates_Parser.XML is
                     (C, "SimpleTag or CompositeTag expected, found" & Name);
                end if;
             end;
-            C := Next_Sibling (C);
+
+            C := Next_Sibling (@);
          end loop;
 
          return T;

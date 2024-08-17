@@ -1041,17 +1041,13 @@ package body Filter is
       P : Parameter_Data := No_Parameter) return String
    is
       pragma Unreferenced (C);
-      use type GNAT.Regpat.Match_Location;
-
-      Matches : GNAT.Regpat.Match_Array (0 .. 0);
    begin
       if P = No_Parameter then
          raise Template_Error with "missing parameter for MATCH filter";
+
       end if;
 
-      GNAT.Regpat.Match (P.Regexp.all, S, Matches);
-
-      if Matches (0) = GNAT.Regpat.No_Match then
+      if GNAT.Regpat.Match (P.Regexp.all, S) = S'First - 1 then
          return "FALSE";
       else
          return "TRUE";

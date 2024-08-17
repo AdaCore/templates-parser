@@ -544,6 +544,25 @@ package body Filter is
       return Result;
    end Clean_Text;
 
+   -----------
+   -- Clone --
+   -----------
+
+   function Clone (P : Routine) return Routine is
+      D : Parameter_Data := P.Parameters;
+   begin
+      case D.Mode is
+         when Regpat =>
+            D.Regpat := new GNAT.Regpat.Pattern_Matcher'(D.Regpat.all);
+         when Regexp =>
+            D.Regexp := new GNAT.Regpat.Pattern_Matcher'(D.Regexp.all);
+         when others =>
+            null;
+      end case;
+
+      return (P with delta Parameters => D);
+   end Clone;
+
    ------------------
    -- Coma_2_Point --
    ------------------

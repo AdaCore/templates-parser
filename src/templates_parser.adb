@@ -365,6 +365,9 @@ package body Templates_Parser is
       procedure Release (S : in out Set);
       --  Release all memory allocated P
 
+      function Clone (P : Routine) return Routine;
+      --  Clone parameter data
+
       type String_Access is access constant String;
 
       type Filter_Record is record

@@ -1,0 +1,13 @@
+
+Test MATCH into a MACRO
+
+@@MACRO(CHECK)@@
+@@IF@@ @_MATCH(.*value):VAR1_@
+@_$1_@
+@@ELSE@@
+FALSE
+@@END_IF@@
+@@END_MACRO@@
+
+@_CHECK(ONE)_@
+@_CHECK(TWO)_@

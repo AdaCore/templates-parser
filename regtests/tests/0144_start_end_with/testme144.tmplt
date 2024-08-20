@@ -1,0 +1,24 @@
+
+Test START_WITH() routine.
+
+TRUE  = @_START_WITH(a):VAR1_@
+TRUE  = @_START_WITH(a ):VAR1_@
+TRUE  = @_START_WITH(a valu):VAR1_@
+TRUE  = @_START_WITH(a value):VAR1_@
+FALSE = @_START_WITH(w):VAR1_@
+FALSE = @_START_WITH(x value):VAR1_@
+FALSE = @_START_WITH(a valux):VAR1_@
+FALSE = @_START_WITH( value):VAR1_@
+FALSE = @_START_WITH(xxxxxxxxxxxxxxxxxxxxxxxxxxx):VAR1_@
+
+Test END_WITH() routine.
+
+TRUE  = @_END_WITH(e):VAR1_@
+TRUE  = @_END_WITH(lue):VAR1_@
+TRUE  = @_END_WITH( value):VAR1_@
+TRUE  = @_END_WITH(a value):VAR1_@
+FALSE = @_END_WITH(w):VAR1_@
+FALSE = @_END_WITH(x value):VAR1_@
+FALSE = @_END_WITH(a valux):VAR1_@
+FALSE = @_END_WITH(a valu):VAR1_@
+FALSE = @_END_WITH(xxxxxxxxxxxxxxxxxxxxxxxxxxxx):VAR1_@

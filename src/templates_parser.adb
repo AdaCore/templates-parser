@@ -161,6 +161,9 @@ package body Templates_Parser is
          Div,
          --  Divide the given parameter to the string
 
+         End_With,
+         --  Returns TRUE if string ends with parameter
+
          Exist,
          --  Returns "TRUE" if var is not empty and "FALSE" otherwise
 
@@ -253,6 +256,9 @@ package body Templates_Parser is
 
          Slice,
          --  Returns a slice of the string
+
+         Start_With,
+         --  Returns TRUE if string starts with parameter
 
          Strip,
          --  Trim leading and trailing spaces and characters HT, LF, CR, NUL
@@ -445,6 +451,11 @@ package body Templates_Parser is
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;
 
+      function End_With
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
       function Exist
         (S : String;
          C : not null access Filter_Context;
@@ -561,6 +572,11 @@ package body Templates_Parser is
          P : Parameter_Data := No_Parameter) return String;
 
       function Slice
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
+      function Start_With
         (S : String;
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;

@@ -642,6 +642,10 @@ package body Data is
    begin
       if R.Filters /= null then
          R.Filters := new Filter.Set'(R.Filters.all);
+
+         for K in R.Filters'Range loop
+            R.Filters (K) := Filter.Clone (@);
+         end loop;
       end if;
 
       if R.Is_Macro then

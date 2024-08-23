@@ -52,21 +52,21 @@ package body Filter is
 
    --  Filter tokens
 
-   Multiply_Token      : aliased constant String := """*""";
-   Plus_Token          : aliased constant String := """+""";
-   Minus_Token         : aliased constant String := """-""";
-   Divide_Token        : aliased constant String := """/""";
    Abs_Token           : aliased constant String := "ABS";
-   Add_Token           : aliased constant String := "ADD";
    Add_Param_Token     : aliased constant String := "ADD_PARAM";
+   Add_Token           : aliased constant String := "ADD";
+   Alternate_Token     : aliased constant String := "ALTERNATE";
    BR_2_EOL_Token      : aliased constant String := "BR_2_EOL";
    BR_2_LF_Token       : aliased constant String := "BR_2_LF";
    Capitalize_Token    : aliased constant String := "CAPITALIZE";
    Clean_Text_Token    : aliased constant String := "CLEAN_TEXT";
    Coma_2_Point_Token  : aliased constant String := "COMA_2_POINT";
    Contract_Token      : aliased constant String := "CONTRACT";
+   Default_Token       : aliased constant String := "DEFAULT";
    Del_Param_Token     : aliased constant String := "DEL_PARAM";
    Div_Token           : aliased constant String := "DIV";
+   Divide_Token        : aliased constant String := """/""";
+   End_With_Token      : aliased constant String := "END_WITH";
    Exist_Token         : aliased constant String := "EXIST";
    File_Exists_Token   : aliased constant String := "FILE_EXISTS";
    Format_Date_Token   : aliased constant String := "FORMAT_DATE";
@@ -77,22 +77,26 @@ package body Filter is
    Match_Token         : aliased constant String := "MATCH";
    Max_Token           : aliased constant String := "MAX";
    Min_Token           : aliased constant String := "MIN";
+   Minus_Token         : aliased constant String := """-""";
    Modulo_Token        : aliased constant String := "MOD";
    Mult_Token          : aliased constant String := "MULT";
+   Multiply_Token      : aliased constant String := """*""";
    Neg_Token           : aliased constant String := "NEG";
    No_Digit_Token      : aliased constant String := "NO_DIGIT";
    No_Dynamic_Token    : aliased constant String := "NO_DYNAMIC";
    No_Letter_Token     : aliased constant String := "NO_LETTER";
    No_Space_Token      : aliased constant String := "NO_SPACE";
    Oui_Non_Token       : aliased constant String := "OUI_NON";
+   Plus_Token          : aliased constant String := """+""";
    Point_2_Coma_Token  : aliased constant String := "POINT_2_COMA";
    Repeat_Token        : aliased constant String := "REPEAT";
-   Replace_Token       : aliased constant String := "REPLACE";
    Replace_All_Token   : aliased constant String := "REPLACE_ALL";
    Replace_Param_Token : aliased constant String := "REPLACE_PARAM";
+   Replace_Token       : aliased constant String := "REPLACE";
    Reverse_Token       : aliased constant String := "REVERSE";
    Size_Token          : aliased constant String := "SIZE";
    Slice_Token         : aliased constant String := "SLICE";
+   Start_With_Token    : aliased constant String := "START_WITH";
    Strip_Token         : aliased constant String := "STRIP";
    Sub_Token           : aliased constant String := "SUB";
    Trim_Token          : aliased constant String := "TRIM";
@@ -103,8 +107,6 @@ package body Filter is
    Web_NBSP_Token      : aliased constant String := "WEB_NBSP";
    Wrap_Token          : aliased constant String := "WRAP";
    Yes_No_Token        : aliased constant String := "YES_NO";
-   Default_Token       : aliased constant String := "DEFAULT";
-   Alternate_Token     : aliased constant String := "ALTERNATE";
 
    --  Filters Table
 
@@ -264,6 +266,12 @@ package body Filter is
 
               Wrap           =>
                 (Wrap_Token'Access,           Wrap'Access),
+
+              Start_With     =>
+                (Start_With_Token'Access,     Start_With'Access),
+
+              End_With       =>
+                (End_With_Token'Access,       End_With'Access),
 
               Yes_No         =>
                 (Yes_No_Token'Access,         Yes_No'Access)
@@ -536,6 +544,25 @@ package body Filter is
       return Result;
    end Clean_Text;
 
+   -----------
+   -- Clone --
+   -----------
+
+   function Clone (P : Routine) return Routine is
+      D : Parameter_Data := P.Parameters;
+   begin
+      case D.Mode is
+         when Regpat =>
+            D.Regpat := new GNAT.Regpat.Pattern_Matcher'(D.Regpat.all);
+         when Regexp =>
+            D.Regexp := new GNAT.Regpat.Pattern_Matcher'(D.Regexp.all);
+         when others =>
+            null;
+      end case;
+
+      return (P with delta Parameters => D);
+   end Clone;
+
    ------------------
    -- Coma_2_Point --
    ------------------
@@ -707,6 +734,34 @@ package body Filter is
             return "";
       end;
    end Divide;
+
+   --------------
+   -- End_With --
+   --------------
+
+   function End_With
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+   begin
+      if P = No_Parameter then
+         raise Template_Error with "missing parameter for END_WITH filter";
+      end if;
+
+      declare
+         Sub : constant String := To_String (P.S);
+      begin
+         if S'Length >= Sub'Length
+           and then S (S'Last - Sub'Length + 1 .. S'Last) = Sub
+         then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end;
+   end End_With;
 
    -----------
    -- Exist --
@@ -1041,17 +1096,13 @@ package body Filter is
       P : Parameter_Data := No_Parameter) return String
    is
       pragma Unreferenced (C);
-      use type GNAT.Regpat.Match_Location;
-
-      Matches : GNAT.Regpat.Match_Array (0 .. 0);
    begin
       if P = No_Parameter then
          raise Template_Error with "missing parameter for MATCH filter";
+
       end if;
 
-      GNAT.Regpat.Match (P.Regexp.all, S, Matches);
-
-      if Matches (0) = GNAT.Regpat.No_Match then
+      if GNAT.Regpat.Match (P.Regexp.all, S) = S'First - 1 then
          return "FALSE";
       else
          return "TRUE";
@@ -1788,6 +1839,34 @@ package body Filter is
          return S (First .. Last);
       end if;
    end Slice;
+
+   ----------------
+   -- Start_With --
+   ----------------
+
+   function Start_With
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+   begin
+      if P = No_Parameter then
+         raise Template_Error with "missing parameter for START_WITH filter";
+      end if;
+
+      declare
+         Sub : constant String := To_String (P.S);
+      begin
+         if S'Length >= Sub'Length
+           and then S (S'First .. S'First + Sub'Length - 1) = Sub
+         then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end;
+   end Start_With;
 
    -----------
    -- Strip --

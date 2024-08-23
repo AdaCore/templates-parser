@@ -345,6 +345,12 @@ parser.
   character if needed. Returns the input string as-is if the parameter
   is not found.
 
+**END_WITH(VALUE)**
+  .. index:: Filter, END_WITH
+
+  Returns **True** if variable ends with VALUE given as parameter
+  and **False** otherwise.
+
 **EXIST**
   .. index:: Filter, EXIST
 
@@ -584,6 +590,12 @@ parser.
   If x or y are negative, they are counted from the end of the string, so
   that 0 matches the last character of the string, -1 matches the character
   just before,...
+
+**START_WITH(VALUE)**
+  .. index:: Filter, START_WITH
+
+  Returns **True** if variable starts with VALUE given as parameter
+  and **False** otherwise.
 
 **STRIP**
   .. index:: Filter, STRIP

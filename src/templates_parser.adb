@@ -4796,8 +4796,7 @@ package body Templates_Parser is
                        Line          => State.Line,
                        Blocks_Count  => State.Blocks_Count,
                        I_Params      => Included.Params,
-                       F_Params      => Flatten_Parameters
-                         (Included.Params),
+                       F_Params      => Flatten_Parameters (Included.Params),
                        Block         => State.Block,
                        Terse_Table   => State.Terse_Table,
                        Parent        => L_State'Unchecked_Access));
@@ -5193,6 +5192,7 @@ package body Templates_Parser is
                         Iteration := Natural'Max (Iteration, Check (I (K)));
                      end if;
                   end loop;
+
                   return Iteration;
                end Check;
 
@@ -5721,6 +5721,7 @@ package body Templates_Parser is
 
                      when Composite =>
                         Is_Composite.all := True;
+
                         if Tk.Comp_Value.Data.Nested_Level = 1 then
                            --  This is a vector
 
@@ -5975,7 +5976,7 @@ package body Templates_Parser is
                      Flush;
                      End_Pos := Length (Results);
 
-                     --  we have some content for the table. Let's align it as
+                     --  We have some content for the table. Let's align it as
                      --  needed.
 
                      if Start_Pos < End_Pos then

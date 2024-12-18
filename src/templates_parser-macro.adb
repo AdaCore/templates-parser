@@ -479,16 +479,50 @@ package body Macro is
                declare
                   use type Data.NKind;
                   use type Data.Tree;
-                  P   : Data.Tree renames Included.Params (K);
-                  Old : Data.Tree;
-               begin
-                  if P /= null
-                    and then P.Kind = Data.Var
-                    and then P.Var.N > 0
-                  then
-                     Old := Included.Params (K);
-                     Included.Params (K) := Data.Clone (Parameters (P.Var.N));
+
+                  procedure Set_Param (D : Data.Tree);
+                  --  Set current include parameter to D
+
+                  procedure Set_Param (I : Positive);
+                  --  Set current include parameter to Parameters (I)
+
+                  ---------------
+                  -- Set_Param --
+                  ---------------
+
+                  procedure Set_Param (D : Data.Tree) is
+                     Old : Data.Tree := Included.Params (K);
+                  begin
+                     Included.Params (K) := D;
                      Data.Release (Old);
+                  end Set_Param;
+
+                  procedure Set_Param (I : Positive) is
+                  begin
+                     Set_Param (Data.Clone (Parameters (I)));
+                  end Set_Param;
+
+                  P : Data.Tree renames Included.Params (K);
+
+               begin
+                  if P /= null and then P.Kind = Data.Var then
+                     if P.Var.N > 0
+                       and then P.Var.N <= Parameters'Last
+                     then
+                        Set_Param (P.Var.N);
+
+                     elsif Vars.Contains (To_String (P.Var.Name)) then
+                        declare
+                           use type Definitions.NKind;
+
+                           E : constant Definitions.Tree :=
+                                 Vars.Element (To_String (P.Var.Name));
+                        begin
+                           if E.N.Kind = Definitions.Ref then
+                              Set_Param (E.N.Ref);
+                           end if;
+                        end;
+                     end if;
                   end if;
                end;
             end loop;
@@ -547,10 +581,17 @@ package body Macro is
                when Include_Stmt =>
                   Rewrite (N.I_Included);
 
+               when Inline_Stmt =>
+                  Rewrite_Tree (N.I_Block, Parameters);
+
                when Extends_Stmt =>
                   Rewrite (N.E_Included);
+                  Rewrite_Tree (N.N_Extends, Parameters);
 
-               when others =>
+               when Block_Stmt =>
+                  Rewrite_Tree (N.N_Block, Parameters);
+
+               when Info | C_Info =>
                   null;
             end case;
 

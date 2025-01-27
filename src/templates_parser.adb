@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2024, AdaCore                     --
+--                     Copyright (C) 1999-2025, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -55,6 +55,8 @@ package body Templates_Parser is
    Internal_Error : exception;
 
    Blank : constant Maps.Character_Set := Maps.To_Set (' ' & ASCII.HT);
+
+   package Name_Set is new Containers.Indefinite_Ordered_Sets (String);
 
    function Get_Parameters (Parameters : String) return Parameter_Set;
    --  Returns the parameters set as parsed into Parameters. This routines
@@ -186,6 +188,10 @@ package body Templates_Parser is
 
          Is_Empty,
          --  Returns "TRUE" if var is empty and "FALSE" otherwise
+
+         Is_First_Occurrence,
+         --  Returns "TRUE" if a variable value is found for the first time
+         --  given the context in parameter.
 
          LF_2_BR,
          --  Replaces all LF character to <BR> HTML tag
@@ -484,6 +490,11 @@ package body Templates_Parser is
          C : not null access Filter_Context;
          P : Parameter_Data := No_Parameter) return String;
 
+      function Is_First_Occurrence
+        (S : String;
+         C : not null access Filter_Context;
+         P : Parameter_Data := No_Parameter) return String;
+
       function LF_2_BR
         (S : String;
          C : not null access Filter_Context;
@@ -669,6 +680,9 @@ package body Templates_Parser is
 
       function Is_No_Dynamic (Filters : Set_Access) return Boolean;
       --  Returns True if Filters contains NO_CONTEXT
+
+      procedure Clear_Global_State;
+      --  Clear global state kept for the filter support
 
    end Filter;
 
@@ -1619,6 +1633,15 @@ package body Templates_Parser is
                   Data      =>
                     new Tag_Data'(0, Natural'Last, 0, 1, others => <>));
    end Clear;
+
+   ------------------------
+   -- Clear_Global_State --
+   ------------------------
+
+   procedure Clear_Global_State is
+   begin
+      Filter.Clear_Global_State;
+   end Clear_Global_State;
 
    -----------
    -- Clone --
@@ -4010,8 +4033,6 @@ package body Templates_Parser is
                                             Reason   : Reason_Kind) := null)
       return Unbounded_String
    is
-      package Name_Set is new Containers.Indefinite_Ordered_Sets (String);
-
       Max_Nested_Levels : constant := 10;
       --  The maximum number of table nested levels
 

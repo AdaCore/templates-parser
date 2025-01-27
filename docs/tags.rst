@@ -459,6 +459,13 @@ parser.
 
   Returns **True** if variable is the empty string and **False** otherwise.
 
+**IS_FIRST_OCCURRENCE(CONTEXT)**
+  .. index:: Filter, IS_FIRST_OCCURRENCE
+
+  Returns **True** if the value in the given context is found for the
+  first time and **False** otherwise. This is based on a global
+  context that will remain during the application runtime.
+
 **LF_2_BR**
   .. index:: Filter, LF_2_BR
 

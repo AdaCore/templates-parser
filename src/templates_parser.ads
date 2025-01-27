@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 1999-2024, AdaCore                     --
+--                     Copyright (C) 1999-2025, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -544,6 +544,10 @@ package Templates_Parser is
    procedure Release_Cache;
    --  Release the internal cache. This free the memory used for all currently
    --  loaded template trees.
+
+   procedure Clear_Global_State;
+   --  Clear the global state kept by the templates parser during the runtime.
+   --  Such a state is recorded for the IS_FIRST_OCCURRENCE filter.
 
 private
 

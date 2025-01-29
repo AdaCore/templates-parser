@@ -1,0 +1,36 @@
+
+1: display
+@_VAR1_@
+2: one / display
+@@IF@@ @_IS_FIRST_OCCURRENCE(one):VAR1_@
+@_VAR1_@
+@@END_IF@@
+3: one / empty
+@@IF@@ @_IS_FIRST_OCCURRENCE(one):VAR1_@
+@_VAR1_@
+@@END_IF@@
+4: two / display
+@@IF@@ @_IS_FIRST_OCCURRENCE(two):VAR1_@
+@_VAR1_@
+@@END_IF@@
+5: two / empty
+@@IF@@ @_IS_FIRST_OCCURRENCE(two):VAR1_@
+@_VAR1_@
+@@END_IF@@
+6: display
+@_VAR1_@
+7: one / empty
+@@IF@@ @_IS_FIRST_OCCURRENCE(one):VAR1_@
+@_VAR1_@
+@@END_IF@@
+8: two / empty
+@@IF@@ @_IS_FIRST_OCCURRENCE(two):VAR1_@
+@_VAR1_@
+@@END_IF@@
+
+Loop:
+@@TABLE@@
+@@IF@@ @_IS_FIRST_OCCURRENCE(table):VAR2_@
+@_VAR2_@
+@@END_IF@@
+@@END_TABLE@@

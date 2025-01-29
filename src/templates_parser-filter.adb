@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2003-2024, AdaCore                     --
+--                     Copyright (C) 2003-2025, AdaCore                     --
 --                                                                          --
 --  This library is free software;  you can redistribute it and/or modify   --
 --  it under terms of the  GNU General Public License  as published by the  --
@@ -48,6 +48,21 @@ package body Filter is
      new Containers.Indefinite_Hashed_Maps
        (String, User_CB, Strings.Hash, "=", "=");
 
+   ----------------
+   -- Occurences --
+   ----------------
+
+   protected Occurrences is
+      procedure Check (Key : String; First : out Boolean);
+      --  Check if Key has already been checked and set First to
+      --  True if not and Falso otherwise.
+
+      procedure Clear;
+      --  Clear the global status
+   private
+      O_Set : Name_Set.Set;
+   end Occurrences;
+
    User_Filters : Filter_Map.Map;
 
    --  Filter tokens
@@ -72,6 +87,7 @@ package body Filter is
    Format_Date_Token   : aliased constant String := "FORMAT_DATE";
    Format_Number_Token : aliased constant String := "FORMAT_NUMBER";
    Is_Empty_Token      : aliased constant String := "IS_EMPTY";
+   Is_First_Occu_Token : aliased constant String := "IS_FIRST_OCCURRENCE";
    LF_2_BR_Token       : aliased constant String := "LF_2_BR";
    Lower_Token         : aliased constant String := "LOWER";
    Match_Token         : aliased constant String := "MATCH";
@@ -176,6 +192,9 @@ package body Filter is
 
               Is_Empty       =>
                 (Is_Empty_Token'Access,       Is_Empty'Access),
+
+              Is_First_Occurrence =>
+                (Is_First_Occu_Token'Access,  Is_First_Occurrence'Access),
 
               LF_2_BR        =>
                 (LF_2_BR_Token'Access,        LF_2_BR'Access),
@@ -543,6 +562,15 @@ package body Filter is
 
       return Result;
    end Clean_Text;
+
+   ------------------------
+   -- Clear_Global_State --
+   ------------------------
+
+   procedure Clear_Global_State is
+   begin
+      Occurrences.Clear;
+   end Clear_Global_State;
 
    -----------
    -- Clone --
@@ -1022,6 +1050,36 @@ package body Filter is
       end if;
    end Is_Empty;
 
+   -------------------------
+   -- Is_First_Occurrence --
+   -------------------------
+
+   function Is_First_Occurrence
+     (S : String;
+      C : not null access Filter_Context;
+      P : Parameter_Data := No_Parameter) return String
+   is
+      pragma Unreferenced (C);
+   begin
+      if P = No_Parameter then
+         raise Template_Error
+           with "missing parameter for IS_FIRST_OCCURRENCE filter";
+      end if;
+
+      declare
+         Key   : constant String := To_String (P.S) & '-' & S;
+         First : Boolean;
+      begin
+         Occurrences.Check (Key, First);
+
+         if First then
+            return "TRUE";
+         else
+            return "FALSE";
+         end if;
+      end;
+   end Is_First_Occurrence;
+
    -------------------
    -- Is_No_Dynamic --
    -------------------
@@ -1088,7 +1146,7 @@ package body Filter is
 
    -----------
    -- Match --
-   ------------
+   -----------
 
    function Match
      (S : String;
@@ -1099,7 +1157,6 @@ package body Filter is
    begin
       if P = No_Parameter then
          raise Template_Error with "missing parameter for MATCH filter";
-
       end if;
 
       if GNAT.Regpat.Match (P.Regexp.all, S) = S'First - 1 then
@@ -1418,6 +1475,32 @@ package body Filter is
 
       return Result (Result'First .. L);
    end No_Space;
+
+   protected body Occurrences is
+
+      -----------
+      -- Check --
+      -----------
+
+      procedure Check (Key : String; First : out Boolean) is
+      begin
+         First := not O_Set.Contains (Key);
+
+         if First then
+            O_Set.Include (Key);
+         end if;
+      end Check;
+
+      -----------
+      -- Clear --
+      -----------
+
+      procedure Clear is
+      begin
+         O_Set.Clear;
+      end Clear;
+
+   end Occurrences;
 
    -------------
    -- Oui_Non --

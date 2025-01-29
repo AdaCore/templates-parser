@@ -1,0 +1,3 @@
+python_interpreter: self
+control:
+- [SKIP, 'not tp_xmlada_enabled', "Needs XML/Ada support."]

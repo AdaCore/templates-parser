@@ -8,6 +8,7 @@ from glob import glob
 import os
 import sys
 import time
+from makevar import MakeVar
 
 from e3.env import Env
 from e3.os.process import Run
@@ -19,6 +20,7 @@ from e3.testsuite import Testsuite
 from e3.testsuite.driver.diff import DiffTestDriver
 from e3.testsuite.result import Log, TestResult, TestStatus
 from e3.testsuite.testcase_finder import ParsedTest, YAMLTestFinder, TestFinder
+from e3.testsuite.control import YAMLTestControlCreator
 
 
 class BasicTestDriver(DiffTestDriver):
@@ -38,6 +40,10 @@ class BasicTestDriver(DiffTestDriver):
             timeout=None,
         )
         self.result.time = time.time() - start_time
+
+    @property
+    def test_control_creator(self):
+        return YAMLTestControlCreator(self.env.control_condition_env)
 
 
 class TPTestsuite(Testsuite):
@@ -85,6 +91,22 @@ class TPTestsuite(Testsuite):
             + os.pathsep
             + makedir("rbin"),
         )
+
+    def set_up(self):
+        super().set_up()
+        opts = self.env.options
+
+        xmlada_enabled = False
+
+        if os.environ.get("TP_XMLADA") == None:
+            c = MakeVar("../makefile.setup")
+            xmlada_enabled = c.get("TP_XMLADA") == "Installed"
+        else:
+            xmlada_enabled =  os.environ.get("TP_XMLADA") == "Installed"
+
+        self.env.control_condition_env = {
+            'tp_xmlada_enabled': xmlada_enabled
+        }
 
     @property
     def test_finders(self):

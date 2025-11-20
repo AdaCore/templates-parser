@@ -313,8 +313,9 @@ parser.
 **CAPITALIZE**
   .. index:: Filter, CAPITALIZE
 
-  Put all characters in the variable in lower case except characters after
-  a space or an underscore which are set in upper-case.
+  Put all characters in the variable in lower case except the first
+  character and the characters after a space or an underscore which
+  are set in upper-case.
 
 **CLEAN_TEXT**
   .. index:: Filter, CLEAN_TEXT

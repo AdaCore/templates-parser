@@ -8,6 +8,18 @@
 ""     finish
 "" endif
 
+" To install this file, move it to $HOME/.vim/syntax/.
+"
+" If you want the autodetect feature to work just add
+" $HOME/.vim/ftdetect/adatmplt.vim with this content
+" autocmd BufRead,BufNewFile *.tmplt set filetype=adatmplt or execute this shell cmd
+" echo "autocmd BufRead,BufNewFile *.tmplt set filetype=adatmplt" > $HOME/.vim/ftdetect/adatmplt.vim
+"
+" Keep in mind, that by install syntax highlighting this way, it will only be
+" visible by the current user. If you want to install it system wide, have a
+" look at your runtimepath(it is distro/system dependent) with 
+" ':set runtimepath'
+
 " let s:cpo_save = $cpo
 " set cpo&vim
 

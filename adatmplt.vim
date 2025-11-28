@@ -16,7 +16,7 @@ syn sync fromstart
 set foldmethod=syntax
 set conceallevel=1
 
-syn match atTag         "@_.\{-}_@" contained
+syn match atTag         "@_.\{-}_@"
 " =, /=, >, >=, <, <=, and, or, xor, in, not, &
 syn match atConditionOP   "\(=\|/=\|>\|>=\|<\|<=\|and\|or\|xor\|in\|not\|&\)" contained
 
@@ -32,7 +32,7 @@ syn region atElsif transparent matchgroup=atCond start="\s*@@ELSIF@@" end="\s*@@
 syn region atInline matchgroup=atStmt start="\s*@@INLINE@@" start="\s*@@INLINE\(\(([^()\\]*\%(\\.[^()\\]*\)*)\)\{1}\|\(([^()\\]*\%(\\.[^()\\]*\)*)\)\{3}\)@@" end="\s*@@END_INLINE@@" fold contains=ALLBUT,atConditionOP,@IfHilight,@SetHilight,@ExtendHilight
 syn match  atInlineE "\s*@@INLINE\%(([^()\\]*\%(\\.[^()\\]*\)*)\)\{2}@@"
 
-syn region atTable matchgroup=atStmt start=/\s*@@TABLE\('\(REVERSE\|TERMINATE_SECTIONS\|TERSE\|ALIGN_ON(\%(\%("[^"\\]*\%(\\.[^"\\]*\)*",\s*\)*\%("[^"\\]*\%(\\.[^"\\]*\)*"\)\))\)\)*@@/ end="\s*@@END_TABLE@@" fold contained contains=ALLBUT,atConditionOP,@IfHilight,@InlineHilight,@SetHilight,@ExtendHilight
+syn region atTable matchgroup=atStmt start=/\s*@@TABLE\('\(REVERSE\|TERMINATE_SECTIONS\|TERSE\|ALIGN_ON(\%(\%("[^"\\]*\%(\\.[^"\\]*\)*",\s*\)*\%("[^"\\]*\%(\\.[^"\\]*\)*"\)\))\)\)*@@/ end="\s*@@END_TABLE@@" fold contains=ALLBUT,atConditionOP,@IfHilight,@InlineHilight,@SetHilight,@ExtendHilight
 syn match  atTableE1 /\(@@TABLE\('\(REVERSE\|TERMINATE_SECTIONS\|TERSE\|ALIGN_ON(\%(\%("[^"\\]*\%(\\.[^"\\]*\)*",\s*\)*\%("[^"\\]*\%(\\.[^"\\]*\)*"\)\))\)\)*@@\)\@<=.\+/
 syn match  atTableE2 /\(@@END_TABLE@@\)\@<=.\+/
 

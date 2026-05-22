@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 --                             Templates Parser                             --
 --                                                                          --
---                     Copyright (C) 2006-2012, AdaCore                     --
+--                     Copyright (C) 2006-2026, AdaCore                     --
 --                                                                          --
 --  This is free software;  you can redistribute it  and/or modify it       --
 --  under terms of the  GNU General Public License as published  by the     --
@@ -311,7 +311,7 @@ procedure Templates2Ada is
    ----------------------
 
    procedure Process_Template (Relative_Name : String) is
-      use Ada.Streams, Ada.Streams.Stream_IO;
+      use Ada.Streams.Stream_IO;
       use Sets;
 
       Result                     : Unbounded_String;

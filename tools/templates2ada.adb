@@ -16,26 +16,35 @@
 --  to http://www.gnu.org/licenses for a complete copy of the license.      --
 ------------------------------------------------------------------------------
 
-with Ada.Characters.Handling;                use Ada.Characters.Handling;
+with Ada.Characters.Handling;
 with Ada.Command_Line;
 with Ada.Containers.Indefinite_Doubly_Linked_Lists;
 with Ada.Containers.Indefinite_Ordered_Maps;
 with Ada.Containers.Indefinite_Ordered_Sets;
 with Ada.Directories;
 with Ada.Streams.Stream_IO;
-with Ada.Strings.Unbounded;                  use Ada.Strings.Unbounded;
-with Ada.Strings.Fixed;                      use Ada.Strings.Fixed;
-with Ada.Strings.Maps;                       use Ada.Strings.Maps;
+with Ada.Strings.Fixed;
+with Ada.Strings.Maps;
+with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 
-with GNAT.Command_Line;                      use GNAT.Command_Line;
+with GNAT.Command_Line;
 
-with Templates_Parser;                       use Templates_Parser;
-with Templates_Parser.Utils;                 use Templates_Parser.Utils;
+with Templates_Parser;
+with Templates_Parser.Utils;
 
 procedure Templates2Ada is
 
    use Ada;
+   use Ada.Characters.Handling;
+   use Ada.Strings.Fixed;
+   use Ada.Strings.Maps;
+   use Ada.Strings.Unbounded;
+
+   use GNAT.Command_Line;
+
+   use Templates_Parser;
+   use Templates_Parser.Utils;
 
    function "+" (Str : String) return Unbounded_String
      renames Ada.Strings.Unbounded.To_Unbounded_String;

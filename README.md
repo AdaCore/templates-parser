@@ -11,6 +11,16 @@ docs](https://docs.adacore.com/live/wave/aws/html/template_parser/index.html).
 
 Build
 -----
+### With Alire
+
+```
+alr get templates_parser
+cd templates_parser_*
+alr build
+```
+Binaries can then be found in `.build` folder.
+
+### Manually
 
 Some make variables can be adjusted to change the default setup:
 
